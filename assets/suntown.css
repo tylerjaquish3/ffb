@@ -1,0 +1,45 @@
+html body {
+    background-color: #04015d;
+}
+
+.header-navbar.navbar-semi-dark .navbar-header {
+    background-color: #2eff37;
+}
+
+.main-menu.menu-dark .navigation,
+.main-menu.menu-dark,
+.main-menu.menu-dark .navigation > li.open > ul {
+    background-color: #2eff37;
+}
+
+.main-menu.menu-dark .navigation li a {
+    color: #000;
+}
+
+.main-menu.menu-dark .navigation > li:hover > a,
+.main-menu.menu-dark .navigation > li.open .hover > a,
+.main-menu.menu-dark .navigation > li.open > a {
+    background-color: #04015d;
+}
+
+body.vertical-layout.vertical-menu.menu-collapsed
+    .main-menu
+    .main-menu-content
+    a.menu-title,
+body.vertical-layout.vertical-menu.menu-collapsed
+    .main-menu
+    .main-menu-content
+    > span.menu-title,
+body.vertical-layout.vertical-menu.menu-collapsed
+    .main-menu
+    .main-menu-content
+    a.menu-title,
+.main-menu.menu-dark .navigation > li > ul,
+.main-menu.menu-dark ul.menu-popout {
+    background-color: #04015d;
+}
+
+.bg-green {
+    background-color: #2eff37 !important;
+    color: #000 !important;
+}

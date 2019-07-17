@@ -1,0 +1,64 @@
+<?php
+
+
+    $row = 1;
+    if (($handle = fopen("2018regseason.csv", "r")) !== FALSE) {
+        
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            // $num = count($data);
+            // echo "<p> $num fields in line $row: <br /></p>\n";
+            $row++;
+
+            // for ($c=0; $c < $num; $c++) {
+            //     echo $data[$c] . "<br />\n";
+            // }
+
+            $year = $data[0];
+            $week = $data[1];
+
+            //local connection
+            $servername = "localhost";
+            $username = "root";
+            $password = "";
+            $dbname = "ffb";
+
+            // Create connection
+            $conn = new mysqli($servername, $username, $password, $dbname, '3307');
+            // Check connection
+            if ($conn->connect_error) {
+                die("Connection failed: " . $conn->connect_error);
+            } 
+
+            $manager1name = $data[2];
+            $manager2name = $data[3];
+
+            $score = explode(" - ",$data[5]);
+            $manager1score = $score[0];
+            $manager2score = $score[1];
+
+            // look up manager id
+            $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$manager1name'");
+            while($row = mysqli_fetch_array($result)) 
+            {
+                $manager1 = $row['id'];
+            }
+
+            $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$manager2name'");
+            while($row = mysqli_fetch_array($result)) 
+            {
+                $manager2 = $row['id'];
+            }
+
+            if ($year != '' && isset($manager1)) {
+                $sql = "INSERT INTO regular_season_matchups (year, week_number, manager1_id, manager2_id, manager1_score, manager2_score) VALUES ($year, $week, $manager1, $manager2, $manager1score, $manager2score)";
+                // var_dump($sql);
+                mysqli_query($conn, $sql);
+            }
+
+        }
+
+        var_dump('done');
+
+        fclose($handle);
+
+    }

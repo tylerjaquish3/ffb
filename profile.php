@@ -1,10 +1,9 @@
+<?php
 
-<?php 
-$pageName = 'Dashboard';
+$pageName = "Profile";
 include 'header.php'; 
 include 'sidebar.html'; 
-
-var_dump($dashboardNumbers);
+var_dump($profileName);
 ?>
 
 <div class="app-content content container-fluid">

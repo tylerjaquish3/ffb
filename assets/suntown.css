@@ -3,7 +3,16 @@ html body {
 }
 
 .header-navbar.navbar-semi-dark .navbar-header {
-    background-color: #2eff37;
+    background-color: #04015d;
+    color: #fff;
+}
+
+ul.nav.navbar-nav {
+    padding: 13px 18px;
+}
+
+div#navbar-mobile {
+    padding-top: 13px;
 }
 
 .main-menu.menu-dark .navigation,
@@ -42,4 +51,8 @@ body.vertical-layout.vertical-menu.menu-collapsed
 .bg-green {
     background-color: #2eff37 !important;
     color: #000 !important;
+}
+
+.table {
+    direction: ltr;
 }

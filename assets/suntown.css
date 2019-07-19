@@ -53,6 +53,47 @@ body.vertical-layout.vertical-menu.menu-collapsed
     color: #000 !important;
 }
 
-.table {
+.table,
+.media-body {
     direction: ltr;
+    background: #fff;
+}
+
+thead {
+    background: #fff;
+}
+
+th {
+    text-align: left;
+}
+
+a.btn.btn-primary,
+.btn-primary:active:hover {
+    background-color: #eee;
+    border-color: #04015d;
+    width: 215px;
+}
+
+a.btn.btn-primary:hover {
+    color: #2eff37;
+}
+
+.darkened {
+    background-color: #2eff37 !important;
+}
+
+.darkened:hover {
+    color: #fff !important;
+}
+
+.card {
+    background: none;
+}
+
+.card-block {
+    background: #fff;
+}
+
+.down15 {
+    margin-top: 15px;
 }

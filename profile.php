@@ -1,9 +1,15 @@
 <?php
 
-$pageName = "Profile";
+$pageName = $_GET['id']."'s Profile";
 include 'header.php'; 
 include 'sidebar.html'; 
-var_dump($profileName);
+
+$result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '".$_GET['id']."'");
+while($row = mysqli_fetch_array($result)) 
+{
+    $managerId = $row['id'];
+}
+
 ?>
 
 <div class="app-content content container-fluid">
@@ -21,8 +27,23 @@ var_dump($profileName);
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green white media-body">
-                                    <h5>Most Wins</h5>
-                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['most_wins_manager'].' ('.$dashboardNumbers['most_wins_number'].')'; ?>&#x200E;</h5>
+                                    <h5>Total Points</h5>
+                                    <h5 class="text-bold-400"><?php echo $profileNumbers['totalPoints'].' (Rank: '.$profileNumbers['totalPointsRank'].')'; ?>&#x200E;</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-xs-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media">
+                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                    <i class="icon-stats-bars font-large-2 white"></i>
+                                </div>
+                                <div class="p-2 bg-green white media-body">
+                                    <h5>Playoff Record</h5>
+                                    <h5 class="text-bold-400"><?php echo $profileNumbers['playoffRecord'].' (Rank: '.$profileNumbers['playoffRecordRank'].')'; ?>&#x200E;</h5>
                                 </div>
                             </div>
                         </div>
@@ -36,23 +57,8 @@ var_dump($profileName);
                                     <i class="icon-trophy font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green white media-body">
-                                    <h5>Most Championships</h5>
-                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['most_championships_manager'].' ('.$dashboardNumbers['most_championships_number'].')'; ?>&#x200E;</h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-xs-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
-                                    <i class="icon-user font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green white media-body">
-                                    <h5>Unique Champions</h5>
-                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['unique_winners']; ?></h5>
+                                    <h5>Championships</h5>
+                                    <h5 class="text-bold-400"><?php echo $profileNumbers['championships'].' ('.$profileNumbers['championshipYears'].')'; ?>&#x200E;</h5>
                                 </div>
                             </div>
                         </div>
@@ -66,8 +72,8 @@ var_dump($profileName);
                                     <i class="icon-calendar font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green white media-body">
-                                    <h5>Seasons</h5>
-                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['seasons']; ?></h5>
+                                    <h5>Reg. Season Record</h5>
+                                    <h5 class="text-bold-400"><?php echo $profileNumbers['record'].' (Rank: '.$profileNumbers['recordRank'].')'; ?>&#x200E;</h5>
                                 </div>
                             </div>
                         </div>
@@ -81,44 +87,101 @@ var_dump($profileName);
                     <div class="card">
                         <div class="card-body">
                             <div class="position-relative">
-                                <table class="table table-striped table-responsive stripe compact height-450" id="datatable-wins">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Wins</th>
-                                    <th>Losses</th>
-                                    <th>Win %&#x200E;</th>
-                                </thead>
-                                <tbody>
-                                    <?php 
-                                    $result = mysqli_query($conn,"SELECT name, wins, losses, total, wins/total AS win_pct 
-                                        FROM managers 
-                                        JOIN (
-                                            SELECT COUNT(manager1_id) AS wins, manager1_id FROM regular_season_matchups rsm 
-                                            WHERE manager1_score > manager2_score GROUP BY manager1_id
-                                        ) w ON w.manager1_id = managers.id
+                                <h3>Record vs. Opponent</h3>
+                                <a class="btn btn-primary" id="postseason">Postseason</a>
+                                <a class="btn btn-primary" id="regSeason">Regular Season</a>
+                                <table class="table table-striped table-responsive stripe compact height-450" id="datatable-regSeason">
+                                    <thead>
+                                        <th>Manager</th>
+                                        <th>Wins</th>
+                                        <th>Losses</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php 
+                                        $result = mysqli_query($conn,"SELECT name, SUM(CASE
+                                                WHEN manager1_score > manager2_score THEN 1
+                                                ELSE 0
+                                            END) AS wins,
+                                            SUM(CASE
+                                                WHEN manager1_score < manager2_score THEN 1
+                                                ELSE 0
+                                            END) AS losses
+                                            FROM regular_season_matchups rsm
+                                            JOIN managers ON managers.id = rsm.manager2_id
+                                            WHERE manager1_id = $managerId
+                                            GROUP BY manager2_id
+                                            ORDER BY wins DESC"
+                                        );
+                                        while($row = mysqli_fetch_array($result)) 
+                                        { ?>
+                                            <tr>
+                                                <td><?php echo $row['name']; ?></td>
+                                                <td><?php echo $row['wins']; ?></td>
+                                                <td><?php echo $row['losses']; ?></td>
+                                            </tr>
 
-                                        JOIN (
-                                            SELECT COUNT(manager1_id) AS losses, manager1_id FROM regular_season_matchups rsm 
-                                            WHERE manager1_score < manager2_score GROUP BY manager1_id
-                                        ) l ON l.manager1_id = managers.id
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
 
-                                        JOIN (
-                                            SELECT COUNT(manager1_id) AS total, manager1_id FROM regular_season_matchups rsm 
-                                            GROUP BY manager1_id
-                                        ) t ON t.manager1_id = managers.id"
-                                    );
-                                    while($row = mysqli_fetch_array($result)) 
-                                    { ?>
-                                        <tr>
-                                            <td><?php echo $row['name']; ?></td>
-                                            <td><?php echo $row['wins']; ?></td>
-                                            <td><?php echo $row['losses']; ?></td>
-                                            <td><?php echo $row['win_pct']; ?></td>
-                                        </tr>
+                                <table class="table table-striped table-responsive stripe compact height-450" id="datatable-postseason" style="display:none;">
+                                    <thead>
+                                        <th>Manager</th>
+                                        <th>Wins</th>
+                                        <th>Losses</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php 
+                                        $result = mysqli_query($conn,"SELECT name, w.wins+w2.wins AS totalWins, l.losses+l2.losses AS totalLosses 
+                                            FROM managers 
+                                            JOIN (
+                                                SELECT SUM(CASE
+                                                WHEN manager1_id = $managerId AND manager1_score > manager2_score THEN 1
+                                                ELSE 0
+                                                END) AS wins, manager2_id 
+                                                FROM playoff_matchups rsm 
+                                                GROUP BY manager2_id
+                                            ) w ON w.manager2_id = managers.id
 
-                                    <?php } ?>
-                                </tbody>
-                            </table>
+                                            JOIN (
+                                                SELECT SUM(CASE
+                                                WHEN manager2_id = $managerId AND manager2_score > manager1_score THEN 1
+                                                ELSE 0
+                                                END) AS wins, manager1_id 
+                                                FROM playoff_matchups rsm 
+                                                GROUP BY manager1_id
+                                            ) w2 ON w2.manager1_id = managers.id
+
+                                            JOIN (
+                                                SELECT SUM(CASE
+                                                WHEN manager1_id = $managerId AND manager1_score < manager2_score THEN 1
+                                                ELSE 0
+                                                END) AS losses, manager2_id 
+                                                FROM playoff_matchups rsm 
+                                                GROUP BY manager2_id
+                                            ) l ON l.manager2_id = managers.id
+
+                                            JOIN (
+                                                SELECT SUM(CASE
+                                                WHEN manager2_id = $managerId AND manager2_score < manager1_score THEN 1
+                                                ELSE 0
+                                                END) AS losses, manager1_id 
+                                                FROM playoff_matchups rsm 
+                                                GROUP BY manager1_id
+                                            ) l2 ON l2.manager1_id = managers.id
+                                            WHERE name != '".$_GET['id']."'"
+                                        );
+                                        while($row = mysqli_fetch_array($result)) 
+                                        { ?>
+                                            <tr>
+                                                <td><?php echo $row['name']; ?></td>
+                                                <td><?php echo $row['totalWins']; ?></td>
+                                                <td><?php echo $row['totalLosses']; ?></td>
+                                            </tr>
+
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -136,7 +199,7 @@ var_dump($profileName);
             <!--/project Total Earning, visit & post-->
             <!-- projects table with monthly chart -->
             <div class="row">
-                <div class="col-xl-8 col-lg-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">Ongoing Projects</h4>
@@ -239,68 +302,6 @@ var_dump($profileName);
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-4 col-lg-12">
-                    <div class="card bg-green">
-                        <div class="card-body">
-                            <div class="card-block">
-                                <div class="media">
-                                    <div class="media-body text-xs-left">
-                                        Reg. Season: Cameron (55.4)&#x200E;<br />
-                                        Postseason: Justin (52.2)&#x200E;
-                                    </div>
-                                    <div class="media-body text-xs-right">
-                                        <h2>Win %&#x200E;</h2>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card bg-green">
-                        <div class="card-body">
-                            <div class="card-block">
-                                <div class="media">
-                                    <div class="media-body text-xs-left">
-                                        Total: Matt (42352)&#x200E;<br />
-                                        Season: Gavin (2250)&#x200E;
-                                    </div>
-                                    <div class="media-body text-xs-right">
-                                        <h2>Points For</h2>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card bg-green">
-                        <div class="card-body">
-                            <div class="card-block">
-                                <div class="media">
-                                    <div class="media-body text-xs-left">
-                                        Winning: Cameron (9)&#x200E;<br />
-                                        Losing: AJ (6)&#x200E;
-                                    </div>
-                                    <div class="media-body text-xs-right">
-                                        <h2>Streaks</h2>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card bg-green">
-                        <div class="card-body">
-                            <div class="card-block">
-                                <div class="media">
-                                    <div class="media-body text-xs-left">
-                                        Reg. Season: Ben (155.4)&#x200E;<br />
-                                        Postseason: Everett (152.2)&#x200E;
-                                    </div>
-                                    <div class="media-body text-xs-right">
-                                        <h2>Biggest Blowout</h2>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -311,8 +312,25 @@ var_dump($profileName);
 <script type="text/javascript">
 
     $(document).ready(function(){
+
+        $('#postseason').click(function () {
+            $('#datatable-regSeason').hide();
+            $('#datatable-postseason').show();
+        });
+
+        $('#regSeason').click(function () {
+            $('#datatable-regSeason').show();
+            $('#datatable-postseason').hide();
+        });
         
-        $('#datatable-wins').DataTable({
+        $('#datatable-regSeason').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [[ 1, "desc" ]]
+        });
+
+        $('#datatable-postseason').DataTable({
             "searching": false,
             "paging": false,
             "info": false,

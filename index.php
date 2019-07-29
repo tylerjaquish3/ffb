@@ -1,8 +1,7 @@
-
-<?php 
+<?php
 $pageName = 'Dashboard';
-include 'header.php'; 
-include 'sidebar.html'; 
+include 'header.php';
+include 'sidebar.html';
 
 ?>
 
@@ -22,7 +21,7 @@ include 'sidebar.html';
                                 </div>
                                 <div class="p-2 bg-green white media-body">
                                     <h5>Most Wins</h5>
-                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['most_wins_manager'].' ('.$dashboardNumbers['most_wins_number'].')'; ?>&#x200E;</h5>
+                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['most_wins_manager'] . ' (' . $dashboardNumbers['most_wins_number'] . ')'; ?>&#x200E;</h5>
                                 </div>
                             </div>
                         </div>
@@ -37,7 +36,7 @@ include 'sidebar.html';
                                 </div>
                                 <div class="p-2 bg-green white media-body">
                                     <h5>Most Championships</h5>
-                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['most_championships_manager'].' ('.$dashboardNumbers['most_championships_number'].')'; ?>&#x200E;</h5>
+                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['most_championships_manager'] . ' (' . $dashboardNumbers['most_championships_number'] . ')'; ?>&#x200E;</h5>
                                 </div>
                             </div>
                         </div>
@@ -87,8 +86,10 @@ include 'sidebar.html';
                                         <th>Win %&#x200E;</th>
                                     </thead>
                                     <tbody>
-                                        <?php 
-                                        $result = mysqli_query($conn,"SELECT name, wins, losses, total, wins/total AS win_pct 
+                                        <?php
+                                        $result = mysqli_query(
+                                            $conn,
+                                            "SELECT name, wins, losses, total, wins/total AS win_pct 
                                             FROM managers 
                                             JOIN (
                                                 SELECT COUNT(manager1_id) AS wins, manager1_id FROM regular_season_matchups rsm 
@@ -105,8 +106,7 @@ include 'sidebar.html';
                                                 GROUP BY manager1_id
                                             ) t ON t.manager1_id = managers.id"
                                         );
-                                        while($row = mysqli_fetch_array($result)) 
-                                        { ?>
+                                        while ($row = mysqli_fetch_array($result)) { ?>
                                             <tr>
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['wins']; ?></td>
@@ -143,10 +143,10 @@ include 'sidebar.html';
                                 <a class="btn btn-primary" id="btnTable1" onclick="showTable(1);">Win/Lose Streaks</a>
                                 <a class="btn btn-primary" id="btnTable2" onclick="showTable(2);">Total Points</a>
                                 <a class="btn btn-primary" id="btnTable3" onclick="showTable(3);">Season Points</a>
-                                <a class="btn btn-primary" id="btnTable4" onclick="showTable(4);">Best Start</a>
-                                <a class="btn btn-primary" id="btnTable5" onclick="showTable(5);">Worst Start</a>
-                                <a class="btn btn-primary" id="btnTable6" onclick="showTable(6);">Largest Victory</a>
-                                <a class="btn btn-primary" id="btnTable7" onclick="showTable(7);">Smallest Victory</a>
+                                <a class="btn btn-primary" id="btnTable4" onclick="showTable(4);">Start Streaks</a>
+                                <!-- <a class="btn btn-primary" id="btnTable5" onclick="showTable(5);">Worst Start</a> -->
+                                <!-- <a class="btn btn-primary" id="btnTable6" onclick="showTable(6);">Largest Victory</a> -->
+                                <a class="btn btn-primary" id="btnTable7" onclick="showTable(7);">Win/Loss Margin</a>
                                 <a class="btn btn-primary" id="btnTable8" onclick="showTable(8);">Weekly Points</a>
                                 <a class="btn btn-primary" id="btnTable9" onclick="showTable(9);">Average Finish</a>
                             </div>
@@ -176,14 +176,15 @@ include 'sidebar.html';
 <?php include 'footer.html'; ?>
 
 <script type="text/javascript">
+    $(document).ready(function() {
 
-    $(document).ready(function(){
-        
         $('#datatable-wins').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [3, "desc"]
+            ]
         });
 
         // Misc tables
@@ -191,109 +192,145 @@ include 'sidebar.html';
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 1, "desc" ]]
+            "order": [
+                [1, "desc"]
+            ]
         });
         $('#datatable-misc2').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 1, "desc" ]]
+            "order": [
+                [1, "desc"]
+            ]
         });
         $('#datatable-misc3').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [1, "desc"]
+            ]
         });
         $('#datatable-misc4').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [3, "desc"]
+            ]
         });
         $('#datatable-misc5').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [3, "desc"]
+            ]
         });
         $('#datatable-misc6').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [3, "desc"]
+            ]
         });
         $('#datatable-misc7').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [1, "desc"]
+            ]
         });
         $('#datatable-misc8').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [1, "desc"]
+            ]
         });
         $('#datatable-misc9').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [1, "asc"]
+            ]
         });
         $('#datatable-misc10').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [3, "desc"]
+            ]
         });
         $('#datatable-misc11').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [3, "desc"]
+            ]
         });
         $('#datatable-misc12').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [0, "asc"]
+            ]
         });
         $('#datatable-misc13').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [0, "asc"]
+            ]
         });
         $('#datatable-misc14').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [3, "desc"]
+            ]
         });
         $('#datatable-misc15').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [3, "desc"]
+            ]
         });
         $('#datatable-misc16').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [3, "desc"]
+            ]
         });
         $('#datatable-misc17').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [3, "desc"]
+            ]
         });
         $('#datatable-misc18').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
-            "order": [[ 3, "desc" ]]
+            "order": [
+                [3, "desc"]
+            ]
         });
 
         var ctx = $('#postseasonChart');
@@ -302,8 +339,7 @@ include 'sidebar.html';
             type: 'horizontalBar',
             data: {
                 labels: <?php echo json_encode($postseasonChart['managers']); ?>,
-                datasets: [
-                    {
+                datasets: [{
                         label: 'Playoff Appearances',
                         data: <?php echo json_encode($postseasonChart['appearances']); ?>,
                         backgroundColor: '#04015d'
@@ -334,12 +370,11 @@ include 'sidebar.html';
 
     function showTable(tableId) {
         for (i = 1; i < 19; i++) {
-            $('#datatable-misc'+i).hide();
-            $('#btnTable'+i).removeClass('darkened');
+            $('#datatable-misc' + i).hide();
+            $('#btnTable' + i).removeClass('darkened');
         }
-        $('#datatable-misc'+tableId).show();
+        $('#datatable-misc' + tableId).show();
 
-        $('#btnTable'+tableId).addClass('darkened');
+        $('#btnTable' + tableId).addClass('darkened');
     }
-
 </script>

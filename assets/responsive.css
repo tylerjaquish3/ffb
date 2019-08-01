@@ -1,0 +1,45 @@
+@media only screen and (max-width: 480px) {
+    body {
+        font-size: 10px;
+    }
+    .card-block {
+        padding: 0.5rem;
+    }
+
+    #postseasonChart {
+        height: 220px !important;
+    }
+
+    #finishesChart {
+        height: 220px !important;
+    }
+
+    h4 {
+        font-size: 1.22rem;
+    }
+
+    .card-header {
+        padding: 10px;
+    }
+
+    .table-padding {
+        padding-left: 3px;
+        padding-right: 3px;
+    }
+
+    li.nav-item.hidden-md-up.float-xs-right {
+        display: none;
+    }
+
+    .navbar-nav .nav-link {
+        padding-top: 0px;
+    }
+
+    .app-content.content.container-fluid {
+        margin-top: 50px;
+    }
+
+    .main-menu-content.ps-container.ps-theme-light {
+        padding-top: 50px;
+    }
+}

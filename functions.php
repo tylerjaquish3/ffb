@@ -5,6 +5,9 @@ $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "ffb";
+$port = "3307";
+
+include 'connections.php';
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname, '3307');

@@ -78,14 +78,6 @@ a.btn.btn-primary:hover {
     color: #2eff37;
 }
 
-.darkened {
-    background-color: #2eff37 !important;
-}
-
-.darkened:hover {
-    color: #fff !important;
-}
-
 .card {
     background: none;
 }
@@ -94,6 +86,44 @@ a.btn.btn-primary:hover {
     background: #fff;
 }
 
+.card-header {
+    background: #2eff37;
+}
+
 .down15 {
     margin-top: 15px;
+}
+
+#postseasonChart {
+    height: 400px !important;
+}
+
+.dropdown {
+    padding: 5px;
+}
+
+.bg-green h5 {
+    font-size: 14px;
+}
+
+span.badge {
+    padding: 3px 10px;
+    border-radius: 6px;
+}
+
+.badge-primary {
+    background-color: #2eff37;
+}
+
+.badge-secondary {
+    background-color: #fb6262;
+}
+
+span.seed {
+    margin-left: 2px;
+    background: #e2e2e2;
+    font-size: 9px;
+    padding: 0px 3px;
+    border-radius: 20px;
+    border: 1px solid;
 }

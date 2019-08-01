@@ -74,8 +74,11 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-xl-4 col-lg-12">
+                <div class="col-xl-4 col-lg-12 table-padding">
                     <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Regular Season Record</h4>
+                        </div>
                         <div class="card-body">
                             <div class="position-relative">
                                 <table class="table table-responsive" id="datatable-wins">
@@ -111,7 +114,7 @@ include 'sidebar.html';
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['wins']; ?></td>
                                                 <td><?php echo $row['losses']; ?></td>
-                                                <td><?php echo $row['win_pct']; ?></td>
+                                                <td><?php echo number_format($row['win_pct'] * 100, 1) . ' %'; ?></td>
                                             </tr>
 
                                         <?php } ?>
@@ -121,11 +124,14 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-8 col-lg-12">
+                <div class="col-xl-8 col-lg-12 table-padding">
                     <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Postseason</h4>
+                        </div>
                         <div class="card-body">
                             <div class="card-block">
-                                <canvas id="postseasonChart" class="height-400"></canvas>
+                                <canvas id="postseasonChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -139,31 +145,52 @@ include 'sidebar.html';
                             <h4 class="card-title">Miscellaneous Stats</h4>
                         </div>
                         <div class="card-body down15">
-                            <div class="col-xs-12 col-sm-2">
-                                <a class="btn btn-primary" id="btnTable1" onclick="showTable(1);">Win/Lose Streaks</a>
-                                <a class="btn btn-primary" id="btnTable2" onclick="showTable(2);">Total Points</a>
-                                <a class="btn btn-primary" id="btnTable3" onclick="showTable(3);">Season Points</a>
-                                <a class="btn btn-primary" id="btnTable4" onclick="showTable(4);">Start Streaks</a>
-                                <!-- <a class="btn btn-primary" id="btnTable5" onclick="showTable(5);">Worst Start</a> -->
-                                <!-- <a class="btn btn-primary" id="btnTable6" onclick="showTable(6);">Largest Victory</a> -->
-                                <a class="btn btn-primary" id="btnTable7" onclick="showTable(7);">Win/Loss Margin</a>
-                                <a class="btn btn-primary" id="btnTable8" onclick="showTable(8);">Weekly Points</a>
-                                <a class="btn btn-primary" id="btnTable9" onclick="showTable(9);">Average Finish</a>
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-6 table-padding">
+                                    <div class="card-header" style="float: left">
+                                        <h4>Postseason</h4>
+                                    </div>
+                                    <div style="float: right">
+                                        <select id="postMiscStats" class="dropdown">
+                                            <option value="10">Average Finish</option>
+                                            <option value="11">First Round Byes</option>
+                                            <option value="12">Appearances</option>
+                                            <option value="13">Underdog Wins</option>
+                                            <option value="14">Top Seed Losses</option>
+                                            <option value="15">Playoff Points</option>
+                                            <option value="16">Playoff Win Margin</option>
+                                        </select>
+                                    </div>
+                                    <?php include 'postMiscStats.php'; ?>
+                                </div>
+                                <div class="col-xs-12 col-sm-6 table-padding">
+                                    <div class="card-header" style="float: left">
+                                        <h4>Regular Season</h4>
+                                    </div>
+                                    <div style="float: right">
+                                        <select id="regMiscStats" class="dropdown">
+                                            <option value="1">Win/Lose Streaks</option>
+                                            <option value="2">Total Points</option>
+                                            <option value="3">Season Points</option>
+                                            <option value="4">Average PF/PA</option>
+                                            <option value="5">Start Streaks</option>
+                                            <option value="6">Win/Loss Margin</option>
+                                            <option value="7">Weekly Points</option>
+                                            <option value="8">Losses with Top 3 Pts</option>
+                                            <option value="9">Wins with Bottom 3 Pts</option>
+                                            <option>Record Against Everyone</option>
+                                        </select>
+                                    </div>
+                                    <?php include 'regMiscStats.php'; ?>
+                                </div>
                             </div>
-                            <div class="col-xs-12 col-sm-2">
-                                <a class="btn btn-primary darkened" id="btnTable10" onclick="showTable(10);">First Round Byes</a>
-                                <a class="btn btn-primary" id="btnTable11" onclick="showTable(11);">Consecutive Playoff App</a>
-                                <a class="btn btn-primary" id="btnTable12" onclick="showTable(12);">Bottom Seed Wins</a>
-                                <a class="btn btn-primary" id="btnTable13" onclick="showTable(13);">Top Seed Losses</a>
-                                <a class="btn btn-primary" id="btnTable14" onclick="showTable(14);">Losses with Top Pts</a>
-                                <a class="btn btn-primary" id="btnTable15" onclick="showTable(15);">Wins with Bottom Pts</a>
-                                <a class="btn btn-primary" id="btnTable16" onclick="showTable(16);">Average PF/PA</a>
-                                <a class="btn btn-primary" id="btnTable17" onclick="showTable(17);">Playoff Win Margin</a>
-                                <a class="btn btn-primary" id="btnTable18" onclick="showTable(18);">Playoff Points</a>
-                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-6">
 
-                            <div class="col-xs-12 col-sm-8">
-                                <?php include 'miscStats.php'; ?>
+                                </div>
+                                <div class="col-xs-12 col-sm-6">
+
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -177,6 +204,14 @@ include 'sidebar.html';
 
 <script type="text/javascript">
     $(document).ready(function() {
+
+        $('#regMiscStats').change(function() {
+            showRegTable($('#regMiscStats').val());
+        });
+
+        $('#postMiscStats').change(function() {
+            showPostTable($('#postMiscStats').val());
+        });
 
         $('#datatable-wins').DataTable({
             "searching": false,
@@ -225,7 +260,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [3, "desc"]
+                [1, "desc"]
             ]
         });
         $('#datatable-misc6').DataTable({
@@ -249,7 +284,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [1, "desc"]
+                [3, "desc"]
             ]
         });
         $('#datatable-misc9').DataTable({
@@ -257,7 +292,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [1, "asc"]
+                [3, "desc"]
             ]
         });
         $('#datatable-misc10').DataTable({
@@ -265,7 +300,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [3, "desc"]
+                [1, "asc"]
             ]
         });
         $('#datatable-misc11').DataTable({
@@ -289,7 +324,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [0, "asc"]
+                [4, "desc"]
             ]
         });
         $('#datatable-misc14').DataTable({
@@ -297,7 +332,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [3, "desc"]
+                [4, "desc"]
             ]
         });
         $('#datatable-misc15').DataTable({
@@ -333,6 +368,7 @@ include 'sidebar.html';
             ]
         });
 
+        Chart.defaults.global.defaultFontSize = 9;
         var ctx = $('#postseasonChart');
 
         var stackedBar = new Chart(ctx, {
@@ -368,13 +404,17 @@ include 'sidebar.html';
         });
     });
 
-    function showTable(tableId) {
-        for (i = 1; i < 19; i++) {
+    function showRegTable(tableId) {
+        for (i = 1; i < 10; i++) {
             $('#datatable-misc' + i).hide();
-            $('#btnTable' + i).removeClass('darkened');
         }
         $('#datatable-misc' + tableId).show();
+    }
 
-        $('#btnTable' + tableId).addClass('darkened');
+    function showPostTable(tableId) {
+        for (i = 10; i < 18; i++) {
+            $('#datatable-misc' + i).hide();
+        }
+        $('#datatable-misc' + tableId).show();
     }
 </script>

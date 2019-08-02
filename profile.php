@@ -41,7 +41,7 @@ while ($row = mysqli_fetch_array($result)) {
                                     <i class="icon-stats-bars font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green white media-body">
-                                    <h5>Playoff Record</h5>
+                                    <h5>Postseason Record</h5>
                                     <h5 class="text-bold-400"><?php echo $profileNumbers['playoffRecord'] . ' (Rank: ' . $profileNumbers['playoffRecordRank'] . ')'; ?>&#x200E;</h5>
                                 </div>
                             </div>
@@ -233,7 +233,7 @@ while ($row = mysqli_fetch_array($result)) {
                             <h4 style="float: left">Pro Categories</h4>
                         </div>
                         <div class="card-body">
-                            
+
                         </div>
                     </div>
                 </div>

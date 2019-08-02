@@ -152,13 +152,13 @@ include 'sidebar.html';
                                     </div>
                                     <div style="float: right">
                                         <select id="postMiscStats" class="dropdown">
-                                            <option value="10">Average Finish</option>
-                                            <option value="11">First Round Byes</option>
-                                            <option value="12">Appearances</option>
-                                            <option value="13">Underdog Wins</option>
-                                            <option value="14">Top Seed Losses</option>
-                                            <option value="15">Playoff Points</option>
-                                            <option value="16">Playoff Win Margin</option>
+                                            <option value="11">Average Finish</option>
+                                            <option value="12">First Round Byes</option>
+                                            <option value="13">Appearances</option>
+                                            <option value="14">Underdog Wins</option>
+                                            <option value="15">Top Seed Losses</option>
+                                            <option value="16">Playoff Points</option>
+                                            <option value="17">Playoff Win Margin</option>
                                         </select>
                                     </div>
                                     <?php include 'postMiscStats.php'; ?>
@@ -178,18 +178,10 @@ include 'sidebar.html';
                                             <option value="7">Weekly Points</option>
                                             <option value="8">Losses with Top 3 Pts</option>
                                             <option value="9">Wins with Bottom 3 Pts</option>
-                                            <option>Record Against Everyone</option>
+                                            <option value="10">Record Against Everyone</option>
                                         </select>
                                     </div>
                                     <?php include 'regMiscStats.php'; ?>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-xs-12 col-sm-6">
-
-                                </div>
-                                <div class="col-xs-12 col-sm-6">
-
                                 </div>
                             </div>
                         </div>
@@ -300,7 +292,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [1, "asc"]
+                [3, "desc"]
             ]
         });
         $('#datatable-misc11').DataTable({
@@ -308,7 +300,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [3, "desc"]
+                [1, "asc"]
             ]
         });
         $('#datatable-misc12').DataTable({
@@ -316,7 +308,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [0, "asc"]
+                [3, "desc"]
             ]
         });
         $('#datatable-misc13').DataTable({
@@ -324,7 +316,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [4, "desc"]
+                [1, "desc"]
             ]
         });
         $('#datatable-misc14').DataTable({
@@ -340,7 +332,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [3, "desc"]
+                [4, "desc"]
             ]
         });
         $('#datatable-misc16').DataTable({
@@ -351,22 +343,7 @@ include 'sidebar.html';
                 [3, "desc"]
             ]
         });
-        $('#datatable-misc17').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc18').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
+
 
         Chart.defaults.global.defaultFontSize = 9;
         var ctx = $('#postseasonChart');
@@ -405,14 +382,14 @@ include 'sidebar.html';
     });
 
     function showRegTable(tableId) {
-        for (i = 1; i < 10; i++) {
+        for (i = 1; i < 11; i++) {
             $('#datatable-misc' + i).hide();
         }
         $('#datatable-misc' + tableId).show();
     }
 
     function showPostTable(tableId) {
-        for (i = 10; i < 18; i++) {
+        for (i = 11; i < 19; i++) {
             $('#datatable-misc' + i).hide();
         }
         $('#datatable-misc' + tableId).show();

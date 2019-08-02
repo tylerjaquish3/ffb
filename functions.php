@@ -1,16 +1,9 @@
 <?php
 
-//local connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "ffb";
-$port = "3307";
-
 include 'connections.php';
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname, '3307');
+$conn = new mysqli($servername, $username, $password, $dbname, $port);
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -31,6 +24,8 @@ if ($pageName == 'Regular Season') {
 if ($pageName == 'Postseason') {
     $postseasonMatchups = getPostseasonMatchups($conn);
 }
+
+include 'saveFunFacts.php';
 
 function getDashboardNumbers($conn)
 {

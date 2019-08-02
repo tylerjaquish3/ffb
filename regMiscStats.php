@@ -67,6 +67,11 @@
 
 		<?php } ?>
 	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=3>Streaks span across seasons</td>
+		</tr>
+	</tfoot>
 </table>
 <!-- Total Points -->
 <table class="table" id="datatable-misc2" style="display:none;">
@@ -93,6 +98,11 @@
 
 		<?php } ?>
 	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=4>Total points over the course of our league history</td>
+		</tr>
+	</tfoot>
 </table>
 <!-- Season points -->
 <table class="table" id="datatable-misc3" style="display:none;">
@@ -126,6 +136,11 @@
 
 		<?php } ?>
 	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=5>Min and max points for and against for a season</td>
+		</tr>
+	</tfoot>
 </table>
 <!-- Average PF/PA -->
 <table class="table" id="datatable-misc4" style="display:none;">
@@ -152,6 +167,11 @@
 
 		<?php } ?>
 	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=4>Average weekly points for and against</td>
+		</tr>
+	</tfoot>
 </table>
 <!-- Start/end streaks -->
 <table class="table" id="datatable-misc5" style="display:none;">
@@ -272,6 +292,11 @@
 
 		<?php } ?>
 	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=7>Longest winning or losing streak to start a season and how it ended</td>
+		</tr>
+	</tfoot>
 </table>
 <!-- Win/loss margin -->
 <table class="table" id="datatable-misc6" style="display:none;">
@@ -302,6 +327,11 @@
 
 		<?php } ?>
 	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=5>Min and max margin of victory and defeat</td>
+		</tr>
+	</tfoot>
 </table>
 <!-- Weekly points -->
 <table class="table" id="datatable-misc7" style="display:none;">
@@ -330,6 +360,11 @@
 
 		<?php } ?>
 	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=5>Regular season min and max points for and points against</td>
+		</tr>
+	</tfoot>
 </table>
 <!-- Losses with Top 3 points -->
 <table class="table" id="datatable-misc8" style="display:none;">
@@ -424,6 +459,11 @@
 
 		<?php } ?>
 	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=4>How many times we were top 3 in points for the week and unluckily lost</td>
+		</tr>
+	</tfoot>
 </table>
 <!-- Wins with Bottom 3 points -->
 <table class="table" id="datatable-misc9" style="display:none;">
@@ -518,4 +558,107 @@
 
 		<?php } ?>
 	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=4>How many times we were bottom 3 in points for the week and luckily won</td>
+		</tr>
+	</tfoot>
+</table>
+<!-- Record against everyone -->
+<table class="table" id="datatable-misc10" style="display:none;">
+	<thead>
+		<th>Manager</th>
+		<th>Wins</th>
+		<th>Losses</th>
+		<th>Win %</th>
+	</thead>
+	<tbody>
+		<?php
+		$prevYear = $prevWeek = 0;
+		$index = -1;
+		$first = true;
+
+		$managers = [
+			'AJ' => [
+				'losses' => 0,
+				'wins' => 0
+			],
+			'Ben' => [
+				'losses' => 0,
+				'wins' => 0
+			],
+			'Tyler' => [
+				'losses' => 0,
+				'wins' => 0
+			],
+			'Matt' => [
+				'losses' => 0,
+				'wins' => 0
+			],
+			'Justin' => [
+				'losses' => 0,
+				'wins' => 0
+			],
+			'Andy' => [
+				'losses' => 0,
+				'wins' => 0
+			],
+			'Cole' => [
+				'losses' => 0,
+				'wins' => 0
+			],
+			'Everett' => [
+				'losses' => 0,
+				'wins' => 0
+			],
+			'Cameron' => [
+				'losses' => 0,
+				'wins' => 0
+			],
+			'Gavin' => [
+				'losses' => 0,
+				'wins' => 0
+			]
+		];
+		$scores = [];
+		$result = mysqli_query($conn, "SELECT year, week_number, name, manager1_score FROM regular_season_matchups rsm 
+			JOIN managers ON managers.id = rsm.manager1_id 
+			ORDER BY year, week_number, manager1_score ASC");
+		while ($row = mysqli_fetch_array($result)) {
+			$scores[$row['year']][$row['week_number']][$row['name']] = $row['manager1_score'];
+		}
+
+		foreach ($scores as $year => $weekArray) {
+			foreach ($weekArray as $week) {
+				$index = 0;
+				foreach ($week as $manager => $value) {
+					// Account for the years where there were only 8 managers
+					if (count($manager) == 8) {
+						$managers[$manager]['wins'] += $index;
+						$managers[$manager]['losses'] += 7 - $index;
+					} else {
+						$managers[$manager]['wins'] += $index;
+						$managers[$manager]['losses'] += 9 - $index;
+					}
+
+					$index++;
+				}
+			}
+		}
+
+		foreach ($managers as $manager => $array) { ?>
+			<tr>
+				<td><?php echo $manager; ?></td>
+				<td><?php echo $array['wins']; ?></td>
+				<td><?php echo $array['losses']; ?></td>
+				<td><?php echo round(($array['wins'] / ($array['wins'] + $array['losses'])) * 100, 1) . ' %'; ?></td>
+			</tr>
+
+		<?php } ?>
+	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=4>Had we played every manager every week, our record would be...</td>
+		</tr>
+	</tfoot>
 </table>

@@ -1,5 +1,5 @@
 <!-- Average finish -->
-<table class="table" id="datatable-misc10">
+<table class="table" id="datatable-misc11">
     <thead>
         <th>Manager</th>
         <th>Average Finish</th>
@@ -23,9 +23,14 @@
 
         <?php } ?>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan=4>Average placing in league</td>
+        </tr>
+    </tfoot>
 </table>
 <!-- First round byes -->
-<table class="table" id="datatable-misc11" style="display:none;">
+<table class="table" id="datatable-misc12" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>#1 Seed</th>
@@ -57,13 +62,18 @@
 
         <?php } ?>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan=4>Number of times we got a bye in the first round of postseason</td>
+        </tr>
+    </tfoot>
 </table>
 <!-- Appearances -->
-<table class="table" id="datatable-misc12" style="display:none;">
+<table class="table" id="datatable-misc13" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Appearances</th>
-        <th>Consecutive</th>
+        <th>Best Streak</th>
     </thead>
     <tbody>
         <?php
@@ -147,9 +157,14 @@
 
         <?php } ?>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan=3>Postseason appearances and best streak of consecutive appearances</td>
+        </tr>
+    </tfoot>
 </table>
 <!-- Underdog wins -->
-<table class="table" id="datatable-misc13" style="display:none;">
+<table class="table" id="datatable-misc14" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Quarterfinal</th>
@@ -259,9 +274,14 @@
 
         <?php } ?>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan=5>Postseason wins as the bottom seed in a matchup</td>
+        </tr>
+    </tfoot>
 </table>
 <!-- Top seed losses -->
-<table class="table" id="datatable-misc14" style="display:none;">
+<table class="table" id="datatable-misc15" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Quarterfinal</th>
@@ -371,9 +391,14 @@
 
         <?php } ?>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan=5>Postseason losses as the top seed in a matchup</td>
+        </tr>
+    </tfoot>
 </table>
 <!-- Playoff points -->
-<table class="table" id="datatable-misc15" style="display:none;">
+<table class="table" id="datatable-misc16" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Points</th>
@@ -411,4 +436,9 @@
 
         <?php } ?>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan=4>Points scored in postseason matchups</td>
+        </tr>
+    </tfoot>
 </table>

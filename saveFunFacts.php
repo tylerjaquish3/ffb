@@ -6,7 +6,7 @@ while ($row = mysqli_fetch_array($result)) {
 }
 
 // if process needs to run
-if ($values > 1507) {
+if ($values > 1637) {
 
     // initialize empty array foreach manager
     for ($i = 1; $i < 11; $i++) {
@@ -109,10 +109,16 @@ if ($values > 1507) {
     var_dump($results);
     // die;
 
-    $mostAlltimeWins = array_keys(array_sort($results, 'alltimeWins', SORT_DESC))[0];
+    $mostAlltimeWins = array_keys(array_sort($results, 'alltimeWins'))[0];
     insertFunFact($conn, $mostAlltimeWins, 'Most Wins (All Time)', 1, $results[$mostAlltimeWins]['alltimeWins']);
-    $mostAlltimeLosses = array_keys(array_sort($results, 'alltimeLosses', SORT_DESC))[0];
+    $mostAlltimeLosses = array_keys(array_sort($results, 'alltimeLosses'))[0];
     insertFunFact($conn, $mostAlltimeLosses, 'Most Losses (All Time)', 1, $results[$mostAlltimeLosses]['alltimeLosses']);
+    $mostWeekPf = array_keys(array_sort($results, 'mostWeekPf'))[0];
+    insertFunFact($conn, $mostWeekPf, 'Most PF (Week)', 1, $results[$mostWeekPf]['mostWeekPf']);
+    $mostWeekPf = array_keys(array_sort($results, 'mostWeekPf'))[9];
+    insertFunFact($conn, $mostWeekPf, 'Least PF (Week)', 10, $results[$mostWeekPf]['mostWeekPf']);
+    $mostWeekPa = array_keys(array_sort($results, 'mostWeekPa'))[0];
+    insertFunFact($conn, $mostWeekPa, 'Most PA (Week)', 0, $results[$mostWeekPa]['mostWeekPa']);
 
     die;
 }
@@ -120,7 +126,8 @@ if ($values > 1507) {
 function insertFunFact($conn, $managerId, $funFact, $rank = null, $value = null, $note = null)
 {
     $mffid = $funFactId = 0;
-    $result = mysqli_query($conn, "SELECT ff.id, mff.id as mff_id FROM fun_facts ff LEFT JOIN manager_fun_facts mff ON mff.fun_fact_id = ff.id WHERE fact = '" . $funFact . "'");
+    $result = mysqli_query($conn, "SELECT ff.id, mff.id as mff_id FROM fun_facts ff 
+    LEFT JOIN manager_fun_facts mff ON mff.fun_fact_id = ff.id WHERE fact = '" . $funFact . "'");
     while ($row = mysqli_fetch_array($result)) {
         $funFactId = $row['id'];
 
@@ -144,7 +151,7 @@ function insertFunFact($conn, $managerId, $funFact, $rank = null, $value = null,
     return $succeeded;
 }
 
-function array_sort($array, $on, $order = SORT_ASC)
+function array_sort($array, $on, $order = SORT_DESC)
 {
     $new_array = array();
     $sortable_array = array();

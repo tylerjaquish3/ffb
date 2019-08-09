@@ -25,7 +25,7 @@ if ($pageName == 'Postseason') {
     $postseasonMatchups = getPostseasonMatchups($conn);
 }
 
-include 'saveFunFacts.php';
+// include 'saveFunFacts.php';
 
 function getDashboardNumbers($conn)
 {

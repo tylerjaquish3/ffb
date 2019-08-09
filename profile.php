@@ -186,6 +186,33 @@ while ($row = mysqli_fetch_array($result)) {
                                         <?php } ?>
                                     </tbody>
                                 </table>
+                                <br /><br />
+                                <table class="table table-responsive" id="datatable-teamNames">
+                                    <thead>
+                                        <th>Year</th>
+                                        <th>Team Name</th>
+                                        <th>Moves</th>
+                                        <th>Trades</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $result = mysqli_query(
+                                            $conn,
+                                            "SELECT name, moves, trades, year
+                                            FROM team_names 
+                                            WHERE manager_id = $managerId"
+                                        );
+                                        while ($array = mysqli_fetch_array($result)) { ?>
+                                            <tr>
+                                                <td><?php echo $array['year']; ?></td>
+                                                <td><?php echo $array['name']; ?></td>
+                                                <td><?php echo $array['moves']; ?></td>
+                                                <td><?php echo $array['trades']; ?></td>
+                                            </tr>
+
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -195,6 +222,7 @@ while ($row = mysqli_fetch_array($result)) {
                         <div class="card-body">
                             <div class="card-block">
                                 <canvas id="finishesChart" class="height-400"></canvas>
+                                <br />
                                 <table class="table table-responsive" id="datatable-seasons">
                                     <thead>
                                         <th>Year</th>
@@ -226,6 +254,59 @@ while ($row = mysqli_fetch_array($result)) {
             </div>
 
             <div class="row">
+                <div class="col-xs-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Drafts</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block">
+                                <table class="table table-responsive" id="datatable-drafts">
+                                    <thead>
+                                        <th>Year</th>
+                                        <th>Pick #</th>
+                                        <th>1st Pick</th>
+                                        <th>2nd Pick</th>
+                                        <th>3rd Pick</th>
+                                        <th>4th Pick</th>
+                                        <th>5th Pick</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $result = mysqli_query(
+                                            $conn,
+                                            "SELECT d.year, 
+                                            (SELECT round_pick FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as position,
+                                            (SELECT CONCAT(player, ' - ', position) FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as r1_pick,
+                                            (SELECT CONCAT(player, ' - ', position) FROM draft WHERE manager_id = $managerId AND round = 2 AND year = d.year) as r2_pick,
+                                            (SELECT CONCAT(player, ' - ', position) FROM draft WHERE manager_id = $managerId AND round = 3 AND year = d.year) as r3_pick,
+                                            (SELECT CONCAT(player, ' - ', position) FROM draft WHERE manager_id = $managerId AND round = 4 AND year = d.year) as r4_pick,
+                                            (SELECT CONCAT(player, ' - ', position) FROM draft WHERE manager_id = $managerId AND round = 5 AND year = d.year) as r5_pick
+                                            FROM draft d
+                                            WHERE manager_id = $managerId AND round = 1"
+                                        );
+                                        while ($array = mysqli_fetch_array($result)) { ?>
+                                            <tr>
+                                                <td><?php echo $array['year']; ?></td>
+                                                <td><?php echo $array['position']; ?></td>
+                                                <td><?php echo $array['r1_pick']; ?></td>
+                                                <td><?php echo $array['r2_pick']; ?></td>
+                                                <td><?php echo $array['r3_pick']; ?></td>
+                                                <td><?php echo $array['r4_pick']; ?></td>
+                                                <td><?php echo $array['r5_pick']; ?></td>
+                                            </tr>
+
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- <div class="row">
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
@@ -237,7 +318,7 @@ while ($row = mysqli_fetch_array($result)) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </div>
@@ -276,6 +357,24 @@ while ($row = mysqli_fetch_array($result)) {
         });
 
         $('#datatable-seasons').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [0, "asc"]
+            ]
+        });
+
+        $('#datatable-teamNames').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [0, "asc"]
+            ]
+        });
+
+        $('#datatable-drafts').DataTable({
             "searching": false,
             "paging": false,
             "info": false,

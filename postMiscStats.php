@@ -1,5 +1,5 @@
 <!-- Average finish -->
-<table class="table" id="datatable-misc11">
+<table class="table" id="datatable-misc20">
     <thead>
         <th>Manager</th>
         <th>Average Finish</th>
@@ -30,7 +30,7 @@
     </tfoot>
 </table>
 <!-- First round byes -->
-<table class="table" id="datatable-misc12" style="display:none;">
+<table class="table" id="datatable-misc21" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>#1 Seed</th>
@@ -69,7 +69,7 @@
     </tfoot>
 </table>
 <!-- Appearances -->
-<table class="table" id="datatable-misc13" style="display:none;">
+<table class="table" id="datatable-misc22" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Appearances</th>
@@ -164,7 +164,7 @@
     </tfoot>
 </table>
 <!-- Underdog wins -->
-<table class="table" id="datatable-misc14" style="display:none;">
+<table class="table" id="datatable-misc23" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Quarterfinal</th>
@@ -281,7 +281,7 @@
     </tfoot>
 </table>
 <!-- Top seed losses -->
-<table class="table" id="datatable-misc15" style="display:none;">
+<table class="table" id="datatable-misc24" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Quarterfinal</th>
@@ -398,7 +398,7 @@
     </tfoot>
 </table>
 <!-- Playoff points -->
-<table class="table" id="datatable-misc16" style="display:none;">
+<table class="table" id="datatable-misc25" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Points</th>
@@ -441,4 +441,122 @@
             <td colspan=4>Points scored in postseason matchups</td>
         </tr>
     </tfoot>
+</table>
+<!-- Win/loss margin -->
+<table class="table" id="datatable-misc26" style="display:none;">
+	<thead>
+		<th>Manager</th>
+		<th>Biggest Win</th>
+		<th>Smallest Win</th>
+		<th>Biggest Loss</th>
+		<th>Smallest Loss</th>
+	</thead>
+	<tbody>
+		<?php
+		$managers = [
+			'AJ' => [
+				'biggestWin' => 0,
+				'smallestWin' => 999,
+				'biggestLoss' => 0,
+				'smallestLoss' => 999
+			],
+			'Ben' => [
+				'biggestWin' => 0,
+				'smallestWin' => 999,
+				'biggestLoss' => 0,
+				'smallestLoss' => 999
+			],
+			'Tyler' => [
+				'biggestWin' => 0,
+				'smallestWin' => 999,
+				'biggestLoss' => 0,
+				'smallestLoss' => 999
+			],
+			'Matt' => [
+				'biggestWin' => 0,
+				'smallestWin' => 999,
+				'biggestLoss' => 0,
+				'smallestLoss' => 999
+			],
+			'Justin' => [
+				'biggestWin' => 0,
+				'smallestWin' => 999,
+				'biggestLoss' => 0,
+				'smallestLoss' => 999
+			],
+			'Andy' => [
+				'biggestWin' => 0,
+				'smallestWin' => 999,
+				'biggestLoss' => 0,
+				'smallestLoss' => 999
+			],
+			'Cole' => [
+				'biggestWin' => 0,
+				'smallestWin' => 999,
+				'biggestLoss' => 0,
+				'smallestLoss' => 999
+			],
+			'Everett' => [
+				'biggestWin' => 0,
+				'smallestWin' => 999,
+				'biggestLoss' => 0,
+				'smallestLoss' => 999
+			],
+			'Cameron' => [
+				'biggestWin' => 0,
+				'smallestWin' => 999,
+				'biggestLoss' => 0,
+				'smallestLoss' => 999
+			],
+			'Gavin' => [
+				'biggestWin' => 0,
+				'smallestWin' => 999,
+				'biggestLoss' => 0,
+				'smallestLoss' => 999
+			]
+		];
+		$result = mysqli_query($conn, "SELECT * FROM playoff_matchups JOIN managers ON manager1_id = managers.id");
+		while ($row = mysqli_fetch_array($result)) { 
+			$diff = abs($row['manager1_score'] - $row['manager2_score']);
+			// if manager won
+			if ($row['manager1_score'] > $row['manager2_score']) {
+				$managers[$row['name']]['biggestWin'] = $diff > $managers[$row['name']]['biggestWin'] ? $diff : $managers[$row['name']]['biggestWin'];
+				$managers[$row['name']]['smallestWin'] = $diff < $managers[$row['name']]['smallestWin'] ? $diff : $managers[$row['name']]['smallestWin'];
+			} else {
+				// manager lost
+				$managers[$row['name']]['biggestLoss'] = $diff > $managers[$row['name']]['biggestLoss'] ? $diff : $managers[$row['name']]['biggestLoss'];
+				$managers[$row['name']]['smallestLoss'] = $diff < $managers[$row['name']]['smallestLoss'] ? $diff : $managers[$row['name']]['smallestLoss'];
+			}
+		}
+
+		$result = mysqli_query($conn, "SELECT * FROM playoff_matchups JOIN managers ON manager2_id = managers.id");
+		while ($row = mysqli_fetch_array($result)) { 
+			$diff = abs($row['manager2_score'] - $row['manager1_score']);
+			// if manager won
+			if ($row['manager2_score'] > $row['manager1_score']) {
+				$managers[$row['name']]['biggestWin'] = $diff > $managers[$row['name']]['biggestWin'] ? $diff : $managers[$row['name']]['biggestWin'];
+				$managers[$row['name']]['smallestWin'] = $diff < $managers[$row['name']]['smallestWin'] ? $diff : $managers[$row['name']]['smallestWin'];
+			} else {
+				// manager lost
+				$managers[$row['name']]['biggestLoss'] = $diff > $managers[$row['name']]['biggestLoss'] ? $diff : $managers[$row['name']]['biggestLoss'];
+				$managers[$row['name']]['smallestLoss'] = $diff < $managers[$row['name']]['smallestLoss'] ? $diff : $managers[$row['name']]['smallestLoss'];
+			}
+		}
+
+		foreach ($managers as $name => $manager) { ?>
+			<tr>
+				<td><?php echo $name; ?></td>
+				<td><?php echo number_format($manager['biggestWin'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($manager['smallestWin'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($manager['biggestLoss'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($manager['smallestLoss'], 2, '.', ','); ?></td>
+			</tr>
+
+		<?php } ?>
+	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=5>Min and max margin of victory and defeat</td>
+		</tr>
+	</tfoot>
 </table>

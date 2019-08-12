@@ -662,3 +662,78 @@
 		</tr>
 	</tfoot>
 </table>
+<!-- Draft position -->
+<table class="table" id="datatable-misc11" style="display:none;">
+	<thead>
+		<th>Manager</th>
+		<th>#1 Picks</th>
+		<th>#10 Picks</th>
+		<th>Avg. Position</th>
+	</thead>
+	<tbody>
+		<?php
+		$result = mysqli_query($conn, "SELECT name, IFNULL(pick1, 0) as pick1, IFNULL(pick10, 0) as pick10, adp
+			FROM managers 
+			LEFT JOIN (
+				SELECT COUNT(id) as pick1, manager_id FROM draft
+				WHERE overall_pick = 1
+			GROUP BY manager_id
+			) p1 ON p1.manager_id = managers.id
+
+			LEFT JOIN (
+			SELECT COUNT(id) as pick10, manager_id FROM draft
+			WHERE overall_pick = 10
+			GROUP BY manager_id
+			) p10 ON p10.manager_id = managers.id
+			
+			LEFT JOIN (
+			SELECT AVG(overall_pick) as adp, manager_id FROM draft
+			WHERE round = 1
+			GROUP BY manager_id
+			) average ON average.manager_id = managers.id");
+		while ($row = mysqli_fetch_array($result)) { ?>
+			<tr>
+				<td><?php echo $row['name']; ?></td>
+				<td><?php echo $row['pick1']; ?></td>
+				<td><?php echo $row['pick10']; ?></td>
+				<td><?php echo round($row['adp'], 1); ?></td>
+			</tr>
+
+		<?php } ?>
+	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=4>Number of times with #1 or #10 pick and average draft position</td>
+		</tr>
+	</tfoot>
+</table>
+<!-- Moves/trades -->
+<table class="table" id="datatable-misc12" style="display:none;">
+	<thead>
+		<th>Manager</th>
+		<th>Moves</th>
+		<th>Trades</th>
+		<th>Total Per Year</th>
+	</thead>
+	<tbody>
+		<?php
+		$result = mysqli_query($conn, "SELECT managers.name, SUM(moves) as moves, SUM(trades) as trades, SUM(moves+trades) as total 
+			FROM team_names 
+			JOIN managers on manager_id = managers.id
+			GROUP BY managers.name;");
+		while ($row = mysqli_fetch_array($result)) { ?>
+			<tr>
+				<td><?php echo $row['name']; ?></td>
+				<td><?php echo $row['moves']; ?></td>
+				<td><?php echo $row['trades']; ?></td>
+				<td><?php echo round($row['total']/$dashboardNumbers['seasons'], 1); ?></td>
+			</tr>
+
+		<?php } ?>
+	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan=4>Number of adds/drops/trades</td>
+		</tr>
+	</tfoot>
+</table>

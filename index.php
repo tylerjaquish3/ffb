@@ -152,13 +152,13 @@ include 'sidebar.html';
                                     </div>
                                     <div style="float: right">
                                         <select id="postMiscStats" class="dropdown">
-                                            <option value="11">Average Finish</option>
-                                            <option value="12">First Round Byes</option>
-                                            <option value="13">Appearances</option>
-                                            <option value="14">Underdog Wins</option>
-                                            <option value="15">Top Seed Losses</option>
-                                            <option value="16">Playoff Points</option>
-                                            <option value="17">Playoff Win Margin</option>
+                                            <option value="20">Average Finish</option>
+                                            <option value="21">First Round Byes</option>
+                                            <option value="22">Appearances</option>
+                                            <option value="23">Underdog Wins</option>
+                                            <option value="24">Top Seed Losses</option>
+                                            <option value="25">Playoff Points</option>
+                                            <option value="26">Win/Loss Margin</option>
                                         </select>
                                     </div>
                                     <?php include 'postMiscStats.php'; ?>
@@ -179,6 +179,8 @@ include 'sidebar.html';
                                             <option value="8">Losses with Top 3 Pts</option>
                                             <option value="9">Wins with Bottom 3 Pts</option>
                                             <option value="10">Record Against Everyone</option>
+                                            <option value="11">Draft Positions</option>
+                                            <option value="12">Moves/Trades</option>
                                         </select>
                                     </div>
                                     <?php include 'regMiscStats.php'; ?>
@@ -300,7 +302,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [1, "asc"]
+                [3, "asc"]
             ]
         });
         $('#datatable-misc12').DataTable({
@@ -311,7 +313,23 @@ include 'sidebar.html';
                 [3, "desc"]
             ]
         });
-        $('#datatable-misc13').DataTable({
+        $('#datatable-misc20').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [1, "asc"]
+            ]
+        });
+        $('#datatable-misc21').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [3, "desc"]
+            ]
+        });
+        $('#datatable-misc22').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
@@ -319,7 +337,7 @@ include 'sidebar.html';
                 [1, "desc"]
             ]
         });
-        $('#datatable-misc14').DataTable({
+        $('#datatable-misc23').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
@@ -327,7 +345,7 @@ include 'sidebar.html';
                 [4, "desc"]
             ]
         });
-        $('#datatable-misc15').DataTable({
+        $('#datatable-misc24').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
@@ -335,12 +353,20 @@ include 'sidebar.html';
                 [4, "desc"]
             ]
         });
-        $('#datatable-misc16').DataTable({
+        $('#datatable-misc25').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
             "order": [
                 [3, "desc"]
+            ]
+        });
+        $('#datatable-misc26').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [1, "desc"]
             ]
         });
 
@@ -382,14 +408,14 @@ include 'sidebar.html';
     });
 
     function showRegTable(tableId) {
-        for (i = 1; i < 11; i++) {
+        for (i = 1; i < 14; i++) {
             $('#datatable-misc' + i).hide();
         }
         $('#datatable-misc' + tableId).show();
     }
 
     function showPostTable(tableId) {
-        for (i = 11; i < 19; i++) {
+        for (i = 20; i < 27; i++) {
             $('#datatable-misc' + i).hide();
         }
         $('#datatable-misc' + tableId).show();

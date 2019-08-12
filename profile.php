@@ -306,6 +306,42 @@ while ($row = mysqli_fetch_array($result)) {
 
             </div>
 
+            <div class="row">
+                <div class="col-xs-12 col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Top Drafted Players</h4>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-responsive" id="datatable-topPlayers">
+                                <thead>
+                                    <th>Player</th>
+                                    <th>Times Drafted</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $result = mysqli_query(
+                                        $conn,
+                                        "SELECT COUNT(round) as times, player FROM draft
+                                        WHERE manager_id = $managerId
+                                        GROUP BY player
+                                        HAVING times > 2
+                                        ORDER BY times DESC"
+                                    );
+                                    while ($array = mysqli_fetch_array($result)) { ?>
+                                        <tr>
+                                            <td><?php echo $array['player']; ?></td>
+                                            <td><?php echo $array['times']; ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                
+            </div>
             <!-- <div class="row">
                 <div class="col-sm-12">
                     <div class="card">
@@ -380,6 +416,15 @@ while ($row = mysqli_fetch_array($result)) {
             "info": false,
             "order": [
                 [0, "asc"]
+            ]
+        });
+
+        $('#datatable-topPlayers').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [1, "desc"]
             ]
         });
 

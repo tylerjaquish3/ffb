@@ -24,6 +24,9 @@ if ($pageName == 'Regular Season') {
 if ($pageName == 'Postseason') {
     $postseasonMatchups = getPostseasonMatchups($conn);
 }
+if ($pageName == 'Draft') {
+    $draftResults = getDraftResults($conn);
+}
 
 // include 'saveFunFacts.php';
 
@@ -411,6 +414,23 @@ function getPostseasonMatchups($conn)
             'm2seed' => $row['manager2_seed'],
             'sort' => $sort
         ];
+    }
+
+    return $results;
+}
+
+function getDraftResults($conn)
+{
+    $results = [];
+    $prevWeek = $prevYear = 0;
+
+    $result = mysqli_query($conn, "SELECT *
+        FROM managers m
+        JOIN draft ON manager_id = m.id
+        ");
+    while ($row = mysqli_fetch_array($result)) {
+
+        $results[] = $row;
     }
 
     return $results;

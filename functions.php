@@ -422,16 +422,16 @@ function getPostseasonMatchups($conn)
 function getDraftResults($conn)
 {
     $results = [];
-    $prevWeek = $prevYear = 0;
 
     $result = mysqli_query($conn, "SELECT *
         FROM managers m
         JOIN draft ON manager_id = m.id
         ");
     while ($row = mysqli_fetch_array($result)) {
-
         $results[] = $row;
     }
 
     return $results;
 }
+
+

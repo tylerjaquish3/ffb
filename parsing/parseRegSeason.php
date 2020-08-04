@@ -2,7 +2,7 @@
 
 
     $row = 1;
-    if (($handle = fopen("2018regseason.csv", "r")) !== FALSE) {
+    if (($handle = fopen("2019regseason.csv", "r")) !== FALSE) {
         
         while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
             // $num = count($data);
@@ -21,9 +21,16 @@
             $username = "root";
             $password = "";
             $dbname = "ffb";
+            $port = '3307';
+
+            // $servername = "tylerjaquish32172.ipagemysql.com";
+            // $username = "kdc_admin";
+            // $password = "kdc_ffb1";
+            // $dbname = "ffb";
+            // $port = "3306";
 
             // Create connection
-            $conn = new mysqli($servername, $username, $password, $dbname, '3307');
+            $conn = new mysqli($servername, $username, $password, $dbname, $port);
             // Check connection
             if ($conn->connect_error) {
                 die("Connection failed: " . $conn->connect_error);
@@ -49,9 +56,18 @@
                 $manager2 = $row['id'];
             }
 
+            if ($manager1score > $manager2score) {
+                $winningManager = $manager1;
+                $losingManager = $manager2;
+            } else {
+                $winningManager = $manager2;
+                $losingManager = $manager1;
+            }
+
             if ($year != '' && isset($manager1)) {
-                $sql = "INSERT INTO regular_season_matchups (year, week_number, manager1_id, manager2_id, manager1_score, manager2_score) VALUES ($year, $week, $manager1, $manager2, $manager1score, $manager2score)";
-                // var_dump($sql);
+                $sql = "INSERT INTO regular_season_matchups (year, week_number, manager1_id, manager2_id, manager1_score, manager2_score, winning_manager_id, losing_manager_id) 
+                VALUES ($year, $week, $manager1, $manager2, $manager1score, $manager2score, $winningManager, $losingManager)";
+                var_dump($sql);
                 mysqli_query($conn, $sql);
             }
 

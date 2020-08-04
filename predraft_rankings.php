@@ -10,7 +10,7 @@ include 'header.php';
 
         <div class="content-body">
             <div class="row">
-                <div class="col-xs-12 col-md-9">
+                <div class="col-xs-12 col-md-3">
                     <div class="card">
                         <div class="card-body">
                             <div class="position-relative">
@@ -18,11 +18,12 @@ include 'header.php';
                                     <?php
                                     $result = mysqli_query(
                                         $conn,
-                                        "SELECT * FROM 2019_rankings ORDER BY my_rank ASC"
+                                        "SELECT * FROM preseason_rankings ORDER BY my_rank ASC"
                                     );
-                                    while ($row = mysqli_fetch_array($result)) { ?>
-                                        <li class="ui-state-default" id="item-<?php echo $row['id']; ?>"> 
-                                            <i class="icon-menu2"></i>&nbsp;&nbsp;&nbsp;<?php echo $row['player']; ?>
+                                    while ($row = mysqli_fetch_array($result)) {
+                                        ?>
+                                        <li class="ui-state-default" id="item-<?php echo $row['id']; ?>">
+                                            <i class="icon-menu2"></i>&nbsp;&nbsp;&nbsp;<span class="color-<?php echo $row['position']; ?>"><?php echo $row['player']; ?></span>
                                         </li>
                                     <?php } ?>
                                 </ul>
@@ -68,4 +69,32 @@ include 'header.php';
     #sortable li { margin: 0 5px 5px 5px; padding: 5px; font-size: 1.2em; height: 1.5em; }
     html>body #sortable li { height: 1.5em; line-height: 1.2em; }
     .ui-state-highlight { height: 1.5em; line-height: 1.2em; }
+
+    .color-QB {
+        background-color: aquamarine;
+    }
+
+    .color-RB {
+        background-color:burlywood;
+    }
+
+    .color-WR {
+        background-color: #fa9cff;
+    }
+
+    .color-TE {
+        background-color: #69cfff;
+    }
+
+    .color-DEF {
+        background-color: #dffcde;
+    }
+
+    .color-K {
+        background-color: #f7cbcc;
+    }
+
+    .color-IDP {
+        background-color: #fcf8b3;
+    }
 </style>

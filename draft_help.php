@@ -81,6 +81,7 @@
                                             Players
                                             - Current Pick: <?php echo $currentPick; ?>
                                         </h3>
+                                        <a type="button" data-toggle="modal" data-target="#draft-board" href="#">Draft Board</a>
                                     </div>
 
                                     <table class="table table-responsive" id="datatable-players">
@@ -92,7 +93,13 @@
                                             <th>Team</th>
                                             <th>Bye</th>
                                             <th>SoS</th>
+                                            <th>Tier</th>
                                             <th></th>
+                                            <th>GP</th>
+                                            <th>Pts</th>
+                                            <th>Yds</th>
+                                            <th>TDs</th>
+                                            <th>Rec</th>
                                         </thead>
                                         <tbody>
                                             <?php
@@ -112,7 +119,13 @@
                                                     <td><?php echo $row['team']; ?></td>
                                                     <td><?php echo $row['bye']; ?></td>
                                                     <td><?php echo $row['sos']; ?></td>
+                                                    <td><?php echo $row['tier']; ?></td>
                                                     <td><a class="btn btn-secondary taken">Taken</a><a class="btn btn-secondary mine">Mine!</a></td>
+                                                    <td><?php echo $row['games']; ?></td>
+                                                    <td><?php echo $row['points']; ?></td>
+                                                    <td><?php echo $row['yards']; ?></td>
+                                                    <td><?php echo $row['touchdowns']; ?></td>
+                                                    <td><?php echo $row['rec']; ?></td>
                                                 </tr>
 
                                             <?php } ?>
@@ -135,6 +148,8 @@
                                             <th>Pos</th>
                                             <th>Player</th>
                                             <th>Bye</th>
+                                            <th>ADP</th>
+                                            <th>Pick #</th>
                                         </thead>
                                         <tbody>
                                             <?php
@@ -142,13 +157,15 @@
                                                 $conn,
                                                 "SELECT * FROM draft_selections
                                                 JOIN preseason_rankings ON preseason_rankings.id = draft_selections.ranking_id
-                                                WHERE is_mine = 1 ORDER BY my_rank ASC"
+                                                WHERE is_mine = 1 ORDER BY pick_number ASC"
                                             );
                                             while ($row = mysqli_fetch_array($result)) { ?>
                                                 <tr class="color-<?php echo $row['position']; ?>">
                                                     <td><?php echo $row['position']; ?></td>
                                                     <td><?php echo $row['player']; ?></td>
                                                     <td><?php echo $row['bye']; ?></td>
+                                                    <td><?php echo $row['adp']; ?></td>
+                                                    <td><?php echo $row['pick_number']; ?></td>
                                                 </tr>
 
                                             <?php } ?>
@@ -178,7 +195,13 @@
                                             <th>Team</th>
                                             <th>Bye</th>
                                             <th>SoS</th>
+                                            <th>Tier</th>
                                             <th></th>
+                                            <th>GP</th>
+                                            <th>Pts</th>
+                                            <th>Yds</th>
+                                            <th>TDs</th>
+                                            <th>Rec</th>
                                         </thead>
                                         <tbody>
                                             <?php
@@ -242,7 +265,7 @@
                                                 select *
                                                 from preseason_rankings
                                                 LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
-                                                where position = 'IDP' AND ranking_id IS NULL
+                                                where (position = 'D' OR position = 'DB') AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 3
                                                 )"
@@ -256,7 +279,13 @@
                                                     <td><?php echo $row['team']; ?></td>
                                                     <td><?php echo $row['bye']; ?></td>
                                                     <td><?php echo $row['sos']; ?></td>
+                                                    <td><?php echo $row['tier']; ?></td>
                                                     <td><a class="btn btn-secondary taken">Taken</a><a class="btn btn-secondary mine">Mine!</a></td>
+                                                    <td><?php echo $row['games']; ?></td>
+                                                    <td><?php echo $row['points']; ?></td>
+                                                    <td><?php echo $row['yards']; ?></td>
+                                                    <td><?php echo $row['touchdowns']; ?></td>
+                                                    <td><?php echo $row['rec']; ?></td>
                                                 </tr>
 
                                             <?php } ?>
@@ -269,9 +298,9 @@
 
                     <?php
                     $turnPlayers = [
-                        // 'Ben' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'IDP'=>0],
-                        // 'Cam' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'IDP'=>0],
-                        'Matt' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'IDP'=>0]
+                        // 'Ben' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'D'=>0,'DB'=>0],
+                        // 'Cam' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'D'=>0,'DB'=>0],
+                        'Matt' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'D'=>0,'DB'=>0]
                     ];
                     // $result = mysqli_query($conn, "select position, count(preseason_rankings.id) as spots from draft_selections
                     //     join preseason_rankings on ranking_id = preseason_rankings.id
@@ -352,10 +381,17 @@
                                             }
                                             ?>
                                             </tr>
-                                            <tr><td>IDP</td>
+                                            <tr><td>D</td>
                                             <?php
                                             foreach ($turnPlayers as $player) {
-                                                echo '<td>'.$player['IDP'].'</td>';
+                                                echo '<td>'.$player['D'].'</td>';
+                                            }
+                                            ?>
+                                            </tr>
+                                            <tr><td>DB</td>
+                                            <?php
+                                            foreach ($turnPlayers as $player) {
+                                                echo '<td>'.$player['DB'].'</td>';
                                             }
                                             ?>
                                             </tr>
@@ -368,6 +404,72 @@
                         <br />
                         <input type="text" id="new-player"><button id="new-player-btn">Add</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="draft-board" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>
+                    <h4 class="modal-title">Draft Board</h4>
+                </div>
+                <div class="modal-body">
+
+                    <table class="table table-responsive" id="datatable-board">
+                        <thead>
+                            <th>AJ</th>
+                            <th>Gavin</th>
+                            <th>Cameron</th>
+                            <th>Justin</th>
+                            <th>Ben</th>
+                            <th>Cole</th>
+                            <th>Everett</th>
+                            <th>Andy</th>
+                            <th>Tyler</th>
+                            <th>Matt</th>
+                        </thead>
+                        <tbody>
+                            <?php
+                            for($round = 1; $round <= 22; $round++) {
+                                $pickMin = ($round*10)-10;
+                                $pickMax = $round*10;
+                                $dir = 'asc';
+                                // Even rounds go backwards
+                                if ($round % 2 == 0) {
+                                    $dir = 'desc';
+                                }
+                                echo '<tr>';
+
+                                $result = mysqli_query(
+                                    $conn,
+                                    "SELECT pick_number, player, position FROM draft_selections ds
+                                    JOIN preseason_rankings pr ON pr.id = ds.ranking_id
+                                    WHERE pick_number <= $pickMax
+                                    AND pick_number > $pickMin
+                                    ORDER BY pick_number $dir"
+                                );
+
+                                $count = mysqli_num_rows($result);
+                                // var_dump($count);
+                                if ($round % 2 == 0 && $count < 10) {
+                                    for ($x=0; $x<(10-$count); $x++) {
+                                        echo '<td></td>';
+                                    }
+                                }
+
+                                while ($row = mysqli_fetch_array($result)) {
+                                    ?>
+                                    <td class="color-<?php echo $row['position']; ?>"><?php echo '<span class="sub">'.$row['pick_number'].'</span>&nbsp;'.$row['player']; ?></td>
+
+                            <?php }
+                                echo '</tr>';
+                            } ?>
+                        </tbody>
+                    </table>
+
                 </div>
             </div>
         </div>
@@ -493,33 +595,45 @@
         background-color: #8cfa84;
     }
 
-    .color-QB td {
+    .color-QB td, .color-QB {
         background-color: aquamarine;
     }
 
-    .color-RB td {
+    .color-RB td, .color-RB {
         background-color:burlywood;
     }
 
-    .color-WR td {
+    .color-WR td, .color-WR {
         background-color: #fa9cff;
     }
 
-    .color-TE td {
+    .color-TE td, .color-TE {
         background-color: #69cfff;
     }
 
-    .color-DEF td {
+    .color-DEF td, .color-DEF {
         background-color: #dffcde;
     }
 
-    .color-K td {
+    .color-K td, .color-K {
         background-color: #f7cbcc;
     }
 
-    .color-IDP td {
+    .color-D td, .color-DB td, .color-D, .color-DB {
         background-color: #fcf8b3;
     }
 
+    .modal-lg {
+        max-width: 90%;
+    }
 
+    #datatable-board td {
+        padding: 15px;
+        font-weight: bold;
+    }
+
+    #datatable-board .sub {
+        font-weight: 400;
+        font-size: 16px;
+    }
 </style>

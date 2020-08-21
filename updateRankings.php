@@ -9,7 +9,9 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if (isset($_POST)) {
+// var_dump($_POST);die;
+
+if (isset($_POST['item'])) {
 
     $return = ['type' => 'success', 'message' => 'Successfully updated.'];
 
@@ -25,6 +27,25 @@ if (isset($_POST)) {
             $rank++;
         }
 
+
+    } catch (Exception $ex) {
+        $return = ['type' => 'error', 'message' => $ex->getMessage()];
+    }
+
+    echo json_encode($return);
+    die;
+}
+
+if (isset($_POST['tier'])) {
+
+    $return = ['type' => 'success', 'message' => 'Successfully updated.'];
+
+    // var_dump($_POST['tier']);die;
+    try {
+
+        $sql = $conn->prepare("UPDATE preseason_rankings SET tier = ? WHERE id = ?");
+        $sql->bind_param('ii', $_POST['tier'], $_POST['playerId']);
+        $sql->execute();
 
     } catch (Exception $ex) {
         $return = ['type' => 'error', 'message' => $ex->getMessage()];

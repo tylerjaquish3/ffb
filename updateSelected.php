@@ -20,8 +20,8 @@ if (isset($_POST['data'])) {
 
         $data = $_POST['data'];
 
-        $player = $data[2];
-        $mine = ($data[8] == 'taken') ? 0 : 1;
+        $player = mysqli_real_escape_string($conn, $data[2]);
+        $mine = ($data[14] == 'taken') ? 0 : 1;
 
         $result = mysqli_query($conn,"SELECT * FROM preseason_rankings WHERE player = '".$player."'");
         if (mysqli_num_rows($result) > 0) {
@@ -59,9 +59,11 @@ if (isset($_POST['newname'])) {
 
     try {
         $player = $_POST['newname'];
+        $rank = 999;
+        $adp = 999;
 
-        $sql = $conn->prepare("INSERT INTO preseason_rankings (player) VALUES (?)");
-        $sql->bind_param('s', $player);
+        $sql = $conn->prepare("INSERT INTO preseason_rankings (player, my_rank, adp) VALUES (?,?,?)");
+        $sql->bind_param('sii', $player, $rank, $adp);
         $sql->execute();
     } catch (Exception $ex) {
         $return = ['type' => 'error', 'message' => $ex->getMessage()];

@@ -23,6 +23,7 @@
     <!-- END Page Level CSS-->
     <!-- END Custom CSS-->
     <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">
+    <!-- <link rel="stylesheet" href="assets/dataTables.min.css" type="text/css"> -->
     <link rel="stylesheet" type="text/css" href="assets/suntown.css">
     <link rel="stylesheet" type="text/css" href="assets/responsive.css">
 

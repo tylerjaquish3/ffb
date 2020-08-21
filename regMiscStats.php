@@ -633,7 +633,7 @@
 				$index = 0;
 				foreach ($week as $manager => $value) {
 					// Account for the years where there were only 8 managers
-					if (count($manager) == 8) {
+					if (is_array($manager) && count($manager) == 8) {
 						$managers[$manager]['wins'] += $index;
 						$managers[$manager]['losses'] += 7 - $index;
 					} else {

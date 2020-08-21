@@ -19,13 +19,13 @@ if (isset($_POST)) {
         $rank = 1;
         foreach ($_POST['item'] as $key => $value) {
 
-            $sql = $conn->prepare("UPDATE 2019_rankings SET my_rank = ? WHERE id = ?");
+            $sql = $conn->prepare("UPDATE preseason_rankings SET my_rank = ? WHERE id = ?");
             $sql->bind_param('ii', $rank, $value);
             $sql->execute();
             $rank++;
         }
 
-        
+
     } catch (Exception $ex) {
         $return = ['type' => 'error', 'message' => $ex->getMessage()];
     }

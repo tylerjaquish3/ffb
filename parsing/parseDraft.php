@@ -4,7 +4,7 @@ $headerRow = [];
 
 $row = 1;
 $overallPick = $prevYear = $roundPick = 0;
-if (($handle = fopen("draft.csv", "r")) !== FALSE) {
+if (($handle = fopen("2019draft.csv", "r")) !== FALSE) {
 
     while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
 

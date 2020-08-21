@@ -71,9 +71,9 @@
                                     <?php
                                         $result = mysqli_query(
                                             $conn,
-                                            "SELECT count(id) as picks FROM 2019_selections"
+                                            "SELECT count(id) as picks FROM draft_selections"
                                         );
-                                        while ($row = mysqli_fetch_array($result)) { 
+                                        while ($row = mysqli_fetch_array($result)) {
                                             $currentPick = $row['picks'] + 1;
                                         }?>
                                     <div class="card-header">
@@ -82,7 +82,7 @@
                                             - Current Pick: <?php echo $currentPick; ?>
                                         </h3>
                                     </div>
-                                    
+
                                     <table class="table table-responsive" id="datatable-players">
                                         <thead>
                                             <th>My Rank</th>
@@ -98,9 +98,9 @@
                                             <?php
                                             $result = mysqli_query(
                                                 $conn,
-                                                "SELECT * FROM 2019_rankings
-                                                LEFT JOIN 2019_selections ON 2019_rankings.id = 2019_selections.ranking_id
-                                                WHERE ranking_id IS NULL 
+                                                "SELECT * FROM preseason_rankings
+                                                LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
+                                                WHERE ranking_id IS NULL
                                                 ORDER BY my_rank ASC"
                                             );
                                             while ($row = mysqli_fetch_array($result)) { ?>
@@ -129,7 +129,7 @@
                                     <div class="card-header">
                                         <h3>My Team</h3>
                                     </div>
-                                    
+
                                     <table class="table table-responsive" id="datatable-team">
                                         <thead>
                                             <th>Pos</th>
@@ -140,8 +140,8 @@
                                             <?php
                                             $result = mysqli_query(
                                                 $conn,
-                                                "SELECT * FROM 2019_selections 
-                                                JOIN 2019_rankings ON 2019_rankings.id = 2019_selections.ranking_id
+                                                "SELECT * FROM draft_selections
+                                                JOIN preseason_rankings ON preseason_rankings.id = draft_selections.ranking_id
                                                 WHERE is_mine = 1 ORDER BY my_rank ASC"
                                             );
                                             while ($row = mysqli_fetch_array($result)) { ?>
@@ -168,7 +168,7 @@
                                     <div class="card-header">
                                         <h3>Top 3 by Position</h3>
                                     </div>
-                                    
+
                                     <table class="table table-responsive" id="datatable-top3">
                                         <thead>
                                             <th>My Rank</th>
@@ -186,63 +186,63 @@
                                                 $conn,
                                                 "(
                                                 select *
-                                                from 2019_rankings 
-                                                LEFT JOIN 2019_selections ON 2019_rankings.id = 2019_selections.ranking_id
-                                                where position = 'QB' AND ranking_id IS NULL 
+                                                from preseason_rankings
+                                                LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
+                                                where position = 'QB' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 3
                                                 )
                                                 UNION ALL
                                                 (
                                                 select *
-                                                from 2019_rankings 
-                                                LEFT JOIN 2019_selections ON 2019_rankings.id = 2019_selections.ranking_id
-                                                where position = 'RB' AND ranking_id IS NULL 
+                                                from preseason_rankings
+                                                LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
+                                                where position = 'RB' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 3
                                                 )
                                                 UNION ALL
                                                 (
                                                 select *
-                                                from 2019_rankings 
-                                                LEFT JOIN 2019_selections ON 2019_rankings.id = 2019_selections.ranking_id
-                                                where position = 'WR' AND ranking_id IS NULL 
+                                                from preseason_rankings
+                                                LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
+                                                where position = 'WR' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 3
                                                 )
                                                 UNION ALL
                                                 (
                                                 select *
-                                                from 2019_rankings 
-                                                LEFT JOIN 2019_selections ON 2019_rankings.id = 2019_selections.ranking_id
-                                                where position = 'TE' AND ranking_id IS NULL 
+                                                from preseason_rankings
+                                                LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
+                                                where position = 'TE' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 3
                                                 )
                                                 UNION ALL
                                                 (
                                                 select *
-                                                from 2019_rankings 
-                                                LEFT JOIN 2019_selections ON 2019_rankings.id = 2019_selections.ranking_id
-                                                where position = 'DEF' AND ranking_id IS NULL 
+                                                from preseason_rankings
+                                                LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
+                                                where position = 'DEF' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 3
                                                 )
                                                 UNION ALL
                                                 (
                                                 select *
-                                                from 2019_rankings 
-                                                LEFT JOIN 2019_selections ON 2019_rankings.id = 2019_selections.ranking_id
-                                                where position = 'K' AND ranking_id IS NULL 
+                                                from preseason_rankings
+                                                LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
+                                                where position = 'K' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 3
                                                 )
                                                 UNION ALL
                                                 (
                                                 select *
-                                                from 2019_rankings 
-                                                LEFT JOIN 2019_selections ON 2019_rankings.id = 2019_selections.ranking_id
-                                                where position = 'IDP' AND ranking_id IS NULL 
+                                                from preseason_rankings
+                                                LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
+                                                where position = 'IDP' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 3
                                                 )"
@@ -267,32 +267,32 @@
                         </div>
                     </div>
 
-                    <?php 
+                    <?php
                     $turnPlayers = [
-                        'Ben' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'IDP'=>0],
-                        'Cam' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'IDP'=>0],
-                        'Justin' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'IDP'=>0]
+                        // 'Ben' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'IDP'=>0],
+                        // 'Cam' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'IDP'=>0],
+                        'Matt' => ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'IDP'=>0]
                     ];
-                    $result = mysqli_query($conn, "select position, count(2019_rankings.id) as spots from 2019_selections
-                        join 2019_rankings on ranking_id = 2019_rankings.id
-                        where pick_number in (8,13,28,33,48,53,68,73,88,93,108,113,128,133,148,153,168,173,188,193,208,213)
-                        group by position");
-                    while ($row = mysqli_fetch_array($result)) {
-                        $turnPlayers['Ben'][$row['position']] = $row['spots'];
-                    }
-                    $result = mysqli_query($conn, "select position, count(2019_rankings.id) as spots from 2019_selections
-                        join 2019_rankings on ranking_id = 2019_rankings.id
-                        where pick_number in (9,12,29,32,49,52,69,72,89,92,109,112,129,132,149,152,169,172,189,192,209, 212)
-                        group by position");
-                    while ($row = mysqli_fetch_array($result)) {
-                        $turnPlayers['Cam'][$row['position']] = $row['spots'];
-                    }
-                    $result = mysqli_query($conn, "select position, count(2019_rankings.id) as spots from 2019_selections
-                        join 2019_rankings on ranking_id = 2019_rankings.id
+                    // $result = mysqli_query($conn, "select position, count(preseason_rankings.id) as spots from draft_selections
+                    //     join preseason_rankings on ranking_id = preseason_rankings.id
+                    //     where pick_number in (8,13,28,33,48,53,68,73,88,93,108,113,128,133,148,153,168,173,188,193,208,213)
+                    //     group by position");
+                    // while ($row = mysqli_fetch_array($result)) {
+                    //     $turnPlayers['Ben'][$row['position']] = $row['spots'];
+                    // }
+                    // $result = mysqli_query($conn, "select position, count(preseason_rankings.id) as spots from draft_selections
+                    //     join preseason_rankings on ranking_id = preseason_rankings.id
+                    //     where pick_number in (9,12,29,32,49,52,69,72,89,92,109,112,129,132,149,152,169,172,189,192,209, 212)
+                    //     group by position");
+                    // while ($row = mysqli_fetch_array($result)) {
+                    //     $turnPlayers['Cam'][$row['position']] = $row['spots'];
+                    // }
+                    $result = mysqli_query($conn, "select position, count(preseason_rankings.id) as spots from draft_selections
+                        join preseason_rankings on ranking_id = preseason_rankings.id
                         where pick_number in (10,11,30,31,50,51,70,71,90,91,110,111,130,131,150,151,170,171,190,191,210,211)
                         group by position");
                     while ($row = mysqli_fetch_array($result)) {
-                        $turnPlayers['Justin'][$row['position']] = $row['spots'];
+                        $turnPlayers['Matt'][$row['position']] = $row['spots'];
                     }
 
                     ?>
@@ -303,69 +303,70 @@
                                     <div class="card-header">
                                         <h3>Turn Positions</h3>
                                     </div>
-                                    
+
                                     <table class="table table-responsive" id="datatable-turn">
                                         <thead>
                                             <th>Pos</th>
-                                            <th>Ben</th>
-                                            <th>Cam</th>
-                                            <th>Justin</th>
+                                            <th>Matt</th>
                                         </thead>
                                         <tbody>
                                             <tr><td>QB</td>
-                                            <?php 
+                                            <?php
                                             foreach ($turnPlayers as $player) {
                                                 echo '<td>'.$player['QB'].'</td>';
-                                            } 
+                                            }
                                             ?>
                                             </tr>
                                             <tr><td>RB</td>
-                                            <?php 
+                                            <?php
                                             foreach ($turnPlayers as $player) {
                                                 echo '<td>'.$player['RB'].'</td>';
-                                            } 
+                                            }
                                             ?>
                                             </tr>
                                             <tr><td>WR</td>
-                                            <?php 
+                                            <?php
                                             foreach ($turnPlayers as $player) {
                                                 echo '<td>'.$player['WR'].'</td>';
-                                            } 
+                                            }
                                             ?>
                                             </tr>
                                             <tr><td>TE</td>
-                                            <?php 
+                                            <?php
                                             foreach ($turnPlayers as $player) {
                                                 echo '<td>'.$player['TE'].'</td>';
-                                            } 
+                                            }
                                             ?>
                                             </tr>
                                             <tr><td>DEF</td>
-                                            <?php 
+                                            <?php
                                             foreach ($turnPlayers as $player) {
                                                 echo '<td>'.$player['DEF'].'</td>';
-                                            } 
+                                            }
                                             ?>
                                             </tr>
                                             <tr><td>K</td>
-                                            <?php 
+                                            <?php
                                             foreach ($turnPlayers as $player) {
                                                 echo '<td>'.$player['K'].'</td>';
-                                            } 
+                                            }
                                             ?>
                                             </tr>
                                             <tr><td>IDP</td>
-                                            <?php 
+                                            <?php
                                             foreach ($turnPlayers as $player) {
                                                 echo '<td>'.$player['IDP'].'</td>';
-                                            } 
+                                            }
                                             ?>
                                             </tr>
                                         </tbody>
                                     </table>
+
                                 </div>
                             </div>
                         </div>
+                        <br />
+                        <input type="text" id="new-player"><button id="new-player-btn">Add</button>
                     </div>
                 </div>
             </div>
@@ -457,6 +458,23 @@
                 }
             });
         }
+
+        $('#new-player-btn').click(function () {
+            $.ajax({
+                url: 'updateSelected.php',
+                type: "POST",
+                data: {newname: $('#new-player').val()},
+                async: false,
+                dataType: 'json',
+                success: function (response) {
+                    if (response.type == 'error') {
+                        alert('error');
+                    } else {
+                        location.reload();
+                    }
+                }
+            });
+        });
 
     });
 </script>

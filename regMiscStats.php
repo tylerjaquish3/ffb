@@ -14,15 +14,15 @@
 			$managerId = $manager['id'];
 
 			$winStreak = $loseStreak = $longestWinStreak = $longestLoseStreak = 0;
-			$result = mysqli_query($conn, "SELECT name, w.year, w.week_number, win, lose 
-	            FROM managers 
+			$result = mysqli_query($conn, "SELECT name, w.year, w.week_number, win, lose
+	            FROM managers
 	            JOIN regular_season_matchups rsm ON managers.id = rsm.manager1_id
 	            JOIN (
 	                SELECT SUM(CASE
 	                WHEN manager1_id = $managerId AND manager1_score > manager2_score THEN 1
 	                ELSE 0
-	                END) AS win, year, week_number 
-	                FROM regular_season_matchups 
+	                END) AS win, year, week_number
+	                FROM regular_season_matchups
 	                GROUP BY year, week_number
 	            ) w ON w.year = rsm.year AND w.week_number = rsm.week_number
 
@@ -30,8 +30,8 @@
 	                SELECT SUM(CASE
 	                WHEN manager1_id = $managerId AND manager1_score < manager2_score THEN 1
 	                ELSE 0
-	                END) AS lose, year, week_number 
-	                FROM regular_season_matchups 
+	                END) AS lose, year, week_number
+	                FROM regular_season_matchups
 	                GROUP BY year, week_number
 	            ) w2 ON w2.year = rsm.year AND w2.week_number = rsm.week_number
 	            WHERE name = '" . $manager['name'] . "'");
@@ -83,7 +83,7 @@
 	</thead>
 	<tbody>
 		<?php
-		$result = mysqli_query($conn, "SELECT managers.name, SUM(manager1_score) AS points_for, 
+		$result = mysqli_query($conn, "SELECT managers.name, SUM(manager1_score) AS points_for,
 			SUM(manager2_score) AS points_against, SUM(manager1_score) - SUM(manager2_score) AS diff
 			FROM regular_season_matchups rsm
 			JOIN managers ON managers.id = rsm.manager1_id
@@ -115,10 +115,10 @@
 	</thead>
 	<tbody>
 		<?php
-		$result = mysqli_query($conn, "SELECT name, MAX(points_for) as max_pf, MAX(points_against) as max_pa, 
+		$result = mysqli_query($conn, "SELECT name, MAX(points_for) as max_pf, MAX(points_against) as max_pa,
 			MIN(points_for) as min_pf, MIN(points_against) as min_pa
 			FROM (
-				SELECT managers.name, year, SUM(manager1_score) AS points_for, 
+				SELECT managers.name, year, SUM(manager1_score) AS points_for,
 				SUM(manager2_score) AS points_against
 				FROM regular_season_matchups rsm
 				JOIN managers ON managers.id = rsm.manager1_id
@@ -195,15 +195,15 @@
 			$prevWeek = 0;
 			$winStreak = $loseStreak = $longestWinStreak = $longestLoseStreak = 0;
 			$winYear = $loseYear = '';
-			$result = mysqli_query($conn, "SELECT name, w.year, w.week_number, win, lose 
-	            FROM managers 
+			$result = mysqli_query($conn, "SELECT name, w.year, w.week_number, win, lose
+	            FROM managers
 	            JOIN regular_season_matchups rsm ON managers.id = rsm.manager1_id
 	            JOIN (
 	                SELECT SUM(CASE
 	                WHEN manager1_id = $managerId AND manager1_score > manager2_score THEN 1
 	                ELSE 0
-	                END) AS win, year, week_number 
-	                FROM regular_season_matchups 
+	                END) AS win, year, week_number
+	                FROM regular_season_matchups
 	                GROUP BY year, week_number
 	            ) w ON w.year = rsm.year AND w.week_number = rsm.week_number
 
@@ -211,8 +211,8 @@
 	                SELECT SUM(CASE
 	                WHEN manager1_id = $managerId AND manager1_score < manager2_score THEN 1
 	                ELSE 0
-	                END) AS lose, year, week_number 
-	                FROM regular_season_matchups 
+	                END) AS lose, year, week_number
+	                FROM regular_season_matchups
 	                GROUP BY year, week_number
 	            ) w2 ON w2.year = rsm.year AND w2.week_number = rsm.week_number
 	            WHERE name = '" . $manager['name'] . "'");
@@ -311,7 +311,7 @@
 		<?php
 		$result = mysqli_query($conn, "SELECT managers.name, MAX(manager1_score - manager2_score) as biggest_win,
 			MAX(manager2_score - manager1_score) as biggest_loss,
-			MIN(IF (manager1_score > manager2_score, manager1_score - manager2_score, null)) as smallest_win, 
+			MIN(IF (manager1_score > manager2_score, manager1_score - manager2_score, null)) as smallest_win,
 			MIN(IF (manager1_score < manager2_score, manager2_score - manager1_score, null)) as smallest_loss
 			FROM regular_season_matchups rsm
 			JOIN managers ON managers.id = rsm.manager1_id
@@ -344,7 +344,7 @@
 	</thead>
 	<tbody>
 		<?php
-		$result = mysqli_query($conn, "SELECT managers.name, MAX(manager1_score) as max_pf, MAX(manager2_score) as max_pa, 
+		$result = mysqli_query($conn, "SELECT managers.name, MAX(manager1_score) as max_pf, MAX(manager2_score) as max_pa,
 			MIN(manager1_score) as min_pf, MIN(manager2_score) as min_pa
 			FROM regular_season_matchups rsm
 			JOIN managers ON managers.id = rsm.manager1_id
@@ -421,8 +421,8 @@
 				'losses' => 0
 			]
 		];
-		$result = mysqli_query($conn, "SELECT * FROM regular_season_matchups rsm 
-			JOIN managers ON managers.id = rsm.manager1_id 
+		$result = mysqli_query($conn, "SELECT * FROM regular_season_matchups rsm
+			JOIN managers ON managers.id = rsm.manager1_id
 			ORDER BY year, week_number, manager1_score DESC");
 		while ($row = mysqli_fetch_array($result)) {
 
@@ -520,8 +520,8 @@
 				'wins' => 0
 			]
 		];
-		$result = mysqli_query($conn, "SELECT * FROM regular_season_matchups rsm 
-			JOIN managers ON managers.id = rsm.manager1_id 
+		$result = mysqli_query($conn, "SELECT * FROM regular_season_matchups rsm
+			JOIN managers ON managers.id = rsm.manager1_id
 			ORDER BY year, week_number, manager1_score ASC");
 		while ($row = mysqli_fetch_array($result)) {
 
@@ -621,19 +621,18 @@
 			]
 		];
 		$scores = [];
-		$result = mysqli_query($conn, "SELECT year, week_number, name, manager1_score FROM regular_season_matchups rsm 
-			JOIN managers ON managers.id = rsm.manager1_id 
+		$result = mysqli_query($conn, "SELECT year, week_number, name, manager1_score FROM regular_season_matchups rsm
+			JOIN managers ON managers.id = rsm.manager1_id
 			ORDER BY year, week_number, manager1_score ASC");
 		while ($row = mysqli_fetch_array($result)) {
 			$scores[$row['year']][$row['week_number']][$row['name']] = $row['manager1_score'];
 		}
-
 		foreach ($scores as $year => $weekArray) {
 			foreach ($weekArray as $week) {
 				$index = 0;
 				foreach ($week as $manager => $value) {
 					// Account for the years where there were only 8 managers
-					if (is_array($manager) && count($manager) == 8) {
+					if (count($week) == 8) {
 						$managers[$manager]['wins'] += $index;
 						$managers[$manager]['losses'] += 7 - $index;
 					} else {
@@ -673,7 +672,7 @@
 	<tbody>
 		<?php
 		$result = mysqli_query($conn, "SELECT name, IFNULL(pick1, 0) as pick1, IFNULL(pick10, 0) as pick10, adp
-			FROM managers 
+			FROM managers
 			LEFT JOIN (
 				SELECT COUNT(id) as pick1, manager_id FROM draft
 				WHERE overall_pick = 1
@@ -685,7 +684,7 @@
 			WHERE overall_pick = 10
 			GROUP BY manager_id
 			) p10 ON p10.manager_id = managers.id
-			
+
 			LEFT JOIN (
 			SELECT AVG(overall_pick) as adp, manager_id FROM draft
 			WHERE round = 1
@@ -717,8 +716,8 @@
 	</thead>
 	<tbody>
 		<?php
-		$result = mysqli_query($conn, "SELECT managers.name, SUM(moves) as moves, SUM(trades) as trades, SUM(moves+trades) as total 
-			FROM team_names 
+		$result = mysqli_query($conn, "SELECT managers.name, SUM(moves) as moves, SUM(trades) as trades, SUM(moves+trades) as total
+			FROM team_names
 			JOIN managers on manager_id = managers.id
 			GROUP BY managers.name;");
 		while ($row = mysqli_fetch_array($result)) { ?>

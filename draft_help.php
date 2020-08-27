@@ -445,7 +445,7 @@
 
                                 $result = mysqli_query(
                                     $conn,
-                                    "SELECT pick_number, player, position FROM draft_selections ds
+                                    "SELECT pick_number, player, position, adp FROM draft_selections ds
                                     JOIN preseason_rankings pr ON pr.id = ds.ranking_id
                                     WHERE pick_number <= $pickMax
                                     AND pick_number > $pickMin
@@ -461,9 +461,9 @@
                                 }
 
                                 while ($row = mysqli_fetch_array($result)) {
+                                    $goodPick = $row['pick_number'] >= $row['adp'] ? 'good-pick' : 'bad-pick';
                                     ?>
-                                    <td class="color-<?php echo $row['position']; ?>"><?php echo '<span class="sub">'.$row['pick_number'].'</span>&nbsp;'.$row['player']; ?></td>
-
+                                    <td class="color-<?php echo $row['position']; ?>"><?php echo '<span class="sub '.$goodPick.'">'.$row['pick_number'].'</span>&nbsp;'.$row['player']; ?></td>
                             <?php }
                                 echo '</tr>';
                             } ?>
@@ -635,5 +635,13 @@
     #datatable-board .sub {
         font-weight: 400;
         font-size: 16px;
+    }
+
+    .good-pick {
+        color: green;
+    }
+
+    .bad-pick {
+        color: red;
     }
 </style>

@@ -21,7 +21,7 @@ if (isset($_POST['data'])) {
         $data = $_POST['data'];
 
         $player = mysqli_real_escape_string($conn, $data[2]);
-        $mine = ($data[14] == 'taken') ? 0 : 1;
+        $mine = ($data[15] == 'taken') ? 0 : 1;
 
         $result = mysqli_query($conn,"SELECT * FROM preseason_rankings WHERE player = '".$player."'");
         if (mysqli_num_rows($result) > 0) {

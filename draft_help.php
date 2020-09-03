@@ -82,6 +82,13 @@
                                             - Current Pick: <?php echo $currentPick; ?>
                                         </h3>
                                         <a type="button" data-toggle="modal" data-target="#draft-board" href="#">Draft Board</a>
+                                        &nbsp;|&nbsp;
+                                        <a type="button" id="hide-te">Hide TE</a>
+                                        &nbsp;|&nbsp;
+                                        <a type="button" id="hide-def">Hide DEF</a>
+                                        &nbsp;|&nbsp;
+                                        <a type="button" id="hide-k">Hide K</a>
+
                                     </div>
 
                                     <table class="table table-responsive" id="datatable-players">
@@ -97,6 +104,7 @@
                                             <th></th>
                                             <th>GP</th>
                                             <th>Pts</th>
+                                            <th>Pts/Gm</th>
                                             <th>Yds</th>
                                             <th>TDs</th>
                                             <th>Rec</th>
@@ -123,11 +131,11 @@
                                                     <td><a class="btn btn-secondary taken">Taken</a><a class="btn btn-secondary mine">Mine!</a></td>
                                                     <td><?php echo $row['games']; ?></td>
                                                     <td><?php echo $row['points']; ?></td>
+                                                    <td><?php echo $row['games'] > 0 ? round($row['points'] / $row['games'], 1) : null; ?></td>
                                                     <td><?php echo $row['yards']; ?></td>
                                                     <td><?php echo $row['touchdowns']; ?></td>
                                                     <td><?php echo $row['rec']; ?></td>
                                                 </tr>
-
                                             <?php } ?>
                                         </tbody>
                                     </table>
@@ -199,6 +207,7 @@
                                             <th></th>
                                             <th>GP</th>
                                             <th>Pts</th>
+                                            <th>Pts/Gm</th>
                                             <th>Yds</th>
                                             <th>TDs</th>
                                             <th>Rec</th>
@@ -283,6 +292,7 @@
                                                     <td><a class="btn btn-secondary taken">Taken</a><a class="btn btn-secondary mine">Mine!</a></td>
                                                     <td><?php echo $row['games']; ?></td>
                                                     <td><?php echo $row['points']; ?></td>
+                                                    <td><?php echo $row['games'] > 0 ? round($row['points'] / $row['games'], 1) : null; ?></td>
                                                     <td><?php echo $row['yards']; ?></td>
                                                     <td><?php echo $row['touchdowns']; ?></td>
                                                     <td><?php echo $row['rec']; ?></td>
@@ -542,6 +552,33 @@
 
             saveSelection(formData);
         });
+
+        $('#hide-te').click(function () {
+            doSearch('TE');
+        });
+
+        $('#hide-def').click(function () {
+            doSearch('DEF');
+        });
+
+        $('#hide-k').click(function () {
+            doSearch('K');
+        });
+
+        var posArray = [];
+        function doSearch(pos) {
+            posArray.push(pos);
+            let regex = '^(';
+
+            posArray.forEach(function (item) {
+                regex += '(?!'+item+')';
+            });
+            regex += '.)*$';
+
+            console.log(regex);
+
+            playersTable.columns([3]).search(regex, true, false).draw();
+        }
 
         function saveSelection(formData)
         {

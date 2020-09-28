@@ -127,3 +127,8 @@ span.seed {
     border-radius: 20px;
     border: 1px solid;
 }
+
+#year-select {
+    padding: 15px;
+    margin-bottom: 20px;
+}

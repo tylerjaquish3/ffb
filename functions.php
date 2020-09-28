@@ -27,6 +27,12 @@ if ($pageName == 'Postseason') {
 if ($pageName == 'Draft') {
     $draftResults = getDraftResults($conn);
 }
+if ((strpos($pageName, 'Recap') !== false)) {
+    $regSeasonMatchups = getRegularSeasonMatchups($conn);
+    $postseasonMatchups = getPostseasonMatchups($conn);
+    $seasonNumbers = getAllNumbersBySeason($conn);
+    $draftResults = getDraftResults($conn);
+}
 
 // include 'saveFunFacts.php';
 
@@ -140,20 +146,20 @@ function getProfileNumbers($conn)
             $managerId = $row['id'];
         }
 
-        $result = mysqli_query($conn, "SELECT name, wins, losses, total, wins/total AS win_pct 
-            FROM managers 
+        $result = mysqli_query($conn, "SELECT name, wins, losses, total, wins/total AS win_pct
+            FROM managers
             JOIN (
-                SELECT COUNT(manager1_id) AS wins, manager1_id FROM regular_season_matchups rsm 
+                SELECT COUNT(manager1_id) AS wins, manager1_id FROM regular_season_matchups rsm
                 WHERE manager1_score > manager2_score GROUP BY manager1_id
             ) w ON w.manager1_id = managers.id
 
             JOIN (
-                SELECT COUNT(manager1_id) AS losses, manager1_id FROM regular_season_matchups rsm 
+                SELECT COUNT(manager1_id) AS losses, manager1_id FROM regular_season_matchups rsm
                 WHERE manager1_score < manager2_score GROUP BY manager1_id
             ) l ON l.manager1_id = managers.id
 
             JOIN (
-                SELECT COUNT(manager1_id) AS total, manager1_id FROM regular_season_matchups rsm 
+                SELECT COUNT(manager1_id) AS total, manager1_id FROM regular_season_matchups rsm
                 GROUP BY manager1_id
             ) t ON t.manager1_id = managers.id
             ORDER BY win_pct DESC");
@@ -197,35 +203,35 @@ function getProfileNumbers($conn)
         // Calc playoff record and rank
         $wins = $losses = 0;
         $rank = 1;
-        $result = mysqli_query($conn, "SELECT name, IFNULL(winsTop, 0) as winsTop, winsBottom, lossesTop, lossesBottom, totalTop, totalBottom, (IFNULL(winsTop, 0)+winsBottom)/(totalTop+totalBottom) AS win_pct 
-            FROM managers 
+        $result = mysqli_query($conn, "SELECT name, IFNULL(winsTop, 0) as winsTop, winsBottom, lossesTop, lossesBottom, totalTop, totalBottom, (IFNULL(winsTop, 0)+winsBottom)/(totalTop+totalBottom) AS win_pct
+            FROM managers
             LEFT JOIN (
-                SELECT COUNT(manager1_id) AS winsTop, manager1_id FROM playoff_matchups rsm 
+                SELECT COUNT(manager1_id) AS winsTop, manager1_id FROM playoff_matchups rsm
                 WHERE manager1_score > manager2_score GROUP BY manager1_id
             ) w ON w.manager1_id = managers.id
 
             LEFT JOIN (
-                SELECT COUNT(manager1_id) AS lossesTop, manager1_id FROM playoff_matchups rsm 
+                SELECT COUNT(manager1_id) AS lossesTop, manager1_id FROM playoff_matchups rsm
                 WHERE manager1_score < manager2_score GROUP BY manager1_id
             ) l ON l.manager1_id = managers.id
 
             LEFT JOIN (
-                SELECT COUNT(manager2_id) AS winsBottom, manager2_id FROM playoff_matchups rsm 
+                SELECT COUNT(manager2_id) AS winsBottom, manager2_id FROM playoff_matchups rsm
                 WHERE manager2_score > manager1_score GROUP BY manager2_id
             ) w2 ON w2.manager2_id = managers.id
 
             LEFT JOIN (
-                SELECT COUNT(manager2_id) AS lossesBottom, manager2_id FROM playoff_matchups rsm 
+                SELECT COUNT(manager2_id) AS lossesBottom, manager2_id FROM playoff_matchups rsm
                 WHERE manager2_score < manager1_score GROUP BY manager2_id
             ) l2 ON l2.manager2_id = managers.id
 
             LEFT JOIN (
-                SELECT COUNT(manager1_id) AS totalTop, manager1_id FROM playoff_matchups rsm 
+                SELECT COUNT(manager1_id) AS totalTop, manager1_id FROM playoff_matchups rsm
                 GROUP BY manager1_id
             ) t ON t.manager1_id = managers.id
 
             LEFT JOIN (
-                SELECT COUNT(manager2_id) as totalBottom, manager2_id FROM playoff_matchups rsm 
+                SELECT COUNT(manager2_id) as totalBottom, manager2_id FROM playoff_matchups rsm
                 GROUP BY manager2_id
             ) t2 ON t2.manager2_id = managers.id
             ORDER BY win_pct DESC");
@@ -244,8 +250,8 @@ function getProfileNumbers($conn)
 
         // Calc total points and rank
         $rank = 1;
-        $result = mysqli_query($conn, "SELECT SUM(manager1_score) as total_points, manager1_id 
-            FROM regular_season_matchups 
+        $result = mysqli_query($conn, "SELECT SUM(manager1_score) as total_points, manager1_id
+            FROM regular_season_matchups
             GROUP BY manager1_id ORDER BY total_points DESC;");
         while ($row = mysqli_fetch_array($result)) {
             if ($row['manager1_id'] == $managerId) {
@@ -268,7 +274,7 @@ function getFinishesChartNumbers($conn)
 
     if (isset($_GET)) {
 
-        $result = mysqli_query($conn, "SELECT * FROM finishes 
+        $result = mysqli_query($conn, "SELECT * FROM finishes
             JOIN managers ON managers.id = finishes.manager_id
             WHERE name = '" . $_GET['id'] . "'");
         while ($row = mysqli_fetch_array($result)) {
@@ -291,7 +297,7 @@ function getSeasonNumbers($conn)
 
     if (isset($_GET)) {
 
-        $result = mysqli_query($conn, "SELECT * FROM finishes 
+        $result = mysqli_query($conn, "SELECT * FROM finishes
             JOIN managers ON managers.id = finishes.manager_id
             WHERE name = '" . $_GET['id'] . "'");
         while ($row = mysqli_fetch_array($result)) {
@@ -299,7 +305,7 @@ function getSeasonNumbers($conn)
             $year = $row['year'];
 
             $pf = $pa = $wins = $losses = 0;
-            $result2 = mysqli_query($conn, "SELECT * FROM regular_season_matchups 
+            $result2 = mysqli_query($conn, "SELECT * FROM regular_season_matchups
                 WHERE manager1_id = " . $managerId . " AND year = " . $year);
             while ($row2 = mysqli_fetch_array($result2)) {
                 $pf += $row2['manager1_score'];
@@ -337,7 +343,7 @@ function getRegularSeasonMatchups($conn)
         FROM managers m
         JOIN regular_season_matchups rsm ON rsm.manager1_id = m.id
         LEFT JOIN (
-        SELECT name, manager2_id, year, week_number, manager2_score FROM regular_season_matchups rsm2 
+        SELECT name, manager2_id, year, week_number, manager2_score FROM regular_season_matchups rsm2
             JOIN managers ON managers.id = rsm2.manager2_id
         ) l ON l.manager2_id = rsm.manager2_id AND l.year = rsm.year AND l.week_number = rsm.week_number
         ORDER BY rsm.year, rsm.week_number ASC");
@@ -383,7 +389,7 @@ function getPostseasonMatchups($conn)
         FROM managers m
         JOIN playoff_matchups rsm ON rsm.manager1_id = m.id
         LEFT JOIN (
-        SELECT name, manager2_id, year, round, manager2_score FROM playoff_matchups rsm2 
+        SELECT name, manager2_id, year, round, manager2_score FROM playoff_matchups rsm2
             JOIN managers ON managers.id = rsm2.manager2_id
         ) l ON l.manager2_id = rsm.manager2_id AND l.year = rsm.year AND l.round = rsm.round
         ORDER BY rsm.year, rsm.round ASC");
@@ -429,6 +435,70 @@ function getDraftResults($conn)
         ");
     while ($row = mysqli_fetch_array($result)) {
         $results[] = $row;
+    }
+
+    return $results;
+}
+
+function getAllNumbersBySeason($conn)
+{
+    $results = [];
+
+    if (isset($_GET['id'])) {
+        $season = $_GET['id'];
+    } else {
+        $result = mysqli_query($conn, "SELECT DISTINCT year FROM finishes ORDER BY year DESC LIMIT 1");
+        while ($row = mysqli_fetch_array($result)) {
+            $season = $row['year'];
+        }
+    }
+
+    $result = mysqli_query($conn, "SELECT finishes.manager_id, finishes.year, managers.name as manager_name,
+        team_names.name AS team_name, moves, finish, trades
+        FROM finishes
+        JOIN managers ON managers.id = finishes.manager_id
+        JOIN team_names ON managers.id = team_names.manager_id AND finishes.year = team_names.year
+        WHERE finishes.YEAR  = '" . $season . "'");
+    while ($row = mysqli_fetch_array($result)) {
+        $managerId = $row['manager_id'];
+        $year = $row['year'];
+
+        $pf = $pa = $wins = $losses = 0;
+        $result2 = mysqli_query($conn, "SELECT * FROM regular_season_matchups
+            WHERE manager1_id = " . $managerId . " AND year = " . $year);
+        while ($row2 = mysqli_fetch_array($result2)) {
+            $pf += $row2['manager1_score'];
+            $pa += $row2['manager2_score'];
+            if ($row2['manager1_score'] > $row2['manager2_score']) {
+                $wins++;
+            } else {
+                $losses++;
+            }
+        }
+
+        $winPct = $wins * 100 / ($wins + $losses);
+        $results[$managerId] = [
+            'manager' => $row['manager_name'],
+            'finish' => $row['finish'],
+            'record' => $wins . ' - ' . $losses,
+            'win_pct' => round($winPct, 1),
+            'pf' => $pf,
+            'pa' => $pa,
+            'team_name' => $row['team_name'],
+            'moves' => $row['moves'],
+            'trades' => $row['trades']
+        ];
+    }
+
+    usort($results, function($a, $b) {
+        if ($b['win_pct'] - $a['win_pct'] == 0) {
+            return $b['pf'] - $a['pf'];
+        }
+        return $b['win_pct'] - $a['win_pct'];
+    });
+
+    foreach ($results as $key => &$result) {
+        $result['seed'] = $key+1;
     }
 
     return $results;

@@ -58,7 +58,7 @@ foreach ($seasonNumbers as $standings) {
                         <div class="card-body">
                             <div class="media">
                                 <div class="p-2 text-xs-center bg-green media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
+                                    <i class="icon-checkmark2 font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green white media-body">
                                     <h5>Most Points</h5>
@@ -88,7 +88,7 @@ foreach ($seasonNumbers as $standings) {
                         <div class="card-body">
                             <div class="media">
                                 <div class="p-2 text-xs-center bg-green media-left media-middle">
-                                    <i class="icon-trophy font-large-2 white"></i>
+                                    <i class="icon-sad font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green white media-body">
                                     <h5>Second Place</h5>
@@ -116,7 +116,7 @@ foreach ($seasonNumbers as $standings) {
             </div>
 
             <div class="row">
-                <div class="col-md-8 col-xs-12">
+                <div class="col-md-6 col-xs-12">
                     <div class="card">
                         <div class="card-header">
                             <h3>Standings</h3>
@@ -158,45 +158,136 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 col-xs-12">
+                <div class="col-md-6 col-xs-12">
                     <div class="card">
                         <div class="card-header">
                             <h3>Postseason</h3>
                         </div>
                         <div class="card-body">
                             <div class="card-block">
-                                <table class="table table-responsive" id="datatable-postseason">
+
+                                <?php
+                                // var_dump($postseasonMatchups);die;
+                                $firstQ = $firstS = true;
+                                $bye1 = $bye2 = '';
+                                foreach ($postseasonMatchups as $matchup) {
+                                    if ($matchup['year'] == $season) {
+
+                                        if ($matchup['winner'] == 'm1') {
+                                            $matchup['manager1disp'] = '<span class="badge badge-primary">'.$matchup['manager1'].'</span>';
+                                            $matchup['manager2disp'] = '<span class="badge badge-secondary">'.$matchup['manager2'].'</span>';
+                                        } else {
+                                            $matchup['manager1disp'] = '<span class="badge badge-secondary">'.$matchup['manager1'].'</span>';
+                                            $matchup['manager2disp'] = '<span class="badge badge-primary">'.$matchup['manager2'].'</span>';
+                                        }
+                                        if ($matchup['round'] == 'Quarterfinal') {
+                                            if ($firstQ) {
+                                                $q1 = $matchup;
+                                                $firstQ = false;
+                                            } else {
+                                                $q2 = $matchup;
+                                            }
+                                        }
+                                        if ($matchup['round'] == 'Semifinal') {
+
+                                            if ($matchup['m1seed'] == '1') {
+                                                $bye1 = $matchup['manager1disp'];
+                                            }
+                                            if ($matchup['m1seed'] == '2') {
+                                                $bye2 = $matchup['manager1disp'];
+                                            }
+
+                                            if ($firstS) {
+                                                $s1 = $matchup;
+                                                $firstS = false;
+                                            } else {
+                                                $s2 = $matchup;
+                                            }
+                                        }
+                                        if ($matchup['round'] == 'Final') {
+                                            // var_dump($matchup);die;
+                                            $f = $matchup;
+                                        }
+                                    }
+                                }
+                                ?>
+
+                                <table id="bracket">
                                     <thead>
-                                        <th>Round</th>
-                                        <th>Manager</th>
-                                        <th>Opponent</th>
-                                        <th>Score</th>
-                                        <th></th>
+                                        <th>Quarterfinal</th>
+                                        <th>Semifinal</th>
+                                        <th>Final</th>
+                                        <th>Champion</th>
                                     </thead>
                                     <tbody>
-                                        <?php
-                                        foreach ($postseasonMatchups as $matchup) {
-                                            if ($matchup['year'] == $season) {
-                                            ?>
-                                            <tr>
-                                                <td><?php echo $matchup['round']; ?></td>
-
-                                                <?php if ($matchup['winner'] == 'm1') {
-                                                    echo '<td><span class="badge badge-primary">' . $matchup['manager1'] . '<span class="seed">' . $matchup['m1seed'] . '</span></span></td>';
-                                                } else {
-                                                    echo '<td><span class="badge badge-secondary">' . $matchup['manager1'] . '<span class="seed">' . $matchup['m1seed'] . '</span></span></td>';
-                                                }
-                                                if ($matchup['winner'] == 'm2') {
-                                                    echo '<td><span class="badge badge-primary">' . $matchup['manager2'] . '<span class="seed">' . $matchup['m2seed'] . '</span></span></td>';
-                                                } else {
-                                                    echo '<td><span class="badge badge-secondary">' . $matchup['manager2'] . '<span class="seed">' . $matchup['m2seed'] . '</span></span></td>';
-                                                } ?>
-                                                <td><?php echo $matchup['score']; ?></td>
-                                                <td><?php echo $matchup['sort']; ?></td>
-                                            </tr>
-
-                                        <?php }
-                                        } ?>
+                                        <tr>
+                                            <td class="quarter top"><?php echo '<span class="seed">1</span>'.$bye1; ?></td>
+                                            <td class="semi"></td>
+                                            <td class="final"></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="quarter bottom">Bye</td>
+                                            <td class="semi top"><?php echo $s1['manager1disp']; ?><br />
+                                                <?php echo explode(' - ',$s1['score'])[0]; ?>
+                                            </td>
+                                            <td class="final"></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="quarter top"><?php echo '<span class="seed">' . $q1['m1seed'] . '</span>'.$q1['manager1disp']; ?><br />
+                                                <?php echo explode(' - ',$q1['score'])[0]; ?>
+                                            </td>
+                                            <td class="semi bottom"><?php echo $s1['manager2disp']; ?><br />
+                                                <?php echo explode(' - ',$s1['score'])[1]; ?>
+                                            </td>
+                                            <td class="final"></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="quarter bottom"><?php echo '<span class="seed">' . $q1['m2seed'] . '</span>'.$q1['manager2disp']; ?><br />
+                                                <?php echo explode(' - ',$q1['score'])[1]; ?>
+                                            </td>
+                                            <td class="semi"></td>
+                                            <td class="final top"><?php echo $f['manager1disp']; ?><br />
+                                                <?php echo explode(' - ',$f['score'])[0]; ?>
+                                            </td>
+                                            <td class="champ"><?php echo ($f['winner'] == 'm1') ? $f['manager1disp'] : $f['manager2disp']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="quarter top"><?php echo '<span class="seed">' . $q2['m1seed'] . '</span>'.$q2['manager1disp']; ?><br />
+                                                <?php echo explode(' - ',$q2['score'])[0]; ?>
+                                            </td>
+                                            <td class="semi"></td>
+                                            <td class="final bottom"><?php echo $f['manager2disp']; ?><br />
+                                                <?php echo explode(' - ',$f['score'])[1]; ?>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="quarter bottom"><?php echo '<span class="seed">' . $q2['m2seed'] . '</span>'.$q2['manager2disp']; ?><br />
+                                                <?php echo explode(' - ',$q2['score'])[1]; ?>
+                                            </td>
+                                            <td class="semi top"><?php echo $s2['manager1disp']; ?><br />
+                                                <?php echo explode(' - ',$s2['score'])[0]; ?>
+                                            </td>
+                                            <td class="final"></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="quarter top">Bye</td>
+                                            <td class="semi bottom"><?php echo $s2['manager2disp']; ?><br />
+                                                <?php echo explode(' - ',$s2['score'])[1]; ?>
+                                            </td>
+                                            <td class="final"></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="quarter bottom"><?php echo '<span class="seed">2</span>'.$bye2; ?></td>
+                                            <td class="semi"></td>
+                                            <td class="final"></td>
+                                            <td></td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -284,6 +375,39 @@ foreach ($seasonNumbers as $standings) {
         </div>
     </div>
 </div>
+
+<style>
+
+
+    .champ {
+        font-size: 24px;
+    }
+
+    #bracket {
+        padding: 5px;
+        direction: ltr;
+    }
+
+    #bracket td, th {
+        padding: 5px 30px;
+        font-weight: bold;
+        font-size: 17px;
+    }
+
+    .top {
+        border-top: 1px solid #000;
+    }
+    .bottom {
+        border-bottom: 1px solid #000;
+    }
+
+    span.seed {
+        font-size: 14px;
+        padding: 0px 5px;
+        margin-right: 5px;
+    }
+
+</style>
 
 <?php include 'footer.html'; ?>
 

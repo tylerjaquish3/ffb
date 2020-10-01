@@ -4,9 +4,25 @@ $pageName = $_GET['id'] . "'s Profile";
 include 'header.php';
 include 'sidebar.html';
 
-$result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '" . $_GET['id'] . "'");
-while ($row = mysqli_fetch_array($result)) {
-    $managerId = $row['id'];
+if (isset($_GET['id'])) {
+
+    $managerName = $_GET['id'];
+    $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '" . $managerName . "'");
+    while ($row = mysqli_fetch_array($result)) {
+        $managerId = $row['id'];
+    }
+
+    if (isset($_GET['versus'])) {
+        $versus = $_GET['versus'];
+    } else {
+        while( in_array( ($versus = mt_rand(1,10)), [$managerId] ) );
+    }
+
+    $result = mysqli_query($conn, "SELECT * FROM managers WHERE id = '" . $versus . "'");
+    while ($row = mysqli_fetch_array($result)) {
+        $versusName = $row['name'];
+    }
+
 }
 
 ?>
@@ -137,14 +153,14 @@ while ($row = mysqli_fetch_array($result)) {
                                         <?php
                                         $result = mysqli_query(
                                             $conn,
-                                            "SELECT name, w.wins+w2.wins AS totalWins, l.losses+l2.losses AS totalLosses 
-                                            FROM managers 
+                                            "SELECT name, w.wins+w2.wins AS totalWins, l.losses+l2.losses AS totalLosses
+                                            FROM managers
                                             JOIN (
                                                 SELECT SUM(CASE
                                                 WHEN manager1_id = $managerId AND manager1_score > manager2_score THEN 1
                                                 ELSE 0
-                                                END) AS wins, manager2_id 
-                                                FROM playoff_matchups rsm 
+                                                END) AS wins, manager2_id
+                                                FROM playoff_matchups rsm
                                                 GROUP BY manager2_id
                                             ) w ON w.manager2_id = managers.id
 
@@ -152,8 +168,8 @@ while ($row = mysqli_fetch_array($result)) {
                                                 SELECT SUM(CASE
                                                 WHEN manager2_id = $managerId AND manager2_score > manager1_score THEN 1
                                                 ELSE 0
-                                                END) AS wins, manager1_id 
-                                                FROM playoff_matchups rsm 
+                                                END) AS wins, manager1_id
+                                                FROM playoff_matchups rsm
                                                 GROUP BY manager1_id
                                             ) w2 ON w2.manager1_id = managers.id
 
@@ -161,8 +177,8 @@ while ($row = mysqli_fetch_array($result)) {
                                                 SELECT SUM(CASE
                                                 WHEN manager1_id = $managerId AND manager1_score < manager2_score THEN 1
                                                 ELSE 0
-                                                END) AS losses, manager2_id 
-                                                FROM playoff_matchups rsm 
+                                                END) AS losses, manager2_id
+                                                FROM playoff_matchups rsm
                                                 GROUP BY manager2_id
                                             ) l ON l.manager2_id = managers.id
 
@@ -170,8 +186,8 @@ while ($row = mysqli_fetch_array($result)) {
                                                 SELECT SUM(CASE
                                                 WHEN manager2_id = $managerId AND manager2_score < manager1_score THEN 1
                                                 ELSE 0
-                                                END) AS losses, manager1_id 
-                                                FROM playoff_matchups rsm 
+                                                END) AS losses, manager1_id
+                                                FROM playoff_matchups rsm
                                                 GROUP BY manager1_id
                                             ) l2 ON l2.manager1_id = managers.id
                                             WHERE name != '" . $_GET['id'] . "'"
@@ -199,7 +215,7 @@ while ($row = mysqli_fetch_array($result)) {
                                         $result = mysqli_query(
                                             $conn,
                                             "SELECT name, moves, trades, year
-                                            FROM team_names 
+                                            FROM team_names
                                             WHERE manager_id = $managerId"
                                         );
                                         while ($array = mysqli_fetch_array($result)) { ?>
@@ -275,7 +291,7 @@ while ($row = mysqli_fetch_array($result)) {
                                         <?php
                                         $result = mysqli_query(
                                             $conn,
-                                            "SELECT d.year, 
+                                            "SELECT d.year,
                                             (SELECT round_pick FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as position,
                                             (SELECT CONCAT(player, ' - ', position) FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as r1_pick,
                                             (SELECT CONCAT(player, ' - ', position) FROM draft WHERE manager_id = $managerId AND round = 2 AND year = d.year) as r2_pick,
@@ -339,8 +355,140 @@ while ($row = mysqli_fetch_array($result)) {
                         </div>
                     </div>
                 </div>
+                <div class="col-xs-12 col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Head to Head</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff;">
+                            <select id="versus-select">
+                                <?php
+                                $result = mysqli_query($conn, "SELECT * FROM managers WHERE id != $managerId ORDER BY name ASC");
+                                while ($row = mysqli_fetch_array($result)) {
+                                    if ($row['id'] == $versus) {
+                                        echo '<option selected value="'.$row['id'].'">'.$row['name'].'</option>';
+                                    } else {
+                                        echo '<option value="'.$row['id'].'">'.$row['name'].'</option>';
+                                    }
+                                }
+                                ?>
+                            </select>
+                            <div class="row">
+                                <div class="col-xs-12 col-md-4">
+                                    <table class="table table-responsive">
+                                    <?php
+                                        $wins = $losses = $total = $pf = $pa = $ptsAvg = $bigWin = $bigLoss = $postTotal = $postWins = $postLosses = 0;
+                                        $closeLoss = -9999;
+                                        $closeWin = 9999;
+                                        $result = mysqli_query(
+                                            $conn,
+                                            "SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score, winning_manager_id
+                                            FROM regular_season_matchups
+                                            WHERE manager1_id = $managerId
+                                            AND manager2_id = $versus
+                                            UNION
+                                            SELECT year, round, manager1_id, manager2_id, manager1_score, manager2_score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
+                                            FROM playoff_matchups
+                                            WHERE (manager1_id = $managerId AND manager2_id = $versus) OR (manager1_id = $versus AND manager2_id = $managerId)
+                                            ORDER BY year, week_number DESC"
+                                        );
+                                        while ($array = mysqli_fetch_array($result)) {
 
-                
+                                            $isPost = (int)$array['week_number'] == 0;
+
+                                            $wins += (!$isPost && $array['winning_manager_id'] == $managerId) ? 1 : 0;
+                                            $losses += (!$isPost && $array['winning_manager_id'] != $managerId) ? 1 : 0;
+                                            $total += (!$isPost) ? 1: 0;
+                                            $postWins += ($isPost && $array['winning_manager_id'] == $managerId) ? 1 : 0;
+                                            $postLosses += ($isPost && $array['winning_manager_id'] != $managerId) ? 1 : 0;
+                                            $postTotal += ($isPost) ? 1: 0;
+
+                                            $pf += $array['manager1_score'];
+                                            $pa += $array['manager2_score'];
+
+                                            $margin = $array['manager1_score'] - $array['manager2_score'];
+                                            $bigWin = ($margin > 0 && $margin > $bigWin) ? $margin : $bigWin;
+                                            $closeLoss = ($margin < 0 && $margin > $closeLoss) ? $margin : $closeLoss;
+                                            $closeWin = ($margin > 0 && $margin < $closeWin) ? $margin : $closeWin;
+                                            $bigLoss = ($margin < 0 && $margin < $bigLoss) ? $margin : $bigLoss;
+                                        } ?>
+                                        <tr><td>Reg. Season Matchups</td><td><?php echo $total; ?></td></tr>
+                                        <tr><td>Reg. Season Wins</td><td><?php echo $wins; ?></td></tr>
+                                        <tr><td>Reg. Season Losses</td><td> <?php echo $losses; ?></td></tr>
+
+                                        <tr><td>Postseason Matchups</td><td><?php echo $postTotal; ?></td></tr>
+                                        <tr><td>Postseason Wins</td><td><?php echo $postWins; ?></td></tr>
+                                        <tr><td>Postseason Losses</td><td> <?php echo $postLosses; ?></td></tr>
+
+                                        <tr><td>Overall Winning %</td><td> <?php echo round(($wins + $postWins) * 100/ ($total + $postTotal), 1).' %'; ?></td></tr>
+
+                                        <tr><td>Total Points For</td><td><?php echo $pf; ?></td></tr>
+                                        <tr><td>Total Points Against</td><td><?php echo $pa; ?></td></tr>
+                                        <tr><td>Average Points For</td><td><?php echo round($pf/$total, 1); ?></td></tr>
+                                        <tr><td>Average Points Against</td><td><?php echo round($pa/$total, 1); ?></td></tr>
+
+                                        <tr><td>Biggest Win</td><td><?php echo round($bigWin, 2); ?></td></tr>
+                                        <tr><td>Biggest Loss</td><td><?php echo round($bigLoss, 2); ?></td></tr>
+                                        <tr><td>Closest Win</td><td><?php echo round($closeWin, 2); ?></td></tr>
+                                        <tr><td>Closest Loss</td><td><?php echo round($closeLoss, 2); ?></td></tr>
+
+
+                                    </table>
+
+                                </div>
+                                <div class="col-xs-12 col-md-8">
+
+                                    <table class="table table-responsive" id="datatable-versus">
+                                        <thead>
+                                            <th>Year</th>
+                                            <th>Week</th>
+                                            <th>Manager</th>
+                                            <th>Score</th>
+                                            <th>Opponent</th>
+                                            <th>Margin</th>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $result = mysqli_query(
+                                                $conn,
+                                                "SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score, winning_manager_id
+                                                FROM regular_season_matchups
+                                                WHERE manager1_id = $managerId
+                                                AND manager2_id = $versus
+                                                UNION
+                                                SELECT year, round, manager1_id, manager2_id, manager1_score, manager2_score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
+                                                FROM playoff_matchups
+                                                WHERE (manager1_id = $managerId AND manager2_id = $versus) OR (manager1_id = $versus AND manager2_id = $managerId)
+                                                ORDER BY year, week_number DESC"
+                                            );
+                                            while ($array = mysqli_fetch_array($result)) { ?>
+                                                <tr class="highlight">
+                                                    <td><?php echo $array['year']; ?></td>
+                                                    <td><?php echo $array['week_number']; ?></td>
+                                                    <?php if ($array['winning_manager_id'] == $managerId) {
+                                                        echo '<td><span class="badge badge-primary">' . $managerName.'</span></td>';
+                                                    } else {
+                                                        echo '<td><span class="badge badge-secondary">' . $managerName.'</span></td>';
+                                                    }?>
+                                                    <td><?php echo $array['manager1_score'].' - '.$array['manager2_score']; ?></td>
+                                                    <?php
+                                                    if ($array['winning_manager_id'] == $versus) {
+                                                        echo '<td><span class="badge badge-primary">' . $versusName.'</span></td>';
+                                                    } else {
+                                                        echo '<td><span class="badge badge-secondary">' . $versusName.'</span></td>';
+                                                    } ?>
+                                                    <td><?php echo round(abs($array['manager1_score'] - $array['manager2_score']), 2); ?></td>
+                                                </tr>
+                                            <?php } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <!-- <div class="row">
                 <div class="col-sm-12">
@@ -363,6 +511,11 @@ while ($row = mysqli_fetch_array($result)) {
 
 <script type="text/javascript">
     $(document).ready(function() {
+
+        var managerName = "<?php echo $managerName; ?>";
+        $('#versus-select').change(function() {
+            window.location = '/profile.php?id='+managerName+'&versus='+$('#versus-select').val();
+        });
 
         $('#oppRecordSelector').change(function() {
             if ($('#oppRecordSelector').val() == 'reg') {
@@ -397,7 +550,7 @@ while ($row = mysqli_fetch_array($result)) {
             "paging": false,
             "info": false,
             "order": [
-                [0, "asc"]
+                [0, "desc"]
             ]
         });
 
@@ -406,7 +559,7 @@ while ($row = mysqli_fetch_array($result)) {
             "paging": false,
             "info": false,
             "order": [
-                [0, "asc"]
+                [0, "desc"]
             ]
         });
 
@@ -415,7 +568,7 @@ while ($row = mysqli_fetch_array($result)) {
             "paging": false,
             "info": false,
             "order": [
-                [0, "asc"]
+                [0, "desc"]
             ]
         });
 
@@ -425,6 +578,15 @@ while ($row = mysqli_fetch_array($result)) {
             "info": false,
             "order": [
                 [1, "desc"]
+            ]
+        });
+
+        $('#datatable-versus').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [0, "desc"]
             ]
         });
 

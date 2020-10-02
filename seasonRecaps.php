@@ -165,9 +165,7 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                         <div class="card-body">
                             <div class="card-block">
-
                                 <?php
-                                // var_dump($postseasonMatchups);die;
                                 $firstQ = $firstS = true;
                                 $bye1 = $bye2 = '';
                                 foreach ($postseasonMatchups as $matchup) {
@@ -191,10 +189,13 @@ foreach ($seasonNumbers as $standings) {
                                         if ($matchup['round'] == 'Semifinal') {
 
                                             if ($matchup['m1seed'] == '1') {
-                                                $bye1 = $matchup['manager1disp'];
+                                                $bye1 = '<span class="badge badge-primary">'.$matchup['manager1'].'</span>';
                                             }
                                             if ($matchup['m1seed'] == '2') {
-                                                $bye2 = $matchup['manager1disp'];
+                                                $bye2 = '<span class="badge badge-primary">'.$matchup['manager1'].'</span>';
+                                            }
+                                            if ($matchup['m2seed'] == '2') {
+                                                $bye2 = '<span class="badge badge-primary">'.$matchup['manager2'].'</span>';
                                             }
 
                                             if ($firstS) {
@@ -205,7 +206,6 @@ foreach ($seasonNumbers as $standings) {
                                             }
                                         }
                                         if ($matchup['round'] == 'Final') {
-                                            // var_dump($matchup);die;
                                             $f = $matchup;
                                         }
                                     }
@@ -378,29 +378,6 @@ foreach ($seasonNumbers as $standings) {
 
 <style>
 
-
-    .champ {
-        font-size: 24px;
-    }
-
-    #bracket {
-        padding: 5px;
-        direction: ltr;
-    }
-
-    #bracket td, th {
-        padding: 5px 30px;
-        font-weight: bold;
-        font-size: 17px;
-    }
-
-    .top {
-        border-top: 1px solid #000;
-    }
-    .bottom {
-        border-bottom: 1px solid #000;
-    }
-
     span.seed {
         font-size: 14px;
         padding: 0px 5px;
@@ -415,7 +392,7 @@ foreach ($seasonNumbers as $standings) {
     $(document).ready(function() {
 
         $('#year-select').change(function() {
-            window.location = '/seasonRecaps.php?id='+$('#year-select').val();
+            window.location = '/ffb/seasonRecaps.php?id='+$('#year-select').val();
         });
 
         $('#datatable-regSeason').DataTable({

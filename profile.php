@@ -4,6 +4,7 @@ $pageName = $_GET['id'] . "'s Profile";
 include 'header.php';
 include 'sidebar.html';
 
+$versusSet = false;
 if (isset($_GET['id'])) {
 
     $managerName = $_GET['id'];
@@ -14,6 +15,7 @@ if (isset($_GET['id'])) {
 
     if (isset($_GET['versus'])) {
         $versus = $_GET['versus'];
+        $versusSet = true;
     } else {
         while( in_array( ($versus = mt_rand(1,10)), [$managerId] ) );
     }
@@ -22,7 +24,6 @@ if (isset($_GET['id'])) {
     while ($row = mysqli_fetch_array($result)) {
         $versusName = $row['name'];
     }
-
 }
 
 ?>
@@ -355,7 +356,7 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-8">
+                <div class="col-xs-12 col-md-8" id="versus">
                     <div class="card">
                         <div class="card-header">
                             <h4>Head to Head</h4>
@@ -451,15 +452,18 @@ if (isset($_GET['id'])) {
                                             <?php
                                             $result = mysqli_query(
                                                 $conn,
-                                                "SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score, winning_manager_id
+                                                "SELECT * FROM (
+                                                SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score, winning_manager_id
                                                 FROM regular_season_matchups
                                                 WHERE manager1_id = $managerId
                                                 AND manager2_id = $versus
-                                                UNION
+                                                    UNION
                                                 SELECT year, round, manager1_id, manager2_id, manager1_score, manager2_score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
-                                                FROM playoff_matchups
-                                                WHERE (manager1_id = $managerId AND manager2_id = $versus) OR (manager1_id = $versus AND manager2_id = $managerId)
-                                                ORDER BY year, week_number DESC"
+                                                    FROM playoff_matchups
+                                                    WHERE (manager1_id = $managerId AND manager2_id = $versus) OR (manager1_id = $versus AND manager2_id = $managerId)
+                                                    ORDER BY year
+                                                ) a
+                                                ORDER BY YEAR desc, CASE WHEN (week_number <> '0' AND CAST(week_number AS SIGNED) <> 0) THEN CAST(week_number AS SIGNED) ELSE 9999 END desc"
                                             );
                                             while ($array = mysqli_fetch_array($result)) { ?>
                                                 <tr class="highlight">
@@ -511,6 +515,10 @@ if (isset($_GET['id'])) {
 
 <script type="text/javascript">
     $(document).ready(function() {
+
+        if ("<?php echo $versusSet; ?>" == true) {
+            document.getElementById('versus').scrollIntoView(true);
+        }
 
         var managerName = "<?php echo $managerName; ?>";
         $('#versus-select').change(function() {

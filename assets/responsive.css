@@ -46,4 +46,19 @@
     .main-menu-content.ps-container.ps-theme-light {
         padding-top: 50px;
     }
+
+    #bracket {
+        padding: 2px;
+        direction: ltr;
+    }
+
+    #bracket td, #bracket th {
+        padding: 2px 20px;
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    .champ {
+        font-size: 14px;
+    }
 }

@@ -132,3 +132,26 @@ span.seed {
     padding: 15px;
     margin-bottom: 20px;
 }
+
+.champ {
+    font-size: 24px;
+}
+
+#bracket {
+    padding: 5px;
+    direction: ltr;
+    background: #fff;
+}
+
+#bracket td, #bracket th {
+    padding: 5px 30px;
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.top {
+    border-top: 1px solid #000;
+}
+.bottom {
+    border-bottom: 1px solid #000;
+}

@@ -33,6 +33,19 @@ if ((strpos($pageName, 'Recap') !== false)) {
     $seasonNumbers = getAllNumbersBySeason($conn);
     $draftResults = getDraftResults($conn);
 }
+if ($pageName == 'Current Season') {
+
+    $result = mysqli_query($conn, "SELECT year FROM rosters ORDER BY year DESC LIMIT 1");
+    while ($row = mysqli_fetch_array($result)) {
+        $season = $row['year'];
+    }
+
+    $points = getCurrentSeasonPoints($conn, $season);
+    $stats = getCurrentSeasonStats($conn, $season);
+    $statsAgainst = getCurrentSeasonStatsAgainst($conn, $season);
+    $bestWeek = getCurrentSeasonBestWeek($conn, $season);
+    $topPerformers = getCurrentSeasonTopPerformers($conn, $season);
+}
 
 // include 'saveFunFacts.php';
 
@@ -504,4 +517,194 @@ function getAllNumbersBySeason($conn)
     return $results;
 }
 
+function getCurrentSeasonPoints($conn, $season)
+{
+    $result = mysqli_query($conn, "SELECT manager, roster_spot, SUM(points) AS points, SUM(projected) AS projected FROM rosters r
+        WHERE YEAR = $season
+        GROUP BY manager, roster_spot");
+    while ($row = mysqli_fetch_array($result)) {
+        $points[$row['manager']][$row['roster_spot']] = [
+            'projected' => $row['projected'],
+            'points' => $row['points']
+        ];
+    }
 
+    return $points;
+}
+
+function getCurrentSeasonStats($conn, $season)
+{
+    $result = mysqli_query($conn, "SELECT manager, SUM(pass_yds) AS pass_yds, SUM(pass_tds) AS pass_tds, SUM(ints) AS ints, SUM(rush_yds) AS rush_yds, SUM(rush_tds) AS rush_tds,
+        SUM(receptions) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds, SUM(fumbles) AS fum, SUM(fg_made) AS fg_made, SUM(pat_made) AS pat_made,
+        SUM(def_sacks) AS def_sacks, SUM(def_int) AS def_int, SUM(def_fum) AS def_fum
+        FROM rosters r
+        JOIN stats s ON s.roster_id = r.id
+        WHERE YEAR = $season and roster_spot != 'BN'
+        GROUP BY manager");
+
+    return $result;
+}
+
+function getCurrentSeasonBestWeek($conn)
+{
+    $bestWeek = [];
+    $result = mysqli_query($conn, "SELECT WEEK, MAX(IF(roster_spot='QB', points, NULL)) AS top_qb,
+        MAX(IF(roster_spot='RB', points, NULL)) AS top_rb,
+        MAX(IF(roster_spot='WR', points, NULL)) AS top_wr,
+        MAX(IF(roster_spot='TE', points, NULL)) AS top_te,
+        MAX(IF(roster_spot='W/R/T', points, NULL)) AS top_wrt,
+        MAX(IF(roster_spot='Q/W/R/T', points, NULL)) AS top_qwrt,
+        MAX(IF(roster_spot='K', points, NULL)) AS top_k,
+        MAX(IF(roster_spot='DEF', points, NULL)) AS top_def,
+        MAX(IF(roster_spot='BN', points, NULL)) AS top_bn
+        FROM rosters
+        WHERE YEAR = 2019
+        GROUP BY week");
+    while ($row = mysqli_fetch_array($result)) {
+        $week = $row['WEEK'];
+
+        $bestWeek[$week]['qb'] = queryBestWeekPlayer($conn, $week, $row['top_qb']);
+        $bestWeek[$week]['rb'] = queryBestWeekPlayer($conn, $week, $row['top_rb']);
+        $bestWeek[$week]['wr'] = queryBestWeekPlayer($conn, $week, $row['top_wr']);
+        $bestWeek[$week]['te'] = queryBestWeekPlayer($conn, $week, $row['top_te']);
+        $bestWeek[$week]['wrt'] = queryBestWeekPlayer($conn, $week, $row['top_wrt']);
+        if ($row['top_qwrt'])
+        $bestWeek[$week]['qwrt'] = queryBestWeekPlayer($conn, $week, $row['top_qwrt']);
+        $bestWeek[$week]['k'] = queryBestWeekPlayer($conn, $week, $row['top_k']);
+        $bestWeek[$week]['def'] = queryBestWeekPlayer($conn, $week, $row['top_def']);
+        $bestWeek[$week]['bn'] = queryBestWeekPlayer($conn, $week, $row['top_bn']);
+    }
+
+    return $bestWeek;
+}
+
+function queryBestWeekPlayer($conn, $week, $pts)
+{
+    $response = [];
+
+    $result = mysqli_query($conn, "SELECT * FROM rosters WHERE week = $week AND points = $pts");
+    while ($row = mysqli_fetch_array($result)) {
+        $response = [
+            'manager' => $row['manager'],
+            'player' => ($row['player']),
+            'points' => round($pts, 1)
+        ];
+    }
+
+    return $response;
+}
+
+function getCurrentSeasonStatsAgainst($conn, $season)
+{
+    $managers = ['Tyler', 'Matt', 'Justin', 'Ben', 'AJ', 'Gavin', 'Cameron', 'Cole', 'Everett', 'Andy'];
+    foreach ($managers as $manager) {
+        $response[$manager] = [
+            'pass_yds' => 0,
+            'pass_tds' => 0,
+            'ints' => 0,
+            'rush_yds' => 0,
+            'rush_tds' => 0,
+            'receptions' => 0,
+            'rec_yds' => 0,
+            'rec_tds' => 0,
+            'fumbles' => 0
+        ];
+    }
+
+    $result = mysqli_query($conn, "SELECT year, week_number, name, manager2_id FROM regular_season_matchups rsm
+        JOIN managers ON rsm.manager1_id = managers.id
+        WHERE year = $season
+        ORDER BY week_number");
+    while ($row = mysqli_fetch_array($result)) {
+        $week = $row['week_number'];
+        $opponent = $row['manager2_id'];
+
+
+        $result2 = mysqli_query($conn, "SELECT manager, SUM(pass_yds) AS pass_yds, SUM(pass_tds) AS pass_tds, SUM(ints) AS ints, SUM(rush_yds) AS rush_yds, SUM(rush_tds) AS rush_tds,
+            SUM(receptions) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds, SUM(fumbles) AS fum, SUM(fg_made) AS fg_made, SUM(pat_made) AS pat_made,
+            SUM(def_sacks) AS def_sacks, SUM(def_int) AS def_int, SUM(def_fum) AS def_fum
+            FROM rosters r
+            JOIN managers m ON m.name = r.manager
+            JOIN stats s ON s.roster_id = r.id
+            WHERE YEAR = $season AND week = $week AND m.id = $opponent and roster_spot != 'BN'
+            GROUP BY manager");
+        while ($row2 = mysqli_fetch_array($result2)) {
+            $response[$row['name']]['pass_yds'] += $row2['pass_yds'];
+            $response[$row['name']]['pass_tds'] += $row2['pass_tds'];
+            $response[$row['name']]['ints'] += $row2['ints'];
+            $response[$row['name']]['rush_yds'] += $row2['rush_yds'];
+            $response[$row['name']]['rush_tds'] += $row2['rush_tds'];
+            $response[$row['name']]['receptions'] += $row2['rec'];
+            $response[$row['name']]['rec_yds'] += $row2['rec_yds'];
+            $response[$row['name']]['rec_tds'] += $row2['rec_tds'];
+            $response[$row['name']]['fumbles'] += $row2['fum'];
+        }
+    }
+
+    return $response;
+}
+
+function getCurrentSeasonTopPerformers($conn, $season)
+{
+    $response = [];
+
+    $result = mysqli_query($conn, "SELECT * FROM rosters WHERE YEAR = $season ORDER BY points DESC LIMIT 1");
+    while ($row = mysqli_fetch_array($result)) {
+        $response['topPerformer'] = [
+            'manager' => $row['manager'],
+            'week' => $row['week'],
+            'player' => $row['player'],
+            'points' => round($row['points'], 1)
+        ];
+    }
+
+    $result = mysqli_query($conn, "SELECT * FROM rosters WHERE YEAR = $season ORDER BY points - projected DESC LIMIT 1");
+    while ($row = mysqli_fetch_array($result)) {
+        $response['outperform'] = [
+            'manager' => $row['manager'],
+            'week' => $row['week'],
+            'player' => $row['player'],
+            'points' => round($row['points'] - $row['projected'], 1)
+        ];
+    }
+
+    $result = mysqli_query($conn, "SELECT manager, (SUM(pass_tds)+SUM(rush_tds)+SUM(rec_tds)) AS total_tds
+        FROM rosters
+        JOIN stats ON stats.roster_id = rosters.id
+        WHERE YEAR = $season
+        GROUP BY manager
+        ORDER BY total_tds DESC LIMIT 1");
+    while ($row = mysqli_fetch_array($result)) {
+        $response['mostTds'] = [
+            'manager' => $row['manager'],
+            'points' => $row['total_tds'],
+        ];
+    }
+
+    $result = mysqli_query($conn, "SELECT manager, (SUM(pass_yds)+SUM(rush_yds)+SUM(rec_yds)) AS total_yds
+        FROM rosters
+        JOIN stats ON stats.roster_id = rosters.id
+        WHERE YEAR = $season
+        GROUP BY manager
+        ORDER BY total_yds DESC LIMIT 1");
+    while ($row = mysqli_fetch_array($result)) {
+        $response['mostYds'] = [
+            'manager' => $row['manager'],
+            'points' => $row['total_yds'],
+        ];
+    }
+
+    $result = mysqli_query($conn, "SELECT manager, SUM(points) AS bench_pts
+        FROM rosters
+        WHERE YEAR = $season AND roster_spot = 'BN'
+        GROUP BY manager
+        ORDER BY bench_pts DESC LIMIT 1");
+    while ($row = mysqli_fetch_array($result)) {
+        $response['bestBench'] = [
+            'manager' => $row['manager'],
+            'points' => round($row['bench_pts'], 1),
+        ];
+    }
+
+    return $response;
+}

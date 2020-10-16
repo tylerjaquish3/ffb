@@ -545,7 +545,7 @@ function getCurrentSeasonStats($conn, $season)
     return $result;
 }
 
-function getCurrentSeasonBestWeek($conn)
+function getCurrentSeasonBestWeek($conn, $season)
 {
     $bestWeek = [];
     $result = mysqli_query($conn, "SELECT WEEK, MAX(IF(roster_spot='QB', points, NULL)) AS top_qb,
@@ -558,31 +558,30 @@ function getCurrentSeasonBestWeek($conn)
         MAX(IF(roster_spot='DEF', points, NULL)) AS top_def,
         MAX(IF(roster_spot='BN', points, NULL)) AS top_bn
         FROM rosters
-        WHERE YEAR = 2019
+        WHERE YEAR = $season
         GROUP BY week");
     while ($row = mysqli_fetch_array($result)) {
         $week = $row['WEEK'];
 
-        $bestWeek[$week]['qb'] = queryBestWeekPlayer($conn, $week, $row['top_qb']);
-        $bestWeek[$week]['rb'] = queryBestWeekPlayer($conn, $week, $row['top_rb']);
-        $bestWeek[$week]['wr'] = queryBestWeekPlayer($conn, $week, $row['top_wr']);
-        $bestWeek[$week]['te'] = queryBestWeekPlayer($conn, $week, $row['top_te']);
-        $bestWeek[$week]['wrt'] = queryBestWeekPlayer($conn, $week, $row['top_wrt']);
-        if ($row['top_qwrt'])
-        $bestWeek[$week]['qwrt'] = queryBestWeekPlayer($conn, $week, $row['top_qwrt']);
-        $bestWeek[$week]['k'] = queryBestWeekPlayer($conn, $week, $row['top_k']);
-        $bestWeek[$week]['def'] = queryBestWeekPlayer($conn, $week, $row['top_def']);
-        $bestWeek[$week]['bn'] = queryBestWeekPlayer($conn, $week, $row['top_bn']);
+        $bestWeek[$week]['qb'] = queryBestWeekPlayer($conn, $week, $row['top_qb'], 'QB');
+        $bestWeek[$week]['rb'] = queryBestWeekPlayer($conn, $week, $row['top_rb'], 'RB');
+        $bestWeek[$week]['wr'] = queryBestWeekPlayer($conn, $week, $row['top_wr'], 'WR');
+        $bestWeek[$week]['te'] = queryBestWeekPlayer($conn, $week, $row['top_te'], 'TE');
+        $bestWeek[$week]['wrt'] = queryBestWeekPlayer($conn, $week, $row['top_wrt'], 'W/R/T');
+        $bestWeek[$week]['qwrt'] = queryBestWeekPlayer($conn, $week, $row['top_qwrt'], 'Q/W/R/T');
+        $bestWeek[$week]['k'] = queryBestWeekPlayer($conn, $week, $row['top_k'], 'K');
+        $bestWeek[$week]['def'] = queryBestWeekPlayer($conn, $week, $row['top_def'], 'DEF');
+        $bestWeek[$week]['bn'] = queryBestWeekPlayer($conn, $week, $row['top_bn'], 'BN');
     }
 
     return $bestWeek;
 }
 
-function queryBestWeekPlayer($conn, $week, $pts)
+function queryBestWeekPlayer($conn, $week, $pts, $pos)
 {
     $response = [];
 
-    $result = mysqli_query($conn, "SELECT * FROM rosters WHERE week = $week AND points = $pts");
+    $result = mysqli_query($conn, "SELECT * FROM rosters WHERE week = $week AND points = $pts and roster_spot = '$pos'");
     while ($row = mysqli_fetch_array($result)) {
         $response = [
             'manager' => $row['manager'],

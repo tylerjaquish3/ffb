@@ -12,47 +12,81 @@ include 'sidebar.html';
 
         <div class="content-body">
             <div class="row">
-                <div class="col-xs-12 col-md-7 table-padding">
+
+                <div class="col-xs-12 col-md-4">
                     <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Stats</h4>
+                        <div class="card-body">
+                            <div class="media">
+                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                    <i class="icon-star-full font-large-2 white"></i>
+                                </div>
+                                <div class="p-2 bg-green white media-body">
+                                    <h5>Top Week Performance</h5>
+                                    <h5 class="text-bold-400"><?php echo $topPerformers['topPerformer']['manager'].' - Week '.$topPerformers['topPerformer']['week']; ?><br />
+                                        <?php echo $topPerformers['topPerformer']['player'].' - '.$topPerformers['topPerformer']['points'].' points'; ?>
+                                    </h5>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-currentStats">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Pass Yds</th>
-                                    <th>Pass TDs</th>
-                                    <th>Ints</th>
-                                    <th>Rush Yds</th>
-                                    <th>Rush TDs</th>
-                                    <th>Rec</th>
-                                    <th>Rec Yds</th>
-                                    <th>Rec TDs</th>
-                                    <th>Fum</th>
-                                    <th>Total Yds</th>
-                                    <th>Total TDs</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    while ($row = mysqli_fetch_array($stats)) { ?>
-                                        <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo $row['pass_yds']; ?></td>
-                                            <td><?php echo $row['pass_tds']; ?></td>
-                                            <td><?php echo $row['ints']; ?></td>
-                                            <td><?php echo $row['rush_yds']; ?></td>
-                                            <td><?php echo $row['rush_tds']; ?></td>
-                                            <td><?php echo $row['rec']; ?></td>
-                                            <td><?php echo $row['rec_yds']; ?></td>
-                                            <td><?php echo $row['rec_tds']; ?></td>
-                                            <td><?php echo $row['fum']; ?></td>
-                                            <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
-                                            <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media">
+                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                    <i class="icon-star-full font-large-2 white"></i>
+                                </div>
+                                <div class="p-2 bg-green white media-body">
+                                    <h5>Top Outperformed Projection</h5>
+                                    <h5 class="text-bold-400"><?php echo $topPerformers['outperform']['manager'].' - Week '.$topPerformers['outperform']['week']; ?><br />
+                                        <?php echo $topPerformers['outperform']['player'].' - '.$topPerformers['outperform']['points'].' points'; ?>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media">
+                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                    <i class="icon-star-full font-large-2 white"></i>
+                                </div>
+                                <div class="p-2 bg-green white media-body">
+                                    <h5>Most Total TDs</h5>
+                                    <h5 class="text-bold-400"><?php echo $topPerformers['mostTds']['manager']; ?><br />
+                                        <?php echo $topPerformers['mostTds']['points']; ?>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media">
+                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                    <i class="icon-star-full font-large-2 white"></i>
+                                </div>
+                                <div class="p-2 bg-green white media-body">
+                                    <h5>Most Total Yards</h5>
+                                    <h5 class="text-bold-400"><?php echo $topPerformers['mostYds']['manager']; ?><br />
+                                        <?php echo $topPerformers['mostYds']['points']; ?>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media">
+                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                    <i class="icon-star-full font-large-2 white"></i>
+                                </div>
+                                <div class="p-2 bg-green white media-body">
+                                    <h5>Best Bench</h5>
+                                    <h5 class="text-bold-400"><?php echo $topPerformers['bestBench']['manager']; ?><br />
+                                        <?php echo $topPerformers['bestBench']['points']; ?>
+                                    </h5>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -145,7 +179,7 @@ include 'sidebar.html';
 
             </div>
             <div class="row">
-                <div class="col-xs-12 col-md-8 table-padding">
+                <div class="col-xs-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Top Weekly Performers</h4>
@@ -223,86 +257,52 @@ include 'sidebar.html';
                     </div>
                 </div>
 
-                <div class="col-xs-12 col-md-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green white media-body">
-                                    <h5>Top Week Performance</h5>
-                                    <h5 class="text-bold-400"><?php echo $topPerformers['topPerformer']['manager'].' - Week '.$topPerformers['topPerformer']['week']; ?><br />
-                                        <?php echo $topPerformers['topPerformer']['player'].' - '.$topPerformers['topPerformer']['points'].' points'; ?>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green white media-body">
-                                    <h5>Top Outperformed Projection</h5>
-                                    <h5 class="text-bold-400"><?php echo $topPerformers['outperform']['manager'].' - Week '.$topPerformers['outperform']['week']; ?><br />
-                                        <?php echo $topPerformers['outperform']['player'].' - '.$topPerformers['outperform']['points'].' points'; ?>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green white media-body">
-                                    <h5>Most Total TDs</h5>
-                                    <h5 class="text-bold-400"><?php echo $topPerformers['mostTds']['manager']; ?><br />
-                                        <?php echo $topPerformers['mostTds']['points']; ?>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green white media-body">
-                                    <h5>Most Total Yards</h5>
-                                    <h5 class="text-bold-400"><?php echo $topPerformers['mostYds']['manager']; ?><br />
-                                        <?php echo $topPerformers['mostYds']['points']; ?>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green white media-body">
-                                    <h5>Best Bench</h5>
-                                    <h5 class="text-bold-400"><?php echo $topPerformers['bestBench']['manager']; ?><br />
-                                        <?php echo $topPerformers['bestBench']['points']; ?>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
             </div>
+            <div class="row">
+                <div class="col-xs-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Stats</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive" id="datatable-currentStats">
+                                <thead>
+                                    <th>Manager</th>
+                                    <th>Total Yds</th>
+                                    <th>Total TDs</th>
+                                    <th>Pass Yds</th>
+                                    <th>Pass TDs</th>
+                                    <th>Ints</th>
+                                    <th>Rush Yds</th>
+                                    <th>Rush TDs</th>
+                                    <th>Rec</th>
+                                    <th>Rec Yds</th>
+                                    <th>Rec TDs</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    while ($row = mysqli_fetch_array($stats)) { ?>
+                                        <tr>
+                                            <td><?php echo $row['manager']; ?></td>
+                                            <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
+                                            <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
+                                            <td><?php echo $row['pass_yds']; ?></td>
+                                            <td><?php echo $row['pass_tds']; ?></td>
+                                            <td><?php echo $row['ints']; ?></td>
+                                            <td><?php echo $row['rush_yds']; ?></td>
+                                            <td><?php echo $row['rush_tds']; ?></td>
+                                            <td><?php echo $row['rec']; ?></td>
+                                            <td><?php echo $row['rec_yds']; ?></td>
+                                            <td><?php echo $row['rec_tds']; ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-xs-12 table-padding">
                     <div class="card">
@@ -313,6 +313,8 @@ include 'sidebar.html';
                             <table class="table table-responsive" id="datatable-statsAgainst">
                                 <thead>
                                     <th>Manager</th>
+                                    <th>Total Yds</th>
+                                    <th>Total TDs</th>
                                     <th>Pass Yds</th>
                                     <th>Pass TDs</th>
                                     <th>Ints</th>
@@ -321,15 +323,14 @@ include 'sidebar.html';
                                     <th>Rec</th>
                                     <th>Rec Yds</th>
                                     <th>Rec TDs</th>
-                                    <th>Fum</th>
-                                    <th>Total Yds</th>
-                                    <th>Total TDs</th>
                                 </thead>
                                 <tbody>
                                     <?php
                                     foreach ($statsAgainst as $manager => $row) { ?>
                                         <tr>
                                             <td><?php echo $manager; ?></td>
+                                            <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
+                                            <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
                                             <td><?php echo $row['pass_yds']; ?></td>
                                             <td><?php echo $row['pass_tds']; ?></td>
                                             <td><?php echo $row['ints']; ?></td>
@@ -338,11 +339,72 @@ include 'sidebar.html';
                                             <td><?php echo $row['receptions']; ?></td>
                                             <td><?php echo $row['rec_yds']; ?></td>
                                             <td><?php echo $row['rec_tds']; ?></td>
-                                            <td><?php echo $row['fumbles']; ?></td>
-                                            <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
-                                            <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
                                         </tr>
 
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 col-md-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Worst Team Weeks</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive" id="datatable-worstTeamWeek">
+                                <thead>
+                                    <th>Points</th>
+                                    <th>Manager</th>
+                                    <th>Week</th>
+                                    <th>Opponent</th>
+                                    <th>Result</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    if (isset($teamWeek['worst']))
+                                    foreach ($teamWeek['worst'] as $row) { ?>
+                                        <tr>
+                                            <td><?php echo $row['points']; ?></td>
+                                            <td><?php echo $row['manager']; ?></td>
+                                            <td><?php echo $row['week']; ?></td>
+                                            <td><?php echo $row['opponent']; ?></td>
+                                            <td><?php echo $row['result']; ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-md-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Best Team Weeks</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive" id="datatable-bestTeamWeek">
+                                <thead>
+                                    <th>Points</th>
+                                    <th>Manager</th>
+                                    <th>Week</th>
+                                    <th>Opponent</th>
+                                    <th>Result</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    if (isset($teamWeek['best']))
+                                    foreach ($teamWeek['best'] as $row) { ?>
+                                        <tr>
+                                            <td><?php echo $row['points']; ?></td>
+                                            <td><?php echo $row['manager']; ?></td>
+                                            <td><?php echo $row['week']; ?></td>
+                                            <td><?php echo $row['opponent']; ?></td>
+                                            <td><?php echo $row['result']; ?></td>
+                                        </tr>
                                     <?php } ?>
                                 </tbody>
                             </table>
@@ -373,7 +435,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [0, "asc"]
+                [2, "desc"]
             ]
         });
 
@@ -389,6 +451,22 @@ include 'sidebar.html';
         $('#datatable-statsAgainst').DataTable({
             "searching": false,
             "paging": false,
+            "info": false,
+            "order": [
+                [2, "desc"]
+            ]
+        });
+
+        $('#datatable-bestTeamWeek').DataTable({
+            "searching": false,
+            "info": false,
+            "order": [
+                [0, "desc"]
+            ]
+        });
+
+        $('#datatable-worstTeamWeek').DataTable({
+            "searching": false,
             "info": false,
             "order": [
                 [0, "asc"]

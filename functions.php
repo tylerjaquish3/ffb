@@ -45,6 +45,7 @@ if ($pageName == 'Current Season') {
     $statsAgainst = getCurrentSeasonStatsAgainst($conn, $season);
     $bestWeek = getCurrentSeasonBestWeek($conn, $season);
     $topPerformers = getCurrentSeasonTopPerformers($conn, $season);
+    $teamWeek = getCurrentSeasonBestTeamWeek($conn, $season);
 }
 
 // include 'saveFunFacts.php';
@@ -702,6 +703,51 @@ function getCurrentSeasonTopPerformers($conn, $season)
         $response['bestBench'] = [
             'manager' => $row['manager'],
             'points' => round($row['bench_pts'], 1),
+        ];
+    }
+
+    return $response;
+}
+
+function getCurrentSeasonBestTeamWeek($conn, $season)
+{
+    $response = [];
+
+    $result = mysqli_query($conn, "SELECT m.name as m1, l.name as m2, rsm.year, rsm.week_number, rsm.manager1_score, rsm.manager2_score
+        FROM managers m
+        JOIN regular_season_matchups rsm ON rsm.manager1_id = m.id
+        LEFT JOIN (
+        SELECT name, manager2_id, year, week_number, manager2_score FROM regular_season_matchups rsm2
+            JOIN managers ON managers.id = rsm2.manager2_id
+        ) l ON l.manager2_id = rsm.manager2_id AND l.year = rsm.year AND l.week_number = rsm.week_number
+        WHERE rsm.year = $season
+        ORDER BY rsm.manager1_score DESC");
+    while ($row = mysqli_fetch_array($result)) {
+        $response['best'][] = [
+            'manager' => $row['m1'],
+            'week' => $row['week_number'],
+            'opponent' => $row['m2'],
+            'points' => round($row['manager1_score'], 2),
+            'result' => $row['manager1_score'] > $row['manager2_score'] ? 'Win' : 'Loss'
+        ];
+    }
+
+    $result = mysqli_query($conn, "SELECT m.name as m1, l.name as m2, rsm.year, rsm.week_number, rsm.manager1_score, rsm.manager2_score
+        FROM managers m
+        JOIN regular_season_matchups rsm ON rsm.manager1_id = m.id
+        LEFT JOIN (
+        SELECT name, manager2_id, year, week_number, manager2_score FROM regular_season_matchups rsm2
+            JOIN managers ON managers.id = rsm2.manager2_id
+        ) l ON l.manager2_id = rsm.manager2_id AND l.year = rsm.year AND l.week_number = rsm.week_number
+        WHERE rsm.year = $season
+        ORDER BY rsm.manager1_score ASC");
+    while ($row = mysqli_fetch_array($result)) {
+        $response['worst'][] = [
+            'manager' => $row['m1'],
+            'week' => $row['week_number'],
+            'opponent' => $row['m2'],
+            'points' => round($row['manager1_score'], 2),
+            'result' => $row['manager1_score'] > $row['manager2_score'] ? 'Win' : 'Loss'
         ];
     }
 

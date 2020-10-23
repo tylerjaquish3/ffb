@@ -20,6 +20,8 @@ if ((strpos($pageName, 'Profile') !== false)) {
 }
 if ($pageName == 'Regular Season') {
     $regSeasonMatchups = getRegularSeasonMatchups($conn);
+    $seasonWins = getSeasonWins($conn);
+    $winsChart = getWinsChartNumbers($conn);
 }
 if ($pageName == 'Postseason') {
     $postseasonMatchups = getPostseasonMatchups($conn);
@@ -46,6 +48,7 @@ if ($pageName == 'Current Season') {
     $bestWeek = getCurrentSeasonBestWeek($conn, $season);
     $topPerformers = getCurrentSeasonTopPerformers($conn, $season);
     $teamWeek = getCurrentSeasonBestTeamWeek($conn, $season);
+    $optimal = getOptimalLineupPoints($conn, $season);
 }
 
 // include 'saveFunFacts.php';
@@ -395,6 +398,75 @@ function getRegularSeasonMatchups($conn)
     return $results;
 }
 
+function getSeasonWins($conn)
+{
+    $response = [];
+    $result = mysqli_query($conn, "SELECT * FROM finishes
+        JOIN managers ON managers.id = finishes.manager_id");
+    while ($row = mysqli_fetch_array($result)) {
+        $managerId = $row['manager_id'];
+        $managerName = strtolower($row['name']);
+        $year = $row['year'];
+        $wins = 0;
+        $result2 = mysqli_query($conn, "SELECT * FROM regular_season_matchups
+            WHERE manager1_id = " . $managerId . " AND year = " . $year);
+        while ($row2 = mysqli_fetch_array($result2)) {
+            if ($row2['manager1_score'] > $row2['manager2_score']) {
+                $wins++;
+            }
+        }
+
+        $response[$year][$managerName] = $wins;
+    }
+
+    return $response;
+}
+
+function getWinsChartNumbers($conn)
+{
+    $response = ['years' => ''];
+
+    $result = mysqli_query($conn, "SELECT DISTINCT year FROM finishes");
+    while ($row = mysqli_fetch_array($result)) {
+        $response['years'] .= $row['year'].', ';
+    }
+
+    $result = mysqli_query($conn, "SELECT * FROM finishes
+        JOIN managers ON managers.id = finishes.manager_id");
+    while ($row = mysqli_fetch_array($result)) {
+        $managerId = $row['manager_id'];
+        $managerName = $row['name'];
+        $year = $row['year'];
+        $wins = 0;
+        $result2 = mysqli_query($conn, "SELECT * FROM regular_season_matchups
+            WHERE manager1_id = ".$managerId." AND year = ".$year);
+        while ($row2 = mysqli_fetch_array($result2)) {
+            if ($row2['manager1_score'] > $row2['manager2_score']) {
+                $wins++;
+            }
+        }
+
+        if (!isset($response['wins'][$managerName])) {
+            $response['wins'][$managerName] = '';
+        }
+
+        $response['wins'][$managerName] .= $wins.', ';
+    }
+
+    $response['years'] = rtrim($response['years'], ', ');
+    foreach ($response['wins'] as $team => &$wins) {
+        // Add 2 blank years for andy and cam
+        if ($team == 'Andy' || $team == 'Cameron') {
+            $wins = ', ,'.$wins;
+        }
+        $wins = rtrim($wins, ', ');
+    }
+
+
+
+    return $response;
+}
+
 function getPostseasonMatchups($conn)
 {
     $results = [];
@@ -732,24 +804,182 @@ function getCurrentSeasonBestTeamWeek($conn, $season)
         ];
     }
 
-    $result = mysqli_query($conn, "SELECT m.name as m1, l.name as m2, rsm.year, rsm.week_number, rsm.manager1_score, rsm.manager2_score
-        FROM managers m
-        JOIN regular_season_matchups rsm ON rsm.manager1_id = m.id
-        LEFT JOIN (
-        SELECT name, manager2_id, year, week_number, manager2_score FROM regular_season_matchups rsm2
-            JOIN managers ON managers.id = rsm2.manager2_id
-        ) l ON l.manager2_id = rsm.manager2_id AND l.year = rsm.year AND l.week_number = rsm.week_number
-        WHERE rsm.year = $season
-        ORDER BY rsm.manager1_score ASC");
-    while ($row = mysqli_fetch_array($result)) {
-        $response['worst'][] = [
-            'manager' => $row['m1'],
-            'week' => $row['week_number'],
-            'opponent' => $row['m2'],
-            'points' => round($row['manager1_score'], 2),
-            'result' => $row['manager1_score'] > $row['manager2_score'] ? 'Win' : 'Loss'
-        ];
+    return $response;
+}
+
+function getOptimalLineupPoints($conn, $season)
+{
+    $response = [];
+    $lastWeek = null;
+    $newWeek = true;
+
+    $result1 = mysqli_query($conn, "SELECT distinct week FROM rosters WHERE YEAR = $season");
+    while ($week = mysqli_fetch_array($result1)) {
+        $week = $week['week'];
+
+        $result2 = mysqli_query($conn, "SELECT distinct manager FROM rosters
+            WHERE YEAR = $season AND week = $week");
+        while ($manager = mysqli_fetch_array($result2)) {
+            $manager = $manager['manager'];
+
+            $projected = $points = 0;
+            $roster = [];
+
+            $result3 = mysqli_query($conn, "SELECT * FROM rosters
+                WHERE YEAR = $season AND week = $week and manager = '".$manager."'");
+            while ($row = mysqli_fetch_array($result3)) {
+
+                $result4 = mysqli_query($conn, "SELECT * FROM regular_season_matchups
+                    join managers on regular_season_matchups.manager1_id = managers.id
+                    WHERE YEAR = $season AND week_number = $week and managers.name = '".$manager."'");
+                while ($row2 = mysqli_fetch_array($result4)) {
+
+                    $winLoss = ($row2['manager1_score'] > $row2['manager2_score']) ? 'Win' : 'Loss';
+                    $manager2 = $row2['manager2_id'];
+
+                    $opponentProjected = $opponentPoints = 0;
+                    $opponentRoster = [];
+
+                    $result5 = mysqli_query($conn, "SELECT * FROM managers
+                        JOIN rosters on rosters.manager = managers.name
+                        WHERE YEAR = $season AND week = $week and managers.id = $manager2");
+                    while ($team = mysqli_fetch_array($result5)) {
+                        $opponent = $team['name'];
+
+                        $opponentRoster[] = [
+                            'pos' => $team['position'],
+                            'points' => (float)$team['points']
+                        ];
+
+                        if ($team['roster_spot'] != 'BN') {
+                            $opponentProjected += $team['projected'];
+                            $opponentPoints += $team['points'];
+                        }
+                    }
+                }
+
+                $roster[] = [
+                    'pos' => $row['position'],
+                    'points' => (float)$row['points']
+                ];
+
+                if ($row['roster_spot'] != 'BN') {
+                    $projected += $row['projected'];
+                    $points += $row['points'];
+                }
+            }
+
+            $optimal = checkRosterForOptimal($roster);
+            $opponentOptimal = checkRosterForOptimal($opponentRoster);
+
+            $response[] = [
+                'manager' => $manager,
+                'week' => $week,
+                'optimal' => round($optimal, 2),
+                'points' => round($points, 2),
+                'projected' => round($projected, 2),
+                'result' => $winLoss,
+                'opponent' => $opponent,
+                'oppPoints' => round($opponentPoints, 2),
+                'oppProjected' => round($opponentProjected, 2),
+                'oppOptimal' => round($opponentOptimal, 2)
+            ];
+        }
     }
 
     return $response;
+}
+
+function checkRosterForOptimal($roster)
+{
+    usort($roster, function($a, $b) {
+        return $b['points'] <=> $a['points'];
+    });
+
+     $optimalRoster = [
+        'qb' => 0,
+        'rb1' => 0,
+        'rb2' => 0,
+        'wr1' => 0,
+        'wr2' => 0,
+        'wr3' => 0,
+        'te' => 0,
+        'wrt' => 0,
+        'qwrt' => 0,
+        'k' => 0,
+        'def' => 0
+    ];
+
+    $fullRoster = 0;
+    foreach ($roster as $player) {
+        if ($fullRoster < 11) {
+            if ($player['pos'] == 'QB') {
+                if ($optimalRoster['qb'] == 0) {
+                    $optimalRoster['qb'] = $player['points'];
+                    $fullRoster++;
+                } elseif ($optimalRoster['qwrt'] == 0) {
+                    $optimalRoster['qwrt'] = $player['points'];
+                    $fullRoster++;
+                }
+            } elseif ($player['pos'] == 'RB') {
+                if ($optimalRoster['rb1'] == 0) {
+                    $optimalRoster['rb1'] = $player['points'];
+                    $fullRoster++;
+                } elseif ($optimalRoster['rb2'] == 0) {
+                    $optimalRoster['rb2'] = $player['points'];
+                    $fullRoster++;
+                } elseif ($optimalRoster['wrt'] == 0) {
+                    $optimalRoster['wrt'] = $player['points'];
+                    $fullRoster++;
+                } elseif ($optimalRoster['qwrt'] == 0) {
+                    $optimalRoster['qwrt'] = $player['points'];
+                    $fullRoster++;
+                }
+            } elseif ($player['pos'] == 'WR') {
+                if ($optimalRoster['wr1'] == 0) {
+                    $optimalRoster['wr1'] = $player['points'];
+                    $fullRoster++;
+                } elseif ($optimalRoster['wr2'] == 0) {
+                    $optimalRoster['wr2'] = $player['points'];
+                    $fullRoster++;
+                } elseif ($optimalRoster['wr3'] == 0) {
+                    $optimalRoster['wr3'] = $player['points'];
+                    $fullRoster++;
+                } elseif ($optimalRoster['wrt'] == 0) {
+                    $optimalRoster['wrt'] = $player['points'];
+                    $fullRoster++;
+                } elseif ($optimalRoster['qwrt'] == 0) {
+                    $optimalRoster['qwrt'] = $player['points'];
+                    $fullRoster++;
+                }
+            } elseif ($player['pos'] == 'TE') {
+                if ($optimalRoster['te'] == 0) {
+                    $optimalRoster['te'] = $player['points'];
+                    $fullRoster++;
+                } elseif ($optimalRoster['wrt'] == 0) {
+                    $optimalRoster['wrt'] = $player['points'];
+                    $fullRoster++;
+                } elseif ($optimalRoster['qwrt'] == 0) {
+                    $optimalRoster['qwrt'] = $player['points'];
+                    $fullRoster++;
+                }
+            } elseif ($player['pos'] == 'K') {
+                if ($optimalRoster['k'] == 0) {
+                    $optimalRoster['k'] = $player['points'];
+                    $fullRoster++;
+                }
+            } elseif ($player['pos'] == 'DEF') {
+                if ($optimalRoster['def'] == 0) {
+                    $optimalRoster['def'] = $player['points'];
+                    $fullRoster++;
+                }
+            }
+        }
+    }
+    $optimal = 0;
+    foreach ($optimalRoster as $pos => $score) {
+        $optimal += $score;
+    }
+
+    return $optimal;
 }

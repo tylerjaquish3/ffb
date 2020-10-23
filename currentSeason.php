@@ -91,7 +91,7 @@ include 'sidebar.html';
                     </div>
                 </div>
 
-                <div class="col-xs-12 col-md-5 table-padding">
+                <div class="col-xs-12 col-md-8 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Points</h4>
@@ -349,30 +349,39 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 col-md-6 table-padding">
+                <div class="col-xs-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Worst Team Weeks</h4>
+                            <h4 style="float: right">Optimal Lineups</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-worstTeamWeek">
+                            <table class="table table-responsive" id="datatable-optimal">
                                 <thead>
-                                    <th>Points</th>
-                                    <th>Manager</th>
                                     <th>Week</th>
+                                    <th>Manager</th>
                                     <th>Opponent</th>
+                                    <th>Actual Points</th>
+                                    <th>Opponent Score</th>
                                     <th>Result</th>
+                                    <th>Projected</th>
+                                    <th>Opponent Projected</th>
+                                    <th>Optimal Points</th>
+                                    <th>Opponent Optimal</th>
                                 </thead>
                                 <tbody>
                                     <?php
-                                    if (isset($teamWeek['worst']))
-                                    foreach ($teamWeek['worst'] as $row) { ?>
+                                    foreach ($optimal as $row) { ?>
                                         <tr>
-                                            <td><?php echo $row['points']; ?></td>
-                                            <td><?php echo $row['manager']; ?></td>
                                             <td><?php echo $row['week']; ?></td>
+                                            <td><?php echo $row['manager']; ?></td>
                                             <td><?php echo $row['opponent']; ?></td>
+                                            <td><?php echo $row['points']; ?></td>
+                                            <td><?php echo $row['oppPoints']; ?></td>
                                             <td><?php echo $row['result']; ?></td>
+                                            <td><?php echo $row['projected']; ?></td>
+                                            <td><?php echo $row['oppProjected']; ?></td>
+                                            <td><?php echo $row['optimal']; ?></td>
+                                            <td><?php echo $row['oppOptimal']; ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -380,37 +389,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-6 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Best Team Weeks</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-bestTeamWeek">
-                                <thead>
-                                    <th>Points</th>
-                                    <th>Manager</th>
-                                    <th>Week</th>
-                                    <th>Opponent</th>
-                                    <th>Result</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    if (isset($teamWeek['best']))
-                                    foreach ($teamWeek['best'] as $row) { ?>
-                                        <tr>
-                                            <td><?php echo $row['points']; ?></td>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo $row['week']; ?></td>
-                                            <td><?php echo $row['opponent']; ?></td>
-                                            <td><?php echo $row['result']; ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>
@@ -465,11 +444,9 @@ include 'sidebar.html';
             ]
         });
 
-        $('#datatable-worstTeamWeek').DataTable({
-            "searching": false,
-            "info": false,
+        $('#datatable-optimal').DataTable({
             "order": [
-                [0, "asc"]
+                [3, "desc"]
             ]
         });
 

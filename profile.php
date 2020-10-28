@@ -520,9 +520,10 @@ if (isset($_GET['id'])) {
             document.getElementById('versus').scrollIntoView(true);
         }
 
-        var managerName = "<?php echo $managerName; ?>";
+        let managerName = "<?php echo $managerName; ?>";
+        let baseUrl = "<?php echo $BASE_URL; ?>";
         $('#versus-select').change(function() {
-            window.location = '/profile.php?id='+managerName+'&versus='+$('#versus-select').val();
+            window.location = baseUrl+'profile.php?id='+managerName+'&versus='+$('#versus-select').val();
         });
 
         $('#oppRecordSelector').change(function() {

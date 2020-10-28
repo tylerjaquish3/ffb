@@ -9,6 +9,11 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$result = mysqli_query($conn, "SELECT year FROM rosters ORDER BY year DESC LIMIT 1");
+while ($row = mysqli_fetch_array($result)) {
+    $season = $row['year'];
+}
+
 if ($pageName == 'Dashboard') {
     $dashboardNumbers = getDashboardNumbers($conn);
     $postseasonChart = getPostseasonChartNumbers($conn);
@@ -22,6 +27,8 @@ if ($pageName == 'Regular Season') {
     $regSeasonMatchups = getRegularSeasonMatchups($conn);
     $seasonWins = getSeasonWins($conn);
     $winsChart = getWinsChartNumbers($conn);
+    $scatterChart = getPointMargins($conn, $season);
+    $pfwins = getPfWinsData($conn);
 }
 if ($pageName == 'Postseason') {
     $postseasonMatchups = getPostseasonMatchups($conn);
@@ -36,12 +43,6 @@ if ((strpos($pageName, 'Recap') !== false)) {
     $draftResults = getDraftResults($conn);
 }
 if ($pageName == 'Current Season') {
-
-    $result = mysqli_query($conn, "SELECT year FROM rosters ORDER BY year DESC LIMIT 1");
-    while ($row = mysqli_fetch_array($result)) {
-        $season = $row['year'];
-    }
-
     $points = getCurrentSeasonPoints($conn, $season);
     $stats = getCurrentSeasonStats($conn, $season);
     $statsAgainst = getCurrentSeasonStatsAgainst($conn, $season);
@@ -53,6 +54,12 @@ if ($pageName == 'Current Season') {
 
 // include 'saveFunFacts.php';
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
 function getDashboardNumbers($conn)
 {
     $response = [];
@@ -104,6 +111,12 @@ function getDashboardNumbers($conn)
     return $response;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
 function getPostseasonChartNumbers($conn)
 {
     $response = [];
@@ -151,6 +164,12 @@ function getPostseasonChartNumbers($conn)
     return $response;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
 function getProfileNumbers($conn)
 {
     $response = [];
@@ -285,6 +304,12 @@ function getProfileNumbers($conn)
     return $response;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
 function getFinishesChartNumbers($conn)
 {
     $results = ['years' => '', 'finishes' => ''];
@@ -308,6 +333,12 @@ function getFinishesChartNumbers($conn)
     return $results;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
 function getSeasonNumbers($conn)
 {
     $results = [];
@@ -351,6 +382,12 @@ function getSeasonNumbers($conn)
     return $results;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
 function getRegularSeasonMatchups($conn)
 {
     $results = [];
@@ -398,6 +435,12 @@ function getRegularSeasonMatchups($conn)
     return $results;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
 function getSeasonWins($conn)
 {
     $response = [];
@@ -422,6 +465,12 @@ function getSeasonWins($conn)
     return $response;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
 function getWinsChartNumbers($conn)
 {
     $response = ['years' => ''];
@@ -462,11 +511,113 @@ function getWinsChartNumbers($conn)
         $wins = rtrim($wins, ', ');
     }
 
+    return $response;
+}
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
+function getPointMargins($conn, $season)
+{
+    $response = [];
+    $priorYear = null;
+
+    $backFive = $season - 5;
+    $result = mysqli_query($conn, "SELECT year, week_number, AVG(manager1_score) as average FROM regular_season_matchups rsm
+        WHERE year > $backFive
+        GROUP BY year, week_number");
+    while ($row = mysqli_fetch_array($result)) {
+
+        $year = $row['year'];
+        $week = $row['week_number'];
+        $average = $row['average'];
+        $matchups = [];
+
+        if ($year != $priorYear) {
+            $yearWinMatchups = $yearLossMatchups = [];
+        }
+        $priorYear = $year;
+
+        $result2 = mysqli_query($conn, "SELECT * FROM regular_season_matchups
+            WHERE year = $year AND week_number = $week");
+        while ($row2 = mysqli_fetch_array($result2)) {
+
+            $win = $row2['manager1_score'] > $row2['manager2_score'];
+
+            $matchups = [
+                'x' => round($average - $row2['manager1_score'], 1),
+                'y' => round($average - $row2['manager2_score'], 1)
+            ];
+
+            if ($win) {
+                $yearWinMatchups[] = $matchups;
+            } else {
+                $yearLossMatchups[] = $matchups;
+            }
+        }
+
+        $response[$year. ' Wins'] = $yearWinMatchups;
+        $response[$year. ' Losses'] = $yearLossMatchups;
+    }
 
     return $response;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
+function getPfWinsData($conn)
+{
+    $response = [];
+
+    $result = mysqli_query($conn, "SELECT * FROM finishes
+        JOIN managers ON managers.id = finishes.manager_id");
+    while ($row = mysqli_fetch_array($result)) {
+        $managerId = $row['manager_id'];
+        $managerName = $row['name'];
+        $year = $row['year'];
+        $wins = $seasonPoints = $seasonPointsAgainst = 0;
+        $array = [];
+
+        $result2 = mysqli_query($conn, "SELECT * FROM regular_season_matchups
+            WHERE manager1_id = " . $managerId . " AND year = " . $year);
+        while ($row2 = mysqli_fetch_array($result2)) {
+            if ($row2['manager1_score'] > $row2['manager2_score']) {
+                $wins++;
+            }
+            $seasonPoints += $row2['manager1_score'];
+            $seasonPointsAgainst += $row2['manager2_score'];
+
+        }
+        $array1[] = [
+            'x' => $wins,
+            'y' => round($seasonPoints,0)
+        ];
+        $array2[] = [
+            'x' => $wins,
+            'y' => round($seasonPointsAgainst, 0)
+        ];
+
+        $response['Points For'] = $array1;
+        $response['Points Against'] = $array2;
+
+    }
+
+    return $response;
+}
+
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
 function getPostseasonMatchups($conn)
 {
     $results = [];
@@ -511,6 +662,12 @@ function getPostseasonMatchups($conn)
     return $results;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
 function getDraftResults($conn)
 {
     $results = [];
@@ -526,6 +683,12 @@ function getDraftResults($conn)
     return $results;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @return void
+ */
 function getAllNumbersBySeason($conn)
 {
     $results = [];
@@ -590,6 +753,13 @@ function getAllNumbersBySeason($conn)
     return $results;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @param [type] $season
+ * @return void
+ */
 function getCurrentSeasonPoints($conn, $season)
 {
     $result = mysqli_query($conn, "SELECT manager, roster_spot, SUM(points) AS points, SUM(projected) AS projected FROM rosters r
@@ -605,6 +775,13 @@ function getCurrentSeasonPoints($conn, $season)
     return $points;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @param [type] $season
+ * @return void
+ */
 function getCurrentSeasonStats($conn, $season)
 {
     $result = mysqli_query($conn, "SELECT manager, SUM(pass_yds) AS pass_yds, SUM(pass_tds) AS pass_tds, SUM(ints) AS ints, SUM(rush_yds) AS rush_yds, SUM(rush_tds) AS rush_tds,
@@ -618,6 +795,13 @@ function getCurrentSeasonStats($conn, $season)
     return $result;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @param [type] $season
+ * @return void
+ */
 function getCurrentSeasonBestWeek($conn, $season)
 {
     $bestWeek = [];
@@ -650,6 +834,15 @@ function getCurrentSeasonBestWeek($conn, $season)
     return $bestWeek;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @param [type] $week
+ * @param [type] $pts
+ * @param [type] $pos
+ * @return void
+ */
 function queryBestWeekPlayer($conn, $week, $pts, $pos)
 {
     $response = [];
@@ -666,6 +859,13 @@ function queryBestWeekPlayer($conn, $week, $pts, $pos)
     return $response;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @param [type] $season
+ * @return void
+ */
 function getCurrentSeasonStatsAgainst($conn, $season)
 {
     $managers = ['Tyler', 'Matt', 'Justin', 'Ben', 'AJ', 'Gavin', 'Cameron', 'Cole', 'Everett', 'Andy'];
@@ -716,6 +916,13 @@ function getCurrentSeasonStatsAgainst($conn, $season)
     return $response;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @param [type] $season
+ * @return void
+ */
 function getCurrentSeasonTopPerformers($conn, $season)
 {
     $response = [];
@@ -781,6 +988,13 @@ function getCurrentSeasonTopPerformers($conn, $season)
     return $response;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @param [type] $season
+ * @return void
+ */
 function getCurrentSeasonBestTeamWeek($conn, $season)
 {
     $response = [];
@@ -807,6 +1021,13 @@ function getCurrentSeasonBestTeamWeek($conn, $season)
     return $response;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $conn
+ * @param [type] $season
+ * @return void
+ */
 function getOptimalLineupPoints($conn, $season)
 {
     $response = [];
@@ -890,6 +1111,12 @@ function getOptimalLineupPoints($conn, $season)
     return $response;
 }
 
+/**
+ * Undocumented function
+ *
+ * @param [type] $roster
+ * @return void
+ */
 function checkRosterForOptimal($roster)
 {
     usort($roster, function($a, $b) {
@@ -982,4 +1209,10 @@ function checkRosterForOptimal($roster)
     }
 
     return $optimal;
+}
+
+function dd($text)
+{
+    var_dump($text);
+    die;
 }

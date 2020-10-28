@@ -100,6 +100,58 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-xs-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Points For and Against</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block">
+                                <canvas id="scatterChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">PF/PA vs Wins</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="card-block">
+                                <canvas id="pfwinsChart"></canvas>
+                                <br />
+                                <!-- <table class="table table-responsive" id="datatable-pfpawins">
+                                    <thead>
+                                        <th>Year</th>
+                                        <th>Manager</th>
+                                        <th>Wins</th>
+                                        <th>PF</th>
+                                        <th>PA</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($pfpawins as $year => $manager) {
+                                            foreach ($manager as $key => $array) { ?>
+                                                <tr>
+                                                    <td><?php echo $year; ?></td>
+                                                    <td><?php echo $key; ?></td>
+                                                    <td><?php echo $array['wins']; ?></td>
+                                                    <td><?php echo $array['pf']; ?></td>
+                                                    <td><?php echo $array['pa']; ?></td>
+                                                </tr>
+                                        <?php }
+                                        } ?>
+                                    </tbody>
+                                </table> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -115,9 +167,7 @@ include 'sidebar.html';
             ]
         });
 
-        $('#datatable-wins').DataTable({
-            "paging": false,
-            "searching": false,
+        $('#datatable-pfpawins').DataTable({
             "info": false,
             "order": [
                 [0, "desc"]
@@ -164,6 +214,116 @@ include 'sidebar.html';
             data: data,
             options: options,
 
+        });
+
+
+        // Chart for scatter of weekly points
+        var ctx2 = $("#scatterChart");
+
+        var points = <?php echo json_encode($scatterChart); ?>;
+        let pointColor = '#000';
+        let i = 0;
+        let dataset2 = [];
+        for (const [key, value] of Object.entries(points)) {
+
+            if (key.includes('Wins')) {
+                pointColor = '#90BE6D';
+            } else {
+                pointColor = '#F3722C';
+            }
+
+            let obj = {};
+            obj.label = key;
+            obj.data = value;
+            obj.showLine = false;
+            obj.pointBackgroundColor = pointColor;
+            dataset2.push(obj);
+            i++;
+        }
+
+        let scatterChart = new Chart(ctx2, {
+            type: 'scatter',
+            data: {
+                datasets: dataset2
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'linear',
+                        position: 'bottom'
+                    }]
+                },
+                scales: {
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Manager Score vs. League Average',
+                            fontSize: 20
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Opponent Score vs. League Average',
+                            fontSize: 20
+                        }
+                    }]
+                }
+            }
+        });
+
+
+        // Chart for scatter of season wins and points
+        let ctx3 = $("#pfwinsChart");
+
+        let pfpawins = <?php echo json_encode($pfwins); ?>;
+        let j = 0;
+        let dataset3 = [];
+        for (const [key, value] of Object.entries(pfpawins)) {
+
+            if (key.includes('For')) {
+                pointColor = '#90BE6D';
+            } else {
+                pointColor = '#F3722C';
+            }
+            let obj = {};
+            obj.label = key;
+            obj.data = value;
+            obj.showLine = false;
+            obj.pointBackgroundColor = pointColor;
+            dataset3.push(obj);
+            j++;
+        }
+
+        let scatterChart2 = new Chart(ctx3, {
+            type: 'scatter',
+            data: {
+                datasets: dataset3
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'linear',
+                        position: 'bottom'
+                    }]
+                },
+                scales: {
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Season Points',
+                            fontSize: 20
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Season Wins',
+                            fontSize: 20
+                        }
+                    }]
+                }
+            }
         });
 
     });

@@ -391,8 +391,10 @@ foreach ($seasonNumbers as $standings) {
 <script type="text/javascript">
     $(document).ready(function() {
 
+        let baseUrl = "<?php echo $BASE_URL; ?>";
+
         $('#year-select').change(function() {
-            window.location = '/ffb/seasonRecaps.php?id='+$('#year-select').val();
+            window.location = baseUrl+'seasonRecaps.php?id='+$('#year-select').val();
         });
 
         $('#datatable-regSeason').DataTable({

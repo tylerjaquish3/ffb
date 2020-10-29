@@ -14,6 +14,10 @@ while ($row = mysqli_fetch_array($result)) {
     $season = $row['year'];
 }
 
+if (!isset($pageName)) {
+    $pageName = 'update';
+}
+
 if ($pageName == 'Dashboard') {
     $dashboardNumbers = getDashboardNumbers($conn);
     $postseasonChart = getPostseasonChartNumbers($conn);
@@ -1215,4 +1219,23 @@ function dd($text)
 {
     var_dump($text);
     die;
+}
+
+// Do DB update with mysql inserts
+if(isset($_POST['sql-stmt'])) {
+    $sql = $_POST['sql-stmt'];
+    var_dump($sql);
+    $allStatements = explode(';', $sql);
+
+    foreach ($allStatements as $stmt) {
+
+        if ($stmt != '') {
+            $success = mysqli_query($conn, $stmt);
+
+            if (!$success) {
+                var_dump(mysqli_error($conn));
+            }
+        }
+    }
+    var_dump('Done');
 }

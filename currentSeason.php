@@ -367,6 +367,8 @@ include 'sidebar.html';
                                     <th>Opponent Projected</th>
                                     <th>Optimal Points</th>
                                     <th>Opponent Optimal</th>
+                                    <th>Actual Margin</th>
+                                    <th>Optimal Margin</th>
                                 </thead>
                                 <tbody>
                                     <?php
@@ -382,6 +384,8 @@ include 'sidebar.html';
                                             <td><?php echo $row['oppProjected']; ?></td>
                                             <td><?php echo $row['optimal']; ?></td>
                                             <td><?php echo $row['oppOptimal']; ?></td>
+                                            <td><?php echo abs(round($row['points'] - $row['oppPoints'], 2)); ?></td>
+                                            <td><?php echo abs(round($row['optimal'] - $row['oppOptimal'], 2)); ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>

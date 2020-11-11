@@ -362,6 +362,7 @@ include 'sidebar.html';
                                     <th>Opponent</th>
                                     <th>Actual Points</th>
                                     <th>Opponent Score</th>
+                                    <th>Diff</th>
                                     <th>Result</th>
                                     <th>Projected</th>
                                     <th>Opponent Projected</th>
@@ -379,6 +380,7 @@ include 'sidebar.html';
                                             <td><?php echo $row['opponent']; ?></td>
                                             <td><?php echo $row['points']; ?></td>
                                             <td><?php echo $row['oppPoints']; ?></td>
+                                            <td><?php echo round($row['points'] - $row['oppPoints'], 2); ?></td>
                                             <td><?php echo $row['result']; ?></td>
                                             <td><?php echo $row['projected']; ?></td>
                                             <td><?php echo $row['oppProjected']; ?></td>

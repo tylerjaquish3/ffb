@@ -453,17 +453,25 @@ if (isset($_GET['id'])) {
                                             $result = mysqli_query(
                                                 $conn,
                                                 "SELECT * FROM (
-                                                SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score, winning_manager_id
-                                                FROM regular_season_matchups
-                                                WHERE manager1_id = $managerId
-                                                AND manager2_id = $versus
-                                                    UNION
-                                                SELECT year, round, manager1_id, manager2_id, manager1_score, manager2_score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
+                                                    SELECT year, week_number, manager1_id AS man1, manager2_id AS man2,
+                                                    manager1_score AS man1score, manager2_score AS man2score, winning_manager_id
+                                                    FROM regular_season_matchups
+                                                    WHERE manager1_id = $managerId
+                                                    AND manager2_id = $versus
+                                                UNION
+                                                    SELECT year, round, manager1_id AS man1, manager2_id AS man2,
+                                                    manager1_score AS man1score, manager2_score AS man2score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
                                                     FROM playoff_matchups
-                                                    WHERE (manager1_id = $managerId AND manager2_id = $versus) OR (manager1_id = $versus AND manager2_id = $managerId)
-                                                    ORDER BY year
+                                                    WHERE (manager1_id = $managerId AND manager2_id = $versus)
+                                                UNION
+                                                    SELECT year, round, manager2_id AS man2, manager1_id AS man1,
+                                                    manager2_score AS man1score, manager1_score AS man2score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
+                                                    FROM playoff_matchups
+                                                    WHERE (manager1_id = $versus AND manager2_id = $managerId)
+                                                    ORDER BY YEAR
                                                 ) a
-                                                ORDER BY YEAR desc, CASE WHEN (week_number <> '0' AND CAST(week_number AS SIGNED) <> 0) THEN CAST(week_number AS SIGNED) ELSE 9999 END desc"
+                                                ORDER BY YEAR desc, CASE WHEN (week_number <> '0' AND CAST(week_number AS SIGNED) <> 0) THEN CAST(week_number AS SIGNED) ELSE 9999 END DESC
+                                                "
                                             );
                                             while ($array = mysqli_fetch_array($result)) { ?>
                                                 <tr class="highlight">
@@ -474,14 +482,14 @@ if (isset($_GET['id'])) {
                                                     } else {
                                                         echo '<td><span class="badge badge-secondary">' . $managerName.'</span></td>';
                                                     }?>
-                                                    <td><?php echo $array['manager1_score'].' - '.$array['manager2_score']; ?></td>
+                                                    <td><?php echo $array['man1score'].' - '.$array['man2score']; ?></td>
                                                     <?php
                                                     if ($array['winning_manager_id'] == $versus) {
                                                         echo '<td><span class="badge badge-primary">' . $versusName.'</span></td>';
                                                     } else {
                                                         echo '<td><span class="badge badge-secondary">' . $versusName.'</span></td>';
                                                     } ?>
-                                                    <td><?php echo round(abs($array['manager1_score'] - $array['manager2_score']), 2); ?></td>
+                                                    <td><?php echo round(abs($array['man1score'] - $array['man2score']), 2); ?></td>
                                                 </tr>
                                             <?php } ?>
                                         </tbody>

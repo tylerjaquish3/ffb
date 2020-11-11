@@ -84,6 +84,7 @@ include 'sidebar.html';
                                     </li>
                                     <li>Smack talk is encouraged, especially if it hurts feelings.</li>
                                     <li>Players added and dropped in the same day shall return to Free Agent status (not Waivers).</li>
+                                    <li>Rules can be changed with a majority vote. However, in season rule changes require a super-majority (80% yea).</li>
                                 </ul>
                             </div>
                         </div>

@@ -155,3 +155,23 @@ span.seed {
 .bottom {
     border-bottom: 1px solid #000;
 }
+
+.plaque {
+    padding: 8px;
+    text-align: center;
+    background: black;
+    color: burlywood;
+    margin: 5px 0px;
+    direction: ltr;
+}
+
+.info-card {
+    background: #fff;
+    direction: ltr;
+    padding: 10px;
+}
+
+.settings-table td {
+    padding: 3px 10px;
+    border: 1px solid #000;
+}

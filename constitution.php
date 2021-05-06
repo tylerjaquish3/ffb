@@ -123,17 +123,25 @@ include 'sidebar.html';
                 <div class="col-xs-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Vote</h4>
+                            <h4>Meeting Agenda</h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">
-                                Before the start of next season, the league shall vote on the following:
-                                <ul>
-                                    <li>Team Defense points awarded</li>
-                                    <li>Include/exclude IDP positions</li>
-                                    <li>Keep the superflex position (Q/W/R/T)</li>
-                                    <li>Keep 4 IR positions</li>
-                                </ul>
+                                A point of emphasis for all vote elements is that there is no right or wrong, and all decisions shall be made to simply make the league better in general,
+                                not to give any strategies advantages or disadvantages.
+                                <br />
+                                <strong>Vote on the following:</strong>
+                                <ol>
+                                    <li>Include/exclude IDP positions and how many? <a href="voteInfo.php#idp">More info</a></li>
+                                    <li>Keep the superflex position (Q/W/R/T) or go back to QB spot? <a href="voteInfo.php#superflex">More info</a></li>
+                                    <li>Keep 4 IR positions or fewer? <a href="voteInfo.php#ir">More info</a></li>
+                                    <li>Team Defense points awarded <a href="voteInfo.php#teamdef">More info</a></li>
+                                    <li>Field goal yards per point <a href="voteInfo.php#fgyards">More info</a></li>
+                                    <li>Add license plate frame for loser? <a href="voteInfo.php#license">More info</a></li>
+                                    <li>Any other items needing vote?</li>
+                                </ol>
+                                <strong>Determine draft order</strong><br />
+                                <strong>Draft date TBD</strong>
                             </div>
                         </div>
                     </div>

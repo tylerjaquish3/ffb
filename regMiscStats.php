@@ -719,7 +719,7 @@
 		$result = mysqli_query($conn, "SELECT managers.name, SUM(moves) as moves, SUM(trades) as trades, SUM(moves+trades) as total
 			FROM team_names
 			JOIN managers on manager_id = managers.id
-			GROUP BY managers.name;");
+			GROUP BY managers.name");
 		while ($row = mysqli_fetch_array($result)) { ?>
 			<tr>
 				<td><?php echo $row['name']; ?></td>

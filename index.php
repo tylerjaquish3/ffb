@@ -74,7 +74,79 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-xl-4 col-lg-12 table-padding">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Trophy</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr;">
+                            <div class="row">
+                                <div class="col-xs-4">
+                                    <div class="row" style="direction: ltr;">
+                                        <div class="col-xs-6"><div class="plaque">2016 CHAMPION<br />COLE BOBOTH</div></div>
+                                        <div class="col-xs-6"><div class="plaque">2014 CHAMPION<br />JUSTIN DIDIER</div></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-6"><div class="plaque">2017 CHAMPION<br />COLE BOBOTH</div></div>
+                                        <div class="col-xs-6"><div class="plaque">2015 CHAMPION<br />JUSTIN DIDIER</div></div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="row">
+                                        <div class="col-xs-6"><div class="plaque">2012 CHAMPION<br />AJ SARTIN</div></div>
+                                        <div class="col-xs-6"><div class="plaque">2010 CHAMPION<br />CAMERON BOBOTH</div></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-6"><div class="plaque">2013 CHAMPION<br />ANDY STAMSCHROR</div></div>
+                                        <div class="col-xs-6"><div class="plaque">2011 CHAMPION<br />BEN BARDELL</div></div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="row">
+                                        <div class="col-xs-6"><div class="plaque">2008 CHAMPION<br />TYLER JAQUISH</div></div>
+                                        <div class="col-xs-6"><div class="plaque">2006 CHAMPION<br />AJ SARTIN</div></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-6"><div class="plaque">2009 CHAMPION<br />MATT REID</div></div>
+                                        <div class="col-xs-6"><div class="plaque">2007 CHAMPION<br />JUSTIN DIDIER</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col-xs-4">
+                                    <div class="row" style="direction: ltr;">
+
+                                    </div>
+                                    <div class="row">
+
+                                    </div>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="row">
+
+                                    </div>
+                                    <div class="row">
+
+                                    </div>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="row">
+                                        <div class="col-xs-6"><div class="plaque">2020 CHAMPION<br />MATT REID</div></div>
+                                        <div class="col-xs-6"><div class="plaque">2018 CHAMPION<br />JUSTIN DIDIER</div></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-6"></div>
+                                        <div class="col-xs-6"><div class="plaque">2019 CHAMPION<br />CAMERON BOBOTH</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-4 col-xs-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">Regular Season Record</h4>
@@ -92,20 +164,20 @@ include 'sidebar.html';
                                         <?php
                                         $result = mysqli_query(
                                             $conn,
-                                            "SELECT name, wins, losses, total, wins/total AS win_pct 
-                                            FROM managers 
+                                            "SELECT name, wins, losses, total, wins/total AS win_pct
+                                            FROM managers
                                             JOIN (
-                                                SELECT COUNT(manager1_id) AS wins, manager1_id FROM regular_season_matchups rsm 
+                                                SELECT COUNT(manager1_id) AS wins, manager1_id FROM regular_season_matchups rsm
                                                 WHERE manager1_score > manager2_score GROUP BY manager1_id
                                             ) w ON w.manager1_id = managers.id
 
                                             JOIN (
-                                                SELECT COUNT(manager1_id) AS losses, manager1_id FROM regular_season_matchups rsm 
+                                                SELECT COUNT(manager1_id) AS losses, manager1_id FROM regular_season_matchups rsm
                                                 WHERE manager1_score < manager2_score GROUP BY manager1_id
                                             ) l ON l.manager1_id = managers.id
 
                                             JOIN (
-                                                SELECT COUNT(manager1_id) AS total, manager1_id FROM regular_season_matchups rsm 
+                                                SELECT COUNT(manager1_id) AS total, manager1_id FROM regular_season_matchups rsm
                                                 GROUP BY manager1_id
                                             ) t ON t.manager1_id = managers.id"
                                         );
@@ -124,7 +196,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-8 col-lg-12 table-padding">
+                <div class="col-xl-8 col-xs-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">Postseason</h4>
@@ -139,14 +211,14 @@ include 'sidebar.html';
             </div>
 
             <div class="row">
-                <div class="col-sm-12">
+                <div class="col-xs-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">Miscellaneous Stats</h4>
                         </div>
                         <div class="card-body down15">
                             <div class="row">
-                                <div class="col-xs-12 col-sm-6 table-padding">
+                                <div class="col-xs-12 col-md-6 table-padding">
                                     <div class="card-header" style="float: left">
                                         <h4>Postseason</h4>
                                     </div>
@@ -163,7 +235,7 @@ include 'sidebar.html';
                                     </div>
                                     <?php include 'postMiscStats.php'; ?>
                                 </div>
-                                <div class="col-xs-12 col-sm-6 table-padding">
+                                <div class="col-xs-12 col-md-6 table-padding">
                                     <div class="card-header" style="float: left">
                                         <h4>Regular Season</h4>
                                     </div>

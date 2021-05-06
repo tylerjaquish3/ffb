@@ -54,7 +54,7 @@ if ($pageName == 'Current Season') {
     $topPerformers = getCurrentSeasonTopPerformers($conn, $season);
     $teamWeek = getCurrentSeasonBestTeamWeek($conn, $season);
     $optimal = getOptimalLineupPoints($conn, $season);
-    $draftedPoints = getDraftedPoints($conn, $season);
+    $draftedPoints = getDraftedPoints($conn, $season, 0);
     $undraftedPoints = getUndraftedPoints($conn, $season);
     $lateRoundPoints = getLateRoundPoints($conn, $season);
     $worstDraft = getWorstDraftPicks($conn, $season);
@@ -1040,15 +1040,18 @@ function getCurrentSeasonBestTeamWeek($conn, $season)
  * @param [type] $season
  * @return void
  */
-function getDraftedPoints($conn, $season, $round = 0)
+function getDraftedPoints($conn, $season, $round)
 {
     $response = [];
+
+    mysqli_query($conn, "SET SQL_BIG_SELECTS=1");
 
     $result = mysqli_query($conn, "SELECT rosters.manager, sum(points) as points FROM rosters
         JOIN managers ON rosters.manager = managers.name
         JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year
-        WHERE rosters.YEAR = $season AND roster_spot NOT IN ('BN', 'IR') and draft.round > $round
+        WHERE rosters.year = $season AND roster_spot NOT IN ('BN', 'IR') and draft.round > $round
         GROUP BY manager");
+
     while ($row = mysqli_fetch_array($result)) {
         $response[] = [
             'manager' => $row['manager'],
@@ -1070,7 +1073,7 @@ function getUndraftedPoints($conn, $season)
 {
     $response = [];
 
-    $drafted = getDraftedPoints($conn, $season);
+    $drafted = getDraftedPoints($conn, $season, 0);
 
     $result = mysqli_query($conn, "SELECT rosters.manager, sum(points) AS points FROM rosters
         WHERE rosters.YEAR = $season AND roster_spot NOT IN ('BN', 'IR')
@@ -1116,6 +1119,8 @@ function getLateRoundPoints($conn, $season)
 function getWorstDraftPicks($conn, $season)
 {
     $response = [];
+
+    mysqli_query($conn, "SET SQL_BIG_SELECTS=1");
 
     $result = mysqli_query($conn, "SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
         JOIN managers ON rosters.manager = managers.name

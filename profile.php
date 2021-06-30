@@ -96,7 +96,55 @@ if (isset($_GET['id'])) {
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Awards</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr;">
+                            <div class="row">
+                                <div class="col-md-6 col-xs-12">
+                                    <?php
+                                    $result = mysqli_query(
+                                        $conn,
+                                        "SELECT * FROM manager_fun_facts mff
+                                        JOIN fun_facts ff ON mff.fun_fact_id = ff.id
+                                        JOIN managers ON managers.id = mff.manager_id
+                                        WHERE is_positive = 1 and manager_id = $managerId"
+                                    );
+                                    while ($row = mysqli_fetch_array($result)) { ?>
+                                        <div class="col-xs-6 award good">
+                                            <strong><?php echo $row['fact']; ?> </strong><br />
+                                            <?php echo $row['value']; ?> <br />
+                                            <?php echo $row['note']; ?>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                                <div class="col-md-6 col-xs-12">
+                                    <?php
+                                    $result = mysqli_query(
+                                        $conn,
+                                        "SELECT * FROM manager_fun_facts mff
+                                        JOIN fun_facts ff ON mff.fun_fact_id = ff.id
+                                        JOIN managers ON managers.id = mff.manager_id
+                                        WHERE is_positive = 0 and manager_id = $managerId"
+                                    );
+                                    while ($row = mysqli_fetch_array($result)) { ?>
+                                        <div class="col-xs-6 award bad">
+                                            <strong><?php echo $row['fact']; ?> </strong><br />
+                                            <?php echo $row['value']; ?> <br />
+                                            <?php echo $row['note']; ?>
+                                        </div>
+                                    <?php } ?>
+                                </div>
 
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-xl-4 col-lg-12">
                     <div class="card">

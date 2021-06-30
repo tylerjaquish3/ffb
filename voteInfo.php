@@ -156,7 +156,7 @@ include 'sidebar.html';
                             <b>Arguments for:</b>
                             <ul>
                                 <li>This was originally set up to be a bonus, but the first three ranges (up to 199 yards allowed) were basically unattainable.
-                                    So the bonus was limited to just 3 pts for giving up less than 299 yds, and would more often that not result in zero or negative outcomes.</li>
+                                    So the bonus was limited to just 3 pts for giving up less than 299 yds, and would more often than not result in zero or negative outcomes.</li>
                                 <li>This will make more defenses less risky because their max negative would be -6 from giving up points</li>
                                 <li>This wouldn't have a big effect on the good DEFs, but would benefit more of the mediocre or bad DEFs that consistently give up 400+ yds.</li>
                                 <li>Not having the flexibility to change the ranges makes it hard to have perfect values</li>

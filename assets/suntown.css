@@ -175,3 +175,18 @@ span.seed {
     padding: 3px 10px;
     border: 1px solid #000;
 }
+
+.award {
+    text-align: center;
+    padding: 10px;
+    margin: 3px 0px;
+    height: 80px;
+}
+
+.good {
+    background: gold;
+}
+
+.bad {
+    background: coral;
+}

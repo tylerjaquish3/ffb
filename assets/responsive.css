@@ -62,11 +62,9 @@
         font-size: 14px;
     }
 
-    /* .plaque {
-        padding: 0px;
-        font-size: 6px;
-        margin: 2px -12px;
-    } */
+    .award {
+        height: 60px;
+    }
 }
 
 @media only screen and (max-width: 640px) {

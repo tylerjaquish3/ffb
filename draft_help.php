@@ -6,7 +6,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 
-    <title>Suntown FFB</title>
+    <title>Draft Helper</title>
+
+    <link rel="icon" type="image/png" href="/images/favicon.jpg">
+
+    <meta property="og:title" content="Suntown Fantasy Football League" />
+    <meta property="og:description" content="The best league in all the land" />
+    <meta property="og:url" content="http://suntownffb.us" />
+    <meta property="og:image" content="http://suntownffb.us/images/favicon.jpg" />
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-touch-fullscreen" content="yes">
@@ -175,7 +182,6 @@
                                                     <td><?php echo $row['adp']; ?></td>
                                                     <td><?php echo $row['pick_number']; ?></td>
                                                 </tr>
-
                                             <?php } ?>
                                         </tbody>
                                     </table>
@@ -191,10 +197,10 @@
                             <div class="card-body">
                                 <div class="position-relative">
                                     <div class="card-header">
-                                        <h3>Top 3 by Position</h3>
+                                        <h3>Top 5 by Position</h3>
                                     </div>
 
-                                    <table class="table table-responsive" id="datatable-top3">
+                                    <table class="table table-responsive" id="datatable-top5">
                                         <thead>
                                             <th>My Rank</th>
                                             <th>ADP</th>
@@ -222,7 +228,7 @@
                                                 LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
                                                 where position = 'QB' AND ranking_id IS NULL
                                                 order by my_rank asc
-                                                LIMIT 3
+                                                LIMIT 5
                                                 )
                                                 UNION ALL
                                                 (
@@ -231,7 +237,7 @@
                                                 LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
                                                 where position = 'RB' AND ranking_id IS NULL
                                                 order by my_rank asc
-                                                LIMIT 3
+                                                LIMIT 5
                                                 )
                                                 UNION ALL
                                                 (
@@ -240,7 +246,7 @@
                                                 LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
                                                 where position = 'WR' AND ranking_id IS NULL
                                                 order by my_rank asc
-                                                LIMIT 3
+                                                LIMIT 5
                                                 )
                                                 UNION ALL
                                                 (
@@ -249,7 +255,7 @@
                                                 LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
                                                 where position = 'TE' AND ranking_id IS NULL
                                                 order by my_rank asc
-                                                LIMIT 3
+                                                LIMIT 5
                                                 )
                                                 UNION ALL
                                                 (
@@ -258,7 +264,7 @@
                                                 LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
                                                 where position = 'DEF' AND ranking_id IS NULL
                                                 order by my_rank asc
-                                                LIMIT 3
+                                                LIMIT 5
                                                 )
                                                 UNION ALL
                                                 (
@@ -267,7 +273,7 @@
                                                 LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
                                                 where position = 'K' AND ranking_id IS NULL
                                                 order by my_rank asc
-                                                LIMIT 3
+                                                LIMIT 5
                                                 )
                                                 UNION ALL
                                                 (
@@ -276,7 +282,7 @@
                                                 LEFT JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
                                                 where (position = 'D' OR position = 'DB') AND ranking_id IS NULL
                                                 order by my_rank asc
-                                                LIMIT 3
+                                                LIMIT 5
                                                 )"
                                             );
                                             while ($row = mysqli_fetch_array($result)) { ?>
@@ -412,7 +418,7 @@
                             </div>
                         </div>
                         <br />
-                        <input type="text" id="new-player"><button id="new-player-btn">Add</button>
+                        <input type="text" id="new-player"><button id="new-player-btn">Add Player</button>
                     </div>
                 </div>
             </div>
@@ -503,7 +509,7 @@
             "sort": false
         });
 
-        var top3Table = $('#datatable-top3').DataTable({
+        var top5Table = $('#datatable-top5').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
@@ -535,8 +541,8 @@
             saveSelection(formData);
         });
 
-        $('#datatable-top3').on('click', 'tbody .taken', function () {
-            var data_row = top3Table.row($(this).closest('tr')).data();
+        $('#datatable-top5').on('click', 'tbody .taken', function () {
+            var data_row = top5Table.row($(this).closest('tr')).data();
             data_row.push('taken');
             console.log(data_row);
             var formData = {data: data_row};
@@ -544,8 +550,8 @@
             saveSelection(formData);
         });
 
-        $('#datatable-top3').on('click', 'tbody .mine', function () {
-            var data_row = top3Table.row($(this).closest('tr')).data();
+        $('#datatable-top5').on('click', 'tbody .mine', function () {
+            var data_row = top5Table.row($(this).closest('tr')).data();
             data_row.push('mine');
             console.log(data_row);
             var formData = {data: data_row};

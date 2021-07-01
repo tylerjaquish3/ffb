@@ -190,3 +190,7 @@ span.seed {
 .bad {
     background: coral;
 }
+
+.text-center {
+    text-align: center;
+}

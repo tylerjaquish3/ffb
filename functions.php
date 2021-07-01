@@ -36,6 +36,7 @@ if ($pageName == 'Regular Season') {
 }
 if ($pageName == 'Postseason') {
     $postseasonMatchups = getPostseasonMatchups($conn);
+    $postseasonRecord = getPostseasonRecord($conn);
 }
 if ($pageName == 'Draft') {
     $draftResults = getDraftResults($conn);
@@ -64,8 +65,6 @@ if ($pageName == 'Current Season') {
     $draftPerformance = getAllDraftedPlayerDetails($conn, $season);
 }
 
-// include 'saveFunFacts.php';
-
 /**
  * Undocumented function
  *
@@ -84,6 +83,11 @@ function getDashboardNumbers($conn)
     $result = mysqli_query($conn, "SELECT count(distinct(manager_id)) as winners FROM finishes WHERE finish = 1");
     while ($row = mysqli_fetch_array($result)) {
         $response['unique_winners'] = $row['winners'];
+    }
+
+    $result = mysqli_query($conn, "SELECT name FROM finishes JOIN managers on managers.id = finishes.manager_id WHERE finish = 1 order by year desc limit 1");
+    while ($row = mysqli_fetch_array($result)) {
+        $response['defending_champ'] = $row['name'];
     }
 
     $result = mysqli_query($conn, "SELECT MAX(championships) as championships FROM (SELECT count(manager_id) as championships FROM finishes WHERE finish = 1 group by manager_id ORDER BY championships DESC LIMIT 1) as max_num");
@@ -672,6 +676,70 @@ function getPostseasonMatchups($conn)
     }
 
     return $results;
+}
+
+function getPostseasonRecord($conn)
+{
+    $response = [];
+
+    $managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
+    foreach ($managers as $manager) {
+        $response[$manager] = [
+            'final_wins' => 0,
+            'semi_wins' => 0,
+            'quarter_wins' => 0,
+            'final_losses' => 0,
+            'semi_losses' => 0,
+            'quarter_losses' => 0,
+            'wins' => 0,
+            'losses' => 0,
+            'win_pct' => 0
+        ];
+    }
+
+    $result = mysqli_query($conn, "SELECT
+        SUM(if(ROUND = 'Final' and manager1_score > manager2_score, 1,0)) AS final_wins,
+        SUM(if(ROUND = 'Semifinal' and manager1_score > manager2_score, 1,0)) AS semi_wins,
+        SUM(if(ROUND = 'Quarterfinal' and manager1_score > manager2_score, 1,0)) AS quarter_wins,
+        SUM(if(ROUND = 'Final' and manager1_score < manager2_score, 1,0)) AS final_losses,
+        SUM(if(ROUND = 'Semifinal' and manager1_score < manager2_score, 1,0)) AS semi_losses,
+        SUM(if(ROUND = 'Quarterfinal' and manager1_score < manager2_score, 1,0)) AS quarter_losses,
+        SUM(if(manager1_score > manager2_score, 1,0)) AS wins,
+        SUM(if(manager1_score < manager2_score, 1,0)) AS losses,
+        name
+        FROM playoff_matchups
+        JOIN managers ON manager1_id = managers.id
+        GROUP BY name
+        UNION
+        SELECT
+        SUM(if(ROUND = 'Final' and manager2_score > manager1_score, 1,0)) AS final_wins,
+        SUM(if(ROUND = 'Semifinal' and manager2_score > manager1_score, 1,0)) AS semi_wins,
+        SUM(if(ROUND = 'Quarterfinal' and manager2_score > manager1_score, 1,0)) AS quarter_wins,
+        SUM(if(ROUND = 'Final' and manager2_score < manager1_score, 1,0)) AS final_losses,
+        SUM(if(ROUND = 'Semifinal' and manager2_score < manager1_score, 1,0)) AS semi_losses,
+        SUM(if(ROUND = 'Quarterfinal' and manager2_score < manager1_score, 1,0)) AS quarter_losses,
+        SUM(if(manager2_score > manager1_score, 1,0)) AS wins,
+        SUM(if(manager2_score < manager1_score, 1,0)) AS losses,
+        name
+        FROM playoff_matchups
+        JOIN managers ON manager2_id = managers.id
+        GROUP BY name");
+    while ($row = mysqli_fetch_array($result)) {
+        $response[$row['name']]['name'] = $row['name'];
+        $response[$row['name']]['final_wins'] += $row['final_wins'];
+        $response[$row['name']]['semi_wins'] += $row['semi_wins'];
+        $response[$row['name']]['quarter_wins'] += $row['quarter_wins'];
+        $response[$row['name']]['final_losses'] += $row['final_losses'];
+        $response[$row['name']]['semi_losses'] += $row['semi_losses'];
+        $response[$row['name']]['quarter_losses'] += $row['quarter_losses'];
+        $response[$row['name']]['wins'] += $row['wins'];
+        $response[$row['name']]['losses'] += $row['losses'];
+        $totalWins = $response[$row['name']]['wins'];
+        $totalMatchups = $totalWins + $response[$row['name']]['losses'];
+        $response[$row['name']]['win_pct'] = $totalWins / ($totalMatchups) * 100;
+    }
+
+    return $response;
 }
 
 /**

@@ -12,10 +12,10 @@ include 'sidebar.html';
 
         <div class="content-body">
             <div class="row">
-                <div class="col-xs-12 table-padding">
+                <div class="col-xs-12 col-md-6 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Postseason Matchups</h4>
+                            <h4 style="float: right">Matchups</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <table class="table table-responsive" id="datatable-postseason">
@@ -54,6 +54,99 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
+                <div class="col-xs-12 col-md-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Points</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table" id="datatable-misc25">
+                                <thead>
+                                    <th>Manager</th>
+                                    <th>Points</th>
+                                    <th># Matchups</th>
+                                    <th>Average</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $result = mysqli_query(
+                                        $conn,
+                                        "SELECT name, ptsTop, ptsBottom, gamest, gamesb
+                                        FROM managers
+                                        LEFT JOIN (
+                                        SELECT COUNT(id) as gamest, SUM(manager1_score) AS ptsTop, manager1_id FROM playoff_matchups rsm
+                                        GROUP BY manager1_id
+                                        ) w ON w.manager1_id = managers.id
+
+                                        LEFT JOIN (
+                                        SELECT COUNT(id) as gamesb, SUM(manager2_score) AS ptsBottom, manager2_id FROM playoff_matchups rsm
+                                        GROUP BY manager2_id
+                                        ) l ON l.manager2_id = managers.id"
+                                    );
+                                    while ($row = mysqli_fetch_array($result)) {
+
+                                        $points = $row['ptsTop'] + $row['ptsBottom'];
+                                        $games = $row['gamest'] + $row['gamesb'];
+                                        $average = $points / $games;
+                                        ?>
+                                        <tr>
+                                            <td><?php echo $row['name']; ?></td>
+                                            <td><?php echo number_format($points, 2, '.', ','); ?></td>
+                                            <td><?php echo $games; ?></td>
+                                            <td><?php echo number_format($average, 2, '.', ','); ?></td>
+                                        </tr>
+
+                                    <?php } ?>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan=4>Points scored in postseason matchups</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 col-md-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Records</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive" id="datatable-records">
+                                <thead>
+                                    <th>Manager</th>
+                                    <th>Quarter Wins</th>
+                                    <th>Quarter Losses</th>
+                                    <th>Semi Wins</th>
+                                    <th>Semi Losses</th>
+                                    <th>Final Wins</th>
+                                    <th>Final Losses</th>
+                                    <th>Overall Win %</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    foreach ($postseasonRecord as $manager) { ?>
+                                        <tr>
+                                            <td><?php echo $manager['name']; ?></td>
+                                            <td><?php echo $manager['quarter_wins']; ?></td>
+                                            <td><?php echo $manager['quarter_losses']; ?></td>
+                                            <td><?php echo $manager['semi_wins']; ?></td>
+                                            <td><?php echo $manager['semi_losses']; ?></td>
+                                            <td><?php echo $manager['final_wins']; ?></td>
+                                            <td><?php echo $manager['final_losses']; ?></td>
+                                            <td><?php echo round($manager['win_pct'], 1); ?></td>
+                                        </tr>
+
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -71,8 +164,26 @@ include 'sidebar.html';
                 "searchable": false
             }],
             "order": [
-                [0, "asc"],
-                [5, "asc"]
+                [0, "desc"],
+                [5, "desc"]
+            ]
+        });
+
+        $('#datatable-misc25').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [3, "desc"]
+            ]
+        });
+
+        $('#datatable-records').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [7, "desc"]
             ]
         });
 

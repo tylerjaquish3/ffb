@@ -62,8 +62,12 @@
         font-size: 14px;
     }
 
-    .award {
-        height: 60px;
+    ul.nav.navbar-nav {
+        padding: 8px 0px;
+    }
+
+    .header-navbar .navbar-header .menu-toggle {
+        top: -2px;
     }
 }
 

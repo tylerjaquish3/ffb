@@ -50,8 +50,8 @@ include 'sidebar.html';
                                     <i class="icon-user font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green white media-body">
-                                    <h5>Unique Champions</h5>
-                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['unique_winners']; ?></h5>
+                                    <h5>Defending Champion</h5>
+                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['defending_champ']; ?></h5>
                                 </div>
                             </div>
                         </div>

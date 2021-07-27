@@ -1,0 +1,333 @@
+{
+    "id": "c2a7bd8a-d141-423a-8810-0988a59ff0b4",
+    "name": "D.J. Chark Jr.",
+    "jersey": "17",
+    "last_name": "Chark",
+    "first_name": "D.J.",
+    "abbr_name": "D.Chark Jr.",
+    "preferred_name": "D.J.",
+    "birth_date": "1996-09-23",
+    "weight": 198.0,
+    "height": 76,
+    "position": "WR",
+    "birth_place": "Alexandria, LA, USA",
+    "high_school": "Alexandria (LA)",
+    "college": "Louisiana State",
+    "college_conf": "Southeastern Conference",
+    "rookie_year": 2018,
+    "status": "ACT",
+    "sr_id": "sr:player:1218294",
+    "name_suffix": "Jr.",
+    "references": [
+        {
+            "id": "CHA553392",
+            "origin": "elias"
+        },
+        {
+            "id": "46130",
+            "origin": "nflx"
+        },
+        {
+            "id": "00-0034777",
+            "origin": "gsis"
+        }
+    ],
+    "team": {
+        "id": "f7ddd7fa-0bae-4f90-bc8e-669e4d6cf2de",
+        "name": "Jaguars",
+        "market": "Jacksonville",
+        "alias": "JAC",
+        "sr_id": "sr:competitor:4386"
+    },
+    "draft": {
+        "year": 2018,
+        "round": 2,
+        "number": 61,
+        "team": {
+            "id": "f7ddd7fa-0bae-4f90-bc8e-669e4d6cf2de",
+            "name": "Jaguars",
+            "market": "Jacksonville",
+            "alias": "JAC",
+            "sr_id": "sr:competitor:4386"
+        }
+    },
+    "seasons": [
+        {
+            "id": "8e45fe2d-fb95-4504-845d-7c815623ccd6",
+            "year": 2018,
+            "type": "REG",
+            "name": "REG",
+            "teams": [
+                {
+                    "id": "f7ddd7fa-0bae-4f90-bc8e-669e4d6cf2de",
+                    "name": "Jaguars",
+                    "market": "Jacksonville",
+                    "alias": "JAC",
+                    "sr_id": "sr:competitor:4386",
+                    "statistics": {
+                        "games_played": 11,
+                        "games_started": 0,
+                        "receiving": {
+                            "receptions": 14,
+                            "targets": 32,
+                            "yards": 174,
+                            "avg_yards": 12.429,
+                            "longest": 38,
+                            "touchdowns": 0,
+                            "longest_touchdown": 0,
+                            "yards_after_catch": 45,
+                            "redzone_targets": 2,
+                            "air_yards": 129,
+                            "broken_tackles": 0,
+                            "dropped_passes": 2,
+                            "catchable_passes": 2,
+                            "yards_after_contact": 14
+                        },
+                        "punt_returns": {
+                            "returns": 0,
+                            "yards": -8,
+                            "avg_yards": 0.0,
+                            "touchdowns": 0,
+                            "longest": -8,
+                            "faircatches": 0,
+                            "longest_touchdown": 0
+                        },
+                        "penalties": {
+                            "penalties": 1,
+                            "yards": 15
+                        },
+                        "kick_returns": {
+                            "returns": 7,
+                            "yards": 186,
+                            "avg_yards": 26.571,
+                            "touchdowns": 0,
+                            "longest": 47,
+                            "faircatches": 0,
+                            "longest_touchdown": 0
+                        },
+                        "fumbles": {
+                            "fumbles": 1,
+                            "lost_fumbles": 1,
+                            "own_rec": 1,
+                            "own_rec_yards": 7,
+                            "opp_rec": 0,
+                            "opp_rec_yards": 0,
+                            "out_of_bounds": 0,
+                            "forced_fumbles": 0,
+                            "own_rec_tds": 0,
+                            "opp_rec_tds": 0,
+                            "ez_rec_tds": 0
+                        },
+                        "defense": {
+                            "tackles": 0,
+                            "assists": 0,
+                            "combined": 0,
+                            "sacks": 0.0,
+                            "sack_yards": 0.0,
+                            "interceptions": 0,
+                            "passes_defended": 0,
+                            "forced_fumbles": 0,
+                            "fumble_recoveries": 0,
+                            "qb_hits": 0,
+                            "tloss": 0.0,
+                            "tloss_yards": 0.0,
+                            "safeties": 0,
+                            "sp_tackles": 5,
+                            "sp_assists": 0,
+                            "sp_forced_fumbles": 0,
+                            "sp_fumble_recoveries": 0,
+                            "sp_blocks": 0,
+                            "misc_tackles": 0,
+                            "misc_assists": 0,
+                            "misc_forced_fumbles": 0,
+                            "misc_fumble_recoveries": 1,
+                            "def_targets": 0,
+                            "def_comps": 0,
+                            "blitzes": 0,
+                            "hurries": 0,
+                            "knockdowns": 0,
+                            "missed_tackles": 0,
+                            "batted_passes": 0
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": "19c4ee6a-c1e5-4346-9ef8-1361f81e6716",
+            "year": 2019,
+            "type": "REG",
+            "name": "REG",
+            "teams": [
+                {
+                    "id": "f7ddd7fa-0bae-4f90-bc8e-669e4d6cf2de",
+                    "name": "Jaguars",
+                    "market": "Jacksonville",
+                    "alias": "JAC",
+                    "sr_id": "sr:competitor:4386",
+                    "statistics": {
+                        "games_played": 15,
+                        "games_started": 14,
+                        "rushing": {
+                            "avg_yards": 10.0,
+                            "attempts": 2,
+                            "touchdowns": 0,
+                            "yards": 20,
+                            "longest": 20,
+                            "longest_touchdown": 0,
+                            "redzone_attempts": 0,
+                            "tlost": 0,
+                            "tlost_yards": 0,
+                            "broken_tackles": 0,
+                            "kneel_downs": 0,
+                            "scrambles": 0,
+                            "yards_after_contact": 4
+                        },
+                        "receiving": {
+                            "receptions": 73,
+                            "targets": 118,
+                            "yards": 1008,
+                            "avg_yards": 13.808,
+                            "longest": 69,
+                            "touchdowns": 8,
+                            "longest_touchdown": 37,
+                            "yards_after_catch": 329,
+                            "redzone_targets": 10,
+                            "air_yards": 679,
+                            "broken_tackles": 5,
+                            "dropped_passes": 4,
+                            "catchable_passes": 8,
+                            "yards_after_contact": 123
+                        },
+                        "penalties": {
+                            "penalties": 3,
+                            "yards": 24
+                        },
+                        "defense": {
+                            "tackles": 0,
+                            "assists": 0,
+                            "combined": 0,
+                            "sacks": 0.0,
+                            "sack_yards": 0.0,
+                            "interceptions": 0,
+                            "passes_defended": 0,
+                            "forced_fumbles": 0,
+                            "fumble_recoveries": 0,
+                            "qb_hits": 0,
+                            "tloss": 0.0,
+                            "tloss_yards": 0.0,
+                            "safeties": 0,
+                            "sp_tackles": 0,
+                            "sp_assists": 0,
+                            "sp_forced_fumbles": 0,
+                            "sp_fumble_recoveries": 0,
+                            "sp_blocks": 0,
+                            "misc_tackles": 1,
+                            "misc_assists": 0,
+                            "misc_forced_fumbles": 0,
+                            "misc_fumble_recoveries": 0,
+                            "def_targets": 0,
+                            "def_comps": 0,
+                            "blitzes": 0,
+                            "hurries": 0,
+                            "knockdowns": 0,
+                            "missed_tackles": 0,
+                            "batted_passes": 0
+                        },
+                        "conversions": {
+                            "pass_attempts": 0,
+                            "pass_successes": 0,
+                            "rush_attempts": 0,
+                            "rush_successes": 0,
+                            "receive_attempts": 2,
+                            "receive_successes": 1,
+                            "defense_attempts": 0,
+                            "defense_successes": 0
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": "2eec467f-9ce1-484c-b58f-e11615bede68",
+            "year": 2020,
+            "type": "REG",
+            "name": "REG",
+            "teams": [
+                {
+                    "id": "f7ddd7fa-0bae-4f90-bc8e-669e4d6cf2de",
+                    "name": "Jaguars",
+                    "market": "Jacksonville",
+                    "alias": "JAC",
+                    "sr_id": "sr:competitor:4386",
+                    "statistics": {
+                        "games_played": 13,
+                        "games_started": 12,
+                        "receiving": {
+                            "receptions": 53,
+                            "targets": 93,
+                            "yards": 706,
+                            "avg_yards": 13.321,
+                            "longest": 73,
+                            "touchdowns": 5,
+                            "longest_touchdown": 73,
+                            "yards_after_catch": 165,
+                            "redzone_targets": 11,
+                            "air_yards": 541,
+                            "broken_tackles": 0,
+                            "dropped_passes": 2,
+                            "catchable_passes": 2,
+                            "yards_after_contact": 45
+                        },
+                        "penalties": {
+                            "penalties": 1,
+                            "yards": 5
+                        },
+                        "defense": {
+                            "tackles": 0,
+                            "assists": 0,
+                            "combined": 0,
+                            "sacks": 0.0,
+                            "sack_yards": 0.0,
+                            "interceptions": 0,
+                            "passes_defended": 0,
+                            "forced_fumbles": 0,
+                            "fumble_recoveries": 0,
+                            "qb_hits": 0,
+                            "tloss": 0.0,
+                            "tloss_yards": 0.0,
+                            "safeties": 0,
+                            "sp_tackles": 0,
+                            "sp_assists": 0,
+                            "sp_forced_fumbles": 0,
+                            "sp_fumble_recoveries": 0,
+                            "sp_blocks": 0,
+                            "misc_tackles": 1,
+                            "misc_assists": 0,
+                            "misc_forced_fumbles": 0,
+                            "misc_fumble_recoveries": 0,
+                            "def_targets": 0,
+                            "def_comps": 0,
+                            "blitzes": 0,
+                            "hurries": 0,
+                            "knockdowns": 0,
+                            "missed_tackles": 0,
+                            "batted_passes": 0
+                        },
+                        "conversions": {
+                            "pass_attempts": 0,
+                            "pass_successes": 0,
+                            "rush_attempts": 0,
+                            "rush_successes": 0,
+                            "receive_attempts": 1,
+                            "receive_successes": 0,
+                            "defense_attempts": 0,
+                            "defense_successes": 0
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "_comment": "Generation started @ 2021-07-23 20:32:46 UTC ended @ 2021-07-23 20:32:46 UTC"
+}

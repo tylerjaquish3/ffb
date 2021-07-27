@@ -3,6 +3,22 @@
 $pageName = "Pre-Draft Rankings";
 include 'header.php';
 
+function desigIcon($id)
+{
+    if ($id == 'bust') {
+        return '<i class="icon-aid-kit" title="Bust"></i>';
+    }
+    if ($id == 'value') {
+        return '<i class="icon-price-tag" title="Value"></i>';
+    }
+    if ($id == 'sleeper') {
+        return '<i class="icon-sleepy2" title="Sleeper"></i>';
+    }
+    if ($id == 'breakout') {
+        return '<i class="icon-star-full" title="Breakout"></i>';
+    }
+    return '';
+}
 ?>
 <div class="app-content container-fluid">
     <div class="content-wrapper">
@@ -23,7 +39,7 @@ include 'header.php';
                                     while ($row = mysqli_fetch_array($result)) {
                                         ?>
                                         <li class="ui-state-default" id="item-<?php echo $row['id']; ?>">
-                                            <i class="icon-menu2"></i>&nbsp;&nbsp;&nbsp;<span class="color-<?php echo $row['position']; ?>"><?php echo $row['player']; ?></span>
+                                            <i class="icon-menu2"></i>&nbsp;&nbsp;&nbsp;<span class="color-<?php echo $row['position']; ?>"><?php echo $row['player'].' ('.$row['proj_points'].')'.desigIcon($row['designation']); ?></span>
                                         </li>
                                     <?php } ?>
                                 </ul>
@@ -50,8 +66,10 @@ include 'header.php';
                                                 <option value="4" <?php if ($tier == 4) { echo 'selected'; }?>>Tier 4</option>
                                                 <option value="5" <?php if ($tier == 5) { echo 'selected'; }?>>Tier 5</option>
                                                 <option value="6" <?php if ($tier == 6) { echo 'selected'; }?>>Tier 6</option>
+                                                <option value="7" <?php if ($tier == 7) { echo 'selected'; }?>>Tier 7</option>
+                                                <option value="8" <?php if ($tier == 8) { echo 'selected'; }?>>Tier 8</option>
                                             </select>
-                                            <span class="color-<?php echo $row['position']; ?>"><?php echo $row['player']; ?></span>
+                                            <span class="color-<?php echo $row['position']; ?>"><?php echo $row['player'].' ('.$row['proj_points'].')'; ?></span>
                                         </li>
                                     <?php } ?>
                                 </ul>
@@ -78,8 +96,10 @@ include 'header.php';
                                                 <option value="4" <?php if ($tier == 4) { echo 'selected'; }?>>Tier 4</option>
                                                 <option value="5" <?php if ($tier == 5) { echo 'selected'; }?>>Tier 5</option>
                                                 <option value="6" <?php if ($tier == 6) { echo 'selected'; }?>>Tier 6</option>
+                                                <option value="7" <?php if ($tier == 7) { echo 'selected'; }?>>Tier 7</option>
+                                                <option value="8" <?php if ($tier == 8) { echo 'selected'; }?>>Tier 8</option>
                                             </select>
-                                            <span class="color-<?php echo $row['position']; ?>"><?php echo $row['player']; ?></span>
+                                            <span class="color-<?php echo $row['position']; ?>"><?php echo $row['player'].' ('.$row['proj_points'].')'; ?></span>
                                         </li>
                                     <?php } ?>
                                 </ul>
@@ -106,8 +126,10 @@ include 'header.php';
                                                 <option value="4" <?php if ($tier == 4) { echo 'selected'; }?>>Tier 4</option>
                                                 <option value="5" <?php if ($tier == 5) { echo 'selected'; }?>>Tier 5</option>
                                                 <option value="6" <?php if ($tier == 6) { echo 'selected'; }?>>Tier 6</option>
+                                                <option value="7" <?php if ($tier == 7) { echo 'selected'; }?>>Tier 7</option>
+                                                <option value="8" <?php if ($tier == 8) { echo 'selected'; }?>>Tier 8</option>
                                             </select>
-                                            <span class="color-<?php echo $row['position']; ?>"><?php echo $row['player']; ?></span>
+                                            <span class="color-<?php echo $row['position']; ?>"><?php echo $row['player'].' ('.$row['proj_points'].')'; ?></span>
                                         </li>
                                     <?php } ?>
                                 </ul>
@@ -162,7 +184,7 @@ include 'header.php';
         direction: ltr;
         font-size: 11px;
     }
-    ul { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+    ul { list-style-type: none; margin: 0; padding: 0; }
     #sortable li { margin: 0 5px 5px 5px; padding: 5px; font-size: 1.2em; height: 1.5em; }
     html>body #sortable li { height: 1.5em; line-height: 1.2em; }
     .ui-state-highlight { height: 1.5em; line-height: 1.2em; }

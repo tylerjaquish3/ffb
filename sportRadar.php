@@ -91,7 +91,7 @@ var_dump($player->name);
                             }
 
                             // Save the data
-                            $sql = $conn->prepare("INSERT INTO player_data (preseason_ranking_id, sportradar_id, year, type, team,
+                            $sql = $conn->prepare("INSERT INTO player_data (preseason_ranking_id, sportradar_id, year, type, team_abbr,
                                 games_played, pass_attempts, pass_completions, pass_yards, pass_touchdowns, pass_interceptions,
                                 rush_attempts, rush_yards, rush_touchdowns, rec_targets, rec_receptions, rec_yards, rec_touchdowns, fumbles)
                                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
@@ -202,7 +202,7 @@ var_dump($season);
                     }
 
                     // Save the data
-                    $sql = $conn->prepare("INSERT INTO player_data (preseason_ranking_id, sportradar_id, year, type, team,
+                    $sql = $conn->prepare("INSERT INTO player_data (preseason_ranking_id, sportradar_id, year, type, team_abbr,
                         games_played, pass_attempts, pass_completions, pass_yards, pass_touchdowns, pass_interceptions,
                         rush_attempts, rush_yards, rush_touchdowns, rec_targets, rec_receptions, rec_yards, rec_touchdowns, fumbles)
                         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");

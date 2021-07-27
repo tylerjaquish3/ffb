@@ -26,10 +26,10 @@
 <?php
 $currentYear = 2021;
 $draftOrder = [
+	'Tyler',
     'Ben',
     'Cameron',
     'AJ',
-	'Tyler',
     'Gavin',
     'Everett',
     'Justin',
@@ -184,8 +184,8 @@ function desigIcon($id, $hasNote)
                                             $result = mysqli_query($conn,
                                                 "SELECT * FROM preseason_rankings pr
                                                 LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
-                                                JOIN player_data pd ON pd.preseason_ranking_id = pr.id
-                                                WHERE ranking_id IS NULL AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                WHERE ranking_id IS NULL
                                                 ORDER BY my_rank ASC"
                                             );
                                             while ($row = mysqli_fetch_array($result)) {
@@ -232,15 +232,17 @@ function desigIcon($id, $hasNote)
 
                                     <table class="table table-responsive" id="datatable-team">
                                         <thead>
+                                            <th>Rd</th>
                                             <th>Pos</th>
                                             <th>Player</th>
                                             <th>Bye</th>
                                             <th>ADP</th>
-                                            <th>Pick #</th>
+                                            <th>Pick</th>
                                         </thead>
                                         <tbody>
                                             <?php
                                             $myPlayers = [];
+                                            $rd = 0;
                                             $result = mysqli_query(
                                                 $conn,
                                                 "SELECT * FROM preseason_rankings
@@ -249,8 +251,10 @@ function desigIcon($id, $hasNote)
                                             );
                                             while ($row = mysqli_fetch_array($result)) {
                                                 $myPlayers[] = (int)$row['bye'];
+                                                $rd++;
                                                 ?>
                                                 <tr class="color-<?php echo $row['position']; ?>">
+                                                    <td><?php echo $rd; ?></td>
                                                     <td><?php echo $row['position']; ?></td>
                                                     <td><?php echo '<a data-toggle="modal" data-target="#player-data" onclick="showPlayerData('.(int)$row[0].')">'.$row['player'].'</a>' ?></td>
                                                     <td><?php echo $row['bye']; ?></td>
@@ -258,6 +262,11 @@ function desigIcon($id, $hasNote)
                                                     <td><?php echo $row['pick_number']; ?></td>
                                                 </tr>
                                             <?php
+                                            }
+                                            if ($rd < 18) {
+                                                for ($x = $rd+1; $x < 18; $x++) {
+                                                    echo '<tr><td>'.$x.'</td><td></td><td></td><td></td><td></td><td></td>';
+                                                }
                                             }
                                             $myPlayers = json_encode($myPlayers); ?>
                                         </tbody>
@@ -304,56 +313,56 @@ function desigIcon($id, $hasNote)
                                                 select *
                                                 from preseason_rankings pr
                                                 LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
-                                                JOIN player_data pd ON pd.preseason_ranking_id = pr.id
-                                                where position = 'QB' AND ranking_id IS NULL AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                where position = 'QB' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 5
                                                 ) UNION ALL (
                                                 select *
                                                 from preseason_rankings pr
                                                 LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
-                                                JOIN player_data pd ON pd.preseason_ranking_id = pr.id
-                                                where position = 'RB' AND ranking_id IS NULL AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                where position = 'RB' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 5
                                                 ) UNION ALL (
                                                 select *
                                                 from preseason_rankings pr
                                                 LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
-                                                JOIN player_data pd ON pd.preseason_ranking_id = pr.id
-                                                where position = 'WR' AND ranking_id IS NULL AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                where position = 'WR' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 5
                                                 ) UNION ALL (
                                                 select *
                                                 from preseason_rankings pr
                                                 LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
-                                                JOIN player_data pd ON pd.preseason_ranking_id = pr.id
-                                                where position = 'TE' AND ranking_id IS NULL AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                where position = 'TE' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 5
                                                 ) UNION ALL (
                                                 select *
                                                 from preseason_rankings pr
                                                 LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
-                                                JOIN player_data pd ON pd.preseason_ranking_id = pr.id
-                                                where position = 'DEF' AND ranking_id IS NULL AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                where position = 'DEF' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 5
                                                 ) UNION ALL (
                                                 select *
                                                 from preseason_rankings pr
                                                 LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
-                                                JOIN player_data pd ON pd.preseason_ranking_id = pr.id
-                                                where position = 'K' AND ranking_id IS NULL AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                where position = 'K' AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 5
                                                 ) UNION ALL (
                                                 select *
                                                 from preseason_rankings pr
                                                 LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
-                                                JOIN player_data pd ON pd.preseason_ranking_id = pr.id
-                                                where (position = 'D' OR position = 'DB') AND ranking_id IS NULL AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
+                                                where (position = 'D' OR position = 'DB') AND ranking_id IS NULL
                                                 order by my_rank asc
                                                 LIMIT 5
                                                 )"
@@ -438,7 +447,6 @@ function desigIcon($id, $hasNote)
                                     <div class="card-header">
                                         <h3>Turn Positions</h3>
                                     </div>
-
                                     <table class="table table-responsive" id="datatable-turn">
                                         <thead>
                                             <th>Pos</th>
@@ -508,8 +516,45 @@ function desigIcon($id, $hasNote)
                                 </div>
                             </div>
                         </div>
+
                         <br />
                         <input type="text" id="new-player"><button id="new-player-btn">Add Player</button>
+                        <br /><br /><br />
+
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="position-relative">
+                                    <div class="card-header">
+                                        <h3>Rolling List</h3>
+                                    </div>
+                                    <table class="table table-responsive" id="datatable-rolling-list">
+                                    <thead>
+                                        <th>Pick</th>
+                                        <th>Player</th>
+                                        <th>ADP</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $result = mysqli_query(
+                                            $conn,
+                                            "SELECT pick_number, player, position, adp FROM draft_selections ds
+                                            JOIN preseason_rankings pr ON pr.id = ds.ranking_id
+                                            ORDER BY pick_number desc LIMIT 20"
+                                        );
+                                        while ($row = mysqli_fetch_array($result)) {
+                                            $goodPick = $row['pick_number'] >= $row['adp'] ? 'good-pick' : 'bad-pick';
+                                        ?>
+                                            <tr class="color-<?php echo $row['position']; ?>">
+                                            <td><?php echo '<span class="sub '.$goodPick.'">'.$row['pick_number'].'</span>'; ?></td>
+                                            <td><?php echo $row['player']; ?></td>
+                                            <td><?php echo $row['adp']; ?></td>
+                                            </tr>
+                                        <?php
+                                        } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -524,7 +569,6 @@ function desigIcon($id, $hasNote)
                     <h4 class="modal-title">Draft Board</h4>
                 </div>
                 <div class="modal-body">
-
                     <table class="table table-responsive" id="datatable-board">
                         <thead>
                             <?php
@@ -732,6 +776,7 @@ function desigIcon($id, $hasNote)
     $(document).ready(function() {
 
         var playersTable = $('#datatable-players').DataTable({
+            "pageLength": 20,
             "order": [
                 [0, "asc"]
             ]
@@ -764,6 +809,15 @@ function desigIcon($id, $hasNote)
             "info": false,
             "order": [
                 [7, "desc"]
+            ]
+        });
+
+        var standingsTable = $('#datatable-rolling-list').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [0, "desc"]
             ]
         });
 
@@ -966,7 +1020,7 @@ function desigIcon($id, $hasNote)
                     } else {
                         table += '<tr>'+
                             '<td>'+item.year+'</td>'+
-                            '<td>'+item.team+'</td>'+
+                            '<td>'+item.team_abbr+'</td>'+
                             '<td>'+item.games_played+'</td>'+
                             '<td>'+item.pass_attempts+'</td>'+
                             '<td>'+item.pass_completions+'</td>'+

@@ -63,12 +63,21 @@
                                     <div class="card-header">
                                         <a type="button" id="hide-selected">Hide Selected</a>
                                         &nbsp;|&nbsp;
-                                        <a type="button" id="hide-te">Hide TE</a>
+                                        <span id="filter-btns">
+                                            <a type="button">QB</a>
+                                            &nbsp;|&nbsp;
+                                            <a type="button">RB</a>
+                                            &nbsp;|&nbsp;
+                                            <a type="button">WR</a>
+                                            &nbsp;|&nbsp;
+                                            <a type="button">TE</a>
+                                            &nbsp;|&nbsp;
+                                            <a type="button">DEF</a>
+                                            &nbsp;|&nbsp;
+                                            <a type="button">K</a>
+                                        </span>
                                         &nbsp;|&nbsp;
-                                        <a type="button" id="hide-def">Hide DEF</a>
-                                        &nbsp;|&nbsp;
-                                        <a type="button" id="hide-k">Hide K</a>
-
+                                        <a type="button" id="show-all">Show All</a>
                                     </div>
                                     <table class="table table-responsive" id="datatable-players">
                                         <thead>
@@ -158,6 +167,28 @@
         </div>
     </div>
 
+    <div class="modal fade" id="player-data" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="direction: ltr">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>
+                    <h4 class="modal-title">Player Data</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <input type="hidden" id="player-id">
+                            <div id="player-header"></div>
+                            <div id="fetched-data"></div>
+                            <textarea id="player-notes" cols=150 rows=6></textarea>
+                            <br /><a class="btn btn-secondary mine" id="save-note">Save</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 <?php include 'footer.html'; ?>
 
@@ -180,32 +211,84 @@
             playersTable.columns([25]).search('false').draw();
         });
 
-        $('#hide-te').click(function () {
-            doSearch('TE');
+        $('#show-all').click(function () {
+            playersTable.columns('').search('').draw();
         });
 
-        $('#hide-def').click(function () {
-            doSearch('DEF');
+        $('#filter-btns a').click(function () {
+            playersTable.columns([3]).search($(this)[0].outerText).draw();
         });
-
-        $('#hide-k').click(function () {
-            doSearch('K');
-        });
-
-        var posArray = [];
-        function doSearch(pos) {
-            posArray.push(pos);
-            let regex = '^(';
-
-            posArray.forEach(function (item) {
-                regex += '(?!'+item+')';
-            });
-            regex += '.)*$';
-
-            playersTable.columns([3]).search(regex, true, false).draw();
-        }
 
     });
+
+    function showPlayerData(id)
+    {
+        $.ajax({
+            type : 'post',
+            url : 'updateSelected.php',
+            data :  {
+                request: 'player_data',
+                id: id
+            },
+            success : function(data){
+                let table = '<table id="player-history"><thead>';
+                table += '<th>Year</th><th>Team</th><th>GP</th>';
+                table += '<th>Pass Att</th><th>Comp</th><th>Pass Yds</th><th>Pass TDs</th><th>Int</th>';
+                table += '<th>Rush Att</th><th>Rush Yds</th><th>Rush TDs</th>';
+                table += '<th>Tar</th><th>Rec</th><th>Rec Yds</th><th>Rec TDs</th><th>Fumbles</th>';
+                table += '</thead><tbody>';
+
+                data = JSON.parse(data);
+                // Loop through data to add rows
+                data.forEach(function (item, index) {
+
+                    if (index == 0) {
+                        let header = '<h4>'+item.player+' ('+item.position + ' | ' + item.team+')</h4>';
+                        $('#player-header').html(header);
+                        $('#player-notes').val(item.notes);
+                        $('#player-id').val(item.id);
+                    } else {
+                        table += '<tr>'+
+                        '<td>'+item.year+'</td>'+
+                        '<td>'+item.team_abbr+'</td>'+
+                        '<td>'+item.games_played+'</td>'+
+                        '<td>'+item.pass_attempts+'</td>'+
+                        '<td>'+item.pass_completions+'</td>'+
+                        '<td>'+item.pass_yards+'</td>'+
+                        '<td>'+item.pass_touchdowns+'</td>'+
+                        '<td>'+item.pass_interceptions+'</td>'+
+                        '<td>'+item.rush_attempts+'</td>'+
+                        '<td>'+item.rush_yards+'</td>'+
+                        '<td>'+item.rush_touchdowns+'</td>'+
+                        '<td>'+item.rec_targets+'</td>'+
+                        '<td>'+item.rec_receptions+'</td>'+
+                        '<td>'+item.rec_yards+'</td>'+
+                        '<td>'+item.rec_touchdowns+'</td>'+
+                        '<td>'+item.fumbles+'</td></tr>';
+                    }
+                });
+
+                table += '</tbody></table>';
+                $('#fetched-data').html(table);
+            }
+        });
+    }
+
+    $('#save-note').click(function() {
+        $.ajax({
+            type : 'post',
+            url : 'updateSelected.php',
+            data :  {
+                request: 'notes',
+                id: $('#player-id').val(),
+                notes: $('#player-notes').val()
+            },
+            success : function(data){
+                location.reload();
+            }
+        });
+    });
+
 </script>
 
 <style>
@@ -252,6 +335,18 @@
 
     .color-D td, .color-DB td, .color-D, .color-DB {
         background-color: #fcf8b3;
+    }
+
+    .modal-lg {
+        max-width: 90%;
+    }
+
+    table#player-history td, th {
+        padding: 10px 15px;
+    }
+
+    table.dataTable tbody th, table.dataTable tbody td {
+        padding: 2px 10px;
     }
 
 </style>

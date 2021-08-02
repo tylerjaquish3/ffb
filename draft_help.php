@@ -21,21 +21,27 @@
     <link rel="stylesheet" type="text/css" href="assets/dataTables.min.css">
     <link rel="stylesheet" type="text/css" href="assets/suntown.css">
     <link rel="stylesheet" type="text/css" href="assets/responsive.css">
+
+    <script src="assets/dataTables.js"></script>
+    <script src="assets/tether.min.js" type="text/javascript"></script>
+    <script src="assets/bootstrap.min.js" type="text/javascript"></script>
 </head>
 
 <?php
+include 'connections.php';
+
 $currentYear = 2021;
 $draftOrder = [
-	'Tyler',
-    'Ben',
-    'Cameron',
-    'AJ',
-    'Gavin',
-    'Everett',
-    'Justin',
-    'Andy',
-    'Matt',
-    'Cole',
+    'Ben'       => 'ben.jpg',
+    'Cameron'   => 'cam.jpg',
+	'Tyler'     => 'tyler.jpg',
+    'AJ'        => 'aj.jpg',
+    'Gavin'     => 'gavin.jpg',
+    'Everett'   => 'everett.jpg',
+    'Justin'    => 'justin.jpg',
+    'Andy'      => 'andy.jpg',
+    'Matt'      => 'matt.jpg',
+    'Cole'      => 'cole.jpg',
 ];
 
 function desigIcon($id, $hasNote)
@@ -58,6 +64,47 @@ function desigIcon($id, $hasNote)
     }
     return $note;
 }
+
+    $result = mysqli_query($conn, "SELECT count(id) as picks FROM draft_selections");
+    while ($row = mysqli_fetch_array($result)) {
+        $currentPick = $row['picks'] + 1;
+    }
+
+    $pickers = [];
+    $allDraftOrder = array_reverse(array_keys($draftOrder));
+    for ($x = 0; $x < 30; $x++) {
+        $allDraftOrder = array_reverse($allDraftOrder);
+        foreach ($allDraftOrder as $man) {
+            $pickers[] = $man;
+        }
+    }
+
+    // var_dump($pickers);
+
+    $myKey = array_search('Tyler', array_keys($draftOrder));
+    $oddRounds = $myKey + 1;
+    $evenRounds = 10 - $myKey;
+    $allMyPicks = [];
+    for ($x = 0; $x < 30; $x++) {
+        if ($x % 2 == 0) {
+            // Even round
+            $allMyPicks[] = $x * 10 + $oddRounds;
+        } else {
+            $allMyPicks[] = $x * 10 + $evenRounds;
+        }
+    }
+
+    foreach ($allMyPicks as $pick) {
+        if ($pick >= $currentPick) {
+            $myNextPick = $pick - $currentPick;
+
+            if ($myNextPick == 0) {
+                $myNextPick = 'Now!';
+            }
+            break;
+        }
+    }
+
 ?>
 
 <body data-open="click" data-menu="vertical-menu" data-col="2-columns" class="vertical-layout vertical-menu 2-columns fixed-navbar">
@@ -82,81 +129,56 @@ function desigIcon($id, $hasNote)
         </div>
     </nav>
 
-    <?php include 'functions.php'; ?>
-
     <div class="app-content container-fluid">
         <div class="content-wrapper">
             <div class="content-header row"></div>
 
             <div class="content-body">
-
+                <div class="row" id="pick-avatars">
+                    <div class="col-xs-12">
+                        <?php
+                        $limit = 0;
+                        foreach ($pickers as $index => $picker) {
+                            if ($index+1 >= $currentPick && $limit < 15) {
+                                $img = $draftOrder[$picker];
+                                echo '<img src="/images/'.$img.'" width="100px">';
+                                $limit++;
+                            }
+                        }
+                        ?>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-xs-12 col-md-9">
                         <div class="card">
                             <div class="card-body">
                                 <div class="position-relative">
-                                    <?php
-                                        $result = mysqli_query(
-                                            $conn,
-                                            "SELECT count(id) as picks FROM draft_selections"
-                                        );
-                                        while ($row = mysqli_fetch_array($result)) {
-                                            $currentPick = $row['picks'] + 1;
-                                        }
 
-                                        $pickers = [];
-                                        $allDraftOrder = array_reverse($draftOrder);
-                                        for ($x = 0; $x < 30; $x++) {
-                                            $allDraftOrder = array_reverse($allDraftOrder);
-                                            if ($x % 2 != 0) {
-                                                // Odd round
-                                            }
-                                            foreach ($allDraftOrder as $man) {
-                                                $pickers[] = $man;
-                                            }
-                                        }
-
-                                        $myKey = array_search('Tyler', $draftOrder);
-                                        $oddRounds = $myKey + 1;
-                                        $evenRounds = 10 - $myKey;
-                                        $allMyPicks = [];
-                                        for ($x = 0; $x < 30; $x++) {
-                                            if ($x % 2 == 0) {
-                                                // Even round
-                                                $allMyPicks[] = $x * 10 + $oddRounds;
-                                            } else {
-                                                $allMyPicks[] = $x * 10 + $evenRounds;
-                                            }
-                                        }
-
-                                        foreach ($allMyPicks as $pick) {
-                                            if ($pick >= $currentPick) {
-                                                $myNextPick = $pick - $currentPick;
-                                                break;
-                                            }
-                                        }
-                                        ?>
                                     <div class="card-header">
                                         <h3>
                                             Current Pick: <?php echo $pickers[$currentPick-1].' ('.$currentPick.')'; ?>
                                             &nbsp;|&nbsp;
                                             My Next Pick: <?php echo $myNextPick; ?>
                                         </h3>
-                                        <a type="button" data-toggle="modal" data-target="#draft-board" href="#">Draft Board</a>
+                                        <a data-toggle="modal" data-target="#draft-board" href="#">Draft Board</a>
                                         &nbsp;|&nbsp;
-                                        <a type="button" data-toggle="modal" data-target="#cheat-sheet" href="#">Cheat Sheet</a>
+                                        <a data-toggle="modal" data-target="#cheat-sheet" href="#">Cheat Sheet</a>
                                         &nbsp;|&nbsp;
-                                        <a type="button" data-toggle="modal" data-target="#proj-standings" href="#">Projected Standings</a>
+                                        <a data-toggle="modal" data-target="#proj-standings" id="show-standings" href="#">Standings</a>
                                         &nbsp;|&nbsp;
-                                        <a type="button" id="hide-te">Hide TE</a>
+                                        <a data-toggle="modal" data-target="#depth-chart" href="#">Depth Chart</a>
                                         &nbsp;|&nbsp;
-                                        <a type="button" id="hide-def">Hide DEF</a>
+                                        <a href="players.php" target="_blank">Players</a>
                                         &nbsp;|&nbsp;
-                                        <a type="button" id="hide-k">Hide K</a>
+                                        <a id="hide-te">Hide TE</a>
                                         &nbsp;|&nbsp;
-                                        <a type="button" id="undoPick">Undo Pick</a>
+                                        <a id="hide-def">Hide DEF</a>
                                         &nbsp;|&nbsp;
-                                        <a type="button" id="restartDraft">Restart Draft</a>
+                                        <a id="hide-k">Hide K</a>
+                                        &nbsp;|&nbsp;
+                                        <a id="undoPick">Undo Pick</a>
+                                        &nbsp;|&nbsp;
+                                        <a id="restartDraft">Restart Draft</a>
                                     </div>
                                     <table class="table table-responsive" id="datatable-players">
                                         <thead>
@@ -396,15 +418,16 @@ function desigIcon($id, $hasNote)
                     </div>
 
                     <?php
-                    $myKey = array_search('Tyler', $draftOrder);
+                    $manOrder = array_keys($draftOrder);
+                    $myKey = array_search('Tyler', $manOrder);
                     $turnPicks = $turnPlayers = [];
                     if ($myKey < 5) {
-                        $turnManagers = array_slice($draftOrder, 0, $myKey);
+                        $turnManagers = array_slice($manOrder, 0, $myKey);
                         for ($x = 1; $x <= $myKey; $x++) {
                             $turnPicks[] = $x;
                         }
                     } else {
-                        $turnManagers = array_slice($draftOrder, $myKey+1);
+                        $turnManagers = array_slice($manOrder, $myKey+1);
                         for ($x = $myKey+2; $x <= 10; $x++) {
                             $turnPicks[] = $x;
                         }
@@ -572,7 +595,7 @@ function desigIcon($id, $hasNote)
                     <table class="table table-responsive" id="datatable-board">
                         <thead>
                             <?php
-                            foreach ($draftOrder as $man) {
+                            foreach ($draftOrder as $man => $avatar) {
                                 echo '<th>'.$man.'</th>';
                             }
                             ?>
@@ -696,7 +719,7 @@ function desigIcon($id, $hasNote)
                                 <tbody>
                                     <?php
                                     $drafted = [];
-                                    foreach ($draftOrder as $man) {
+                                    foreach ($draftOrder as $man => $avatar) {
                                         $drafted[$man] = ['QB' => 0,'RB' => 0,'WR' => 0,'TE' => 0,'DEF' => 0,'K' => 0,'Total' => 0,
                                         'QBc' => 0, 'RBc' => 0, 'WRc' => 0, 'TEc' => 0, 'DEFc' => 0, 'Kc' => 0,
                                         'QBm' => 2, 'RBm' => 3, 'WRm' => 3, 'TEm' => 1, 'DEFm' => 1, 'Km' => 1];
@@ -757,8 +780,9 @@ function desigIcon($id, $hasNote)
                             <input type="hidden" id="player-id">
                             <div id="player-header"></div>
                             <div id="fetched-data"></div>
+
                             <textarea id="player-notes" cols=150 rows=6></textarea>
-                            <br /><a class="btn btn-secondary mine" id="save-note">Save</a>
+                            <br /><a class="btn btn-secondary mine" id="save-note">Save</a><div id="confirm"></div>
                         </div>
                     </div>
                 </div>
@@ -766,60 +790,144 @@ function desigIcon($id, $hasNote)
         </div>
     </div>
 
-<?php include 'footer.html'; ?>
+    <div class="modal fade" id="depth-chart" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="direction: ltr">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>
+                    <h4 class="modal-title">Depth Chart</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <table class="table table-responsive" id="datatable-depth">
+                                <thead>
+                                    <th>Team</th>
+                                    <th>QB 1</th>
+                                    <th>QB 2</th>
+                                    <th>RB 1</th>
+                                    <th>RB 2</th>
+                                    <th>WR 1</th>
+                                    <th>WR 2</th>
+                                    <th>WR 3</th>
+                                    <th>WR 4</th>
+                                    <th>TE</th>
+                                    <th>K</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $result = mysqli_query($conn, "SELECT team,
+                                        max(case when position = 'QB' and depth = 1 then player ELSE '' end) as QB1,
+                                        max(case when position = 'QB' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as QB1p,
+                                        max(case when position = 'QB' and depth = 2 then player ELSE '' end) as QB2,
+                                        max(case when position = 'QB' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as QB2p,
+                                        max(case when position = 'RB' and depth = 1 then player ELSE '' end) as RB1,
+                                        max(case when position = 'RB' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as RB1p,
+                                        max(case when position = 'RB' and depth = 2 then player ELSE '' end) as RB2,
+                                        max(case when position = 'RB' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as RB2p,
+                                        max(case when position = 'WR' and depth = 1 then player ELSE '' end) as WR1,
+                                        max(case when position = 'WR' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as WR1p,
+                                        max(case when position = 'WR' and depth = 2 then player ELSE '' end) as WR2,
+                                        max(case when position = 'WR' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as WR2p,
+                                        max(case when position = 'WR' and depth = 3 then player ELSE '' end) as WR3,
+                                        max(case when position = 'WR' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as WR3p,
+                                        max(case when position = 'WR' and depth = 4 then player ELSE '' end) as WR4,
+                                        max(case when position = 'WR' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as WR4p,
+                                        max(case when position = 'TE' and depth = 1 then player ELSE '' end) as TE1,
+                                        max(case when position = 'TE' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as TE1p,
+                                        max(case when position = 'K' then player ELSE '' end) as K,
+                                        max(case when position = 'K' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as Kp
+                                        FROM preseason_rankings pr
+                                        LEFT JOIN draft_selections ds ON ds.ranking_id = pr.id
+                                        WHERE team IS NOT null
+                                        GROUP BY team");
+                                    while ($row = mysqli_fetch_array($result)) {
+                                    ?>
+                                        <tr>
+                                            <td><strong><?php echo $row['team']; ?></strong></td>
+                                            <td class="color-QB <?php echo $row['QB1'] == $row['QB1p'] ? 'color-gray' : ''; ?>"><?php echo $row['QB1']; ?></td>
+                                            <td class="color-QB <?php echo $row['QB2'] == $row['QB2p'] ? 'color-gray' : ''; ?>"><?php echo $row['QB2']; ?></td>
+                                            <td class="color-RB <?php echo $row['RB1'] == $row['RB1p'] ? 'color-gray' : ''; ?>"><?php echo $row['RB1']; ?></td>
+                                            <td class="color-RB <?php echo $row['RB1'] == $row['RB2p'] ? 'color-gray' : ''; ?>"><?php echo $row['RB2']; ?></td>
+                                            <td class="color-WR <?php echo $row['WR1'] == $row['WR1p'] ? 'color-gray' : ''; ?>"><?php echo $row['WR1']; ?></td>
+                                            <td class="color-WR <?php echo $row['WR2'] == $row['WR2p'] ? 'color-gray' : ''; ?>"><?php echo $row['WR2']; ?></td>
+                                            <td class="color-WR <?php echo $row['WR3'] == $row['WR3p'] ? 'color-gray' : ''; ?>"><?php echo $row['WR3']; ?></td>
+                                            <td class="color-WR <?php echo $row['WR4'] == $row['WR4p'] ? 'color-gray' : ''; ?>"><?php echo $row['WR4']; ?></td>
+                                            <td class="color-TE <?php echo $row['TE1'] == $row['TE1p'] ? 'color-gray' : ''; ?>"><?php echo $row['TE1']; ?></td>
+                                            <td class="color-K <?php echo $row['K'] == $row['Kp'] ? 'color-gray' : ''; ?>"><?php echo $row['K']; ?></td>
+                                        </tr>
+                                    <?php
+                                    } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <script type="text/javascript">
 
     let myPlayers = "<?php echo $myPlayers; ?>";
     myPlayers = JSON.parse(myPlayers);
 
+    var playersTable = $('#datatable-players').DataTable({
+        "pageLength": 20,
+        "order": [
+            [0, "asc"]
+        ]
+    });
+    var teamTable = $('#datatable-team').DataTable({
+        "searching": false,
+        "paging": false,
+        "info": false,
+        "sort": false
+    });
+    var top5Table = $('#datatable-top5').DataTable({
+        "searching": false,
+        "paging": false,
+        "info": false,
+        "sort": false
+    });
+    var turnTable = $('#datatable-turn').DataTable({
+        "searching": false,
+        "paging": false,
+        "info": false,
+        "sort": false
+    });
+    var standingsTable = $('#datatable-standings').DataTable({
+        "searching": false,
+        "paging": false,
+        "info": false,
+        "order": [
+            [7, "desc"]
+        ]
+    });
+    var rollingTable = $('#datatable-rolling-list').DataTable({
+        "searching": false,
+        "paging": false,
+        "info": false,
+        "order": [
+            [0, "desc"]
+        ]
+    });
+    var depthTable = $('#datatable-depth').DataTable({
+        "searching": false,
+        "paging": false,
+        "info": false,
+        "autoWidth": false,
+        "order": [
+            [0, "asc"]
+        ]
+    });
+
     $(document).ready(function() {
 
-        var playersTable = $('#datatable-players').DataTable({
-            "pageLength": 20,
-            "order": [
-                [0, "asc"]
-            ]
-        });
-
-        var teamTable = $('#datatable-team').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "sort": false
-        });
-
-        var top5Table = $('#datatable-top5').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "sort": false
-        });
-
-        var turnTable = $('#datatable-turn').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "sort": false
-        });
-
-        var standingsTable = $('#datatable-standings').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [7, "desc"]
-            ]
-        });
-
-        var standingsTable = $('#datatable-rolling-list').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [0, "desc"]
-            ]
-        });
+        let currentPick = "<?php echo $currentPick-1; ?>";
+        if (currentPick % 10 == 0 && currentPick != 0) {
+            $('#proj-standings').modal('show');
+        }
 
         $('#datatable-players').on('click', 'tbody .taken', function () {
             var data_row = playersTable.row($(this).closest('tr')).data();
@@ -1042,23 +1150,23 @@ function desigIcon($id, $hasNote)
                 $('#fetched-data').html(table);
             }
         });
-
-        $('#save-note').click(function() {
-            $.ajax({
-                type : 'post',
-                url : 'updateSelected.php',
-                data :  {
-                    request: 'notes',
-                    id: $('#player-id').val(),
-                    notes: $('#player-notes').val()
-                },
-                success : function(data){
-
-                }
-            });
-        });
-
     }
+
+    $('#save-note').click(function() {
+        $.ajax({
+            type : 'post',
+            url : 'updateSelected.php',
+            data :  {
+                request: 'notes',
+                id: $('#player-id').val(),
+                notes: $('#player-notes').val()
+            },
+            success : function(data){
+                $('#confirm').html('Saved!');
+                location.reload();
+            }
+        });
+    });
 </script>
 
 <style>
@@ -1090,6 +1198,10 @@ function desigIcon($id, $hasNote)
 
     .mine {
         background-color: #8cfa84;
+    }
+
+    .color-gray td, .color-gray {
+        background-color: lightgray !important;
     }
 
     .color-QB td, .color-QB {
@@ -1149,5 +1261,13 @@ function desigIcon($id, $hasNote)
 
     table#player-history td, th {
         padding: 10px 15px;
+    }
+
+    table.dataTable tbody th, table.dataTable tbody td {
+        padding: 2px 10px;
+    }
+
+    div#pick-avatars {
+        text-align: center;
     }
 </style>

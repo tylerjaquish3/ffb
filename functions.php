@@ -2,13 +2,6 @@
 
 include 'connections.php';
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname, $port);
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
 $result = mysqli_query($conn, "SELECT year FROM rosters ORDER BY year DESC LIMIT 1");
 while ($row = mysqli_fetch_array($result)) {
     $season = $row['year'];

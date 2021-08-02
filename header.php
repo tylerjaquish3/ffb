@@ -39,7 +39,7 @@
     <!-- BEGIN Custom CSS-->
     <link rel="stylesheet" type="text/css" href="assets/style-rtl.css">
     <!-- END Custom CSS-->
-    <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="assets/dataTables.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="assets/suntown.css">
     <link rel="stylesheet" type="text/css" href="assets/responsive.css">
 

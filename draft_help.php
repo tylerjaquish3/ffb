@@ -33,15 +33,15 @@ include 'connections.php';
 $currentYear = 2021;
 $draftOrder = [
     'Ben'       => 'ben.jpg',
-    'Cameron'   => 'cam.jpg',
-	'Tyler'     => 'tyler.jpg',
-    'AJ'        => 'aj.jpg',
-    'Gavin'     => 'gavin.jpg',
-    'Everett'   => 'everett.jpg',
-    'Justin'    => 'justin.jpg',
-    'Andy'      => 'andy.jpg',
-    'Matt'      => 'matt.jpg',
     'Cole'      => 'cole.jpg',
+    'Gavin'     => 'gavin.jpg',
+    'Cameron'   => 'cam.jpg',
+    'Justin'    => 'justin.jpg',
+	'Tyler'     => 'tyler.jpg',
+    'Matt'      => 'matt.jpg',
+    'Everett'   => 'everett.jpg',
+    'AJ'        => 'aj.jpg',
+    'Andy'      => 'andy.jpg',
 ];
 
 function desigIcon($id, $hasNote)

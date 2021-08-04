@@ -109,7 +109,7 @@ include 'sidebar.html';
                                     <li>Playoff Tie-Breaker:	Best regular season record vs opponent wins</li>
                                     <li>Playoff Reseeding:	Yes</li>
                                     <li>Divisions:	No</li>
-                                    <li>Roster Positions:	QB, WR, WR, WR, RB, RB, TE, W/R/T, Q/W/R/T, K, DEF, BN, BN, BN, BN, BN, BN, IR, IR, IR, IR</li>
+                                    <li>Roster Positions:	QB, WR, WR, WR, RB, RB, TE, W/R/T, Q/W/R/T, K, DEF, BN, BN, BN, BN, BN, BN, IR, IR</li>
                                     <li>Fractional Points:	Yes</li>
                                     <li>Negative Points:	Yes</li>
                                 </ul>
@@ -123,7 +123,7 @@ include 'sidebar.html';
                 <div class="col-xs-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Meeting Agenda</h4>
+                            <h4>Meeting Agenda | 8/3/2021</h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">
@@ -132,16 +132,16 @@ include 'sidebar.html';
                                 <br />
                                 <strong>Vote on the following:</strong>
                                 <ol>
-                                    <li>Include/exclude IDP positions and how many? <a href="voteInfo.php#idp">More info</a></li>
-                                    <li>Keep the superflex position (Q/W/R/T) or go back to QB spot? <a href="voteInfo.php#superflex">More info</a></li>
-                                    <li>Keep 4 IR positions or fewer? <a href="voteInfo.php#ir">More info</a></li>
-                                    <li>Team Defense points awarded <a href="voteInfo.php#teamdef">More info</a></li>
-                                    <li>Field goal yards per point <a href="voteInfo.php#fgyards">More info</a></li>
-                                    <li>Add license plate frame for loser? <a href="voteInfo.php#license">More info</a></li>
-                                    <li>Any other items needing vote?</li>
+                                    <li>Include/exclude IDP positions and how many? <a href="voteInfo.php#idp">More info</a> <strong>Voted to keep as-is.</strong></li>
+                                    <li>Keep the superflex position (Q/W/R/T) or go back to QB spot? <a href="voteInfo.php#superflex">More info</a> <strong>Voted to keep as-is.</strong></li>
+                                    <li>Keep 4 IR positions or fewer? <a href="voteInfo.php#ir">More info</a> <strong>Voted to change to 2 IR positions.</strong></li>
+                                    <li>Team Defense points awarded <a href="voteInfo.php#teamdef">More info</a> <strong>Voted to add points for prop A. Voted to keep prop B as-is.</strong></li>
+                                    <li>Field goal yards per point <a href="voteInfo.php#fgyards">More info</a> <strong>Voted to change to YPP stat category and remove ranges.</strong></li>
+                                    <li>Add license plate frame for loser? <a href="voteInfo.php#license">More info</a> <strong>Voted to make loser sit on a toilet during draft and their team name shall be set by the champion.</strong></li>
+                                    <li>Change to 2 team DEF positions <strong>Voted to keep as-is.</strong></li>
                                 </ol>
-                                <strong>Determine draft order</strong><br />
-                                <strong>Draft date TBD</strong>
+                                <strong>Determine 2021 draft order</strong><br />
+                                <strong>Draft date Monday, Sept 6, 2021 | 4:00pm | Spokane Valley, WA</strong>
                             </div>
                         </div>
                     </div>

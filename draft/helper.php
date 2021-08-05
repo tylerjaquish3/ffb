@@ -64,7 +64,7 @@
 
     // Determine tendency/need for each manager
     foreach ($draftOrder as $man => $avatar) {
-        for ($x = 1; $x < 8; $x++) {
+        for ($x = 1; $x < 23; $x++) {
             $tendency[$man][$x]['picks'] = [
                 'QB' => 0, 'RB' => 0, 'WR' => 0, 'TE' => 0, 'DEF' => 0, 'LB' => 0
             ];
@@ -107,7 +107,7 @@
         foreach ($round as $rd => $stuff) {
             foreach ($stuff['need'] as $pos => $val) {
                 // Number 11 is based on weighted number of positions
-                $tendency[$name][$rd]['need_pct'][$pos] = ($val / 11);
+                $tendency[$name][$rd]['need_pct'][$pos] = $val < 0 ? 0 : ($val / 11);
             }
         }
     }
@@ -156,7 +156,7 @@
                                 $limit++;
 
                                 $likelihood = [];
-                                if (isset($tendency[$picker][$currentRd])) {
+                                if (isset($tendency[$picker][$currentRd]['want_pct'])) {
                                     $needs = $tendency[$picker][$currentRd]['need_pct'];
                                     $wants = $tendency[$picker][$currentRd]['want_pct'];
                                     arsort($needs);

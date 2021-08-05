@@ -3,22 +3,6 @@
 $pageName = "Pre-Draft Rankings";
 include 'header.php';
 
-function desigIcon($id)
-{
-    if ($id == 'bust') {
-        return '<i class="icon-aid-kit" title="Bust"></i>';
-    }
-    if ($id == 'value') {
-        return '<i class="icon-price-tag" title="Value"></i>';
-    }
-    if ($id == 'sleeper') {
-        return '<i class="icon-sleepy2" title="Sleeper"></i>';
-    }
-    if ($id == 'breakout') {
-        return '<i class="icon-star-full" title="Breakout"></i>';
-    }
-    return '';
-}
 ?>
 <div class="app-content container-fluid">
     <div class="content-wrapper">
@@ -39,7 +23,7 @@ function desigIcon($id)
                                     while ($row = mysqli_fetch_array($result)) {
                                         ?>
                                         <li class="ui-state-default" id="item-<?php echo $row['id']; ?>">
-                                            <i class="icon-menu2"></i>&nbsp;&nbsp;&nbsp;<span class="color-<?php echo $row['position']; ?>"><?php echo $row['player'].' ('.$row['proj_points'].')'.desigIcon($row['designation']); ?></span>
+                                            <i class="icon-menu2"></i>&nbsp;&nbsp;&nbsp;<span class="color-<?php echo $row['position']; ?>"><?php echo $row['player'].' ('.$row['proj_points'].')'.desigIcon($row['designation'], $row['notes']); ?></span>
                                         </li>
                                     <?php } ?>
                                 </ul>
@@ -143,7 +127,7 @@ function desigIcon($id)
     </div>
 </div>
 
-<?php include 'footer.html'; ?>
+<?php include '../footer.html'; ?>
 
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
@@ -164,8 +148,8 @@ function desigIcon($id)
         $("#sortable").disableSelection();
 
         $('.tier-selector').change(function () {
-            console.log($(this).val());
-            console.log($(this).data('tier-id'));
+            // console.log($(this).val());
+            // console.log($(this).data('tier-id'));
             $.ajax({
                 data: {
                     tier: $(this).val(),
@@ -194,31 +178,4 @@ function desigIcon($id)
         font-size: 16px;
     }
 
-    .color-QB {
-        background-color: aquamarine;
-    }
-
-    .color-RB {
-        background-color:burlywood;
-    }
-
-    .color-WR {
-        background-color: #fa9cff;
-    }
-
-    .color-TE {
-        background-color: #69cfff;
-    }
-
-    .color-DEF {
-        background-color: #dffcde;
-    }
-
-    .color-K {
-        background-color: #f7cbcc;
-    }
-
-    .color-IDP {
-        background-color: #fcf8b3;
-    }
 </style>

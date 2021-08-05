@@ -1,27 +1,7 @@
-<!DOCTYPE html>
-<html lang="en" data-textdirection="rtl" class="loading">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-
-    <title>Players List</title>
-
-    <link rel="icon" type="image/png" href="/images/favicon.jpg">
-    <meta property="og:title" content="Suntown Fantasy Football League" />
-    <meta property="og:description" content="The best league in all the land" />
-    <meta property="og:url" content="http://suntownffb.us" />
-    <meta property="og:image" content="http://suntownffb.us/images/favicon.jpg" />
-
-    <link rel="stylesheet" type="text/css" href="assets/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/icomoon.css">
-    <link rel="stylesheet" type="text/css" href="assets/bootstrap-extended.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/app.min.css">
-    <!-- <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet"> -->
-    <link rel="stylesheet" type="text/css" href="assets/dataTables.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/suntown.css">
-    <link rel="stylesheet" type="text/css" href="assets/responsive.css">
-</head>
+<?php
+    $pageName = "Draft Helper";
+    include 'header.php';
+?>
 
 <body data-open="click" data-menu="vertical-menu" data-col="2-columns" class="vertical-layout vertical-menu 2-columns fixed-navbar">
 
@@ -45,7 +25,7 @@
         </div>
     </nav>
 
-    <?php include 'functions.php';
+    <?php
     $currentYear = 2021;
     ?>
 
@@ -190,7 +170,7 @@
     </div>
 
 
-<?php include 'footer.html'; ?>
+<?php include '../footer.html'; ?>
 
 <script type="text/javascript">
 

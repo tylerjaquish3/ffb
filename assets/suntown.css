@@ -194,3 +194,52 @@ span.seed {
 .text-center {
     text-align: center;
 }
+
+.color-gray td, .color-gray {
+    background-color: lightgray !important;
+}
+
+.color-QB td, .color-QB {
+    background-color: aquamarine;
+}
+
+.color-RB td, .color-RB {
+    background-color: burlywood;
+}
+
+.color-WR td, .color-WR {
+    background-color: #fa9cff;
+}
+
+.color-TE td, .color-TE {
+    background-color: #69cfff;
+}
+
+.color-DEF td, .color-DEF {
+    background-color: #dffcde;
+}
+
+.color-K td, .color-K {
+    background-color: #f7cbcc;
+}
+
+.color-D td, .color-DB td, .color-D, .color-DB {
+    background-color: #fcf8b3;
+}
+
+td.color-bad {
+    background: #fa887f;
+}
+
+td.color-good {
+    background: #8cfa84;
+}
+
+tr.color-black td {
+    background-color: #000;
+    padding: 0px !important;
+}
+
+.modal-lg {
+    max-width: 90%;
+}

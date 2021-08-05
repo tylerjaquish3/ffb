@@ -30,13 +30,13 @@ include 'sidebar.html';
 
                                 <p>This league will always be a free, head-to-head league hosted by Yahoo. The only prize is a plaque with the champion's name inscribed that gets added to the league trophy,
                                     as well as the trophy living with the champion until a new champion is crowned. The league has also voted that the 10th place finisher
-                                    must pay for the new plaque at the end of each season.</p>
+                                    must pay for the new plaque at the end of each season, sit on a toilet during the next draft, and their team name (for the following season) shall be set by the champion.</p>
 
                                 <p>The league matchups schedule shall use data from prior seasons to determine the optimal weekly schedules for each manager to face opponents as equally as possible.
                                     Since this has been enacted relatively recently, the data is skewed and may take several seasons to even out the schedules.
                                 </p>
 
-                                <p>All parts of this constitution, including rules and practices, may be modified or ammended with a majority vote. However, if deemed minor, changes may be made by the commissioner without
+                                <p>All parts of this constitution, including rules and practices, may be modified or amended with a majority vote. However, if deemed minor, changes may be made by the commissioner without
                                     whining or complaining by the members. Questions concerning the interpretation of this document shall be reviewed and <u>swiftly</u> deleted by the commissioner.</p>
                             </div>
                         </div>
@@ -105,7 +105,7 @@ include 'sidebar.html';
                                     <li>Waiver Type:	Continual rolling list</li>
                                     <li>Weekly Waivers:	Game Time - Tuesday</li>
                                     <li>Post Draft Players:	Follow Waiver Rules</li>
-                                    <li>Playoffs:	Week 14, 15, and 16 (6 teams)</li>
+                                    <li>Playoffs:	Week 15, 16, and 17 (6 teams)</li>
                                     <li>Playoff Tie-Breaker:	Best regular season record vs opponent wins</li>
                                     <li>Playoff Reseeding:	Yes</li>
                                     <li>Divisions:	No</li>
@@ -139,8 +139,21 @@ include 'sidebar.html';
                                     <li>Field goal yards per point <a href="voteInfo.php#fgyards">More info</a> <strong>Voted to change to YPP stat category and remove ranges.</strong></li>
                                     <li>Add license plate frame for loser? <a href="voteInfo.php#license">More info</a> <strong>Voted to make loser sit on a toilet during draft and their team name shall be set by the champion.</strong></li>
                                     <li>Change to 2 team DEF positions <strong>Voted to keep as-is.</strong></li>
+                                    <li>Remove Justin from the league <strong>Voted unanimously.</strong></li>
                                 </ol>
                                 <strong>Determine 2021 draft order</strong><br />
+                                <ol>
+                                    <li>Ben</li>
+                                    <li>Cole</li>
+                                    <li>Gavin</li>
+                                    <li>Cameron</li>
+                                    <li>Justin</li>
+                                    <li>Tyler</li>
+                                    <li>Matt</li>
+                                    <li>Everett</li>
+                                    <li>AJ</li>
+                                    <li>Andy</li>
+                                </ol>
                                 <strong>Draft date Monday, Sept 6, 2021 | 4:00pm | Spokane Valley, WA</strong>
                             </div>
                         </div>

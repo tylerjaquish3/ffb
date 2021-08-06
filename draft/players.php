@@ -216,6 +216,7 @@
                 table += '<th>Pass Att</th><th>Comp</th><th>Pass Yds</th><th>Pass TDs</th><th>Int</th>';
                 table += '<th>Rush Att</th><th>Rush Yds</th><th>Rush TDs</th>';
                 table += '<th>Tar</th><th>Rec</th><th>Rec Yds</th><th>Rec TDs</th><th>Fumbles</th>';
+                table += '<th>Pts</th><th>Pts/Gm</th>';
                 table += '</thead><tbody>';
 
                 data = JSON.parse(data);
@@ -228,6 +229,11 @@
                         $('#player-notes').val(item.notes);
                         $('#player-id').val(item.id);
                     } else {
+                        let points = (item.pass_yards*.04)+(item.pass_touchdowns*4)+(item.rush_yards*.1)+(item.pass_touchdowns*6);
+                        points += (item.rec_yards*.1)+(item.rec_touchdowns*6)+(item.rec_receptions*.5);
+                        points -= (item.pass_interceptions*2)+(item.fumbles*3);
+                        let ppg = (points/item.games_played).toFixed(1);
+
                         table += '<tr>'+
                         '<td>'+item.year+'</td>'+
                         '<td>'+item.team_abbr+'</td>'+
@@ -244,7 +250,9 @@
                         '<td>'+item.rec_receptions+'</td>'+
                         '<td>'+item.rec_yards+'</td>'+
                         '<td>'+item.rec_touchdowns+'</td>'+
-                        '<td>'+item.fumbles+'</td></tr>';
+                        '<td>'+item.fumbles+'</td>'+
+                        '<td>'+points.toFixed(0)+'</td>'+
+                        '<td>'+ppg+'</td>';
                     }
                 });
 
@@ -283,42 +291,6 @@
 
     .mine {
         background-color: #8cfa84;
-    }
-
-    .color-gray td, .color-gray {
-        background-color: lightgray;
-    }
-
-    .color-QB td, .color-QB {
-        background-color: aquamarine;
-    }
-
-    .color-RB td, .color-RB {
-        background-color: burlywood;
-    }
-
-    .color-WR td, .color-WR {
-        background-color: #fa9cff;
-    }
-
-    .color-TE td, .color-TE {
-        background-color: #69cfff;
-    }
-
-    .color-DEF td, .color-DEF {
-        background-color: #dffcde;
-    }
-
-    .color-K td, .color-K {
-        background-color: #f7cbcc;
-    }
-
-    .color-D td, .color-DB td, .color-D, .color-DB {
-        background-color: #fcf8b3;
-    }
-
-    .modal-lg {
-        max-width: 90%;
     }
 
     table#player-history td, th {

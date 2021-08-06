@@ -221,7 +221,7 @@
                                         &nbsp;|&nbsp;
                                         <a id="restartDraft">Restart Draft</a>
                                     </div>
-                                    <table class="table table-responsive" id="datatable-players">
+                                    <table class="table table-responsive" id="datatable-players" width="100%">
                                         <thead>
                                             <th>My Rank</th>
                                             <th>ADP</th>
@@ -240,6 +240,7 @@
                                             <th>Rec</th>
                                             <th>Proj Pts</th>
                                             <th></th>
+                                            <th>Pos</th>
                                         </thead>
                                         <tbody>
                                             <?php
@@ -252,11 +253,15 @@
                                                 ORDER BY my_rank ASC"
                                             );
                                             while ($row = mysqli_fetch_array($result)) {
+
+                                                $sosColor = ($row['sos'] > 25) ? 'bad' : ($row['sos'] < 7 ? 'good' : '');
+                                                $lineColor = ($row['position'] != 'DEF') ? (($row['line'] > 25) ? 'bad' : ($row['line'] < 7 ? 'good' : '')) : '';
+
                                                 $count++;
                                                 if (in_array($count, $allMyNextPicks)) {
                                                     $myRank = $row['my_rank']+2;
                                                     echo '<tr class="color-black"><td>'.$myRank.'</td><td></td><td></td><td></td><td></td><td></td><td></td>
-                                                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
+                                                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
                                                 }
                                             ?>
                                                 <tr class="color-<?php echo $row['position']; ?>">
@@ -265,8 +270,8 @@
                                                     <td><?php echo '<a data-toggle="modal" data-target="#player-data" onclick="showPlayerData('.(int)$row[0].')">'.$row['player'].'</a>'; ?></td>
                                                     <td><?php echo $row['team']; ?></td>
                                                     <td><?php echo $row['bye']; ?></td>
-                                                    <td class="color-<?php echo ($row['sos'] > 25) ? 'bad' : ($row['sos'] < 7 ? 'good' : ''); ?>"><?php echo $row['sos']; ?></td>
-                                                    <td class="color-<?php echo ($row['line'] > 25) ? 'bad' : ($row['line'] < 7 ? 'good' : ''); ?>"><?php echo $row['line']; ?></td>
+                                                    <td class="color-<?php echo $sosColor; ?>"><?php echo $row['sos']; ?></td>
+                                                    <td class="color-<?php echo $lineColor; ?>"><?php echo ($row['position'] != 'DEF') ? $row['line'] : ''; ?></td>
                                                     <td><?php echo $row['tier']; ?></td>
                                                     <td><a class="btn btn-secondary taken">Taken</a><a class="btn btn-secondary mine">Mine!</a></td>
                                                     <td><?php echo $row['games_played']; ?></td>
@@ -277,6 +282,7 @@
                                                     <td><?php echo $row['rec_receptions']; ?></td>
                                                     <td><?php echo $row['proj_points']; ?></td>
                                                     <td><?php echo desigIcon($row['designation'], $row['notes'] ? true : false); ?></td>
+                                                    <td><?php echo $row['position']; ?></td>
                                                 </tr>
                                             <?php } ?>
                                         </tbody>
@@ -381,18 +387,22 @@
     myPlayers = JSON.parse(myPlayers);
 
     var playersTable = $('#datatable-players').DataTable({
+        "autoWidth": true,
         "pageLength": 20,
         "order": [
             [0, "asc"]
         ]
     });
+
+    playersTable.columns(17).visible(false);
+    playersTable.columns.adjust().draw();
+
     var teamTable = $('#datatable-team').DataTable({
         "searching": false,
         "paging": false,
         "info": false,
         "sort": false
     });
-
 
     $(document).ready(function() {
 
@@ -450,7 +460,6 @@
             }
         });
 
-
         $('#hide-te').click(function () {
             doSearch('TE');
         });
@@ -463,19 +472,6 @@
             doSearch('K');
         });
 
-        function checkByes(data)
-        {
-            let players = myPlayers.length;
-            if (players) {
-                let count = myPlayers.filter(x => x == data[5]).length;
-                if (count/players > .2) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         var posArray = [];
         function doSearch(pos) {
             posArray.push(pos);
@@ -486,10 +482,8 @@
             });
             regex += '.)*$';
 
-            playersTable.columns([3]).search(regex, true, false).draw();
+            playersTable.columns([17]).search(regex, true, false).draw();
         }
-
-
 
         $('#undoPick').click(function () {
             if (confirm('Are you sure?')) {
@@ -529,6 +523,19 @@
             }
         });
     });
+
+    function checkByes(data)
+    {
+        let players = myPlayers.length;
+        if (players) {
+            let count = myPlayers.filter(x => x == data[4]).length;
+            if (count/players > .2) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     function saveSelection(formData)
     {
@@ -633,6 +640,7 @@
                 table += '<th>Pass Att</th><th>Comp</th><th>Pass Yds</th><th>Pass TDs</th><th>Int</th>';
                 table += '<th>Rush Att</th><th>Rush Yds</th><th>Rush TDs</th>';
                 table += '<th>Tar</th><th>Rec</th><th>Rec Yds</th><th>Rec TDs</th><th>Fumbles</th>';
+                table += '<th>Pts</th><th>Pts/Gm</th>';
                 table += '</thead><tbody>';
 
                 data = JSON.parse(data);
@@ -645,6 +653,11 @@
                         $('#player-notes').val(item.notes);
                         $('#player-id').val(item.id);
                     } else {
+
+                        let points = (item.pass_yards*.04)+(item.pass_touchdowns*4)+(item.rush_yards*.1)+(item.pass_touchdowns*6);
+                        points += (item.rec_yards*.1)+(item.rec_touchdowns*6)+(item.rec_receptions*.5);
+                        points -= (item.pass_interceptions*2)+(item.fumbles*3);
+                        let ppg = (points/item.games_played).toFixed(1);
                         table += '<tr>'+
                             '<td>'+item.year+'</td>'+
                             '<td>'+item.team_abbr+'</td>'+
@@ -661,7 +674,9 @@
                             '<td>'+item.rec_receptions+'</td>'+
                             '<td>'+item.rec_yards+'</td>'+
                             '<td>'+item.rec_touchdowns+'</td>'+
-                            '<td>'+item.fumbles+'</td>';
+                            '<td>'+item.fumbles+'</td>'+
+                            '<td>'+points.toFixed(0)+'</td>'+
+                            '<td>'+ppg+'</td>';
                     }
                 });
 
@@ -690,8 +705,17 @@
 
 <style>
     .app-content.container-fluid {
-        background: white;
+        background: #3E3D3E;
         direction: ltr;
+    }
+
+    .card, th, table.dataTable {
+        background: #3E3D3E;
+        color: #fff;
+    }
+
+    td, .card-header {
+        color: #3E3D3E;
     }
 
     a.btn.btn-secondary {
@@ -702,8 +726,8 @@
         color: black;
     }
 
-    a:hover {
-        color: white;
+    a:hover, .card-body label, .dataTables_info {
+        color: white !important;
     }
 
     .strike {
@@ -764,7 +788,8 @@
     .meter {
         height: 40px;
         width: 20px;
-        background: #fff;
+        background: #3E3D3E;
+        color: #fff;
     }
 
     .meter span {
@@ -772,4 +797,8 @@
         font-size: 11px;
     }
 
+    .modal-content {
+        background-color: #3E3D3E;
+        color: #fff;
+    }
 </style>

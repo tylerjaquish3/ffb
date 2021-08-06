@@ -42,7 +42,7 @@
                                     <th>Team</th>
                                     <th>Bye</th>
                                     <th>SoS</th>
-                                    <th>line</th>
+                                    <th>Line</th>
                                     <th>Tier</th>
                                     <th>Diff</th>
                                     <th></th>

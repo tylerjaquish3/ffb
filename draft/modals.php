@@ -234,19 +234,19 @@
                                     max(case when position = 'QB' and depth = 1 then player ELSE '' end) as QB1,
                                     max(case when position = 'QB' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as QB1p,
                                     max(case when position = 'QB' and depth = 2 then player ELSE '' end) as QB2,
-                                    max(case when position = 'QB' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as QB2p,
+                                    max(case when position = 'QB' and depth = 2 AND ranking_id IS NOT null then player ELSE '' end) as QB2p,
                                     max(case when position = 'RB' and depth = 1 then player ELSE '' end) as RB1,
                                     max(case when position = 'RB' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as RB1p,
                                     max(case when position = 'RB' and depth = 2 then player ELSE '' end) as RB2,
-                                    max(case when position = 'RB' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as RB2p,
+                                    max(case when position = 'RB' and depth = 2 AND ranking_id IS NOT null then player ELSE '' end) as RB2p,
                                     max(case when position = 'WR' and depth = 1 then player ELSE '' end) as WR1,
                                     max(case when position = 'WR' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as WR1p,
                                     max(case when position = 'WR' and depth = 2 then player ELSE '' end) as WR2,
-                                    max(case when position = 'WR' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as WR2p,
+                                    max(case when position = 'WR' and depth = 2 AND ranking_id IS NOT null then player ELSE '' end) as WR2p,
                                     max(case when position = 'WR' and depth = 3 then player ELSE '' end) as WR3,
-                                    max(case when position = 'WR' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as WR3p,
+                                    max(case when position = 'WR' and depth = 3 AND ranking_id IS NOT null then player ELSE '' end) as WR3p,
                                     max(case when position = 'WR' and depth = 4 then player ELSE '' end) as WR4,
-                                    max(case when position = 'WR' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as WR4p,
+                                    max(case when position = 'WR' and depth = 4 AND ranking_id IS NOT null then player ELSE '' end) as WR4p,
                                     max(case when position = 'TE' and depth = 1 then player ELSE '' end) as TE1,
                                     max(case when position = 'TE' and depth = 1 AND ranking_id IS NOT null then player ELSE '' end) as TE1p,
                                     max(case when position = 'K' then player ELSE '' end) as K,
@@ -262,7 +262,7 @@
                                         <td class="color-QB <?php echo $row['QB1'] == $row['QB1p'] ? 'color-gray' : ''; ?>"><?php echo $row['QB1']; ?></td>
                                         <td class="color-QB <?php echo $row['QB2'] == $row['QB2p'] ? 'color-gray' : ''; ?>"><?php echo $row['QB2']; ?></td>
                                         <td class="color-RB <?php echo $row['RB1'] == $row['RB1p'] ? 'color-gray' : ''; ?>"><?php echo $row['RB1']; ?></td>
-                                        <td class="color-RB <?php echo $row['RB1'] == $row['RB2p'] ? 'color-gray' : ''; ?>"><?php echo $row['RB2']; ?></td>
+                                        <td class="color-RB <?php echo $row['RB2'] == $row['RB2p'] ? 'color-gray' : ''; ?>"><?php echo $row['RB2']; ?></td>
                                         <td class="color-WR <?php echo $row['WR1'] == $row['WR1p'] ? 'color-gray' : ''; ?>"><?php echo $row['WR1']; ?></td>
                                         <td class="color-WR <?php echo $row['WR2'] == $row['WR2p'] ? 'color-gray' : ''; ?>"><?php echo $row['WR2']; ?></td>
                                         <td class="color-WR <?php echo $row['WR3'] == $row['WR3p'] ? 'color-gray' : ''; ?>"><?php echo $row['WR3']; ?></td>

@@ -111,32 +111,11 @@
             }
         }
     }
-// var_dump($tendency['Justin'][$currentRound]);die;
 
     ob_flush();
 ?>
 
-<body data-open="click" data-menu="vertical-menu" data-col="2-columns" class="vertical-layout vertical-menu 2-columns fixed-navbar">
-
-    <!-- navbar-fixed-top-->
-    <nav class="header-navbar navbar navbar-with-menu navbar-fixed-top navbar-semi-dark navbar-shadow">
-        <div class="navbar-wrapper">
-            <div class="navbar-header">
-                <ul class="nav navbar-nav">
-                    <li class="nav-item mobile-menu hidden-md-up float-xs-left"><a class="nav-link nav-menu-main menu-toggle hidden-xs"><i class="icon-menu5 font-large-1"></i></a></li>
-                    <li class="nav-item">
-                        <h2>Suntown FFB</h2>
-                    </li>
-                    <li class="nav-item hidden-md-up float-xs-right"><a data-toggle="collapse" data-target="#navbar-mobile" class="nav-link open-navbar-container"><i class="icon-ellipsis pe-2x icon-icon-rotate-right-right"></i></a></li>
-                </ul>
-            </div>
-            <div class="navbar-container content container-fluid">
-                <div id="navbar-mobile">
-                    <h2>&nbsp;<?php echo $currentYear; ?> Draft Helper &nbsp;</h2>
-                </div>
-            </div>
-        </div>
-    </nav>
+<body">
 
     <div class="app-content container-fluid">
         <div class="content-wrapper">
@@ -172,10 +151,10 @@
                                 }
                                 if (isset($likelihood['QB'])) {
                                     echo '<br><div style="display: inline-flex">';
-                                    echo '<div class="meter"><span class="color-QB" style="height: '.$likelihood['QB'].'%">'.$likelihood['QB'].'</span></div>';
-                                    echo '<div class="meter"><span class="color-RB" style="height: '.$likelihood['RB'].'%">'.$likelihood['RB'].'</span></div>';
-                                    echo '<div class="meter"><span class="color-WR" style="height: '.$likelihood['WR'].'%">'.$likelihood['WR'].'</span></div>';
-                                    echo '<div class="meter"><span class="color-TE" style="height: '.$likelihood['TE'].'%">'.$likelihood['TE'].'</span></div>';
+                                    echo '<div class="meter"><span class="color-QB" style="height: '.$likelihood['QB'].'%"></span><span class="val">'.$likelihood['QB'].'</span></div>';
+                                    echo '<div class="meter"><span class="color-RB" style="height: '.$likelihood['RB'].'%"></span><span class="val">'.$likelihood['RB'].'</span></div>';
+                                    echo '<div class="meter"><span class="color-WR" style="height: '.$likelihood['WR'].'%"></span><span class="val">'.$likelihood['WR'].'</span></div>';
+                                    echo '<div class="meter"><span class="color-TE" style="height: '.$likelihood['TE'].'%"></span><span class="val">'.$likelihood['TE'].'</span></div>';
                                     echo '</div>';
                                 } else {
                                     echo '<br><div style="display: inline-flex">';
@@ -191,7 +170,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-12 col-md-9">
+                    <div class="col-xs-12 col-md-10">
                         <div class="card">
                             <div class="card-body">
                                 <div class="position-relative">
@@ -273,7 +252,7 @@
                                                     <td class="color-<?php echo $sosColor; ?>"><?php echo $row['sos']; ?></td>
                                                     <td class="color-<?php echo $lineColor; ?>"><?php echo ($row['position'] != 'DEF') ? $row['line'] : ''; ?></td>
                                                     <td><?php echo $row['tier']; ?></td>
-                                                    <td><a class="btn btn-secondary taken">Taken</a><a class="btn btn-secondary mine">Mine!</a></td>
+                                                    <td><a class="btn btn-secondary taken"><i class="icon-minus"></i></a><a class="btn btn-secondary mine"><i class="icon-plus"></i></a></td>
                                                     <td><?php echo $row['games_played']; ?></td>
                                                     <td><?php echo $row['points']; ?></td>
                                                     <td><?php echo $row['games_played'] > 0 ? round($row['points'] / $row['games_played'], 1) : null; ?></td>
@@ -291,7 +270,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-xs-12 col-md-3">
+                    <div class="col-xs-12 col-md-2">
                         <div class="card">
                             <div class="card-body">
                                 <div class="position-relative">
@@ -302,7 +281,6 @@
                                     <table class="table table-responsive" id="datatable-team">
                                         <thead>
                                             <th>Rd</th>
-                                            <th>Pos</th>
                                             <th>Player</th>
                                             <th>Bye</th>
                                             <th>ADP</th>
@@ -324,7 +302,6 @@
                                                 ?>
                                                 <tr class="color-<?php echo $row['position']; ?>">
                                                     <td><?php echo $rd; ?></td>
-                                                    <td><?php echo $row['position']; ?></td>
                                                     <td><?php echo '<a data-toggle="modal" data-target="#player-data" onclick="showPlayerData('.(int)$row[0].')">'.$row['player'].'</a>' ?></td>
                                                     <td><?php echo $row['bye']; ?></td>
                                                     <td><?php echo $row['adp']; ?></td>
@@ -334,7 +311,7 @@
                                             }
                                             if ($rd < 18) {
                                                 for ($x = $rd+1; $x < 18; $x++) {
-                                                    echo '<tr><td>'.$x.'</td><td></td><td></td><td></td><td></td><td></td>';
+                                                    echo '<tr><td>'.$x.'</td><td></td><td></td><td></td><td></td>';
                                                 }
                                             }
                                             $myPlayers = json_encode($myPlayers); ?>
@@ -387,15 +364,16 @@
     myPlayers = JSON.parse(myPlayers);
 
     var playersTable = $('#datatable-players').DataTable({
-        "autoWidth": true,
+        "columnDefs": [
+            // { "width": "80px", "targets": 8 },
+            { "sortable": false, "targets": [15,16]},
+            { "visible": false, "targets": 17 }
+        ],
         "pageLength": 20,
         "order": [
             [0, "asc"]
         ]
     });
-
-    playersTable.columns(17).visible(false);
-    playersTable.columns.adjust().draw();
 
     var teamTable = $('#datatable-team').DataTable({
         "searching": false,
@@ -704,6 +682,10 @@
 </script>
 
 <style>
+
+    body {
+        padding-top: 0;
+    }
     .app-content.container-fluid {
         background: #3E3D3E;
         direction: ltr;
@@ -719,7 +701,7 @@
     }
 
     a.btn.btn-secondary {
-        padding: .2rem 1rem;
+        padding: .2rem .5rem;
     }
 
     a, a:link, a:visited {
@@ -728,6 +710,10 @@
 
     a:hover, .card-body label, .dataTables_info {
         color: white !important;
+    }
+
+    table#player-history td {
+        color: white;
     }
 
     .strike {
@@ -778,7 +764,11 @@
     }
 
     .avatars {
-        display: inline-block;
+        display: inline-grid;
+    }
+
+    .avatars img {
+        margin-bottom: -10px;
     }
 
     span.subtext {
@@ -794,7 +784,11 @@
 
     .meter span {
         display: block;
-        font-size: 11px;
+        font-size: 13px;
+    }
+
+    span.val {
+        margin-top: 0px;
     }
 
     .modal-content {

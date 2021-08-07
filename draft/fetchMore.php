@@ -26,7 +26,7 @@
     {
         global $conn;
         $output = '
-            <div class="col-xs-12 col-md-9">
+            <div class="col-xs-12 col-md-10">
                 <div class="card">
                     <div class="card-body">
                         <div class="position-relative">
@@ -136,7 +136,7 @@
                                         <td class="color-'.$lineColor.'">'.$row['line'].'</td>
                                         <td>'.$row['tier'].'</td>
                                         <td>'.$diff.'</td>
-                                        <td><a class="btn btn-secondary taken">Taken</a><a class="btn btn-secondary mine">Mine!</a></td>
+                                        <td><a class="btn btn-secondary taken"><i class="icon-minus"></i></a><a class="btn btn-secondary mine"><i class="icon-plus"></i></a></td>
                                         <td>'.$row['games_played'].'</td>
                                         <td>'.$row['points'].'</td>
                                         <td>'.$ppg.'</td>
@@ -180,7 +180,7 @@
         }
 
         foreach ($turnManagers as $man) {
-            $turnPlayers[$man] = ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0,'D'=>0,'DB'=>0];
+            $turnPlayers[$man] = ['QB'=>0,'RB'=>0,'WR'=>0,'TE'=>0,'K'=>0,'DEF'=>0];
         }
 
         $i = 0;
@@ -209,7 +209,7 @@
         }
 
         $output = '
-            <div class="col-xs-12 col-md-3">
+            <div class="col-xs-12 col-md-2">
                 <div class="card">
                     <div class="card-body">
                         <div class="position-relative">
@@ -259,19 +259,19 @@
                                     foreach ($turnPlayers as $player) {
                                         $output .= '<td>'.$player['K'].'</td>';
                                     }
-                                    $output .= '
-                                    </tr>
-                                    <tr><td>D</td>';
-                                    foreach ($turnPlayers as $player) {
-                                        $output .= '<td>'.$player['D'].'</td>';
-                                    }
-                                    $output .= '
-                                    </tr>
-                                    <tr><td>DB</td>';
+                                    // $output .= '
+                                    // </tr>
+                                    // <tr><td>D</td>';
+                                    // foreach ($turnPlayers as $player) {
+                                    //     $output .= '<td>'.$player['D'].'</td>';
+                                    // }
+                                    // $output .= '
+                                    // </tr>
+                                    // <tr><td>DB</td>';
 
-                                    foreach ($turnPlayers as $player) {
-                                        $output .= '<td>'.$player['DB'].'</td>';
-                                    }
+                                    // foreach ($turnPlayers as $player) {
+                                    //     $output .= '<td>'.$player['DB'].'</td>';
+                                    // }
                                     $output .= '
                                     </tr>
                                 </tbody>

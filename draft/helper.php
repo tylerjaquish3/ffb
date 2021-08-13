@@ -188,21 +188,25 @@
                                         &nbsp;|&nbsp;
                                         <a data-toggle="modal" data-target="#depth-chart" href="#">Depth Chart</a>
                                         &nbsp;|&nbsp;
-                                        <a href="players.php" target="_blank">Players</a>
+                                        <a data-toggle="modal" data-target="#positions" href="#">Positions</a>
                                         &nbsp;|&nbsp;
+                                        <a href="players.php" target="_blank">Players</a>
+                                        <!-- &nbsp;|&nbsp;
                                         <a id="hide-te">Hide TE</a>
                                         &nbsp;|&nbsp;
                                         <a id="hide-def">Hide DEF</a>
                                         &nbsp;|&nbsp;
-                                        <a id="hide-k">Hide K</a>
+                                        <a id="hide-k">Hide K</a> -->
                                         &nbsp;|&nbsp;
                                         <a id="undoPick">Undo Pick</a>
                                         &nbsp;|&nbsp;
                                         <a id="restartDraft">Restart Draft</a>
+                                        &nbsp;|&nbsp;
+                                        <a id="scramble">Scramble</a>
                                     </div>
                                     <table class="table table-responsive" id="datatable-players" width="100%">
                                         <thead>
-                                            <th>My Rank</th>
+                                            <th>Rank</th>
                                             <th>ADP</th>
                                             <th>Player</th>
                                             <th>Team</th>
@@ -217,7 +221,7 @@
                                             <th>Yds</th>
                                             <th>TDs</th>
                                             <th>Rec</th>
-                                            <th>Proj Pts</th>
+                                            <th>Proj</th>
                                             <th></th>
                                             <th>Pos</th>
                                         </thead>
@@ -330,10 +334,13 @@
         </div>
     </div>
 
+    <script src="/assets/chart.min.js" type="text/javascript"></script>
+
     <?php include 'modals.php'; ?>
 
 <script type="text/javascript">
 
+    var top5Table;
     var hasScrolled = false;
     $(window).scroll(function(){
 
@@ -365,8 +372,8 @@
 
     var playersTable = $('#datatable-players').DataTable({
         "columnDefs": [
-            // { "width": "80px", "targets": 8 },
-            { "sortable": false, "targets": [15,16]},
+            { "width": "55px", "targets": 8 },
+            { "sortable": false, "targets": [8,16,17]},
             { "visible": false, "targets": 17 }
         ],
         "pageLength": 20,
@@ -383,24 +390,6 @@
     });
 
     $(document).ready(function() {
-
-        var standingsTable = $('#datatable-standings').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [7, "desc"]
-            ]
-        });
-        var depthTable = $('#datatable-depth').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "autoWidth": false,
-            "order": [
-                [0, "asc"]
-            ]
-        });
 
         $('#pick-avatars').removeClass('hidden');
 
@@ -438,17 +427,41 @@
             }
         });
 
-        $('#hide-te').click(function () {
-            doSearch('TE');
+        $('#scramble').click(function () {
+            // Sort by bye week desc
+            playersTable.order([4, 'desc']).draw();
+            // Hide rank and adp
+            playersTable.column(0).visible(false);
+            playersTable.column(1).visible(false);
+            // Change scramble to unscramble
+            $(this)[0].innerText = 'Unscramble';
+
+            if ($.fn.DataTable.isDataTable('#datatable-top5') && typeof top5Table !== "undefined") {
+                let names = ['Blue Adams', 'Brett Favre', 'Joe Namath', 'Fred Flintstone', 'Ken Griffey',
+                    'Tom Hanks', 'Rosie O\'Donnell', 'Peewee Herman', 'Warren Moon', 'Jason Statham',
+                    'Chuck Norris', 'Pete Rose', 'Joe Montana', 'Jerry Rice', 'Jerry Springer', 'Natalie Portman',
+                    'Adam Sandler', 'Larry Bird', 'Bo Jackson', 'Tweety Bird', 'Vinny Testaverde', 'Wayne Gretsky'
+                ];
+                let teams = ['XYZ', 'UFO', 'TBD', 'NFL', 'Sun', 'Spo', 'LGB', 'CIA', 'FBI', 'STD', 'PDA'];
+                top5Table.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
+                    top5Table.cell(this, 2).data(names[Math.floor(Math.random() * names.length)]).draw();
+                    top5Table.cell(this, 3).data(teams[Math.floor(Math.random() * teams.length)]).draw();
+                });
+            }
+            $(this).hide();
         });
 
-        $('#hide-def').click(function () {
-            doSearch('DEF');
-        });
+        // $('#hide-te').click(function () {
+        //     doSearch('TE');
+        // });
 
-        $('#hide-k').click(function () {
-            doSearch('K');
-        });
+        // $('#hide-def').click(function () {
+        //     doSearch('DEF');
+        // });
+
+        // $('#hide-k').click(function () {
+        //     doSearch('K');
+        // });
 
         var posArray = [];
         function doSearch(pos) {
@@ -533,9 +546,10 @@
         });
     }
 
+
     function moreDataJs()
     {
-        var top5Table = $('#datatable-top5').DataTable({
+        top5Table = $('#datatable-top5').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
@@ -603,82 +617,6 @@
         });
     }
 
-    function showPlayerData(id)
-    {
-        $.ajax({
-            type : 'post',
-            url : 'updateSelected.php',
-            data :  {
-                request: 'player_data',
-                id: id
-            },
-            success : function(data){
-                let table = '<table id="player-history"><thead>';
-                table += '<th>Year</th><th>Team</th><th>GP</th>';
-                table += '<th>Pass Att</th><th>Comp</th><th>Pass Yds</th><th>Pass TDs</th><th>Int</th>';
-                table += '<th>Rush Att</th><th>Rush Yds</th><th>Rush TDs</th>';
-                table += '<th>Tar</th><th>Rec</th><th>Rec Yds</th><th>Rec TDs</th><th>Fumbles</th>';
-                table += '<th>Pts</th><th>Pts/Gm</th>';
-                table += '</thead><tbody>';
-
-                data = JSON.parse(data);
-                // Loop through data to add rows
-                data.forEach(function (item, index) {
-
-                    if (index == 0) {
-                        let header = '<h4>'+item.player+' ('+item.position + ' | ' + item.team+')</h4>';
-                        $('#player-header').html(header);
-                        $('#player-notes').val(item.notes);
-                        $('#player-id').val(item.id);
-                    } else {
-
-                        let points = (item.pass_yards*.04)+(item.pass_touchdowns*4)+(item.rush_yards*.1)+(item.pass_touchdowns*6);
-                        points += (item.rec_yards*.1)+(item.rec_touchdowns*6)+(item.rec_receptions*.5);
-                        points -= (item.pass_interceptions*2)+(item.fumbles*3);
-                        let ppg = (points/item.games_played).toFixed(1);
-                        table += '<tr>'+
-                            '<td>'+item.year+'</td>'+
-                            '<td>'+item.team_abbr+'</td>'+
-                            '<td>'+item.games_played+'</td>'+
-                            '<td>'+item.pass_attempts+'</td>'+
-                            '<td>'+item.pass_completions+'</td>'+
-                            '<td>'+item.pass_yards+'</td>'+
-                            '<td>'+item.pass_touchdowns+'</td>'+
-                            '<td>'+item.pass_interceptions+'</td>'+
-                            '<td>'+item.rush_attempts+'</td>'+
-                            '<td>'+item.rush_yards+'</td>'+
-                            '<td>'+item.rush_touchdowns+'</td>'+
-                            '<td>'+item.rec_targets+'</td>'+
-                            '<td>'+item.rec_receptions+'</td>'+
-                            '<td>'+item.rec_yards+'</td>'+
-                            '<td>'+item.rec_touchdowns+'</td>'+
-                            '<td>'+item.fumbles+'</td>'+
-                            '<td>'+points.toFixed(0)+'</td>'+
-                            '<td>'+ppg+'</td>';
-                    }
-                });
-
-                table += '</tbody></table>';
-                $('#fetched-data').html(table);
-            }
-        });
-    }
-
-    $('#save-note').click(function() {
-        $.ajax({
-            type : 'post',
-            url : 'updateSelected.php',
-            data :  {
-                request: 'notes',
-                id: $('#player-id').val(),
-                notes: $('#player-notes').val()
-            },
-            success : function(data){
-                $('#confirm').html('Saved!');
-                location.reload();
-            }
-        });
-    });
 </script>
 
 <style>
@@ -696,6 +634,10 @@
         color: #fff;
     }
 
+    table.dataTable.no-footer {
+        border-bottom: none;
+    }
+
     td, .card-header {
         color: #3E3D3E;
     }
@@ -706,9 +648,10 @@
 
     a, a:link, a:visited {
         color: black;
+        cursor: pointer;
     }
 
-    a:hover, .card-body label, .dataTables_info {
+    a:hover, .card-body label, .dataTables_info, .paginate_button {
         color: white !important;
     }
 
@@ -795,4 +738,9 @@
         background-color: #3E3D3E;
         color: #fff;
     }
+
+    .row.draft-pos {
+        text-align: center;
+    }
+
 </style>

@@ -100,34 +100,6 @@ if (isset($_POST['request'])) {
         $sql->execute();
     }
 
-    if ($_POST['request'] == 'player_data') {
-        $id = $_POST['id'];
-        $data = [];
-
-        $result = mysqli_query($conn, "SELECT * FROM preseason_rankings WHERE id = $id");
-        if (mysqli_num_rows($result) > 0) {
-            while($row = mysqli_fetch_array($result)) {
-                $data[] = $row;
-            }
-        }
-
-        $result = mysqli_query($conn, "SELECT * FROM player_data WHERE preseason_ranking_id = $id and type = 'REG' order by year desc");
-        if (mysqli_num_rows($result) > 0) {
-            while($row = mysqli_fetch_array($result)) {
-                $data[] = $row;
-            }
-        }
-
-        echo json_encode($data);
-        die;
-    }
-
-    if ($_POST['request'] == 'notes') {
-        $sql = $conn->prepare("UPDATE preseason_rankings SET notes = ? WHERE id = ?");
-        $sql->bind_param('si', $_POST['notes'], $_POST['id']);
-        $sql->execute();
-    }
-
     echo json_encode(true);
     die;
 }

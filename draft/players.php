@@ -32,6 +32,8 @@
                                             &nbsp;|&nbsp;
                                             <a type="button">TE</a>
                                             &nbsp;|&nbsp;
+                                            <a type="button">W/R/T</a>
+                                            &nbsp;|&nbsp;
                                             <a type="button">DEF</a>
                                             &nbsp;|&nbsp;
                                             <a type="button">K</a>
@@ -176,7 +178,11 @@
         });
 
         $('#filter-btns a').click(function () {
-            playersTable.columns([3]).search($(this)[0].outerText).draw();
+            let criteria = $(this)[0].outerText;
+            if (criteria == 'W/R/T') {
+                criteria = 'WR|RB|TE';
+            }
+            playersTable.columns([3]).search(criteria, true, true).draw();
         });
 
     });
@@ -185,7 +191,7 @@
     {
         $.ajax({
             type : 'post',
-            url : 'updateSelected.php',
+            url : 'modalData.php',
             data :  {
                 request: 'player_data',
                 id: id
@@ -209,7 +215,7 @@
                         $('#player-notes').val(item.notes);
                         $('#player-id').val(item.id);
                     } else {
-                        let points = (item.pass_yards*.04)+(item.pass_touchdowns*4)+(item.rush_yards*.1)+(item.pass_touchdowns*6);
+                        let points = (item.pass_yards*.04)+(item.pass_touchdowns*4)+(item.rush_yards*.1)+(item.rush_touchdowns*6);
                         points += (item.rec_yards*.1)+(item.rec_touchdowns*6)+(item.rec_receptions*.5);
                         points -= (item.pass_interceptions*2)+(item.fumbles*3);
                         let ppg = (points/item.games_played).toFixed(1);
@@ -245,7 +251,7 @@
     $('#save-note').click(function() {
         $.ajax({
             type : 'post',
-            url : 'updateSelected.php',
+            url : 'modalData.php',
             data :  {
                 request: 'notes',
                 id: $('#player-id').val(),
@@ -264,17 +270,10 @@
     body {
         padding-top: 0;
     }
+
     .app-content.container-fluid {
         background: white;
         direction: ltr;
-    }
-
-    .taken {
-        background-color: #fa887f;
-    }
-
-    .mine {
-        background-color: #8cfa84;
     }
 
     table#player-history td, th {
@@ -283,6 +282,11 @@
 
     table.dataTable tbody th, table.dataTable tbody td {
         padding: 2px 10px;
+    }
+
+    a, a:link, a:visited {
+        color: black;
+        cursor: pointer;
     }
 
 </style>

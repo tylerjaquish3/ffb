@@ -4,6 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Cache-Control" content="public">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 
     <title>Suntown FFB</title>
@@ -16,16 +17,16 @@
     <meta property="og:image" content="http://suntownffb.us/images/favicon.jpg" />
 
     <!-- BEGIN VENDOR CSS-->
-    <link rel="stylesheet" type="text/css" href="/assets/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/bootstrap-extended.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/app.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/icomoon.css">
+    <link rel="stylesheet" type="text/css" href="/assets/bootstrap.min.css" defer>
+    <!-- <link rel="stylesheet" type="text/css" href="/assets/bootstrap-extended.min.css" defer> -->
+    <link rel="stylesheet" type="text/css" href="/assets/app.min.css" defer>
+    <link rel="stylesheet" type="text/css" href="/assets/icomoon.css" defer>
+    <link rel="stylesheet" type="text/css" href="/assets/dataTables.min.css" defer>
 
     <!-- BEGIN Custom CSS-->
-    <link rel="stylesheet" href="/assets/dataTables.min.css" >
     <link rel="stylesheet" type="text/css" href="/assets/suntown.css">
 
-    <script src="/assets/dataTables.js"></script>
+    <script src="/assets/dataTables.js" type="text/javascript"></script>
     <script src="/assets/tether.min.js" type="text/javascript"></script>
     <script src="/assets/bootstrap.min.js" type="text/javascript"></script>
 

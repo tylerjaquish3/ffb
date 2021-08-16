@@ -15,6 +15,7 @@
         'AJ'        => 'aj-min.jpg',
         'Andy'      => 'andy-min.jpg',
     ];
+    $allPositions = ['QB','RB','RB','WR','WR','WR','TE','W/R/T','Q/W/R/T','K','DEF','BN','BN','BN','BN','BN','BN'];
 
     ob_start();
     $result = mysqli_query($conn, "SELECT count(id) as picks FROM draft_selections");
@@ -24,7 +25,7 @@
 
     $pickers = [];
     $allDraftOrder = array_reverse(array_keys($draftOrder));
-    for ($x = 0; $x < 30; $x++) {
+    for ($x = 0; $x < count($allPositions)+1; $x++) {
         $allDraftOrder = array_reverse($allDraftOrder);
         foreach ($allDraftOrder as $man) {
             $pickers[] = $man;
@@ -35,7 +36,7 @@
     $oddRounds = $myKey + 1;
     $evenRounds = 10 - $myKey;
     $allMyPicks = $allMyNextPicks = [];
-    for ($x = 0; $x < 30; $x++) {
+    for ($x = 0; $x < count($allPositions)+1; $x++) {
         if ($x % 2 == 0) {
             // Even round
             $allMyPicks[] = $x * 10 + $oddRounds;
@@ -64,25 +65,27 @@
 
     // Determine tendency/need for each manager
     foreach ($draftOrder as $man => $avatar) {
-        for ($x = 1; $x < 23; $x++) {
+        for ($x = 1; $x < count($allPositions); $x++) {
             $tendency[$man][$x]['picks'] = [
-                'QB' => 0, 'RB' => 0, 'WR' => 0, 'TE' => 0, 'DEF' => 0, 'LB' => 0
+                'QB' => 0, 'RB' => 0, 'WR' => 0, 'TE' => 0, 'K' => 0, 'DEF' => 0
             ];
             $tendency[$man][$x]['want_pct'] = [
-                'QB' => 0, 'RB' => 0, 'WR' => 0, 'TE' => 0, 'DEF' => 0, 'LB' => 0
+                'QB' => 0, 'RB' => 0, 'WR' => 0, 'TE' => 0, 'K' => 0, 'DEF' => 0
             ];
             $tendency[$man][$x]['need'] = [
-                'QB' => 4, 'RB' => 5, 'WR' => 3, 'TE' => 2, 'DEF' => 1
+                'QB' => 4, 'RB' => 5, 'WR' => 3, 'TE' => 2, 'K' => 0, 'DEF' => 1
             ];
         }
     }
     $result = mysqli_query($conn, "SELECT * FROM draft
         JOIN managers m ON m.id = manager_id
         WHERE YEAR > ($currentYear - 6)
-        AND ROUND < 8
+        AND ROUND < ".count($allPositions)."
         ORDER BY YEAR DESC, ROUND asc");
     while ($row = mysqli_fetch_array($result)) {
-        $tendency[$row['name']][$row['round']]['picks'][$row['position']]++;
+        if (isset($tendency[$row['name']][$row['round']]['picks'][$row['position']])) {
+            $tendency[$row['name']][$row['round']]['picks'][$row['position']]++;
+        }
     }
 
     foreach ($tendency as $name => $round) {
@@ -279,10 +282,10 @@
                             <div class="card-body">
                                 <div class="position-relative">
                                     <div class="card-header">
-                                        <h3>My Team</h3>
+                                        <h3>My Team&nbsp;&nbsp;<i class="icon-list" id="flip-team-view"></i></h3>
                                     </div>
 
-                                    <table class="table table-responsive" id="datatable-team">
+                                    <table class="table table-responsive" id="datatable-teamByRound">
                                         <thead>
                                             <th>Rd</th>
                                             <th>Player</th>
@@ -313,12 +316,84 @@
                                                 </tr>
                                             <?php
                                             }
-                                            if ($rd < 18) {
-                                                for ($x = $rd+1; $x < 18; $x++) {
+                                            if ($rd < count($allPositions)+1) {
+                                                for ($x = $rd+1; $x < count($allPositions)+1; $x++) {
                                                     echo '<tr><td>'.$x.'</td><td></td><td></td><td></td><td></td>';
                                                 }
                                             }
                                             $myPlayers = json_encode($myPlayers); ?>
+                                        </tbody>
+                                    </table>
+                                    <table class="table table-responsive" id="datatable-teamByPosition" style="display: none;">
+                                        <thead>
+                                            <th>Pos</th>
+                                            <th>Player</th>
+                                            <th>Bye</th>
+                                            <th>Pick</th>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $myRoster = [];
+                                            $wrt = ['RB','WR','TE'];
+                                            $qwrt = ['QB','RB','WR','TE'];
+                                            foreach ($allPositions as $pos) {
+                                                $myRoster[] = [$pos => null];
+                                            }
+                                            $result = mysqli_query($conn,
+                                                "SELECT * FROM preseason_rankings
+                                                JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
+                                                WHERE is_mine = 1 ORDER BY pick_number ASC"
+                                            );
+                                            while ($row = mysqli_fetch_array($result)) {
+                                                foreach ($myRoster as $key => &$rosterPos) {
+                                                    foreach ($rosterPos as $k => &$pos) {
+                                                        $filled = false;
+                                                        if ($pos == null && $k == $row['position']) {
+                                                            $myRoster[$key] = $row;
+                                                            $filled = true;
+                                                            break;
+                                                        } elseif ($pos == null && $k == 'W/R/T' && in_array($row['position'], $wrt)) {
+                                                            $myRoster[$key] = $row;
+                                                            $filled = true;
+                                                            break;
+                                                        } elseif ($pos == null && $k == 'Q/W/R/T' && in_array($row['position'], $qwrt)) {
+                                                            $myRoster[$key] = $row;
+                                                            $filled = true;
+                                                            break;
+                                                        } elseif ($pos == null && $k == 'BN') {
+                                                            $myRoster[$key] = $row;
+                                                            $filled = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                    if ($filled) {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            $count = 0;
+                                            foreach ($allPositions as $rosterSpot) {
+                                                $row = $myRoster[$count];
+                                                if ($row && isset($row['position'])) {
+                                                ?>
+                                                    <tr class="color-<?php echo $row['position']; ?>">
+                                                        <td><?php echo $rosterSpot; ?></td>
+                                                        <td><?php echo '<a data-toggle="modal" data-target="#player-data" onclick="showPlayerData('.(int)$row[0].')">'.$row['player'].'</a>' ?></td>
+                                                        <td><?php echo $row['bye']; ?></td>
+                                                        <td><?php echo $row['pick_number']; ?></td>
+                                                    </tr>
+                                                <?php
+                                                } else { ?>
+                                                    <tr>
+                                                        <td><?php echo $rosterSpot; ?></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                <?php
+                                                }
+                                                $count++;
+                                            }?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -327,9 +402,7 @@
                     </div>
                 </div>
 
-                <div id="postData">
-
-                </div>
+                <div id="postData"></div>
             </div>
         </div>
     </div>
@@ -341,9 +414,10 @@
 <script type="text/javascript">
 
     var top5Table;
+    var scrambled;
+    var scrambledNames;
     var hasScrolled = false;
     $(window).scroll(function(){
-
         if (!hasScrolled) {
             getPostData();
             hasScrolled = true;
@@ -382,7 +456,13 @@
         ]
     });
 
-    var teamTable = $('#datatable-team').DataTable({
+    var teamTable = $('#datatable-teamByRound').DataTable({
+        "searching": false,
+        "paging": false,
+        "info": false,
+        "sort": false
+    });
+    var teamByPosTable = $('#datatable-teamByPosition').DataTable({
         "searching": false,
         "paging": false,
         "info": false,
@@ -391,7 +471,19 @@
 
     $(document).ready(function() {
 
-        $('#pick-avatars').removeClass('hidden');
+        var showTeamTable = true;
+
+        $('#flip-team-view').click(function () {
+            if (showTeamTable) {
+                $('#datatable-teamByRound').hide();
+                $('#datatable-teamByPosition').show();
+                showTeamTable = false;
+            } else {
+                $('#datatable-teamByPosition').hide();
+                $('#datatable-teamByRound').show();
+                showTeamTable = true;
+            }
+        });
 
         let currentPick = "<?php echo $currentPick-1; ?>";
         if (currentPick % 10 == 0 && currentPick != 0) {
@@ -428,24 +520,25 @@
         });
 
         $('#scramble').click(function () {
+            scrambled = true;
             // Sort by bye week desc
             playersTable.order([4, 'desc']).draw();
             // Hide rank and adp
             playersTable.column(0).visible(false);
             playersTable.column(1).visible(false);
-            // Change scramble to unscramble
-            $(this)[0].innerText = 'Unscramble';
 
+            scrambledNames = ['Blue Adams', 'Brett Favre', 'Joe Namath', 'Fred Flintstone', 'Ken Griffey',
+                'Tom Hanks', 'Rosie O\'Donnell', 'Peewee Herman', 'Warren Moon', 'Jason Statham',
+                'Chuck Norris', 'Pete Rose', 'Joe Montana', 'Jerry Rice', 'Jerry Springer', 'Natalie Portman',
+                'Adam Sandler', 'Larry Bird', 'Bo Jackson', 'Tweety Bird', 'Vinny Testaverde', 'Wayne Gretsky',
+                'Ben Bardell', 'Andy\'s Mom', 'Miley Cyrus', 'Bill Clinton', 'John Stockton', 'Hannibal Lecter',
+                'Richard Simmons', 'Oprah Winfrey', 'Joseph Smith', 'Mahatma Ghandi', 'Howie Mandel'
+            ];
             if ($.fn.DataTable.isDataTable('#datatable-top5') && typeof top5Table !== "undefined") {
-                let names = ['Blue Adams', 'Brett Favre', 'Joe Namath', 'Fred Flintstone', 'Ken Griffey',
-                    'Tom Hanks', 'Rosie O\'Donnell', 'Peewee Herman', 'Warren Moon', 'Jason Statham',
-                    'Chuck Norris', 'Pete Rose', 'Joe Montana', 'Jerry Rice', 'Jerry Springer', 'Natalie Portman',
-                    'Adam Sandler', 'Larry Bird', 'Bo Jackson', 'Tweety Bird', 'Vinny Testaverde', 'Wayne Gretsky'
-                ];
                 let teams = ['XYZ', 'UFO', 'TBD', 'NFL', 'Sun', 'Spo', 'LGB', 'CIA', 'FBI', 'STD', 'PDA'];
                 top5Table.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
-                    top5Table.cell(this, 2).data(names[Math.floor(Math.random() * names.length)]).draw();
-                    top5Table.cell(this, 3).data(teams[Math.floor(Math.random() * teams.length)]).draw();
+                    top5Table.cell(this, 2).data(scrambledNames[Math.floor(Math.random() * scrambledNames.length)]).draw();
+                    top5Table.cell(this, 3).data(scrambledNames[Math.floor(Math.random() * scrambledNames.length)]).draw();
                 });
             }
             $(this).hide();
@@ -545,7 +638,6 @@
             }
         });
     }
-
 
     function moreDataJs()
     {
@@ -741,6 +833,13 @@
 
     .row.draft-pos {
         text-align: center;
+    }
+
+    #flip-team-view {
+        font-size: 15px;
+        float: right;
+        margin-top: 10px;
+        cursor: pointer;
     }
 
 </style>

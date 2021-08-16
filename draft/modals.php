@@ -16,7 +16,7 @@
                     </thead>
                     <tbody>
                         <?php
-                        for($round = 1; $round <= 22; $round++) {
+                        for ($round = 1; $round <= count($allPositions); $round++) {
                             $pickMin = ($round*10)-10;
                             $pickMax = $round*10;
                             $dir = 'asc';
@@ -66,14 +66,10 @@
             </div>
             <div class="modal-body" style="direction: ltr">
                 <div class="row">
-                    <div class="col-xs-3" id="TE-tiers">
-                    </div>
-                    <div class="col-xs-3" id="WR-tiers">
-                    </div>
-                    <div class="col-xs-3" id="RB-tiers">
-                    </div>
-                    <div class="col-xs-3" id="QB-tiers">
-                    </div>
+                    <div class="col-xs-3" id="TE-tiers"></div>
+                    <div class="col-xs-3" id="WR-tiers"></div>
+                    <div class="col-xs-3" id="RB-tiers"></div>
+                    <div class="col-xs-3" id="QB-tiers"></div>
                 </div>
             </div>
         </div>
@@ -145,7 +141,7 @@
                     </div>
                 </div>
                 <?php
-                for ($rd = 1; $rd < 18; $rd++) {
+                for ($rd = 1; $rd < count($allPositions); $rd++) {
                 ?>
                     <div class="row">
                         <div class="col-xs-2">
@@ -431,7 +427,7 @@
 
     function positionYearChart(chart, roundPos)
     {
-        for (x = 1; x < 18; x++) {
+        for (x = 1; x < count($allPositions); x++) {
             data = roundPos[x-1]['data'];
             ctx = document.getElementById(chart+'-rd'+x).getContext('2d');
             new Chart(ctx, {
@@ -506,7 +502,7 @@
     });
 
     // Section for cheat sheet modal **********************************
-    $("#cheat-sheet").on('shown.bs.modal', function(){
+    $("#cheat-sheet").on('shown.bs.modal', function() {
         $.ajax({
             url : 'modalData.php',
             method: 'POST',
@@ -528,6 +524,33 @@
                     }
 
                     $('#'+pos+'-tiers').html(posCol);
+                }
+
+                if (scrambled) {
+                    $('#QB-tiers span').each(function () {
+                        let str = $(this).text();
+                        arr = str.split(".");
+                        rank = arr[0];
+                        $(this).text(rank+'. '+scrambledNames[Math.floor(Math.random() * scrambledNames.length)]);
+                    });
+                    $('#RB-tiers span').each(function () {
+                        let str = $(this).text();
+                        arr = str.split(".");
+                        rank = arr[0];
+                        $(this).text(rank+'. '+scrambledNames[Math.floor(Math.random() * scrambledNames.length)]);
+                    });
+                    $('#WR-tiers span').each(function () {
+                        let str = $(this).text();
+                        arr = str.split(".");
+                        rank = arr[0];
+                        $(this).text(rank+'. '+scrambledNames[Math.floor(Math.random() * scrambledNames.length)]);
+                    });
+                    $('#TE-tiers span').each(function () {
+                        let str = $(this).text();
+                        arr = str.split(".");
+                        rank = arr[0];
+                        $(this).text(rank+'. '+scrambledNames[Math.floor(Math.random() * scrambledNames.length)]);
+                    });
                 }
             }
         });

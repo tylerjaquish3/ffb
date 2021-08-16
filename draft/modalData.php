@@ -127,7 +127,7 @@ if (isset($_POST['standings'])) {
 if (isset($_POST['projectedChart'])) {
     $draftOrder = $_POST['draftOrder'];
     $data = getProjections($draftOrder);
-// dd($data);
+
     $mine = [];
     $league = ['QB' => 0,'RB' => 0,'WR' => 0,'TE' => 0,'K' => 0,'DEF' => 0,'BN' => 0];
     $filled = ['QB' => 0,'RB' => 0,'WR' => 0,'TE' => 0,'K' => 0,'DEF' => 0,'BN' => 0];

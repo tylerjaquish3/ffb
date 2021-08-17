@@ -103,64 +103,52 @@
                                 <th>Total</th>
                                 <th>Last Year</th>
                             </thead>
-                            <tbody>
-                            </tbody>
+                            <tbody></tbody>
                         </table>
+                    </div>
+                </div>
+                <div class="row" style="text-align: center;">
+                    <div class="col-xs-4">
+                        <h4>Worst Byes</h4>
+                    </div>
+                    <div class="col-xs-4">
+                        <h4>Worst Picks</h4>
+                    </div>
+                    <div class="col-xs-4">
+                        <h4>Best Picks</h4>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-xs-4">
-                        <table class="table table-responsive">
+                        <table class="table table-responsive" id="datatable-worstByes">
                             <thead>
                                 <th>Manager</th>
-                                <th>Player</th>
-                                <th>Pick</th>
-                                <th>ADP</th>
+                                <th>Week</th>
+                                <th>Byes</th>
                             </thead>
-                            <?php
-                            $result = mysqli_query($conn,
-                                "SELECT name, player, adp, pick_number, pr.adp - ds.pick_number AS diff 
-                                FROM draft_selections ds
-                                JOIN preseason_rankings pr ON ds.ranking_id = pr.id
-                                JOIN managers ON managers.id = ds.manager_id
-                                ORDER BY diff ASC LIMIT 5"
-                            );
-                            while ($row = mysqli_fetch_array($result)) {?>
-                                <tr>
-                                    <td><?php echo $row['name']; ?></td>
-                                    <td><?php echo $row['player']; ?></td>
-                                    <td><?php echo $row['pick_number']; ?></td>
-                                    <td><?php echo $row['adp']; ?></td>
-                                </tr>   
-                            <?php
-                            } ?>
+                            <tbody></tbody>
                         </table>
                     </div>
                     <div class="col-xs-4">
-                        <table class="table table-responsive">
+                        <table class="table table-responsive" id="datatable-worstPicks">
                             <thead>
                                 <th>Manager</th>
                                 <th>Player</th>
                                 <th>Pick</th>
                                 <th>ADP</th>
                             </thead>
-                            <?php
-                            $result = mysqli_query($conn,
-                                "SELECT name, player, adp, pick_number, pr.adp - ds.pick_number AS diff 
-                                FROM draft_selections ds
-                                JOIN preseason_rankings pr ON ds.ranking_id = pr.id
-                                JOIN managers ON managers.id = ds.manager_id
-                                ORDER BY diff DESC LIMIT 5"
-                            );
-                            while ($row = mysqli_fetch_array($result)) {?>
-                                <tr>
-                                    <td><?php echo $row['name']; ?></td>
-                                    <td><?php echo $row['player']; ?></td>
-                                    <td><?php echo $row['pick_number']; ?></td>
-                                    <td><?php echo $row['adp']; ?></td>
-                                </tr> 
-                            <?php
-                            } ?>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-4">
+                        <table class="table table-responsive" id="datatable-bestPicks">
+                            <thead>
+                                <th>Manager</th>
+                                <th>Player</th>
+                                <th>Pick</th>
+                                <th>ADP</th>
+                            </thead>
+                            <tbody></tbody>
                         </table>
                     </div>
                 </div>
@@ -197,7 +185,7 @@
                     </div>
                 </div>
                 <?php
-                for ($rd = 1; $rd < count($allPositions); $rd++) {
+                for ($rd = 1; $rd <= count($allPositions); $rd++) {
                 ?>
                     <div class="row">
                         <div class="col-xs-2">
@@ -274,6 +262,54 @@
                                 <th>K</th>
                             </thead>
                             <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="defenses" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="direction: ltr">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>
+                <h4 class="modal-title">Defenses</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <table class="table table-responsive" id="datatable-defenses">
+                            <thead>
+                                <th>Team</th>
+                                <th>My Rank</th>
+                                <th>SoS</th>
+                                <th>Rank</th>
+                                <th>Wk 1-4</th>
+                                <th>Wk 1</th>
+                                <th>Wk 2</th>
+                                <th>Wk 3</th>
+                                <th>Wk 4</th>
+                                <th>Wk 5</th>
+                                <th>Wk 6</th>
+                                <th>Wk 7</th>
+                                <th>Wk 8</th>
+                            </thead>
+                            <tbody>
+                                <tr><td>Den</td><td>8</td><td>1</td><td>13</td><td>16</td>  <td class="color-M">NYG</td><td class="color-M">Jax</td><td class="color-G">NYJ</td><td class="color-B">Bal</td><td class="color-M">Pit</td><td class="color-M">LV </td><td class="color-B">Cle</td><td class="color-M">Was</td></tr>
+                                <tr><td>NE</td><td>6</td><td>2</td><td>8</td><td>26</td>    <td class="color-G">Mia</td><td class="color-G">NYJ</td><td class="color-M">NO </td><td class="color-B">TB </td><td class="color-G">Hou</td><td class="color-B">Dal</td><td class="color-G">NYJ</td><td class="color-M">LAC</td></tr>
+                                <tr><td>Pit</td><td>1</td><td>3</td><td>3</td><td>8</td>    <td class="color-B">Buf</td><td class="color-M">LV </td><td class="color-M">Cin</td><td class="color-B">GB </td><td class="color-G">Den</td><td class="color-B">Sea</td><td class="color-B">Cle</td><td class="color-M">Chi</td></tr>
+                                <tr><td>KC</td><td>11</td><td>4</td><td>14</td><td>18</td>  <td class="color-B">Cle</td><td class="color-B">Bal</td><td class="color-M">LAC</td><td class="color-G">Phi</td><td class="color-B">Buf</td><td class="color-M">Was</td><td class="color-B">Ten</td><td class="color-M">NYG</td></tr>
+                                <tr><td>Ind</td><td>7</td><td>6</td><td>7</td><td>28</td>   <td class="color-B">Sea</td><td class="color-B">LAR</td><td class="color-B">Ten</td><td class="color-G">Mia</td><td class="color-B">Bal</td><td class="color-G">Hou</td><td class="color-M">SF </td><td class="color-B">Ten</td></tr>
+                                <tr><td>Was</td><td>3</td><td>7</td><td>2</td><td>17</td>   <td class="color-M">LAC</td><td class="color-M">NYG</td><td class="color-B">Buf</td><td class="color-M">Atl</td><td class="color-M">NO </td><td class="color-B">KC </td><td class="color-B">GB </td><td class="color-G">Den</td></tr>
+                                <tr><td>Ari</td><td>12</td><td>8</td><td>19</td><td>4</td>  <td class="color-B">Ten</td><td class="color-M">Min</td><td class="color-M">Jax</td><td class="color-B">LAR</td><td class="color-M">SF </td><td class="color-B">Cle</td><td class="color-G">Hou</td><td class="color-B">GB </td></tr>
+                                <tr><td>LAC</td><td>10</td><td>9</td><td>12</td><td>14</td> <td class="color-M">Was</td><td class="color-B">Dal</td><td class="color-B">KC </td><td class="color-M">LV </td><td class="color-B">Cle</td><td class="color-B">Bal</td><td class="color-G">NE </td><td class="color-G">Phi</td></tr>
+                                <tr><td>Mia</td><td>9</td><td>11</td><td>10</td><td>20</td> <td class="color-G">NE </td><td class="color-B">Buf</td><td class="color-M">LV </td><td class="color-M">Ind</td><td class="color-B">TB </td><td class="color-M">Jax</td><td class="color-M">Atl</td><td class="color-B">Buf</td></tr>
+                                <tr><td>SF</td><td>4</td><td>13</td><td>5</td><td>5</td>    <td class="color-G">Det</td><td class="color-G">Phi</td><td class="color-B">GB </td><td class="color-B">Sea</td><td class="color-M">Ari</td><td class="color-M">Ind</td><td class="color-M">Chi</td><td class="color-M">Ari</td></tr>
+                                <tr><td>Bal</td><td>5</td><td>17</td><td>4</td><td>1</td>   <td class="color-M">LV </td><td class="color-B">KC </td><td class="color-G">Det</td><td class="color-G">Den</td><td class="color-M">Ind</td><td class="color-M">LAC</td><td class="color-M">Cin</td><td class="color-M">Min</td></tr>
+                                <tr><td>LAR</td><td>2</td><td>18</td><td>1</td><td>30</td>  <td class="color-M">Chi</td><td class="color-M">Ind</td><td class="color-B">TB </td><td class="color-M">Ari</td><td class="color-B">Sea</td><td class="color-M">NYG</td><td class="color-G">Det</td><td class="color-G">Hou</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -402,6 +438,77 @@
             });
         }
 
+        if (!$.fn.DataTable.isDataTable('#datatable-bestPicks')) {
+            $('#datatable-bestPicks').DataTable({
+                "processing": true,
+                "ajax": {
+                    "url": "modalData.php",
+                    "type": "POST",
+                    "dataType": "json",
+                    "data": {
+                        "bestPicks": true
+                    }
+                },
+                "columns": [
+                    { "data": "manager" },
+                    { "data": "player" },
+                    { "data": "pick" },
+                    { "data": "adp" }
+                ],
+                "searching": false,
+                "paging": false,
+                "info": false,
+                "sort": false
+            });
+        }
+
+        if (!$.fn.DataTable.isDataTable('#datatable-worstPicks')) {
+            $('#datatable-worstPicks').DataTable({
+                "processing": true,
+                "ajax": {
+                    "url": "modalData.php",
+                    "type": "POST",
+                    "dataType": "json",
+                    "data": {
+                        "worstPicks": true
+                    }
+                },
+                "columns": [
+                    { "data": "manager" },
+                    { "data": "player" },
+                    { "data": "pick" },
+                    { "data": "adp" }
+                ],
+                "searching": false,
+                "paging": false,
+                "info": false,
+                "sort": false
+            });
+        }
+
+        if (!$.fn.DataTable.isDataTable('#datatable-worstByes')) {
+            $('#datatable-worstByes').DataTable({
+                "processing": true,
+                "ajax": {
+                    "url": "modalData.php",
+                    "type": "POST",
+                    "dataType": "json",
+                    "data": {
+                        "worstByes": true
+                    }
+                },
+                "columns": [
+                    { "data": "manager" },
+                    { "data": "week" },
+                    { "data": "byes" }
+                ],
+                "searching": false,
+                "paging": false,
+                "info": false,
+                "sort": false
+            });
+        }
+
         $.ajax({
             url : 'modalData.php',
             method: 'POST',
@@ -483,7 +590,8 @@
 
     function positionYearChart(chart, roundPos)
     {
-        for (x = 1; x < count($allPositions); x++) {
+        let count = <?php echo count($allPositions); ?>;
+        for (x = 1; x <= count; x++) {
             data = roundPos[x-1]['data'];
             ctx = document.getElementById(chart+'-rd'+x).getContext('2d');
             new Chart(ctx, {
@@ -555,6 +663,19 @@
                 ]
             });
         }
+    });
+
+    var defensesTable = $('#datatable-defenses').DataTable({
+        "searching": false,
+        "paging": false,
+        "info": false,
+        "autoWidth": false,
+        "columnDefs": [
+            { "sortable": false, "targets": [5,6,7,8,9,10,11,12] }
+        ],
+        "order": [
+            [1, "asc"]
+        ]
     });
 
     // Section for cheat sheet modal **********************************

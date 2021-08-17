@@ -238,6 +238,69 @@ function getProjections(array $draftOrder)
     return $data;
 }
 
+if (isset($_POST['bestPicks'])) {
+    $result = mysqli_query($conn,
+        "SELECT name, player, adp, pick_number, pr.adp - ds.pick_number AS diff
+        FROM draft_selections ds
+        JOIN preseason_rankings pr ON ds.ranking_id = pr.id
+        JOIN managers ON managers.id = ds.manager_id
+        ORDER BY diff ASC LIMIT 5"
+    );
+    while ($row = mysqli_fetch_array($result)) {
+        $data['data'][] = [
+            'manager' => $row['name'],
+            'player' =>$row['player'],
+            'pick' => $row['pick_number'],
+            'adp' => $row['adp']
+        ];
+    }
+
+    echo json_encode($data);
+    die;
+}
+
+if (isset($_POST['worstPicks'])) {
+    $result = mysqli_query($conn,
+        "SELECT name, player, adp, pick_number, pr.adp - ds.pick_number AS diff
+        FROM draft_selections ds
+        JOIN preseason_rankings pr ON ds.ranking_id = pr.id
+        JOIN managers ON managers.id = ds.manager_id
+        ORDER BY diff DESC LIMIT 5"
+    );
+    while ($row = mysqli_fetch_array($result)) {
+        $data['data'][] = [
+            'manager' => $row['name'],
+            'player' =>$row['player'],
+            'pick' => $row['pick_number'],
+            'adp' => $row['adp']
+        ];
+    }
+
+    echo json_encode($data);
+    die;
+}
+
+if (isset($_POST['worstByes'])) {
+    $result = mysqli_query($conn,
+        "SELECT bye AS week, COUNT(ds.id) AS byes, name
+        FROM draft_selections ds
+        JOIN preseason_rankings pr ON ds.ranking_id = pr.id
+        JOIN managers ON managers.id = ds.manager_id
+        GROUP BY name, bye
+        ORDER BY byes DESC LIMIT 5"
+    );
+    while ($row = mysqli_fetch_array($result)) {
+        $data['data'][] = [
+            'manager' => $row['name'],
+            'week' =>$row['week'],
+            'byes' => $row['byes']
+        ];
+    }
+
+    echo json_encode($data);
+    die;
+}
+
 if (isset($_POST['cheatSheet'])) {
 
     $positions = ['QB','RB','WR','TE'];
@@ -278,7 +341,7 @@ if (isset($_POST['cheatSheet'])) {
     die;
 }
 
-if ($_POST['request'] == 'player_data') {
+if (isset($_POST['request']) && $_POST['request'] == 'player_data') {
     $id = $_POST['id'];
     $data = [];
 
@@ -300,7 +363,7 @@ if ($_POST['request'] == 'player_data') {
     die;
 }
 
-if ($_POST['request'] == 'notes') {
+if (isset($_POST['request']) && $_POST['request'] == 'notes') {
     $sql = $conn->prepare("UPDATE preseason_rankings SET notes = ? WHERE id = ?");
     $sql->bind_param('si', $_POST['notes'], $_POST['id']);
     $sql->execute();

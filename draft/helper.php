@@ -2,6 +2,13 @@
     $pageName = "Draft Helper";
     include 'header.php';
 
+    // Ideas for next year
+    // Ability to view each team by roster spot
+    // Make it easier to add initial set of players, SoS, line, proj points
+    // Make it easier to update projections based on FFB UDK
+    // Fix sportradar to just update each player (and add rookies stats)
+
+    // For a new year, just update these few items
     $currentYear = 2021;
     $draftOrder = [
         'Ben'       => 'ben-min.jpg',
@@ -16,8 +23,8 @@
         'Andy'      => 'andy-min.jpg',
     ];
     $allPositions = ['QB','RB','RB','WR','WR','WR','TE','W/R/T','Q/W/R/T','K','DEF','BN','BN','BN','BN','BN','BN'];
+    // *********************************************
 
-    ob_start();
     $result = mysqli_query($conn, "SELECT count(id) as picks FROM draft_selections");
     while ($row = mysqli_fetch_array($result)) {
         $currentPick = $row['picks'] + 1;
@@ -25,7 +32,7 @@
 
     $pickers = [];
     $allDraftOrder = array_reverse(array_keys($draftOrder));
-    for ($x = 0; $x < count($allPositions)+1; $x++) {
+    for ($x = 0; $x < count($allPositions); $x++) {
         $allDraftOrder = array_reverse($allDraftOrder);
         foreach ($allDraftOrder as $man) {
             $pickers[] = $man;
@@ -103,6 +110,7 @@
         JOIN managers m ON m.id = manager_id
         JOIN preseason_rankings pr ON pr.id = ranking_id");
     while ($row = mysqli_fetch_array($result)) {
+        if (isset($tendency[$row['name']][$currentRound]['need'][$row['position']]))
         $tendency[$row['name']][$currentRound]['need'][$row['position']]--;
     }
 
@@ -115,7 +123,6 @@
         }
     }
 
-    ob_flush();
 ?>
 
 <body">
@@ -169,6 +176,9 @@
                             }
                         }
                         ob_flush();
+// var_dump($picker);
+// var_dump($currentRd);
+//                         var_dump($tendency[$picker][$currentRd]);
                         ?>
                     </div>
                 </div>
@@ -179,9 +189,13 @@
                                 <div class="position-relative">
                                     <div class="card-header">
                                         <h3>
-                                            Current Pick: <?php echo $pickers[$currentPick-1].' ('.$currentPick.')'; ?>
-                                            &nbsp;|&nbsp;
-                                            My Next Pick: <?php echo $myNextPick; ?>
+                                        <?php
+                                        if (isset($pickers[$currentPick-1])) {
+                                            echo 'Current Pick: '.$pickers[$currentPick-1].' ('.$currentPick.')';
+                                            echo '&nbsp;|&nbsp';
+                                            echo 'My Next Pick: '.$myNextPick;
+                                        }
+                                        ?>
                                         </h3>
                                         <a data-toggle="modal" data-target="#draft-board" href="#">Draft Board</a>
                                         &nbsp;|&nbsp;
@@ -192,6 +206,8 @@
                                         <a data-toggle="modal" data-target="#depth-chart" href="#">Depth Chart</a>
                                         &nbsp;|&nbsp;
                                         <a data-toggle="modal" data-target="#positions" href="#">Positions</a>
+                                        &nbsp;|&nbsp;
+                                        <a data-toggle="modal" data-target="#defenses" href="#">Defenses</a>
                                         &nbsp;|&nbsp;
                                         <a href="players.php" target="_blank">Players</a>
                                         <!-- &nbsp;|&nbsp;
@@ -492,7 +508,7 @@
 
         $('#datatable-players').on('click', 'tbody .taken', function () {
             var data_row = playersTable.row($(this).closest('tr')).data();
-            pickManager = "<?php echo $pickers[$currentPick-1]; ?>";
+            pickManager = "<?php echo isset($pickers[$currentPick-1]) ? $pickers[$currentPick-1] : 10; ?>";
             data_row.push(pickManager);
             data_row.push('taken');
             console.log(data_row);
@@ -503,7 +519,7 @@
 
         $('#datatable-players').on('click', 'tbody .mine', function () {
             var data_row = playersTable.row($(this).closest('tr')).data();
-            pickManager = "<?php echo $pickers[$currentPick-1]; ?>";
+            pickManager = "<?php echo isset($pickers[$currentPick-1]) ? $pickers[$currentPick-1] : 10; ?>";
             data_row.push(pickManager);
             data_row.push('mine');
             console.log(data_row);
@@ -681,7 +697,7 @@
 
         $('#datatable-top5').on('click', 'tbody .taken', function () {
             var data_row = top5Table.row($(this).closest('tr')).data();
-            pickManager = "<?php echo $pickers[$currentPick-1]; ?>";
+            pickManager = "<?php echo isset($pickers[$currentPick-1]) ? $pickers[$currentPick-1] : 10; ?>";
             data_row.push(pickManager);
             data_row.push('taken');
             console.log(data_row);
@@ -692,7 +708,7 @@
 
         $('#datatable-top5').on('click', 'tbody .mine', function () {
             var data_row = top5Table.row($(this).closest('tr')).data();
-            pickManager = "<?php echo $pickers[$currentPick-1]; ?>";
+            pickManager = "<?php echo isset($pickers[$currentPick-1]) ? $pickers[$currentPick-1] : 10; ?>";
             data_row.push(pickManager);
             data_row.push('mine');
             console.log(data_row);
@@ -780,6 +796,18 @@
 
     .bad-pick {
         color: red;
+    }
+
+    .color-B {
+        background-color: #fa887f;
+    }
+
+    .color-G {
+        background-color: #8cfa84;
+    }
+
+    .color-M {
+        background-color: #dffcde;
     }
 
     table#player-history td, th {

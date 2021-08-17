@@ -108,6 +108,62 @@
                         </table>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-xs-4">
+                        <table class="table table-responsive">
+                            <thead>
+                                <th>Manager</th>
+                                <th>Player</th>
+                                <th>Pick</th>
+                                <th>ADP</th>
+                            </thead>
+                            <?php
+                            $result = mysqli_query($conn,
+                                "SELECT name, player, adp, pick_number, pr.adp - ds.pick_number AS diff 
+                                FROM draft_selections ds
+                                JOIN preseason_rankings pr ON ds.ranking_id = pr.id
+                                JOIN managers ON managers.id = ds.manager_id
+                                ORDER BY diff ASC LIMIT 5"
+                            );
+                            while ($row = mysqli_fetch_array($result)) {?>
+                                <tr>
+                                    <td><?php echo $row['name']; ?></td>
+                                    <td><?php echo $row['player']; ?></td>
+                                    <td><?php echo $row['pick_number']; ?></td>
+                                    <td><?php echo $row['adp']; ?></td>
+                                </tr>   
+                            <?php
+                            } ?>
+                        </table>
+                    </div>
+                    <div class="col-xs-4">
+                        <table class="table table-responsive">
+                            <thead>
+                                <th>Manager</th>
+                                <th>Player</th>
+                                <th>Pick</th>
+                                <th>ADP</th>
+                            </thead>
+                            <?php
+                            $result = mysqli_query($conn,
+                                "SELECT name, player, adp, pick_number, pr.adp - ds.pick_number AS diff 
+                                FROM draft_selections ds
+                                JOIN preseason_rankings pr ON ds.ranking_id = pr.id
+                                JOIN managers ON managers.id = ds.manager_id
+                                ORDER BY diff DESC LIMIT 5"
+                            );
+                            while ($row = mysqli_fetch_array($result)) {?>
+                                <tr>
+                                    <td><?php echo $row['name']; ?></td>
+                                    <td><?php echo $row['player']; ?></td>
+                                    <td><?php echo $row['pick_number']; ?></td>
+                                    <td><?php echo $row['adp']; ?></td>
+                                </tr> 
+                            <?php
+                            } ?>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -255,7 +255,7 @@
                                                 ORDER BY my_rank ASC"
                                             );
                                             while ($row = mysqli_fetch_array($result)) {
-
+                                                $btnColor = ($myNextPick == 'Now!') ? 'mine' : 'taken';
                                                 $sosColor = ($row['sos'] > 25) ? 'bad' : ($row['sos'] < 7 ? 'good' : '');
                                                 $lineColor = ($row['position'] != 'DEF') ? (($row['line'] > 25) ? 'bad' : ($row['line'] < 7 ? 'good' : '')) : '';
 
@@ -275,7 +275,7 @@
                                                     <td class="color-<?php echo $sosColor; ?>"><?php echo $row['sos']; ?></td>
                                                     <td class="color-<?php echo $lineColor; ?>"><?php echo ($row['position'] != 'DEF') ? $row['line'] : ''; ?></td>
                                                     <td><?php echo $row['tier']; ?></td>
-                                                    <td><a class="btn btn-secondary taken"><i class="icon-minus"></i></a><a class="btn btn-secondary mine"><i class="icon-plus"></i></a></td>
+                                                    <td><a class="btn btn-secondary selected-btn <?php echo $btnColor; ?>"><i class="icon-plus"></i></a></td>
                                                     <td><?php echo $row['games_played']; ?></td>
                                                     <td><?php echo $row['points']; ?></td>
                                                     <td><?php echo $row['games_played'] > 0 ? round($row['points'] / $row['games_played'], 1) : null; ?></td>
@@ -447,7 +447,8 @@
             dataType: 'text',
             data: {
                 currentYear: "<?php echo $currentYear; ?>",
-                draftOrder: '<?php echo json_encode($draftOrder); ?>'
+                draftOrder: '<?php echo json_encode($draftOrder); ?>',
+                myNextPick: '<?php echo $myNextPick; ?>',
             },
             cache: false,
             success: function(response) {
@@ -462,7 +463,7 @@
 
     var playersTable = $('#datatable-players').DataTable({
         "columnDefs": [
-            { "width": "55px", "targets": 8 },
+            { "width": "25px", "targets": 8 },
             { "sortable": false, "targets": [8,16,17]},
             { "visible": false, "targets": 17 }
         ],
@@ -506,27 +507,16 @@
             $('#proj-standings').modal('show');
         }
 
-        $('#datatable-players').on('click', 'tbody .taken', function () {
+        $('#datatable-players').on('click', 'tbody .selected-btn', function () {
             var data_row = playersTable.row($(this).closest('tr')).data();
             pickManager = "<?php echo isset($pickers[$currentPick-1]) ? $pickers[$currentPick-1] : 10; ?>";
             data_row.push(pickManager);
-            data_row.push('taken');
-            console.log(data_row);
+            // console.log(data_row);
             var formData = {data: data_row};
 
-            saveSelection(formData);
-        });
-
-        $('#datatable-players').on('click', 'tbody .mine', function () {
-            var data_row = playersTable.row($(this).closest('tr')).data();
-            pickManager = "<?php echo isset($pickers[$currentPick-1]) ? $pickers[$currentPick-1] : 10; ?>";
-            data_row.push(pickManager);
-            data_row.push('mine');
-            console.log(data_row);
-            var formData = {data: data_row};
-
+            let mine = '<?php echo $myNextPick; ?>' == 'Now!';
             let good = checkByes(data_row);
-            if (!good) {
+            if (mine && !good) {
                 if (confirm('Check the byes, bro.')) {
                     saveSelection(formData);
                 }
@@ -695,27 +685,16 @@
             });
         });
 
-        $('#datatable-top5').on('click', 'tbody .taken', function () {
+        $('#datatable-top5').on('click', 'tbody .selected-btn', function () {
             var data_row = top5Table.row($(this).closest('tr')).data();
             pickManager = "<?php echo isset($pickers[$currentPick-1]) ? $pickers[$currentPick-1] : 10; ?>";
             data_row.push(pickManager);
-            data_row.push('taken');
-            console.log(data_row);
+            // console.log(data_row);
             var formData = {data: data_row};
 
-            saveSelection(formData);
-        });
-
-        $('#datatable-top5').on('click', 'tbody .mine', function () {
-            var data_row = top5Table.row($(this).closest('tr')).data();
-            pickManager = "<?php echo isset($pickers[$currentPick-1]) ? $pickers[$currentPick-1] : 10; ?>";
-            data_row.push(pickManager);
-            data_row.push('mine');
-            console.log(data_row);
-            var formData = {data: data_row};
-
+            let mine = '<?php echo $myNextPick; ?>' == 'Now!';
             let good = checkByes(data_row);
-            if (!good) {
+            if (mine && !good) {
                 if (confirm('Check the byes, bro.')) {
                     saveSelection(formData);
                 }

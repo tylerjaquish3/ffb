@@ -21,8 +21,9 @@ if (isset($_POST['data'])) {
         $data = $_POST['data'];
 
         $player = mysqli_real_escape_string($conn, $data[2]);
-        $mine = ($data[count($data)-1] == 'taken') ? 0 : 1;
+        $mine = ($data[count($data)-1] == 'Tyler') ? 1 : 0;
 
+        // get the player
         $result = mysqli_query($conn,"SELECT * FROM preseason_rankings WHERE my_rank = $data[0]");
         if (mysqli_num_rows($result) > 0) {
             while($row = mysqli_fetch_array($result)) {
@@ -39,7 +40,7 @@ if (isset($_POST['data'])) {
             }
         }
 
-        $picker = $data[count($data)-2];
+        $picker = $data[count($data)-1];
         $result = mysqli_query($conn,"SELECT id FROM managers WHERE name = '{$picker}'");
         if (mysqli_num_rows($result) > 0) {
             while($row = mysqli_fetch_array($result)) {

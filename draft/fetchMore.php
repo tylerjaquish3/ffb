@@ -4,10 +4,11 @@
 	require_once 'header.php';
 
     $currentYear = $_POST['currentYear'];
+    $myNextPick = $_POST['myNextPick'];
     $draftOrder = (array) json_decode($_POST['draftOrder']);
 
     $output = '<div class="row">';
-    $top5table = getTop5Table($currentYear);
+    $top5table = getTop5Table($currentYear, $myNextPick);
     $addPlayer = '
             <br />
             <input type="text" id="new-player"><button id="new-player-btn">Add Player</button>
@@ -22,7 +23,7 @@
     echo $output;
     die;
 
-    function getTop5Table($currentYear)
+    function getTop5Table($currentYear, $myNextPick)
     {
         global $conn;
         $output = '
@@ -118,7 +119,7 @@
                                     )"
                                 );
                                 while ($row = mysqli_fetch_array($result)) {
-
+                                    $btnColor = ($myNextPick == 'Now!') ? 'mine' : 'taken';
                                     $sosColor = ($row['sos'] > 25) ? 'bad' : ($row['sos'] < 7 ? 'good' : '');
                                     $lineColor = ($row['line'] > 25) ? 'bad' : ($row['line'] < 7 ? 'good' : '');
                                     $ppg = ($row['games_played'] > 0) ? round($row['points'] / $row['games_played'], 1) : null;
@@ -136,7 +137,7 @@
                                         <td class="color-'.$lineColor.'">'.$row['line'].'</td>
                                         <td>'.$row['tier'].'</td>
                                         <td>'.$diff.'</td>
-                                        <td><a class="btn btn-secondary taken"><i class="icon-minus"></i></a><a class="btn btn-secondary mine"><i class="icon-plus"></i></a></td>
+                                        <td><a class="btn btn-secondary selected-btn '.$btnColor.'"><i class="icon-plus"></i></a></td>
                                         <td>'.$row['games_played'].'</td>
                                         <td>'.$row['points'].'</td>
                                         <td>'.$ppg.'</td>

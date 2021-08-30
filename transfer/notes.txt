@@ -1,0 +1,31 @@
+
+github access token
+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
+
+
+
+https://537686889302.signin.aws.amazon.com/console
+
+mssh ubuntu@{instance_id}
+mssh ubuntu@i-0b8fafc81b54952c7
+mssh ubuntu@i-04cd6dbad2ea77e7d
+
+// delete remote branch
+git push origin -d feature/344
+
+
+OMNI_QUANT_KEY = 8ClHPxmOounSTstkWWgU0ptJWR0KmcfE
+
+
+ssh onto lazy susan staging (git bash):
+
+aws-azure-login --no-prompt -m gui
+see image saved on desktop for instructions to get instance id and private ip from aws
+mssh -t i-07af0e3e57a07ebbd ubuntu@10.0.5.218
+sudo docker ps
+get the first value (left)
+sudo docker exec -it <container id> sh
+
+php artisan tinker
+Illuminate\Support\Facades\Redis::keys('*');
+

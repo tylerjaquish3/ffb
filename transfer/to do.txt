@@ -1,0 +1,169 @@
+
+more browser tests cleaned up
+	portco profile
+	tabs on portfolio profile
+make modals and buttons match style guide
+cache fx rates
+load js for portfolio profile on demand
+bugsnag
+
+
+we set up supervisor to run on Raiden so that write ups job will run
+unsure if kratos or zelda got supervisor or not
+3/17 
+pdfs, pusher are working on raiden
+5/19
+zelda write ups do not work (supervisor not running jobs)
+
+
+4/1 new variables for pusher
+
+channel = omni-staging.
+app_id = "1181764"
+key = "d4c01b736b1c11b0635e"
+secret = "7fd3cc2681eeda8c84ae"
+
+channel = omni-production.
+app_id = "1181765"
+key = "fa2e4809d311e466899a"
+secret = "d31bbe0bef00c1a61f20"
+
+
+when do you know a project is off track? how can you tell?
+have you managed remote teams? how has that been going these last 6 months?
+how do you prioritize tasks on a project?
+tell me about how you gather requirements for an issue and then verify the solution met the requirements
+how do you handle multiple projects at once?
+what would be your biggest challenge to contribute right away?
+
+vince===========
+what are some things that are frustrating as an omni engineer?
+what can PMs do to make things easier for engineers?
+how would you rate our current process 1-100?
+how can we prevent so many bugs being introduced?
+
+
+vita==========
+what can we do as developers to make things easier on your end?
+are there any frustrations you have with the way we address issues, including our willingness and attitudes?
+how would you rate our current process 1-100?
+how can we prevent so many bugs being introduced?
+
+
+vince 1on1 8/27
+frustrated not following process
+more time to research other techs
+focus on better dev environments
+get environments synchronized
+
+vince 1on1 10/8
+mundane tasks?
+set up retros?
+interested in helping with tim
+set up time for research
+process is getting better with vipasha
+assigning and est. during sprint planning
+
+vince 1on1 10/29
+looking forward to refactoring
+simplifying the export code
+tell tim we are eager to help
+vipasha more connected with sprints is helping
+get vipasha to get reqs for lazy susan
+ask vipasha about the gathering reqs tickets
+
+vince 1on1 11/19
+worried about exports (large datasets) and how we would put that in backend
+working with tim is going fine, skills are lacking
+concerned about hiring consultant firm versus hiring engineers
+interested in optimizing backend stuff - nested foreach
+research react with laravel
+
+tim 1on1 12/10
+good amount of communication
+happy with the help he's been getting
+goals: being productive for the company, increase tech skills, wants to take on more 
+would find value in seeing how hotfixes happen
+has learned a lot about unit testing
+accpt criteria for the seeder ticket 435
+front end is more difficult for him
+internship ends 12/28 but wants to keep working
+
+vince 1on1 12/10
+nice to have a lighter load
+react research was put on hold, will look into Behat
+will work on bugsnag errors when tickets run out
+
+tim 1on1 12/31
+spoke to tyler about extending internship for 3 months, end of march
+need more tickets in backlog
+new semester classes are at night
+ideally wants a full time role
+can take more tickets without instruction
+wants to do more mysql, learn more devops groundwork structure
+likes the complexity of the issues he's given
+
+vince 1on1 1/21
+likes working from home, but would like optional office time
+wnats to know about title change criteria and only once per year?
+feels like he put in a lot of work last year and doesnt know what he can work toward
+talk about goals - hasn't thought about it because of ^
+will use end of sprint for research rather than adding more tickets
+
+tim 1on1 1/27
+feedback from vince is going good, get along well, been very helpful
+	-sometimes vince just gives the answer rather than "why"
+	-wants more learning rather than "what just happened?"
+	-not concerned about condescending responses
+had a busy schedule when classes started up, but its gotten easier now
+hard to understand laravel syntax and what goes where (MVC)
+works different hours each day, but averages 4/day
+wants to do a hotfix
+
+tim 1on1 2/11
+has felt more comfortable asking vince for help
+understanding more code, most questions are about requirements
+time logging will be valuable, should come up with a notification to update time spent
+
+vince 1on1 3/4
+need devops help
+don't want to say more about PMs not making tickets
+time logging seems very inaccurate - QA time not logged
+not interested in work groups - no point of trying harder this year
+not being compensated for going above and beyond, lack of motivation
+
+tim 1on1 3/10
+talked about how the company values software vs. finance 
+software is more interesting to him
+trying to decide if he wants to take the Eng I role
+wants to eventually get to Python, not interested in becoming a PM at this point
+has offer letter from finance company, getting one from DSE soon
+
+tim 1on1 3/24
+not taking job offer
+starting investment firm with family office
+
+vince 1on1 3/25
+talked about bringing on Alex, asked how that came about, how we found him
+talked about tim leaving
+doesn't want to do smoke tests
+likes the tasks we're doing
+spend more time in estimating to dig into issues
+
+vince 1on1 5/6
+mostly just talked about tasks
+estimating is going better
+
+vince 1on1 6/17
+doesnt feel like mid-year reviews are helpful
+feels good about tickets
+talked about giving him more difficult tickets to stretch his comfort zone
+
+vince 1on1 8/19
+should add QA time for tickets in jira?
+should put focus on optimizing code & queries
+only make requests when data is needed
+will make list of front end edits 
+more work on responsiveness
+need road map updated
+need to look into retirement investing

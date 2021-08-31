@@ -139,8 +139,8 @@ if (isset($_POST['projectedChart'])) {
             $league['TE'] += $team['te'];
             $league['K'] += $team['k'];
             $league['DEF'] += $team['def'];
-            // $league['Starting'] += $team['starting'];
             $league['BN'] += $team['bn'];
+            // $league['Starting'] += $team['starting'];
             // $league['Total'] += $team['total'];
 
             $filled['QB'] += ($team['qb'] > 0) ? 1 : 0;
@@ -159,8 +159,8 @@ if (isset($_POST['projectedChart'])) {
             $mine[] = $team['te'];
             $mine[] = $team['k'];
             $mine[] = $team['def'];
-            // $mine[] = $team['starting'];
             $mine[] = $team['bn'];
+            // $mine[] = $team['starting'];
             // $mine[] = $team['total'];
         }
     }

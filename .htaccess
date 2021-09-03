@@ -1,7 +1,5 @@
 <IfModule mod_headers.c>
 
-    ExpiresActive On
-
     # One year for image and video files
     <filesMatch ".(gif|ico|jpg|jpeg|mp4|mpeg|png)$">
         Header set Cache-Control "max-age=31536000, public"

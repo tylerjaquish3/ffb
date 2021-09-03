@@ -15,7 +15,6 @@ if (isset($_POST['data'])) {
 
     $return = ['type' => 'success', 'message' => 'Successfully updated.'];
 
-    // var_dump($_POST['data']);
     try {
 
         $data = $_POST['data'];
@@ -24,6 +23,7 @@ if (isset($_POST['data'])) {
         $mine = ($data[count($data)-1] == 'Tyler') ? 1 : 0;
 
         // get the player
+        // This can cause problems to look them up by my rank if i'm changing my rankings during a mock draft
         $result = mysqli_query($conn,"SELECT * FROM preseason_rankings WHERE my_rank = $data[0]");
         if (mysqli_num_rows($result) > 0) {
             while($row = mysqli_fetch_array($result)) {

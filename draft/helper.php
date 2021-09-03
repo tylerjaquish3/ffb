@@ -3,10 +3,14 @@
     include 'header.php';
 
     // Ideas for next year
-    // Ability to view each team by roster spot
+    // Ability to view each manager's roster sorted by lineup and compare lineups (week 1 matchup?)
     // Make it easier to add initial set of players, SoS, line, proj points
     // Make it easier to update projections based on FFB UDK
+    // Make it easier to update adp based on 2QB (https://draftwizard.fantasypros.com/football/adp/mock-drafts/overall/2qb-std-10-teams)
     // Fix sportradar to just update each player (and add rookies stats)
+    // Add player history and notes to predraft rankings
+    // Look into VORP, VONA, VOLS (value based drafting)
+    // Additional notifications like "that was a great pick" or "you should really consider this stat based on your roster"
 
     // For a new year, just update these few items
     $currentYear = 2021;
@@ -262,13 +266,13 @@
                                                 $count++;
                                                 if (in_array($count, $allMyNextPicks)) {
                                                     $myRank = $row['my_rank']+2;
-                                                    echo '<tr class="color-black"><td>'.$myRank.'</td><td></td><td></td><td></td><td></td><td></td><td></td>
+                                                    echo '<tr class="color-black"><td>'.$myRank.'</td><td data-order="999">></td><td></td><td></td><td></td><td></td><td></td>
                                                     <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
                                                 }
                                             ?>
                                                 <tr class="color-<?php echo $row['position']; ?>">
                                                     <td><?php echo $row['my_rank']; ?></td>
-                                                    <td><?php echo $row['adp']; ?></td>
+                                                    <td data-order="<?php echo $row['adp'] ? $row['adp'] : 999; ?>"><?php echo $row['adp']; ?></td>
                                                     <td><?php echo '<a data-toggle="modal" data-target="#player-data" onclick="showPlayerData('.(int)$row[0].')">'.$row['player'].'</a>'; ?></td>
                                                     <td><?php echo $row['team']; ?></td>
                                                     <td><?php echo $row['bye']; ?></td>
@@ -509,13 +513,14 @@
 
         $('#datatable-players').on('click', 'tbody .selected-btn', function () {
             var data_row = playersTable.row($(this).closest('tr')).data();
-            pickManager = "<?php echo isset($pickers[$currentPick-1]) ? $pickers[$currentPick-1] : 10; ?>";
-            data_row.push(pickManager);
             // console.log(data_row);
-            var formData = {data: data_row};
+            var data = Object.keys(data_row).map((key) => data_row[key]);
+            pickManager = "<?php echo isset($pickers[$currentPick-1]) ? $pickers[$currentPick-1] : 10; ?>";
+            data.push(pickManager);
+            var formData = {data: data};
 
             let mine = '<?php echo $myNextPick; ?>' == 'Now!';
-            let good = checkByes(data_row);
+            let good = checkByes(data);
             if (mine && !good) {
                 if (confirm('Check the byes, bro.')) {
                     saveSelection(formData);

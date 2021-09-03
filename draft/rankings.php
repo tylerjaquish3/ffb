@@ -31,13 +31,19 @@ include 'header.php';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-3">
+
+                <?php 
+                $positions = ['TE', 'WR', 'RB', 'QB'];
+
+                foreach ($positions as $pos) {
+                ?>
+                <div class="col-xs-12 col-md-2">
                     <div class="card">
                         <div class="card-body">
                             <div class="position-relative">
                                 <ul class="tiers-list">
                                     <?php
-                                    $result = mysqli_query($conn, "SELECT * FROM preseason_rankings WHERE position = 'WR' ORDER BY my_rank ASC");
+                                    $result = mysqli_query($conn, "SELECT * FROM preseason_rankings WHERE position = '{$pos}' ORDER BY my_rank ASC");
                                     while ($row = mysqli_fetch_array($result)) {
                                         $tier = $row['tier'];
                                         ?>
@@ -61,66 +67,8 @@ include 'header.php';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="position-relative">
-                                <ul class="tiers-list">
-                                    <?php
-                                    $result = mysqli_query($conn, "SELECT * FROM preseason_rankings WHERE position = 'RB' ORDER BY my_rank ASC");
-                                    while ($row = mysqli_fetch_array($result)) {
-                                        $tier = $row['tier'];
-                                        ?>
-                                        <li class="ui-state-default" id="item-<?php echo $row['id']; ?>">
-                                            <select class="tier-selector" data-tier-id="<?php echo $row['id']; ?>">
-                                                <option>Select Tier</option>
-                                                <option value="1" <?php if ($tier == 1) { echo 'selected'; }?>>Tier 1</option>
-                                                <option value="2" <?php if ($tier == 2) { echo 'selected'; }?>>Tier 2</option>
-                                                <option value="3" <?php if ($tier == 3) { echo 'selected'; }?>>Tier 3</option>
-                                                <option value="4" <?php if ($tier == 4) { echo 'selected'; }?>>Tier 4</option>
-                                                <option value="5" <?php if ($tier == 5) { echo 'selected'; }?>>Tier 5</option>
-                                                <option value="6" <?php if ($tier == 6) { echo 'selected'; }?>>Tier 6</option>
-                                                <option value="7" <?php if ($tier == 7) { echo 'selected'; }?>>Tier 7</option>
-                                                <option value="8" <?php if ($tier == 8) { echo 'selected'; }?>>Tier 8</option>
-                                            </select>
-                                            <span class="color-<?php echo $row['position']; ?>"><?php echo $row['player'].' ('.$row['proj_points'].')'; ?></span>
-                                        </li>
-                                    <?php } ?>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xs-12 col-md-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="position-relative">
-                                <ul class="tiers-list">
-                                    <?php
-                                    $result = mysqli_query($conn, "SELECT * FROM preseason_rankings WHERE position = 'QB' ORDER BY my_rank ASC");
-                                    while ($row = mysqli_fetch_array($result)) {
-                                        $tier = $row['tier'];
-                                        ?>
-                                        <li class="ui-state-default" id="item-<?php echo $row['id']; ?>">
-                                            <select class="tier-selector" data-tier-id="<?php echo $row['id']; ?>">
-                                                <option>Select Tier</option>
-                                                <option value="1" <?php if ($tier == 1) { echo 'selected'; }?>>Tier 1</option>
-                                                <option value="2" <?php if ($tier == 2) { echo 'selected'; }?>>Tier 2</option>
-                                                <option value="3" <?php if ($tier == 3) { echo 'selected'; }?>>Tier 3</option>
-                                                <option value="4" <?php if ($tier == 4) { echo 'selected'; }?>>Tier 4</option>
-                                                <option value="5" <?php if ($tier == 5) { echo 'selected'; }?>>Tier 5</option>
-                                                <option value="6" <?php if ($tier == 6) { echo 'selected'; }?>>Tier 6</option>
-                                                <option value="7" <?php if ($tier == 7) { echo 'selected'; }?>>Tier 7</option>
-                                                <option value="8" <?php if ($tier == 8) { echo 'selected'; }?>>Tier 8</option>
-                                            </select>
-                                            <span class="color-<?php echo $row['position']; ?>"><?php echo $row['player'].' ('.$row['proj_points'].')'; ?></span>
-                                        </li>
-                                    <?php } ?>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <?php
+                } ?>
 
             </div>
         </div>

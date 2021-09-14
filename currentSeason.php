@@ -51,7 +51,7 @@ include 'sidebar.html';
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green white media-body">
-                                    <h5>Most Total TDs</h5>
+                                    <h5>Most Total TDs (incl. BN)</h5>
                                     <h5 class="text-bold-400"><?php echo $topPerformers['mostTds']['manager']; ?><br />
                                         <?php echo $topPerformers['mostTds']['points']; ?>
                                     </h5>
@@ -66,7 +66,7 @@ include 'sidebar.html';
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green white media-body">
-                                    <h5>Most Total Yards</h5>
+                                    <h5>Most Total Yards (incl. BN)</h5>
                                     <h5 class="text-bold-400"><?php echo $topPerformers['mostYds']['manager']; ?><br />
                                         <?php echo $topPerformers['mostYds']['points']; ?>
                                     </h5>
@@ -97,8 +97,9 @@ include 'sidebar.html';
                             <h4 style="float: right">Points</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-currentPoints">
+                            <table class="stripe row-border order-column" id="datatable-currentPoints">
                                 <thead>
+                                    <tr>
                                     <th>Manager</th>
                                     <th>QB</th>
                                     <th>RB</th>
@@ -110,6 +111,7 @@ include 'sidebar.html';
                                     <th>DEF</th>
                                     <th>Bench</th>
                                     <th>Total</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
                                     <?php
@@ -185,7 +187,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Top Weekly Performers</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-bestWeek">
+                            <table class="stripe row-border order-column" id="datatable-bestWeek">
                                 <thead>
                                     <th>Week</th>
                                     <th>Top QB</th>
@@ -265,7 +267,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Stats</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-currentStats">
+                            <table class="stripe row-border order-column" id="datatable-currentStats">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Total Yds</th>
@@ -310,7 +312,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Stats Against</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-statsAgainst">
+                            <table class="stripe row-border order-column" id="datatable-statsAgainst">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Total Yds</th>
@@ -355,11 +357,11 @@ include 'sidebar.html';
                             <h4 style="float: right">Optimal Lineups</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-optimal">
+                            <table class="stripe row-border order-column" id="datatable-optimal">
                                 <thead>
-                                    <th>Week</th>
                                     <th>Manager</th>
                                     <th>Opponent</th>
+                                    <th>Week</th>
                                     <th>Actual Points</th>
                                     <th>Opponent Score</th>
                                     <th>Result</th>
@@ -374,9 +376,9 @@ include 'sidebar.html';
                                     <?php
                                     foreach ($optimal as $row) { ?>
                                         <tr>
-                                            <td><?php echo $row['week']; ?></td>
                                             <td><?php echo $row['manager']; ?></td>
                                             <td><?php echo $row['opponent']; ?></td>
+                                            <td><?php echo $row['week']; ?></td>
                                             <td><?php echo $row['points']; ?></td>
                                             <td><?php echo $row['oppPoints']; ?></td>
                                             <td><?php echo $row['result']; ?></td>
@@ -621,55 +623,88 @@ include 'sidebar.html';
 
 <?php include 'footer.html'; ?>
 
+<script src="/assets/dataTables-fixedColumns.min.js" type="text/javascript"></script>
+
 <script type="text/javascript">
     $(document).ready(function() {
 
+
         $('#datatable-currentPoints').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                leftColumns: 1
+            },
+            order: [
                 [10, "desc"]
             ]
         });
 
         $('#datatable-currentStats').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                left: 1
+            },
+            order: [
                 [2, "desc"]
             ]
         });
 
         $('#datatable-bestWeek').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [0, "asc"]
+            searching: false,
+            paging: false,
+            info: false,
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                left: 1
+            },
+            order: [
+                [0, "desc"]
             ]
         });
 
         $('#datatable-statsAgainst').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                left: 1
+            },
+            order: [
                 [2, "desc"]
             ]
         });
 
         $('#datatable-bestTeamWeek').DataTable({
-            "searching": false,
-            "info": false,
-            "order": [
+            searching: false,
+            info: false,
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                left: 1
+            },
+            order: [
                 [0, "desc"]
             ]
         });
 
         $('#datatable-optimal').DataTable({
-            "order": [
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                leftColumns: 2
+            },
+            order: [
                 [3, "desc"]
             ]
         });

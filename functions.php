@@ -7,6 +7,11 @@ while ($row = mysqli_fetch_array($result)) {
     $season = $row['year'];
 }
 
+$result = mysqli_query($conn, "SELECT MAX(WEEK) AS maxweek FROM rosters WHERE YEAR = $season");
+while ($row = mysqli_fetch_array($result)) {
+    $week = $row['maxweek'];
+}
+
 if (!isset($pageName)) {
     $pageName = 'update';
 }
@@ -24,7 +29,7 @@ if ($pageName == 'Regular Season') {
     $regSeasonMatchups = getRegularSeasonMatchups($conn);
     $seasonWins = getSeasonWins($conn);
     $winsChart = getWinsChartNumbers($conn);
-    $scatterChart = getPointMargins($conn, $season);
+    $scatterChart = getPointMargins();
     $pfwins = getPfWinsData($conn);
 }
 if ($pageName == 'Postseason') {
@@ -41,21 +46,21 @@ if ((strpos($pageName, 'Recap') !== false)) {
     $draftResults = getDraftResults($conn);
 }
 if ($pageName == 'Current Season') {
-    $points = getCurrentSeasonPoints($conn, $season);
-    $stats = getCurrentSeasonStats($conn, $season);
-    $statsAgainst = getCurrentSeasonStatsAgainst($conn, $season);
-    $bestWeek = getCurrentSeasonBestWeek($conn, $season);
-    $topPerformers = getCurrentSeasonTopPerformers($conn, $season);
-    $teamWeek = getCurrentSeasonBestTeamWeek($conn, $season);
-    $optimal = getOptimalLineupPoints($conn, $season);
-    $draftedPoints = getDraftedPoints($conn, $season, 0);
-    $undraftedPoints = getUndraftedPoints($conn, $season);
-    $lateRoundPoints = getLateRoundPoints($conn, $season);
-    $worstDraft = getWorstDraftPicks($conn, $season);
-    $bestDraft = getBestDraftPicks($conn, $season);
-    $playersRetained = getPlayersRetained($conn, $season);
-    $everyoneRecord = getRecordAgainstEveryone($conn, $season);
-    $draftPerformance = getAllDraftedPlayerDetails($conn, $season);
+    $points = getCurrentSeasonPoints();
+    $stats = getCurrentSeasonStats();
+    $statsAgainst = getCurrentSeasonStatsAgainst();
+    $bestWeek = getCurrentSeasonBestWeek();
+    $topPerformers = getCurrentSeasonTopPerformers();
+    $teamWeek = getCurrentSeasonBestTeamWeek();
+    $optimal = getOptimalLineupPoints();
+    $draftedPoints = getDraftedPoints(0);
+    $undraftedPoints = getUndraftedPoints();
+    $lateRoundPoints = getLateRoundPoints();
+    $worstDraft = getWorstDraftPicks();
+    $bestDraft = getBestDraftPicks();
+    $playersRetained = getPlayersRetained();
+    $everyoneRecord = getRecordAgainstEveryone();
+    $draftPerformance = getAllDraftedPlayerDetails();
 }
 
 /**
@@ -526,11 +531,11 @@ function getWinsChartNumbers($conn)
 /**
  * Undocumented function
  *
- * @param [type] $conn
  * @return void
  */
-function getPointMargins($conn, $season)
+function getPointMargins()
 {
+    global $conn, $season;
     $response = [];
     $priorYear = null;
 
@@ -829,12 +834,12 @@ function getAllNumbersBySeason($conn)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getCurrentSeasonPoints($conn, $season)
+function getCurrentSeasonPoints()
 {
+    global $conn, $season;
+
     $result = mysqli_query($conn, "SELECT manager, roster_spot, SUM(points) AS points, SUM(projected) AS projected FROM rosters r
         WHERE YEAR = $season
         GROUP BY manager, roster_spot");
@@ -851,12 +856,12 @@ function getCurrentSeasonPoints($conn, $season)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getCurrentSeasonStats($conn, $season)
+function getCurrentSeasonStats()
 {
+    global $conn, $season;
+
     $result = mysqli_query($conn, "SELECT manager, SUM(pass_yds) AS pass_yds, SUM(pass_tds) AS pass_tds, SUM(ints) AS ints, SUM(rush_yds) AS rush_yds, SUM(rush_tds) AS rush_tds,
         SUM(receptions) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds, SUM(fumbles) AS fum, SUM(fg_made) AS fg_made, SUM(pat_made) AS pat_made,
         SUM(def_sacks) AS def_sacks, SUM(def_int) AS def_int, SUM(def_fum) AS def_fum
@@ -871,12 +876,11 @@ function getCurrentSeasonStats($conn, $season)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getCurrentSeasonBestWeek($conn, $season)
+function getCurrentSeasonBestWeek()
 {
+    global $conn, $season;
     $bestWeek = [];
     $result = mysqli_query($conn, "SELECT WEEK, MAX(IF(roster_spot='QB', points, NULL)) AS top_qb,
         MAX(IF(roster_spot='RB', points, NULL)) AS top_rb,
@@ -935,12 +939,11 @@ function queryBestWeekPlayer($conn, $week, $pts, $pos)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getCurrentSeasonStatsAgainst($conn, $season)
+function getCurrentSeasonStatsAgainst()
 {
+    global $conn, $season;
     $managers = ['Tyler', 'Matt', 'Justin', 'Ben', 'AJ', 'Gavin', 'Cameron', 'Cole', 'Everett', 'Andy'];
     foreach ($managers as $manager) {
         $response[$manager] = [
@@ -963,7 +966,6 @@ function getCurrentSeasonStatsAgainst($conn, $season)
     while ($row = mysqli_fetch_array($result)) {
         $week = $row['week_number'];
         $opponent = $row['manager2_id'];
-
 
         $result2 = mysqli_query($conn, "SELECT manager, SUM(pass_yds) AS pass_yds, SUM(pass_tds) AS pass_tds, SUM(ints) AS ints, SUM(rush_yds) AS rush_yds, SUM(rush_tds) AS rush_tds,
             SUM(receptions) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds, SUM(fumbles) AS fum, SUM(fg_made) AS fg_made, SUM(pat_made) AS pat_made,
@@ -992,12 +994,11 @@ function getCurrentSeasonStatsAgainst($conn, $season)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getCurrentSeasonTopPerformers($conn, $season)
+function getCurrentSeasonTopPerformers()
 {
+    global $conn, $season;
     $response = [];
 
     $result = mysqli_query($conn, "SELECT * FROM rosters WHERE YEAR = $season ORDER BY points DESC LIMIT 1");
@@ -1064,12 +1065,11 @@ function getCurrentSeasonTopPerformers($conn, $season)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getCurrentSeasonBestTeamWeek($conn, $season)
+function getCurrentSeasonBestTeamWeek()
 {
+    global $conn, $season;
     $response = [];
 
     $result = mysqli_query($conn, "SELECT m.name as m1, l.name as m2, rsm.year, rsm.week_number, rsm.manager1_score, rsm.manager2_score
@@ -1097,12 +1097,11 @@ function getCurrentSeasonBestTeamWeek($conn, $season)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getDraftedPoints($conn, $season, $round)
+function getDraftedPoints($round)
 {
+    global $conn, $season;
     $response = [];
 
     mysqli_query($conn, "SET SQL_BIG_SELECTS=1");
@@ -1126,15 +1125,14 @@ function getDraftedPoints($conn, $season, $round)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getUndraftedPoints($conn, $season)
+function getUndraftedPoints()
 {
+    global $conn, $season;
     $response = [];
 
-    $drafted = getDraftedPoints($conn, $season, 0);
+    $drafted = getDraftedPoints(0);
 
     $result = mysqli_query($conn, "SELECT rosters.manager, sum(points) AS points FROM rosters
         WHERE rosters.YEAR = $season AND roster_spot NOT IN ('BN', 'IR')
@@ -1157,15 +1155,11 @@ function getUndraftedPoints($conn, $season)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getLateRoundPoints($conn, $season)
+function getLateRoundPoints()
 {
-    $response = [];
-
-    $drafted = getDraftedPoints($conn, $season, 9);
+    $drafted = getDraftedPoints(9);
 
     return $drafted;
 }
@@ -1173,29 +1167,36 @@ function getLateRoundPoints($conn, $season)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getWorstDraftPicks($conn, $season)
+function getWorstDraftPicks()
 {
+    global $conn, $season;
     $response = [];
 
     mysqli_query($conn, "SET SQL_BIG_SELECTS=1");
 
+    $qbMedian = getMedian('qb');
+    $wrtMedian = getMedian('wrt');
+    // dd($wrtMedian);
+
+    // Use multiplier to find sweet spot
+    // Don't want to just be above average, but to be a bit worse than that
+    $multiplier = .7;
+
     $result = mysqli_query($conn, "SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
         JOIN managers ON rosters.manager = managers.name
         JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year
-        WHERE rosters.YEAR = 2020
+        WHERE rosters.YEAR = $season
         GROUP BY manager, overall_pick, player, position");
     while ($row = mysqli_fetch_array($result)) {
 
         if ($row['position'] == 'QB') {
-            if ($row['points'] < 150 && $row['overall_pick'] < 30) {
+            if ($row['points'] < ($qbMedian*$multiplier) && $row['overall_pick'] < 30) {
                 $response[] = $row;
             }
         } else {
-            if ($row['points'] < 80 && $row['overall_pick'] < 60) {
+            if ($row['points'] < ($wrtMedian*$multiplier) && $row['overall_pick'] < 60) {
                 $response[] = $row;
             }
         }
@@ -1204,16 +1205,41 @@ function getWorstDraftPicks($conn, $season)
     return $response;
 }
 
+function getMedian($pos)
+{
+    global $conn, $season, $week;
+
+    $result = mysqli_query($conn, "SELECT position, avg(points) AS points 
+        FROM rosters WHERE YEAR = $season
+        GROUP BY position");
+    while ($row = mysqli_fetch_array($result)) {
+        $data[$row['position']] = $row['points'];
+    }
+    
+    if ($pos == 'qb') {
+        return $data['QB'] * $week;
+    }
+    $avg = ($data['WR'] + $data['TE'] + $data['RB']) / 3;
+
+    return $avg * $week;
+    
+}
+
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getBestDraftPicks($conn, $season)
+function getBestDraftPicks()
 {
+    global $conn, $season;
     $response = [];
+
+    $qbMedian = getMedian('qb');
+    $wrtMedian = getMedian('wrt');
+    // Use multiplier to find sweet spot
+    // Don't want to just be above average, but to be a bit better than that
+    $multiplier = 1.4;
 
     $result = mysqli_query($conn, "SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
         JOIN managers ON rosters.manager = managers.name
@@ -1223,11 +1249,11 @@ function getBestDraftPicks($conn, $season)
     while ($row = mysqli_fetch_array($result)) {
 
         if ($row['position'] == 'QB') {
-            if ($row['points'] > 250 && $row['overall_pick'] > 40) {
+            if ($row['points'] > ($qbMedian*$multiplier) && $row['overall_pick'] > 40) {
                 $response[] = $row;
             }
         } else {
-            if ($row['points'] > 140 && $row['overall_pick'] > 70) {
+            if ($row['points'] > ($wrtMedian*$multiplier) && $row['overall_pick'] > 70) {
                 $response[] = $row;
             }
         }
@@ -1239,18 +1265,17 @@ function getBestDraftPicks($conn, $season)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getPlayersRetained($conn, $season)
+function getPlayersRetained()
 {
+    global $conn, $week, $season;
     $response = [];
 
     $result = mysqli_query($conn, "SELECT manager, COUNT(rosters.player) as players FROM rosters
         JOIN managers ON rosters.manager = managers.name
         JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year
-        WHERE rosters.year = $season AND WEEK = 13
+        WHERE rosters.year = $season AND WEEK = $week
         GROUP BY manager");
     while ($row = mysqli_fetch_array($result)) {
         $response[] = $row;
@@ -1262,12 +1287,11 @@ function getPlayersRetained($conn, $season)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getRecordAgainstEveryone($conn, $season)
+function getRecordAgainstEveryone()
 {
+    global $conn, $season;
     $prevYear = $prevWeek = 0;
     $index = -1;
     $first = true;
@@ -1343,8 +1367,9 @@ function getRecordAgainstEveryone($conn, $season)
     return $managers;
 }
 
-function getAllDraftedPlayerDetails($conn, $season)
+function getAllDraftedPlayerDetails()
 {
+    global $conn, $season;
     $response = [];
 
     $result = mysqli_query($conn, "SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player,
@@ -1364,12 +1389,11 @@ function getAllDraftedPlayerDetails($conn, $season)
 /**
  * Undocumented function
  *
- * @param [type] $conn
- * @param [type] $season
  * @return void
  */
-function getOptimalLineupPoints($conn, $season)
+function getOptimalLineupPoints()
 {
+    global $conn, $season;
     $response = [];
     $lastWeek = null;
     $newWeek = true;

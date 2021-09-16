@@ -48,7 +48,7 @@ body.vertical-layout.vertical-menu.menu-collapsed
     background-color: #04015d;
 }
 
-.bg-green {
+.bg-green-ffb {
     background-color: #2eff37 !important;
     color: #000 !important;
 }
@@ -102,7 +102,7 @@ a.btn.btn-primary:hover {
     padding: 5px;
 }
 
-.bg-green h5 {
+.bg-green-ffb h5 {
     font-size: 14px;
 }
 
@@ -242,4 +242,8 @@ tr.color-black td {
 
 .modal-lg {
     max-width: 90%;
+}
+
+.footer {
+    background: #d3d3d3;
 }

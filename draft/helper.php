@@ -10,6 +10,7 @@
     // Fix sportradar to just update each player (and add rookies stats)
     // Look into VORP, VONA, VOLS (value based drafting)
     // Additional notifications like "that was a great pick" or "you should really consider this stat based on your roster"
+    // Factor in league schedule somehow
 
     // For a new year, just update these few items
     $currentYear = 2021;

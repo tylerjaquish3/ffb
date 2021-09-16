@@ -16,10 +16,10 @@ include 'sidebar.html';
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Most Wins</h5>
                                     <h5 class="text-bold-400"><?php echo $dashboardNumbers['most_wins_manager'] . ' (' . $dashboardNumbers['most_wins_number'] . ')'; ?>&#x200E;</h5>
                                 </div>
@@ -31,10 +31,10 @@ include 'sidebar.html';
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-trophy font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Most Championships</h5>
                                     <h5 class="text-bold-400"><?php echo $dashboardNumbers['most_championships_manager'] . ' (' . $dashboardNumbers['most_championships_number'] . ')'; ?>&#x200E;</h5>
                                 </div>
@@ -46,10 +46,10 @@ include 'sidebar.html';
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-user font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Defending Champion</h5>
                                     <h5 class="text-bold-400"><?php echo $dashboardNumbers['defending_champ']; ?></h5>
                                 </div>
@@ -61,10 +61,10 @@ include 'sidebar.html';
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-calendar font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Seasons</h5>
                                     <h5 class="text-bold-400"><?php echo $dashboardNumbers['seasons']; ?></h5>
                                 </div>

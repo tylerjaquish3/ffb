@@ -8,7 +8,6 @@
     // Make it easier to update projections based on FFB UDK
     // Make it easier to update adp based on 2QB (https://draftwizard.fantasypros.com/football/adp/mock-drafts/overall/2qb-std-10-teams)
     // Fix sportradar to just update each player (and add rookies stats)
-    // Add player history and notes to predraft rankings
     // Look into VORP, VONA, VOLS (value based drafting)
     // Additional notifications like "that was a great pick" or "you should really consider this stat based on your roster"
 

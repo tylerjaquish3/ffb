@@ -17,10 +17,10 @@ include 'sidebar.html';
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Top Week Performance</h5>
                                     <h5 class="text-bold-400"><?php echo $topPerformers['topPerformer']['manager'].' - Week '.$topPerformers['topPerformer']['week']; ?><br />
                                         <?php echo $topPerformers['topPerformer']['player'].' - '.$topPerformers['topPerformer']['points'].' points'; ?>
@@ -32,10 +32,10 @@ include 'sidebar.html';
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Top Outperformed Projection</h5>
                                     <h5 class="text-bold-400"><?php echo $topPerformers['outperform']['manager'].' - Week '.$topPerformers['outperform']['week']; ?><br />
                                         <?php echo $topPerformers['outperform']['player'].' - '.$topPerformers['outperform']['points'].' points'; ?>
@@ -47,10 +47,10 @@ include 'sidebar.html';
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Most Total TDs (incl. BN)</h5>
                                     <h5 class="text-bold-400"><?php echo $topPerformers['mostTds']['manager']; ?><br />
                                         <?php echo $topPerformers['mostTds']['points']; ?>
@@ -62,10 +62,10 @@ include 'sidebar.html';
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Most Total Yards (incl. BN)</h5>
                                     <h5 class="text-bold-400"><?php echo $topPerformers['mostYds']['manager']; ?><br />
                                         <?php echo $topPerformers['mostYds']['points']; ?>
@@ -77,10 +77,10 @@ include 'sidebar.html';
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Best Bench</h5>
                                     <h5 class="text-bold-400"><?php echo $topPerformers['bestBench']['manager']; ?><br />
                                         <?php echo $topPerformers['bestBench']['points']; ?>
@@ -396,17 +396,20 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
-            <div classs="row">
-                <div class="col-xs-12 col-md-3">
+            <div class="row">
+                <div class="col-xs-12 col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Drafted Players</h4>
+                            <h4 style="float: right">Points From Draft</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <table class="table table-responsive" id="datatable-drafted">
                                 <thead>
                                     <th>Manager</th>
-                                    <th>Points</th>
+                                    <th>All Drafted</th>
+                                    <th>Drafted 1-5</th>
+                                    <th>Drafted 10-17</th>
+                                    <th>Undrafted</th>
                                 </thead>
                                 <tbody>
                                     <?php
@@ -414,57 +417,10 @@ include 'sidebar.html';
                                     ?>
                                         <tr>
                                             <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo round($row['points'], 1); ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xs-12 col-md-3">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Undrafted Players</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-undrafted">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Points</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    foreach ($undraftedPoints as $row) {
-                                    ?>
-                                        <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo round($row['points'], 1); ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xs-12 col-md-3">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Drafted Rounds 10-17</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-lateRound">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Points</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    foreach ($lateRoundPoints as $row) {
-                                    ?>
-                                        <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo round($row['points'], 1); ?></td>
+                                            <td><?php echo round($row['drafted_points'], 1); ?></td>
+                                            <td><?php echo round($row['early_round'], 1); ?></td>
+                                            <td><?php echo round($row['late_round'], 1); ?></td>
+                                            <td><?php echo round($row['undrafted_points'], 1); ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -780,3 +736,18 @@ include 'sidebar.html';
 
     });
 </script>
+
+<style>
+    #datatable-currentStats_wrapper, #datatable-statsAgainst_wrapper {
+        max-width: 1060px;
+    }
+    #datatable-currentPoints_wrapper {
+        max-width: 820px;
+    }
+    #datatable-bestWeek_wrapper {
+        max-width: 1395px;
+    }
+    #datatable-optimal_wrapper {
+        max-width: 1525px;
+    }
+</style>

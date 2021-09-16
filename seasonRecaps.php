@@ -57,10 +57,10 @@ foreach ($seasonNumbers as $standings) {
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-checkmark2 font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb white media-body">
                                     <h5>Most Points</h5>
                                     <h5 class="text-bold-400"><?php echo $topScorer; ?>&#x200E;</h5>
                                 </div>
@@ -72,10 +72,10 @@ foreach ($seasonNumbers as $standings) {
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb white media-body">
                                     <h5>Regular Season Champion</h5>
                                     <h5 class="text-bold-400"><?php echo $regSeasonChamp; ?>&#x200E;</h5>
                                 </div>
@@ -87,10 +87,10 @@ foreach ($seasonNumbers as $standings) {
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-sad font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb white media-body">
                                     <h5>Second Place</h5>
                                     <h5 class="text-bold-400"><?php echo $runnerUp; ?>&#x200E;</h5>
                                 </div>
@@ -102,10 +102,10 @@ foreach ($seasonNumbers as $standings) {
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
-                                <div class="p-2 text-xs-center bg-green media-left media-middle">
+                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-trophy font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green white media-body">
+                                <div class="p-2 bg-green-ffb white media-body">
                                     <h5>Champion</h5>
                                     <h5 class="text-bold-400"><?php echo $champion; ?>&#x200E;</h5>
                                 </div>

@@ -186,98 +186,93 @@
 	</thead>
 	<tbody>
 		<?php
-		$managers = '';
-		$result2 = mysqli_query($conn, "SELECT * FROM managers");
-		while ($manager = mysqli_fetch_array($result2)) {
+		$longestWin = $longestLose = 0;
+        $longestWina = $longestLosea = [];
 
-			$managerId = $manager['id'];
-			$ignore = $ignoreLose = false;
-			$prevWeek = 0;
-			$winStreak = $loseStreak = $longestWinStreak = $longestLoseStreak = 0;
-			$winYear = $loseYear = '';
-			$result = mysqli_query($conn, "SELECT name, w.year, w.week_number, win, lose
-	            FROM managers
-	            JOIN regular_season_matchups rsm ON managers.id = rsm.manager1_id
-	            JOIN (
-	                SELECT SUM(CASE
-	                WHEN manager1_id = $managerId AND manager1_score > manager2_score THEN 1
-	                ELSE 0
-	                END) AS win, year, week_number
-	                FROM regular_season_matchups
-	                GROUP BY year, week_number
-	            ) w ON w.year = rsm.year AND w.week_number = rsm.week_number
-
-	            JOIN (
-	                SELECT SUM(CASE
-	                WHEN manager1_id = $managerId AND manager1_score < manager2_score THEN 1
-	                ELSE 0
-	                END) AS lose, year, week_number
-	                FROM regular_season_matchups
-	                GROUP BY year, week_number
-	            ) w2 ON w2.year = rsm.year AND w2.week_number = rsm.week_number
-	            WHERE name = '" . $manager['name'] . "'");
+        for ($x = 1; $x < 11; $x++) {
+            
+			$years = [];
+			$result = mysqli_query($conn, "SELECT * FROM regular_season_matchups
+				WHERE manager1_id = $x and winning_manager_id = $x
+				order by year asc, week_number asc");
 			while ($row = mysqli_fetch_array($result)) {
+				$years[$row['year']][] = $row;
+			};
+			
+            // manager win streak
+            $myStreakWin = $myLongestWin = 0;
+            foreach ($years as $y => $weeks) {
+                $lastWeek = 0;
+                foreach ($weeks as $w) {
+                    if ($w['week_number'] == 1) {
+                        $myStreakWin  = 0;
+                    }
+                    if ($w['week_number'] == ($lastWeek + 1)) {
+                        $myStreakWin++;
+                        if ($myStreakWin > $myLongestWin) {
+                            $myLongestWin = $myStreakWin;
+							$winYear = $y;
+                        }
+                        $lastWeek = $w['week_number'];
+                    } else {
+                        break; // go to next year
+                    }
+                }
+            }
+            
+            // manager lose streak
+            $result = mysqli_query($conn, "SELECT * FROM regular_season_matchups
+				WHERE manager1_id = $x and losing_manager_id = $x
+				order by year asc, week_number asc");
+			while ($row = mysqli_fetch_array($result)) {
+				$years[$row['year']][] = $row;
+			};
 
-				$currentWeek = $row['week_number'];
+            $myStreakLose = $myLongestLose = 0;
+            foreach ($years as $y => $weeks) {
+                $lastWeek = 0;
+                foreach ($weeks as $w) {
+                    if ($w['week_number'] == 1) {
+                        $myStreakLose  = 0;
+                    }
+                    if ($w['week_number'] == ($lastWeek + 1)) {
+                        $myStreakLose++;
+                        if ($myStreakLose > $myLongestLose) {
+                            $myLongestLose = $myStreakLose;
+							$loseYear = $y;
+                        }
+                        $lastWeek = $w['week_number'];
+                    } else {
+                        break; // go to next year
+                    }
+                }
+            }
 
-				if (!$ignore) {
-					if ($row['win'] == 1) {
-						if ($currentWeek == $prevWeek + 1) {
-							$winStreak++;
-						} else {
-							$winStreak = 0;
-						}
-					} else {
-						$winYear = ($winStreak > $longestWinStreak) ? $row['year'] : $winYear;
-						$longestWinStreak = ($winStreak > $longestWinStreak) ? $winStreak : $longestWinStreak;
-						$ignore = true;
-						$winStreak = 0;
-					}
-				}
-
-				if (!$ignoreLose) {
-					if ($row['lose'] == 1) {
-						if ($currentWeek == $prevWeek + 1) {
-							$loseStreak++;
-						} else {
-							$loseStreak = 0;
-						}
-					} else {
-						$loseYear = ($loseStreak > $longestLoseStreak) ? $row['year'] : $loseYear;
-						$longestLoseStreak = ($loseStreak > $longestLoseStreak) ? $loseStreak : $longestLoseStreak;
-						$ignoreLose = true;
-						$loseStreak = 0;
-					}
-				}
-
-				if ($prevWeek == 12) {
-					$prevWeek = 0;
-					$ignore = $ignoreLose = false;
-				} else {
-					$prevWeek = $currentWeek;
-				}
+			$result2 = mysqli_query($conn, "SELECT * FROM managers WHERE id = $x");
+			while ($row2 = mysqli_fetch_array($result2)) {
+				$manager = $row2['name'];
 			}
 
-			$result3 = mysqli_query($conn, "SELECT * FROM finishes WHERE manager_id = $managerId AND year = $winYear");
+			$result3 = mysqli_query($conn, "SELECT * FROM finishes WHERE manager_id = $x AND year = $winYear");
 			while ($row3 = mysqli_fetch_array($result3)) {
 				$winYearFinish = $row3['finish'];
 			}
 
-			$result4 = mysqli_query($conn, "SELECT * FROM finishes WHERE manager_id = $managerId AND year = $loseYear");
+			$result4 = mysqli_query($conn, "SELECT * FROM finishes WHERE manager_id = $x AND year = $loseYear");
 			while ($row4 = mysqli_fetch_array($result4)) {
 				$loseYearFinish = $row4['finish'];
 			}
 
 			$startStreaks[] = [
-				'manager' => $manager['name'],
-				'winStreak' => $longestWinStreak . ' - 0',
+				'manager' => $manager,
+				'winStreak' => $myLongestWin . ' - 0',
 				'winYear' => $winYear,
 				'winYearFinish' => $winYearFinish,
-				'loseStreak' => '0 - ' . $longestLoseStreak,
+				'loseStreak' => '0 - ' . $myLongestLose,
 				'loseYear' => $loseYear,
 				'loseYearFinish' => $loseYearFinish
 			];
-		}
+        }
 
 		foreach ($startStreaks as $row) { ?>
 			<tr>

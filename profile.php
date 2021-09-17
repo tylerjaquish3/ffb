@@ -33,7 +33,7 @@ if (isset($_GET['id'])) {
         <div class="content-header row"></div>
 
         <div class="content-body">
-            <!-- Statistics -->
+            <!-- Headline Statistics -->
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-xs-12">
                     <div class="card">
@@ -42,7 +42,7 @@ if (isset($_GET['id'])) {
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green-ffb white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Total Points</h5>
                                     <h5 class="text-bold-400"><?php echo $profileNumbers['totalPoints'] . ' (Rank: ' . $profileNumbers['totalPointsRank'] . ')'; ?>&#x200E;</h5>
                                 </div>
@@ -57,7 +57,7 @@ if (isset($_GET['id'])) {
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-stats-bars font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green-ffb white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Postseason Record</h5>
                                     <h5 class="text-bold-400"><?php echo $profileNumbers['playoffRecord'] . ' (Rank: ' . $profileNumbers['playoffRecordRank'] . ')'; ?>&#x200E;</h5>
                                 </div>
@@ -72,7 +72,7 @@ if (isset($_GET['id'])) {
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-trophy font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green-ffb white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Championships</h5>
                                     <h5 class="text-bold-400"><?php echo $profileNumbers['championships'] . ' (' . $profileNumbers['championshipYears'] . ')'; ?>&#x200E;</h5>
                                 </div>
@@ -87,7 +87,7 @@ if (isset($_GET['id'])) {
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-calendar font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green-ffb white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Reg. Season Record</h5>
                                     <h5 class="text-bold-400"><?php echo $profileNumbers['record'] . ' (Rank: ' . $profileNumbers['recordRank'] . ')'; ?>&#x200E;</h5>
                                 </div>
@@ -113,10 +113,14 @@ if (isset($_GET['id'])) {
                                         JOIN managers ON managers.id = mff.manager_id
                                         WHERE is_positive = 1 and manager_id = $managerId"
                                     );
-                                    while ($row = mysqli_fetch_array($result)) { ?>
+                                    while ($row = mysqli_fetch_array($result)) { 
+                                        $value = $row['value'];
+                                        if (isfloat($row['value']) && isDecimal($row['value'])) {
+                                            $value = number_format($row['value'], 2, '.', ',');
+                                        } ?>
                                         <div class="col-xs-6 award good">
                                             <strong><?php echo $row['fact']; ?> </strong><br />
-                                            <?php echo $row['value']; ?> <br />
+                                            <?php echo $value; ?> <br />
                                             <?php echo $row['note']; ?>
                                         </div>
                                     <?php } ?>
@@ -130,10 +134,14 @@ if (isset($_GET['id'])) {
                                         JOIN managers ON managers.id = mff.manager_id
                                         WHERE is_positive = 0 and manager_id = $managerId"
                                     );
-                                    while ($row = mysqli_fetch_array($result)) { ?>
+                                    while ($row = mysqli_fetch_array($result)) { 
+                                        $value = $row['value'];
+                                        if (isfloat($row['value']) && isDecimal($row['value'])) {
+                                            $value = number_format($row['value'], 2, '.', ',');
+                                        } ?>
                                         <div class="col-xs-6 award bad">
                                             <strong><?php echo $row['fact']; ?> </strong><br />
-                                            <?php echo $row['value']; ?> <br />
+                                            <?php echo $value; ?> <br />
                                             <?php echo $row['note']; ?>
                                         </div>
                                     <?php } ?>

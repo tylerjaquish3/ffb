@@ -1578,6 +1578,16 @@ function checkRosterForOptimal(array $roster)
     return $optimal;
 }
 
+function isfloat($val) 
+{
+    return ($val == (string)(float)$val);
+}
+
+function isDecimal($val)
+{
+    return is_numeric( $val ) && floor( $val ) != $val;
+}
+
 function dd($text)
 {
     var_dump($text);

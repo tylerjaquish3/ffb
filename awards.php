@@ -43,11 +43,13 @@ include 'sidebar.html';
                                             WHERE is_positive = 1 and manager_id = $x"
                                         );
                                         while ($row = mysqli_fetch_array($result)) {
-
-                                            ?>
+                                            $value = $row['value'];
+                                            if (isfloat($row['value']) && isDecimal($row['value'])) {
+                                                $value = number_format($row['value'], 2, '.', ',');
+                                            } ?>
                                             <div class="col-xs-6 award good">
                                                 <strong><?php echo $row['fact']; ?> </strong><br />
-                                                <?php echo $row['value']; ?> <br />
+                                                <?php echo $value; ?> <br />
                                                 <?php echo $row['note']; ?>
                                             </div>
                                         <?php }
@@ -64,10 +66,14 @@ include 'sidebar.html';
                                             JOIN managers ON managers.id = mff.manager_id
                                             WHERE is_positive = 0 and manager_id = $x"
                                         );
-                                        while ($row = mysqli_fetch_array($result)) { ?>
+                                        while ($row = mysqli_fetch_array($result)) { 
+                                            $value = $row['value'];
+                                            if (isfloat($row['value']) && isDecimal($row['value'])) {
+                                                $value = number_format($row['value'], 2, '.', ',');
+                                            } ?>
                                             <div class="col-xs-6 award bad">
                                                 <strong><?php echo $row['fact']; ?> </strong><br />
-                                                <?php echo $row['value']; ?> <br />
+                                                <?php echo $value; ?> <br />
                                                 <?php echo $row['note']; ?>
                                             </div>
                                     <?php } ?>

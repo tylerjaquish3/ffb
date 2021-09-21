@@ -1302,46 +1302,16 @@ function getRecordAgainstEveryone()
     $index = -1;
 
     $managers = [
-        'AJ' => [
-            'losses' => 0,
-            'wins' => 0
-        ],
-        'Ben' => [
-            'losses' => 0,
-            'wins' => 0
-        ],
-        'Tyler' => [
-            'losses' => 0,
-            'wins' => 0
-        ],
-        'Matt' => [
-            'losses' => 0,
-            'wins' => 0
-        ],
-        'Justin' => [
-            'losses' => 0,
-            'wins' => 0
-        ],
-        'Andy' => [
-            'losses' => 0,
-            'wins' => 0
-        ],
-        'Cole' => [
-            'losses' => 0,
-            'wins' => 0
-        ],
-        'Everett' => [
-            'losses' => 0,
-            'wins' => 0
-        ],
-        'Cameron' => [
-            'losses' => 0,
-            'wins' => 0
-        ],
-        'Gavin' => [
-            'losses' => 0,
-            'wins' => 0
-        ]
+        'AJ' => ['losses' => 0,'wins' => 0],
+        'Ben' => ['losses' => 0,'wins' => 0],
+        'Tyler' => ['losses' => 0, 'wins' => 0],
+        'Matt' => ['losses' => 0, 'wins' => 0],
+        'Justin' => ['losses' => 0, 'wins' => 0],
+        'Andy' => ['losses' => 0, 'wins' => 0],
+        'Cole' => ['losses' => 0, 'wins' => 0],
+        'Everett' => ['losses' => 0, 'wins' => 0],
+        'Cameron' => ['losses' => 0, 'wins' => 0],
+        'Gavin' => ['losses' => 0, 'wins' => 0]
     ];
     $scores = [];
     $result = mysqli_query($conn, "SELECT week_number, name, manager1_score FROM regular_season_matchups rsm
@@ -1590,7 +1560,10 @@ function isDecimal($val)
 
 function dd($text)
 {
+    // var_dump($text);
+    echo '<pre>';
     var_dump($text);
+    echo '</pre>';
     die;
 }
 
@@ -1606,7 +1579,7 @@ if(isset($_POST['sql-stmt'])) {
             $success = mysqli_query($conn, $stmt);
 
             if (!$success) {
-                var_dump(mysqli_error($conn));
+                dd(mysqli_error($conn));
             }
         }
     }

@@ -56,7 +56,6 @@ if ($pageName == 'Current Season') {
     $draftedPoints = getDraftPoints();
     $worstDraft = getWorstDraftPicks();
     $bestDraft = getBestDraftPicks();
-    $playersRetained = getPlayersRetained();
     $everyoneRecord = getRecordAgainstEveryone();
     $draftPerformance = getAllDraftedPlayerDetails();
 }
@@ -359,7 +358,8 @@ function getSeasonNumbers()
 
         $result = mysqli_query($conn, "SELECT * FROM finishes
             JOIN managers ON managers.id = finishes.manager_id
-            WHERE name = '" . $_GET['id'] . "'");
+            JOIN team_names ON team_names.manager_id = managers.id AND team_names.year = finishes.year
+            WHERE managers.name = '" . $_GET['id'] . "'");
         while ($row = mysqli_fetch_array($result)) {
             $managerId = $row['manager_id'];
             $year = $row['year'];
@@ -384,7 +384,10 @@ function getSeasonNumbers()
                 'record' => $wins . ' - ' . $losses,
                 'win_pct' => round($winPct, 1),
                 'pf' => $pf,
-                'pa' => $pa
+                'pa' => $pa,
+                'team_name' => $row['name'],
+                'moves' => $row['moves'],
+                'trades' => $row['trades']
             ];
         }
     } else {
@@ -1129,12 +1132,22 @@ function getDraftedPoints($dir, $round)
  */
 function getDraftPoints()
 {
-    global $conn, $season;
+    global $conn, $week, $season;
     $response = [];
 
     $drafted = getDraftedPoints('>', 0);
     $lateRound = getDraftedPoints('>', 9);
     $earlyRound = getDraftedPoints('<', 6);
+
+    $retained = [];
+    $result = mysqli_query($conn, "SELECT manager, COUNT(rosters.player) as players FROM rosters
+        JOIN managers ON rosters.manager = managers.name
+        JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year
+        WHERE rosters.year = $season AND WEEK = $week
+        GROUP BY manager");
+    while ($row = mysqli_fetch_array($result)) {
+        $retained[] = $row;
+    }
 
     $result = mysqli_query($conn, "SELECT rosters.manager, sum(points) AS points FROM rosters
         WHERE rosters.YEAR = $season AND roster_spot NOT IN ('BN', 'IR')
@@ -1148,6 +1161,14 @@ function getDraftPoints()
                     'undrafted_points' => $row['points'] - $item['points'],
                     'drafted_points' => $item['points'],
                 ];
+            }
+        }
+    }
+
+    foreach ($retained as $item) {
+        foreach ($response as &$row) {
+            if ($item['manager'] == $row['manager']) {
+                $row['retained'] = $item['players'];
             }
         }
     }

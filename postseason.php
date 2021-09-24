@@ -12,7 +12,7 @@ include 'sidebar.html';
 
         <div class="content-body">
             <div class="row">
-                <div class="col-xs-12 col-md-6 table-padding">
+                <div class="col-xs-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Matchups</h4>
@@ -54,7 +54,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-6 table-padding">
+                <div class="col-xs-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Points</h4>
@@ -109,7 +109,7 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 col-md-6 table-padding">
+                <div class="col-xs-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Records</h4>

@@ -13,7 +13,7 @@ include 'sidebar.html';
         <div class="content-body">
 
             <div class="row">
-                <div class="col-sm-12 table-padding">
+                <div class="col-xs-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">Fun Facts</h4>
@@ -32,7 +32,7 @@ include 'sidebar.html';
                                         <div class="row">';
                                 }
                             ?>
-                                <div class="col-md-6 col-xs-12">
+                                <div class="col-lg-6 col-xs-12">
                                     <?php
 
                                         $result = mysqli_query(
@@ -56,7 +56,7 @@ include 'sidebar.html';
 
                                     ?>
                                 </div>
-                                <div class="col-md-6 col-xs-12">
+                                <div class="col-lg-6 col-xs-12">
                                     <?php
 
                                         $result = mysqli_query(

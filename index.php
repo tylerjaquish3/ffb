@@ -218,7 +218,7 @@ include 'sidebar.html';
                         </div>
                         <div class="card-body down15">
                             <div class="row">
-                                <div class="col-xs-12 col-md-6 table-padding">
+                                <div class="col-xs-12 col-lg-6 table-padding">
                                     <div class="card-header" style="float: left">
                                         <h4>Postseason</h4>
                                     </div>
@@ -235,7 +235,7 @@ include 'sidebar.html';
                                     </div>
                                     <?php include 'postMiscStats.php'; ?>
                                 </div>
-                                <div class="col-xs-12 col-md-6 table-padding">
+                                <div class="col-xs-12 col-lg-6 table-padding">
                                     <div class="card-header" style="float: left">
                                         <h4>Regular Season</h4>
                                     </div>

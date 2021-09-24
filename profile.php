@@ -104,7 +104,7 @@ if (isset($_GET['id'])) {
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr;">
                             <div class="row">
-                                <div class="col-md-6 col-xs-12">
+                                <div class="col-lg-6 col-xs-12">
                                     <?php
                                     $result = mysqli_query(
                                         $conn,
@@ -125,7 +125,7 @@ if (isset($_GET['id'])) {
                                         </div>
                                     <?php } ?>
                                 </div>
-                                <div class="col-md-6 col-xs-12">
+                                <div class="col-lg-6 col-xs-12">
                                     <?php
                                     $result = mysqli_query(
                                         $conn,
@@ -259,33 +259,6 @@ if (isset($_GET['id'])) {
                                         <?php } ?>
                                     </tbody>
                                 </table>
-                                <br /><br />
-                                <table class="table table-responsive" id="datatable-teamNames">
-                                    <thead>
-                                        <th>Year</th>
-                                        <th>Team Name</th>
-                                        <th>Moves</th>
-                                        <th>Trades</th>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $result = mysqli_query(
-                                            $conn,
-                                            "SELECT name, moves, trades, year
-                                            FROM team_names
-                                            WHERE manager_id = $managerId"
-                                        );
-                                        while ($array = mysqli_fetch_array($result)) { ?>
-                                            <tr>
-                                                <td><?php echo $array['year']; ?></td>
-                                                <td><?php echo $array['name']; ?></td>
-                                                <td><?php echo $array['moves']; ?></td>
-                                                <td><?php echo $array['trades']; ?></td>
-                                            </tr>
-
-                                        <?php } ?>
-                                    </tbody>
-                                </table>
                             </div>
                         </div>
                     </div>
@@ -299,22 +272,28 @@ if (isset($_GET['id'])) {
                                 <table class="table table-responsive" id="datatable-seasons">
                                     <thead>
                                         <th>Year</th>
+                                        <th>Team Name</th>
                                         <th>Record</th>
                                         <th>Win %</th>
                                         <th>PF</th>
                                         <th>PA</th>
                                         <th>Finish</th>
+                                        <th>Moves</th>
+                                        <th>Trades</th>
                                     </thead>
                                     <tbody>
                                         <?php
                                         foreach ($seasonNumbers as $year => $array) { ?>
                                             <tr>
                                                 <td><?php echo $year; ?></td>
+                                                <td><?php echo $array['team_name']; ?></td>
                                                 <td><?php echo $array['record']; ?></td>
                                                 <td><?php echo $array['win_pct'] . ' %'; ?></td>
                                                 <td><?php echo $array['pf']; ?></td>
                                                 <td><?php echo $array['pa']; ?></td>
                                                 <td><?php echo $array['finish']; ?></td>
+                                                <td><?php echo $array['moves']; ?></td>
+                                                <td><?php echo $array['trades']; ?></td>
                                             </tr>
 
                                         <?php } ?>
@@ -380,7 +359,7 @@ if (isset($_GET['id'])) {
             </div>
 
             <div class="row">
-                <div class="col-xs-12 col-md-4">
+                <div class="col-xs-12 col-lg-4">
                     <div class="card">
                         <div class="card-header">
                             <h4>Top Drafted Players</h4>
@@ -412,7 +391,7 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-8" id="versus">
+                <div class="col-xs-12 col-lg-8" id="versus">
                     <div class="card">
                         <div class="card-header">
                             <h4>Head to Head</h4>

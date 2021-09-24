@@ -13,7 +13,7 @@ include 'sidebar.html';
         <div class="content-body">
             <div class="row">
 
-                <div class="col-xs-12 col-md-4">
+                <div class="col-xs-12 col-lg-4">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -91,7 +91,7 @@ include 'sidebar.html';
                     </div>
                 </div>
 
-                <div class="col-xs-12 col-md-8 table-padding">
+                <div class="col-xs-12 col-lg-8 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Points</h4>
@@ -397,7 +397,7 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 col-md-6">
+                <div class="col-xs-12 col-lg-6">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Points From Draft</h4>
@@ -410,6 +410,7 @@ include 'sidebar.html';
                                     <th>Drafted 1-5</th>
                                     <th>Drafted 10-17</th>
                                     <th>Undrafted</th>
+                                    <th>Players Retained</th>
                                 </thead>
                                 <tbody>
                                     <?php
@@ -421,6 +422,7 @@ include 'sidebar.html';
                                             <td><?php echo round($row['early_round'], 1); ?></td>
                                             <td><?php echo round($row['late_round'], 1); ?></td>
                                             <td><?php echo round($row['undrafted_points'], 1); ?></td>
+                                            <td><?php echo round($row['retained'], 1); ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -428,24 +430,27 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-3">
+                <div class="col-xs-12 col-lg-4">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Retained from Draft</h4>
+                            <h4 style="float: right">Record Against Everyone</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-playersRetained">
+                            <table class="table table-responsive" id="datatable-everyone">
                                 <thead>
                                     <th>Manager</th>
-                                    <th>Players</th>
+                                    <th>Wins</th>
+                                    <th>Losses</th>
+                                    <th>Win %</th>
                                 </thead>
                                 <tbody>
                                     <?php
-                                    foreach ($playersRetained as $row) {
-                                    ?>
+                                    foreach ($everyoneRecord as $manager => $array) { ?>
                                         <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo round($row['players'], 1); ?></td>
+                                            <td><?php echo $manager; ?></td>
+                                            <td><?php echo $array['wins']; ?></td>
+                                            <td><?php echo $array['losses']; ?></td>
+                                            <td><?php echo round(($array['wins'] / ($array['wins'] + $array['losses'])) * 100, 1) . ' %'; ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -453,7 +458,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-4">
+                <div class="col-xs-12 col-md-6 col-lg-4">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Best Draft Picks</h4>
@@ -482,7 +487,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-4">
+                <div class="col-xs-12 col-md-6 col-lg-4">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Worst Draft Picks</h4>
@@ -511,37 +516,8 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Record Against Everyone</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-everyone">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Wins</th>
-                                    <th>Losses</th>
-                                    <th>Win %</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    foreach ($everyoneRecord as $manager => $array) { ?>
-                                        <tr>
-                                            <td><?php echo $manager; ?></td>
-                                            <td><?php echo $array['wins']; ?></td>
-                                            <td><?php echo $array['losses']; ?></td>
-                                            <td><?php echo round(($array['wins'] / ($array['wins'] + $array['losses'])) * 100, 1) . ' %'; ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 col-md-6">
+                
+                <div class="col-xs-12 col-lg-4">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Performance</h4>

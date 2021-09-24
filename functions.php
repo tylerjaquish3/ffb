@@ -1206,11 +1206,10 @@ function getWorstDraftPicks()
 
     $qbMedian = getMedian('qb');
     $wrtMedian = getMedian('wrt');
-    // dd($wrtMedian);
 
     // Use multiplier to find sweet spot
     // Don't want to just be above average, but to be a bit worse than that
-    $multiplier = .7;
+    $multiplier = .8;
 
     $result = mysqli_query($conn, "SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
         JOIN managers ON rosters.manager = managers.name
@@ -1220,17 +1219,26 @@ function getWorstDraftPicks()
     while ($row = mysqli_fetch_array($result)) {
 
         if ($row['position'] == 'QB') {
-            if ($row['points'] < ($qbMedian*$multiplier) && $row['overall_pick'] < 30) {
+            if ($row['points'] < ($qbMedian*$multiplier) && $row['overall_pick'] < 40) {
+                $response[] = $row;
+            } elseif ($row['points'] < $qbMedian && $row['overall_pick'] < 15) {
+                // QBs drafted higher should be held to higher standard
                 $response[] = $row;
             }
         } else {
-            if ($row['points'] < ($wrtMedian*$multiplier) && $row['overall_pick'] < 60) {
+            if ($row['points'] < ($wrtMedian*$multiplier) && $row['overall_pick'] < 70) {
+                $response[] = $row;
+            } elseif ($row['points'] < $wrtMedian && $row['overall_pick'] < 30) {
                 $response[] = $row;
             }
         }
     }
 
-    return $response;
+    usort($response, function($a, $b) {
+        return $a['points'] <=> $b['points'];
+    });
+
+    return array_slice($response,0,15);
 }
 
 function getMedian($pos)
@@ -1287,7 +1295,11 @@ function getBestDraftPicks()
         }
     }
 
-    return $response;
+    usort($response, function($a, $b) {
+        return $b['points'] <=> $a['points'];
+    });
+
+    return array_slice($response,0,15);
 }
 
 /**

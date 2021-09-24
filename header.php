@@ -39,7 +39,7 @@
     <!-- BEGIN Custom CSS-->
     <link rel="stylesheet" type="text/css" href="assets/style-rtl.css">
     <!-- END Custom CSS-->
-    <link href="assets/dataTables.min.css" rel="stylesheet">
+    <link href="assets/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="assets/suntown.css">
     <link rel="stylesheet" type="text/css" href="assets/responsive.css">
 

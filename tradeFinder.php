@@ -4,6 +4,58 @@ $pageName = "Trade Finder";
 include 'header.php';
 include 'sidebar.html';
 
+
+// Look up how many weeks of data there are
+$weeks = 0;
+$result = mysqli_query($conn, "SELECT distinct week FROM rosters 
+    WHERE YEAR = $season");
+while ($row = mysqli_fetch_array($result)) {
+    $weeks++;
+}
+
+// Look up all the actual points
+$posPts = [];
+$result = mysqli_query($conn, "SELECT position, manager, SUM(points) as pts 
+    FROM rosters 
+    WHERE YEAR = $season
+    GROUP BY manager, position");
+while ($row = mysqli_fetch_array($result)) {
+    $posPts[$row['manager']][$row['position']] = round($row['pts'], 1);
+}
+
+function getRanksByPos(array $teams, string $pos)
+{
+    usort($teams, function($a, $b) use ($pos) {
+        return $b[$pos] <=> $a[$pos];
+    });
+
+    $x = 1;
+    foreach ($teams as &$team) {
+        $team[$pos.'rank'] = $x;
+        $x++;
+    }
+
+    return $teams;
+}
+
+function printFinderRow($team, $targets, $pos)
+{
+    if ($team[$pos.'rank'] > 5) { 
+        echo '<td>Needs '.$pos.' ('.$team[$pos.'rank'].')'; 
+    } else {
+        if ($team['man'] == 'Tyler') {
+            echo '<td>Rank: '.$team[$pos.'rank'];
+        } else {
+            echo '<td>';
+        }
+    }
+    foreach ($targets as $target) {
+        if ($target['owner'] == $team['man'] && $target['pos'] == $pos) {
+            echo '<br>'.$target['player'];
+        }
+    }
+    echo '</td>';
+}
 ?>
 
 <div class="app-content content container-fluid">
@@ -12,28 +64,6 @@ include 'sidebar.html';
 
         <div class="content-body">
             <div class="row">
-
-                <!-- <div class="col-xs-12 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4>Trade Finder</h4>
-                            <span id="count"></span>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe row-border order-column" id="datatable-teamPosPts">
-                                <thead>
-                                    <th>Owner</th>
-                                    <th>Pos</th>
-                                    <th>Proj</th>
-                                    <th>Points</th>
-                                </thead>
-                                <tbody>
-                                    
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div> -->
 
                 <div class="col-xs-12 col-md-6 table-padding">
                     <div class="card">
@@ -52,14 +82,6 @@ include 'sidebar.html';
                                 </thead>
                                 <tbody>
                                     <?php
-                                    // Look up how many weeks of data there are
-                                    $weeks = 0;
-                                    $result = mysqli_query($conn, "SELECT distinct week FROM rosters 
-                                        WHERE YEAR = $season");
-                                    while ($row = mysqli_fetch_array($result)) {
-                                        $weeks++;
-                                    }
-
                                     // Look up all the actual points
                                     $playerPts = [];
                                     $result = mysqli_query($conn, "SELECT player, SUM(points) as pts FROM rosters 
@@ -70,7 +92,8 @@ include 'sidebar.html';
                                         $playerPts[$name] = round($row['pts'], 1);
                                     }
 
-                                    $result = mysqli_query($conn, "SELECT player, proj_points, name FROM preseason_rankings pr JOIN draft_selections ds ON ds.ranking_id = pr.id
+                                    $targets = [];
+                                    $result = mysqli_query($conn, "SELECT player, proj_points, name, position FROM preseason_rankings pr JOIN draft_selections ds ON ds.ranking_id = pr.id
                                         JOIN managers m ON m.id = ds.manager_id
                                         WHERE is_mine = 0");
                                     while ($row = mysqli_fetch_array($result)) {
@@ -80,7 +103,12 @@ include 'sidebar.html';
                                             $pts = $playerPts[$row['player']];
                                         }
                                         $proj = round(($row['proj_points']/14) * $weeks, 1);
-                                        if ($proj - $pts > 10) {
+                                        if ($proj - $pts > (7*$weeks)) {
+                                            $targets[] = [
+                                                'player' => $row['player'],
+                                                'pos' => $row['position'],
+                                                'owner' => $row['name']
+                                            ];
                                             echo '<tr><td>'.$row['player'].'</td><td>'.$proj.'</td><td>'.$pts.'</td><td>'.($proj-$pts).'</td><td>'.$row['name'].'</td></tr>';
                                         }
                                     }
@@ -167,29 +195,60 @@ include 'sidebar.html';
                                 </thead>
                                 <tbody>
                                     <?php
-                                    // Look up how many weeks of data there are
-                                    $weeks = 0;
-                                    $result = mysqli_query($conn, "SELECT distinct week FROM rosters 
-                                        WHERE YEAR = $season");
-                                    while ($row = mysqli_fetch_array($result)) {
-                                        $weeks++;
-                                    }
-
-                                    // Look up all the actual points
-                                    $posPts = [];
-                                    $result = mysqli_query($conn, "SELECT position, manager, SUM(points) as pts 
-                                        FROM rosters 
-                                        WHERE YEAR = $season
-                                        GROUP BY manager, position");
-                                    while ($row = mysqli_fetch_array($result)) {
-                                        $posPts[$row['manager']][$row['position']] = round($row['pts'], 1);
-                                    }
-
                                     foreach ($posPts as $man => $pts) { 
                                         echo '<tr><td>'.$man.'</td><td>'.$pts['QB'].'</td><td>'.$pts['RB'].'</td><td>'.$pts['WR'].'</td><td>'.$pts['TE'].'</td><td>'.$pts['K'].'</td><td>'.$pts['DEF'].'</td></tr>';
                                     }
                                     ?>
                                 </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xs-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Trade Finder</h4>
+                            <span id="count"></span>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="stripe row-border order-column" id="datatable-tradeFinder">
+                                <thead>
+                                    <th>Manager</th>
+                                    <th>QB</th>
+                                    <th>RB</th>
+                                    <th>WR</th>
+                                    <th>TE</th>
+                                    <th>K</th>
+                                    <th>DEF</th>
+                                </thead>
+                            <?php 
+                            foreach ($posPts as $man => $pos) {
+                                $teams[] = [
+                                    'man' => $man,
+                                    'QB' => $pos['QB'],
+                                    'RB' => $pos['RB'],
+                                    'WR' => $pos['WR'],
+                                    'TE' => $pos['TE'],
+                                    'K' => $pos['K'],
+                                    'DEF' => $pos['DEF']
+                                ];
+                            }
+                            $positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'];
+                            foreach ($positions as $pos) {
+                                $teams = getRanksByPos($teams, $pos);
+                            }
+                            
+                            foreach ($teams as $team) {
+                                echo '<tr><td>'.$team['man'].'</td>';
+                                
+                                foreach ($positions as $pos) {
+                                    printFinderRow($team, $targets, $pos);
+                                }
+
+                                echo '</tr>';
+                            }
+                            ?>
                             </table>
                         </div>
                     </div>
@@ -228,6 +287,15 @@ include 'sidebar.html';
         "info": false,
         "order": [
             [1, "asc"],
+        ]
+    });
+
+    $('#datatable-tradeFinder').DataTable({
+        "searching": false,
+        "paging": false,
+        "info": false,
+        "order": [
+            [0, "asc"],
         ]
     });
 

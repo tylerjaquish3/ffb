@@ -60,7 +60,7 @@ foreach ($seasonNumbers as $standings) {
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-checkmark2 font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green-ffb white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Most Points</h5>
                                     <h5 class="text-bold-400"><?php echo $topScorer; ?>&#x200E;</h5>
                                 </div>
@@ -75,7 +75,7 @@ foreach ($seasonNumbers as $standings) {
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green-ffb white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Regular Season Champion</h5>
                                     <h5 class="text-bold-400"><?php echo $regSeasonChamp; ?>&#x200E;</h5>
                                 </div>
@@ -90,7 +90,7 @@ foreach ($seasonNumbers as $standings) {
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-sad font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green-ffb white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Second Place</h5>
                                     <h5 class="text-bold-400"><?php echo $runnerUp; ?>&#x200E;</h5>
                                 </div>
@@ -105,7 +105,7 @@ foreach ($seasonNumbers as $standings) {
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
                                     <i class="icon-trophy font-large-2 white"></i>
                                 </div>
-                                <div class="p-2 bg-green-ffb white media-body">
+                                <div class="p-2 bg-green-ffb media-body">
                                     <h5>Champion</h5>
                                     <h5 class="text-bold-400"><?php echo $champion; ?>&#x200E;</h5>
                                 </div>
@@ -116,7 +116,7 @@ foreach ($seasonNumbers as $standings) {
             </div>
 
             <div class="row">
-                <div class="col-md-6 col-xs-12">
+                <div class="col-lg-6 col-xs-12">
                     <div class="card">
                         <div class="card-header">
                             <h3>Standings</h3>
@@ -158,7 +158,7 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 col-xs-12">
+                <div class="col-lg-6 col-xs-12">
                     <div class="card">
                         <div class="card-header">
                             <h3>Postseason</h3>
@@ -297,7 +297,7 @@ foreach ($seasonNumbers as $standings) {
             </div>
 
             <div class="row">
-                <div class="col-md-6 col-xs-12">
+                <div class="col-lg-6 col-xs-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Results</h4>
@@ -330,7 +330,7 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 col-xs-12">
+                <div class="col-lg-6 col-xs-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Regular Season Matchups</h4>
@@ -376,6 +376,11 @@ foreach ($seasonNumbers as $standings) {
     </div>
 </div>
 
+<!-- These /divs are added to get the footer aligned properly -->
+</div>
+</div>
+<?php include 'footer.html'; ?>
+
 <style>
 
     span.seed {
@@ -385,8 +390,6 @@ foreach ($seasonNumbers as $standings) {
     }
 
 </style>
-
-<?php include 'footer.html'; ?>
 
 <script type="text/javascript">
     $(document).ready(function() {

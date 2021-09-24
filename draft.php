@@ -12,7 +12,7 @@ include 'sidebar.html';
 
         <div class="content-body">
             <div class="row">
-                <div class="col-xs-12 col-md-7 table-padding">
+                <div class="col-xs-12 col-lg-7 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Results</h4>
@@ -47,7 +47,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-5 table-padding">
+                <div class="col-xs-12 col-lg-5 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Positions</h4>
@@ -113,7 +113,7 @@ include 'sidebar.html';
 
         $('#datatable-draft').DataTable({
             "order": [
-                [0, "asc"],
+                [0, "desc"],
                 [3, "asc"]
             ]
         });

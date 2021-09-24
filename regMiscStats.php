@@ -220,6 +220,7 @@
                 }
             }
             
+			$years = [];
             // manager lose streak
             $result = mysqli_query($conn, "SELECT * FROM regular_season_matchups
 				WHERE manager1_id = $x and losing_manager_id = $x

@@ -36,9 +36,9 @@ include 'sidebar.html';
                                     <i class="icon-star-full font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Top Outperformed Projection</h5>
-                                    <h5 class="text-bold-400"><?php echo $topPerformers['outperform']['manager'].' - Week '.$topPerformers['outperform']['week']; ?><br />
-                                        <?php echo $topPerformers['outperform']['player'].' - '.$topPerformers['outperform']['points'].' points'; ?>
+                                    <h5>Best Draft Pick</h5>
+                                    <h5 class="text-bold-400"><?php echo $topPerformers['bestDraftPick']['manager']; ?><br />
+                                        <?php echo $topPerformers['bestDraftPick']['player'].' - '.$topPerformers['bestDraftPick']['points'].' points'; ?>
                                     </h5>
                                 </div>
                             </div>

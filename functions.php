@@ -2,6 +2,7 @@
 
 include 'connections.php';
 
+
 $result = mysqli_query($conn, "SELECT year FROM rosters ORDER BY year DESC LIMIT 1");
 while ($row = mysqli_fetch_array($result)) {
     $season = $row['year'];
@@ -14,6 +15,12 @@ while ($row = mysqli_fetch_array($result)) {
 
 if (!isset($pageName)) {
     $pageName = 'update';
+} else {
+    $ignore = ['User Activity', 'File Not Found'];
+
+    if (!in_array($pageName, $ignore)) {
+        saveUserActivity($pageName);
+    }
 }
 
 if ($pageName == 'Dashboard') {
@@ -58,6 +65,31 @@ if ($pageName == 'Current Season') {
     $bestDraft = getBestDraftPicks();
     $everyoneRecord = getRecordAgainstEveryone();
     $draftPerformance = getAllDraftedPlayerDetails();
+    $draftRounds = getBestRoundPicks();
+}
+
+function saveUserActivity($pageName)
+{
+    global $conn;
+
+    try {
+        // Lookup manager id by IP address
+        $managerId = null;
+        $ipAddress = $_SERVER['REMOTE_ADDR'];
+        $result = mysqli_query($conn, "SELECT manager_id from ip_addresses WHERE ip_address = '".$ipAddress."'");
+        while ($row = mysqli_fetch_array($result)) {
+            $managerId = $row['manager_id'];
+        }
+
+        // Save activity
+        date_default_timezone_set('America/Los_Angeles');
+        $timestamp = date('Y-m-d H:i:s');
+        $sql = $conn->prepare("INSERT INTO user_activity (ip_address, manager_id, page, created_at) VALUES (?,?,?,?)");
+        $sql->bind_param('siss', $ipAddress, $managerId, $pageName, $timestamp);
+        $sql->execute();
+    } catch (\Exception $ex) {
+        // Do nothing, just don't fail on this
+    }
 }
 
 /**
@@ -1014,15 +1046,12 @@ function getCurrentSeasonTopPerformers()
         ];
     }
 
-    $result = mysqli_query($conn, "SELECT * FROM rosters WHERE YEAR = $season ORDER BY points - projected DESC LIMIT 1");
-    while ($row = mysqli_fetch_array($result)) {
-        $response['outperform'] = [
-            'manager' => $row['manager'],
-            'week' => $row['week'],
-            'player' => $row['player'],
-            'points' => round($row['points'] - $row['projected'], 1)
-        ];
-    }
+    $result = getBestDraftPicks();
+    $response['bestDraftPick'] = [
+        'manager' => $result[0]['manager'],
+        'player' => $result[0]['player'],
+        'points' => round($result[0]['points'], 1)
+    ];
 
     $result = mysqli_query($conn, "SELECT manager, (SUM(pass_tds)+SUM(rush_tds)+SUM(rec_tds)) AS total_tds
         FROM rosters
@@ -1258,7 +1287,6 @@ function getMedian($pos)
     $avg = ($data['WR'] + $data['TE'] + $data['RB']) / 3;
 
     return $avg * $week;
-    
 }
 
 /**
@@ -1358,14 +1386,8 @@ function getRecordAgainstEveryone()
         foreach ($weekArray as $week) {
             $index = 0;
             foreach ($week as $manager => $value) {
-                // Account for the years where there were only 8 managers
-                if (count($week) == 8) {
-                    $managers[$manager]['wins'] += $index;
-                    $managers[$manager]['losses'] += 7 - $index;
-                } else {
-                    $managers[$manager]['wins'] += $index;
-                    $managers[$manager]['losses'] += 9 - $index;
-                }
+                $managers[$manager]['wins'] += $index;
+                $managers[$manager]['losses'] += 9 - $index;
 
                 $index++;
             }
@@ -1380,18 +1402,45 @@ function getAllDraftedPlayerDetails()
     global $conn, $season;
     $response = [];
 
-    $result = mysqli_query($conn, "SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player,
+    $result = mysqli_query($conn, "SELECT rosters.manager, draft.overall_pick, draft.position, draft.round, rosters.player,
         SUM(points) AS points, COUNT(rosters.player) AS GP
         FROM rosters
         JOIN managers ON rosters.manager = managers.name
         JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year
         WHERE rosters.year = $season AND rosters.roster_spot NOT IN ('BN','IR')
-        GROUP BY manager, overall_pick, player, POSITION");
+        GROUP BY manager, overall_pick, player, position, round");
     while ($row = mysqli_fetch_array($result)) {
         $response[] = $row;
     }
 
     return $response;
+}
+
+function getBestRoundPicks()
+{
+    $result = getAllDraftedPlayerDetails();
+
+    $best = [];
+    for ($x = 1; $x < 18; $x++) {
+        $best[$x] = ['manager' => '', 'player' => '', 'points' => 0];
+    }
+
+    $qbMultiplier = .8;
+
+    foreach ($result as $row) {
+        $pts = $row['points'];
+        if ($row['position'] == 'QB') {
+            $pts = $pts * $qbMultiplier;
+        }
+        
+        if ($pts > $best[$row['round']]['points']) {
+            $best[$row['round']]['points'] = $pts;
+            $best[$row['round']]['manager'] = $row['manager'];
+            $best[$row['round']]['player'] = $row['player'];
+        }
+    }
+
+    return $best;
 }
 
 /**
@@ -1613,6 +1662,12 @@ if(isset($_POST['sql-stmt'])) {
 
             if (!$success) {
                 dd(mysqli_error($conn));
+            }
+
+            while ($row = mysqli_fetch_array($success)) {
+                echo '<pre>';
+                var_dump($row);
+                echo '<pre>';
             }
         }
     }

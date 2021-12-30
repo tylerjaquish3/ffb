@@ -16,7 +16,7 @@ while ($row = mysqli_fetch_array($result)) {
 if (!isset($pageName)) {
     $pageName = 'update';
 } else {
-    $ignore = ['User Activity', 'File Not Found'];
+    $ignore = ['User Activity', 'File Not Found', 'Update Database'];
 
     if (!in_array($pageName, $ignore)) {
         saveUserActivity($pageName);

@@ -136,7 +136,7 @@ include 'sidebar.html';
                                         <div class="col-xs-6"><div class="plaque">2018 CHAMPION<br />JUSTIN DIDIER</div></div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-xs-6"></div>
+                                        <div class="col-xs-6"><div class="plaque">2021 CHAMPION<br />JUSTIN DIDIER</div></div>
                                         <div class="col-xs-6"><div class="plaque">2019 CHAMPION<br />CAMERON BOBOTH</div></div>
                                     </div>
                                 </div>

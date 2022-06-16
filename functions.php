@@ -19,7 +19,8 @@ if (!isset($pageName)) {
     $ignore = ['User Activity', 'File Not Found', 'Update Database'];
 
     if (!in_array($pageName, $ignore)) {
-        saveUserActivity($pageName);
+        // Dumb idea, IP addresses change when users are on phones
+        // saveUserActivity($pageName);
     }
 }
 

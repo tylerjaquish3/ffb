@@ -13,7 +13,7 @@
     // Factor in league schedule somehow
 
     // For a new year, just update these few items
-    $currentYear = 2021;
+    $currentYear = 2022;
     $draftOrder = [
         'Ben'       => 'ben-min.jpg',
         'Cole'      => 'cole-min.jpg',

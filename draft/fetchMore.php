@@ -66,7 +66,7 @@
                                     LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
                                     LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
                                     where position = 'QB' AND ranking_id IS NULL
-                                    order by my_rank asc
+                                    order by -my_rank desc
                                     LIMIT 5
                                     ) UNION ALL (
                                     select *
@@ -74,7 +74,7 @@
                                     LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
                                     LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
                                     where position = 'RB' AND ranking_id IS NULL
-                                    order by my_rank asc
+                                    order by -my_rank desc
                                     LIMIT 5
                                     ) UNION ALL (
                                     select *
@@ -82,7 +82,7 @@
                                     LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
                                     LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
                                     where position = 'WR' AND ranking_id IS NULL
-                                    order by my_rank asc
+                                    order by -my_rank desc
                                     LIMIT 5
                                     ) UNION ALL (
                                     select *
@@ -90,7 +90,7 @@
                                     LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
                                     LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
                                     where position = 'TE' AND ranking_id IS NULL
-                                    order by my_rank asc
+                                    order by -my_rank desc
                                     LIMIT 5
                                     ) UNION ALL (
                                     select *
@@ -98,7 +98,7 @@
                                     LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
                                     LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
                                     where position = 'DEF' AND ranking_id IS NULL
-                                    order by my_rank asc
+                                    order by -my_rank desc
                                     LIMIT 5
                                     ) UNION ALL (
                                     select *
@@ -106,7 +106,7 @@
                                     LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
                                     LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
                                     where position = 'K' AND ranking_id IS NULL
-                                    order by my_rank asc
+                                    order by -my_rank desc
                                     LIMIT 5
                                     ) UNION ALL (
                                     select *
@@ -114,7 +114,7 @@
                                     LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
                                     LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
                                     where (position = 'D' OR position = 'DB') AND ranking_id IS NULL
-                                    order by my_rank asc
+                                    order by -my_rank desc
                                     LIMIT 5
                                     )"
                                 );

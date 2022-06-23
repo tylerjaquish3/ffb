@@ -14,7 +14,7 @@ $currentYear = date('Y');
 
 if (isset($_POST['team-change'])) {
     $file = 'files/'.$currentYear.'/teamChange.csv';
-    $sql = $conn->prepare("UPDATE preseason_rankings SET team = ? WHERE player = ?");
+    $sql = $conn->prepare("UPDATE preseason_rankings SET team = ? WHERE player = ? OR alias = ?");
 
     if (($handle = fopen($file, "r")) !== FALSE) {
         while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
@@ -27,7 +27,7 @@ if (isset($_POST['team-change'])) {
             if ( false===$sql ) {
                 die('prepare() failed: ' . htmlspecialchars($mysqli->error));
             }
-            $rc = $sql->bind_param('ss', $team, $player);
+            $rc = $sql->bind_param('sss', $team, $player, $player);
             if ( false===$rc ) {
                 die('bind_param() failed: ' . htmlspecialchars($sql->error));
             }
@@ -189,7 +189,7 @@ function updatePlayers($field, $player, $value)
 
     $found = false;
     $sql = $conn->prepare("UPDATE preseason_rankings SET $field = ? WHERE id = ?");
-    $result = mysqli_query($conn, "SELECT * FROM preseason_rankings WHERE player = '{$player}'");
+    $result = mysqli_query($conn, "SELECT * FROM preseason_rankings WHERE player = '{$player}' OR alias = '{$player}'");
     while ($row = mysqli_fetch_array($result)) {
 
         $found = true;

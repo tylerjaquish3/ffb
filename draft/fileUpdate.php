@@ -112,6 +112,24 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-xl-3 col-lg-6 col-xs-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="media">
+                                    <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
+                                        <i class="icon-star-full font-large-2 white"></i>
+                                    </div>
+                                    <div class="p-2 bg-green-ffb media-body">
+                                        <h5>Back to Draft Page</h5>
+                                        <form action="index.html" method="POST">
+                                            <input type="hidden" name="player-rookies" value="true">
+                                            <button type="submit">Back</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
                 </div>
                 <div class="row">
@@ -209,7 +227,6 @@
                                     </div>
                                     <div class="p-2 bg-green-ffb media-body">
                                         <h5>Player Points</h5>
-                                        <h6><a href="" target="_blank">Get Data</a></h6>
                                         <form action="preseasonFileUpdate.php" method="POST">
                                             <input type="hidden" name="player-points" value="true">
                                             <button type="submit">Update</button>

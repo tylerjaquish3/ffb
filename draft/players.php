@@ -6,7 +6,7 @@
 <body>
 
     <?php
-    $currentYear = 2021;
+    $currentYear = date('Y');
     ?>
 
     <div class="app-content container-fluid">

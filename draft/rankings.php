@@ -18,7 +18,7 @@ include 'header.php';
                                     <?php
                                     $result = mysqli_query(
                                         $conn,
-                                        "SELECT * FROM preseason_rankings ORDER BY my_rank ASC"
+                                        "SELECT * FROM preseason_rankings ORDER BY -my_rank DESC"
                                     );
                                     while ($row = mysqli_fetch_array($result)) {
                                         ?>
@@ -43,7 +43,7 @@ include 'header.php';
                             <div class="position-relative">
                                 <ul class="tiers-list">
                                     <?php
-                                    $result = mysqli_query($conn, "SELECT * FROM preseason_rankings WHERE position = '{$pos}' ORDER BY my_rank ASC");
+                                    $result = mysqli_query($conn, "SELECT * FROM preseason_rankings WHERE position = '{$pos}' ORDER BY -my_rank DESC");
                                     while ($row = mysqli_fetch_array($result)) {
                                         $tier = $row['tier'];
                                         ?>

@@ -4,23 +4,19 @@
 
     // Ideas for next year
     // Ability to view each manager's roster sorted by lineup and compare lineups (week 1 matchup?)
-    // Make it easier to add initial set of players, SoS, line, proj points
-    // Make it easier to update projections based on FFB UDK
-    // Make it easier to update adp based on 2QB (https://draftwizard.fantasypros.com/football/adp/mock-drafts/overall/2qb-std-10-teams)
-    // Fix sportradar to just update each player (and add rookies stats)
     // Look into VORP, VONA, VOLS (value based drafting)
     // Additional notifications like "that was a great pick" or "you should really consider this stat based on your roster"
     // Factor in league schedule somehow
 
+    $currentYear = date('Y');
     // For a new year, just update these few items
-    $currentYear = 2022;
     $draftOrder = [
         'Ben'       => 'ben-min.jpg',
         'Cole'      => 'cole-min.jpg',
         'Gavin'     => 'gavin-min.jpg',
+        'Tyler'     => 'tyler-min.jpg',
         'Cameron'   => 'cam-min.jpg',
         'Justin'    => 'justin-min.jpg',
-        'Tyler'     => 'tyler-min.jpg',
         'Matt'      => 'matt-min.jpg',
         'Everett'   => 'everett-min.jpg',
         'AJ'        => 'aj-min.jpg',
@@ -73,6 +69,8 @@
             $allMyNextPicks = array_values($allMyNextPicks);
         }
     }
+
+    // var_dump($allMyNextPicks);die;
 
     // Determine tendency/need for each manager
     foreach ($draftOrder as $man => $avatar) {
@@ -256,19 +254,19 @@
                                                 LEFT JOIN draft_selections ON pr.id = draft_selections.ranking_id
                                                 LEFT JOIN player_data pd ON pd.preseason_ranking_id = pr.id AND pd.type = 'REG' AND pd.year = ($currentYear-1)
                                                 WHERE ranking_id IS NULL
-                                                ORDER BY my_rank ASC"
+                                                ORDER BY -my_rank DESC"
                                             );
                                             while ($row = mysqli_fetch_array($result)) {
                                                 $btnColor = ($myNextPick == 'Now!') ? 'mine' : 'taken';
                                                 $sosColor = ($row['sos'] > 25) ? 'bad' : ($row['sos'] < 7 ? 'good' : '');
                                                 $lineColor = ($row['position'] != 'DEF') ? (($row['line'] > 25) ? 'bad' : ($row['line'] < 7 ? 'good' : '')) : '';
 
-                                                $count++;
                                                 if (in_array($count, $allMyNextPicks)) {
                                                     $myRank = $row['my_rank']+2;
                                                     echo '<tr class="color-black"><td>'.$myRank.'</td><td data-order="999">></td><td></td><td></td><td></td><td></td><td></td>
                                                     <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
                                                 }
+                                                $count++;
                                             ?>
                                                 <tr class="color-<?php echo $row['position']; ?>">
                                                     <td><?php echo $row['my_rank']; ?></td>
@@ -472,9 +470,7 @@
             { "visible": false, "targets": 17 }
         ],
         "pageLength": 20,
-        "order": [
-            [0, "asc"]
-        ]
+        "order": []
     });
 
     var teamTable = $('#datatable-teamByRound').DataTable({
@@ -487,7 +483,8 @@
         "searching": false,
         "paging": false,
         "info": false,
-        "sort": false
+        // "sort": false,
+        "order": []
     });
 
     $(document).ready(function() {

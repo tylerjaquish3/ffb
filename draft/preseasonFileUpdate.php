@@ -117,7 +117,6 @@ function remove_utf8_bom($text)
 // Add rookies
 // Update adp, points, proj_points
 
-
 if (isset($_POST['player-rookies'])) {
 
     $file = 'files/'.$currentYear.'/rookies.csv';
@@ -180,29 +179,39 @@ if (isset($_POST['player-points'])) {
         $sql->bind_param('di', $points, $player);
         $sql->execute();
     }
-    echo 'Finished updating points';
+    echo '<br>Finished updating points';
 }
 
 
 function updatePlayers($field, $player, $value) 
 {
     global $conn;
-    echo $player;
-    $player = str_replace("'", "''", $player);
 
     $found = false;
+    $sql = $conn->prepare("UPDATE preseason_rankings SET $field = ? WHERE id = ?");
     $result = mysqli_query($conn, "SELECT * FROM preseason_rankings WHERE player = '{$player}'");
     while ($row = mysqli_fetch_array($result)) {
 
         $found = true;
         // Save the data
-        $sql = $conn->prepare("UPDATE preseason_rankings SET $field = ? WHERE id = ?");
-        $sql->bind_param('ii', $value, $row['id']);
-        $sql->execute();
+        if ( false===$sql ) {
+            echo $player;
+            die('prepare() failed: ' . htmlspecialchars($mysqli->error));
+        }
+        $rc = $sql->bind_param('ii', $value, $row['id']);
+        if ( false===$rc ) {
+            echo $player;
+            die('bind_param() failed: ' . htmlspecialchars($sql->error));
+        }
+        $rc = $sql->execute();
+        if ( false===$rc ) {
+            echo $player;
+            die('execute() failed: ' . htmlspecialchars($sql->error));
+        }
     }
 
     if (!$found) {
-        echo 'Not found';
+        echo $player.' Not found<br>';
     }
 }
 

@@ -15,13 +15,13 @@ while ($row = mysqli_fetch_array($result)) {
 
 if (!isset($pageName)) {
     $pageName = 'update';
-} else {
-    $ignore = ['User Activity', 'File Not Found', 'Update Database'];
+// } else {
+//     $ignore = ['User Activity', 'File Not Found', 'Update Database'];
 
-    if (!in_array($pageName, $ignore)) {
-        // Dumb idea, IP addresses change when users are on phones
-        // saveUserActivity($pageName);
-    }
+//     if (!in_array($pageName, $ignore)) {
+//         // Dumb idea, IP addresses change when users are on phones
+//         // saveUserActivity($pageName);
+//     }
 }
 
 if ($pageName == 'Dashboard') {
@@ -91,6 +91,12 @@ function saveUserActivity($pageName)
     } catch (\Exception $ex) {
         // Do nothing, just don't fail on this
     }
+}
+
+function getManagerName($id) {
+    $managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
+
+    return $managers[$id-1];
 }
 
 /**

@@ -215,3 +215,53 @@ function updatePlayers($field, $player, $value)
     }
 }
 
+
+if (isset($_POST['ffb-schedule'])) {
+
+    // First delete existing schedule
+    $sql = $conn->prepare("DELETE FROM schedule");
+    $sql->execute();
+
+    $sql = $conn->prepare("INSERT INTO schedule (manager1_id, manager2_id, week) VALUES (?,?,?)");
+    $file = 'files/'.$currentYear.'/schedule.csv';
+    if (($handle = fopen($file, "r")) !== FALSE) {
+        $count = 0;
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            $count++;
+            if ($count == 1) {
+                continue; // row 1 is headers
+            }
+
+            $week = (int) str_replace("Week ", "", $data[0]);
+            
+            $columnStart = 1;
+            for ($x = $columnStart; $x < 10; $x+=2) {
+                $man1 = $data[$x];
+                $man2 = $data[$x+1];
+
+                // Lookup manager 1
+                $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '{$man1}'");
+                while ($row = mysqli_fetch_array($result)) {
+                    $man1id = $row['id'];
+                }
+                // Lookup manager 2
+                $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '{$man2}'");
+                while ($row = mysqli_fetch_array($result)) {
+                    $man2id = $row['id'];
+                }
+
+                if ($man1id && $man2id) {
+                    // Insert into schedule table
+                    // dd($man1id.' vs. '.$man2id.' wk: '.$week);
+                    $sql->bind_param('iii', $man1id, $man2id, $week);
+                    $sql->execute();
+                }
+            }
+            
+        }
+        fclose($handle);
+        echo 'Finished updating schedules';
+    }
+}
+
+echo '<br><br><a href="index.html">Back to Draft page</a>';

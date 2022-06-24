@@ -257,6 +257,26 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-xl-3 col-lg-6 col-xs-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="media">
+                                    <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
+                                        <i class="icon-star-full font-large-2 white"></i>
+                                    </div>
+                                    <div class="p-2 bg-green-ffb media-body">
+                                        <?php $disabled = 'disabled'; if(file_exists('files/'.$year.'/schedule.csv')) { $disabled = ''; } ?>
+                                        <h5>FFB Schedule</h5>
+                                        <form action="preseasonFileUpdate.php" method="POST">
+                                            <input type="hidden" name="ffb-schedule" value="true">
+                                            <button type="submit" <?php echo $disabled; ?>>Update</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
                 </div>
             </div>

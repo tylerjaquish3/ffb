@@ -1,5 +1,5 @@
 <?php
-    $pageName = "Draft Helper";
+    $pageName = "Players";
     include 'header.php';
 ?>
 

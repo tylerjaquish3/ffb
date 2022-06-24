@@ -129,6 +129,8 @@
         }
     }
 
+    echo '<br><br><a href="index.html">Back to Draft page</a>';
+
     function makeRequest(string $url)
     {
         sleep(2);

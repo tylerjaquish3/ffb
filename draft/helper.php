@@ -224,6 +224,10 @@
                                         <a id="restartDraft">Restart Draft</a>
                                         &nbsp;|&nbsp;
                                         <a id="scramble">Scramble</a>
+                                        &nbsp;|&nbsp;
+                                        <a href="schedule.php">Schedule</a>
+                                        &nbsp;|&nbsp;
+                                        <a href="index.html">Draft Home</a>
                                     </div>
                                     <table class="table table-responsive" id="datatable-players" width="100%">
                                         <thead>

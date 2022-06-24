@@ -56,6 +56,12 @@
         return $note;
     }
 
+    function getManagerName($id) {
+        $managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
+    
+        return $managers[$id-1];
+    }
+
     include '../connections.php';
 
     ?>

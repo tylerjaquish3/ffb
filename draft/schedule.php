@@ -3,6 +3,11 @@
     include 'header.php';
 ?>
 
+<style>
+    table td {
+        padding: 0rem 1rem !important;
+    }
+</style>
 <body>
 
     <?php
@@ -13,6 +18,7 @@
         $manager = $_GET['id'];
     }
 
+    $myPoints = $oppPoints = [];
     $schedule = [];
     $result = mysqli_query($conn, "SELECT * FROM schedule where manager1_id = $manager OR manager2_id = $manager ORDER BY week ASC");
     while ($row = mysqli_fetch_array($result)) {
@@ -59,16 +65,24 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="row">
+                <?php
+                for ($x = 1; $x < 15; $x++) {
+                    headToHead($x);
+                }
+                
+                function headToHead($week) { 
+                    global $allPositions, $conn, $manager, $schedule;
+                    ?>
                     <div class="col-xs-12 col-md-6">
                         <div class="card">
                             <div class="card-body">
                                 <div class="position-relative">
                                     <div class="card-header">
-                                        Week 1 - vs. <?php echo $schedule[1]['name']; ?>
+                                        Week <?php echo $week.' - vs. '.$schedule[$week]['name']; ?>
                                         &nbsp;|&nbsp;
-                                        <span id="outcome"></span>
+                                        <span id="outcome<?php echo $week; ?>"></span>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6">
@@ -90,7 +104,7 @@
                                                     $result = mysqli_query($conn,
                                                         "SELECT * FROM preseason_rankings
                                                         JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
-                                                        WHERE manager_id = $manager ORDER BY pick_number ASC"
+                                                        WHERE manager_id = $manager AND bye != $week ORDER BY pick_number ASC"
                                                     );
                                                     while ($row = mysqli_fetch_array($result)) {
                                                         foreach ($myRoster as $key => &$rosterPos) {
@@ -136,7 +150,7 @@
                                                                 <td><?php echo $pts; ?></td>
                                                             </tr>
                                                         <?php
-                                                        } else { ?>
+                                                        } elseif ($rosterSpot != 'BN') { ?>
                                                             <tr>
                                                                 <td><?php echo $rosterSpot; ?></td>
                                                                 <td></td>
@@ -146,7 +160,13 @@
                                                         <?php
                                                         }
                                                         $count++;
-                                                    }?>
+                                                    } ?>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td><strong>Total</strong></td>
+                                                        <td></td>
+                                                        <td><strong><?php echo $myTotal; ?></strong></td>
+                                                    </tr>
                                                 </tbody>
                                             </table>
                                         </div>
@@ -166,11 +186,11 @@
                                                     foreach ($allPositions as $pos) {
                                                         $myRoster[] = [$pos => null];
                                                     }
-                                                    $opp = (int)$schedule[1]['id'];
+                                                    $opp = (int)$schedule[$week]['id'];
                                                     $result = mysqli_query($conn,
                                                         "SELECT * FROM preseason_rankings
                                                         JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
-                                                        WHERE manager_id = $opp ORDER BY pick_number ASC"
+                                                        WHERE manager_id = $opp AND bye != $week ORDER BY pick_number ASC"
                                                     );
                                                     while ($row = mysqli_fetch_array($result)) {
                                                         foreach ($myRoster as $key => &$rosterPos) {
@@ -215,7 +235,7 @@
                                                                 <td><?php echo $pts; ?></td>
                                                             </tr>
                                                         <?php
-                                                        } else { ?>
+                                                        } elseif ($rosterSpot != 'BN') { ?>
                                                             <tr>
                                                                 <td><?php echo $rosterSpot; ?></td>
                                                                 <td></td>
@@ -226,6 +246,12 @@
                                                         }
                                                         $count++;
                                                     }?>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td><strong>Total</strong></td>
+                                                        <td></td>
+                                                        <td><strong><?php echo $oppTotal; ?></strong></td>
+                                                    </tr>
                                                 </tbody>
                                             </table>
                                         </div>
@@ -234,6 +260,7 @@
                             </div>
                         </div>
                     </div>
+                    <?php } ?>
                 </div>
             </div>
         </div>
@@ -247,16 +274,31 @@
             window.location = baseUrl+'draft/schedule.php?id='+$('#manager-select').val();
         });
 
-        let myTotal = parseFloat("<?php echo $myTotal; ?>");
-        let oppTotal = parseFloat("<?php echo $oppTotal; ?>");
-        let myName = "<?php echo $myName; ?>";
-        let oppName = "<?php echo $schedule[1]['name']; ?>";
+        $.ajax({
+            url : '../dataLookup.php',
+            method: 'POST',
+            dataType: 'text',
+            data: {
+                dataType: "schedule",
+                manager: "<?php echo $manager; ?>"
+            },
+            cache: false,
+            success: function(response) {
+                let data = JSON.parse(response);
+                console.log(data);
 
-        let outcome = myName+' wins, '+myTotal+' - '+oppTotal;
-        if (oppTotal > myTotal) {
-            outcome = oppName+' wins, '+oppTotal+' - '+myTotal;
-        }
-        $('#outcome').html(outcome);
+                data.forEach(function (item) {
+
+                    console.log(item);
+                    let outcome = item.oppName+' wins '+item.opp+' - '+item.mine;
+                    if (item.mine > item.opp) {
+                        outcome = item.manName+' wins '+item.mine+' - '+item.opp;
+                    }
+
+                    $("#outcome"+item.week).html(outcome);
+                });
+            }
+        });
 
     });
     </script>

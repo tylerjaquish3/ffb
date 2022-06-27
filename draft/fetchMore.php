@@ -45,7 +45,7 @@
                                     <th>SoS</th>
                                     <th>Line</th>
                                     <th>Tier</th>
-                                    <th>Diff</th>
+                                    <th>VOLS</th>
                                     <th></th>
                                     <th>GP</th>
                                     <th>Pts</th>
@@ -123,7 +123,7 @@
                                     $sosColor = ($row['sos'] > 25) ? 'bad' : ($row['sos'] < 7 ? 'good' : '');
                                     $lineColor = ($row['line'] > 25) ? 'bad' : ($row['line'] < 7 ? 'good' : '');
                                     $ppg = ($row['games_played'] > 0) ? round($row['points'] / $row['games_played'], 1) : null;
-                                    $diff = ($lastProj && $lastPos == $row['position']) ? $lastProj-$row['proj_points'] : '';
+                                    // $diff = ($lastProj && $lastPos == $row['position']) ? $lastProj-$row['proj_points'] : '';
                                     $icon = desigIcon($row['designation'], $row['notes'] ? true : false);
 
                                     $output .= '
@@ -136,7 +136,7 @@
                                         <td class="color-'.$sosColor.'">'.$row['sos'].'</td>
                                         <td class="color-'.$lineColor.'">'.$row['line'].'</td>
                                         <td>'.$row['tier'].'</td>
-                                        <td>'.$diff.'</td>
+                                        <td>'.$row['vols'].'</td>
                                         <td><a class="btn btn-secondary selected-btn '.$btnColor.'"><i class="icon-plus"></i></a></td>
                                         <td>'.$row['games_played'].'</td>
                                         <td>'.$row['points'].'</td>

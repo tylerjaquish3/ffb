@@ -35,6 +35,12 @@
 <body>
 
     <?php
+    include '../connections.php';
+
+    function dd($text) {
+        var_dump($text);die;
+    }
+
     function desigIcon($id, $hasNote)
     {
         $note = '';
@@ -56,12 +62,52 @@
         return $note;
     }
 
-    function getManagerName($id) {
+    function getManagerName($id) 
+    {
+        // These are in order by ID
         $managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
     
         return $managers[$id-1];
     }
 
-    include '../connections.php';
+    // This should happen after each pick so the baseline could move up/down/stay based on picks that happen
+    function updateVols()
+    {
+        global $conn;
+
+        $positions = [
+            ['pos' => 'QB', 'limit' => 20, 'base' => null],
+            ['pos' => 'RB', 'limit' => 30, 'base' => null],
+            ['pos' => 'WR', 'limit' => 30, 'base' => null],
+            ['pos' => 'TE', 'limit' => 10, 'base' => null],
+        ];
+        foreach ($positions as &$pos) {
+            $pos['base'] = getBaseline($pos['pos'], $pos['limit']);
+        }
+        
+        $sql = $conn->prepare("UPDATE preseason_rankings SET vols = ? WHERE id = ?");
+        $result = mysqli_query($conn, "SELECT * FROM preseason_rankings ORDER BY proj_points DESC");
+        while ($row = mysqli_fetch_array($result)) {
+
+            $search = array_search($row['position'], array_column($positions, 'pos'));
+            // dd($positions[$search]);
+            $baseline = $positions[$search]['base'];
+            // dd($baseline);
+            $vols = $row['proj_points'] - $baseline;
+            $sql->bind_param('ii', $vols, $row['id']);
+            $sql->execute();
+        }
+    }
+
+    function getBaseline($pos, $limit)
+    {
+        global $conn;
+        $result = mysqli_query($conn, "SELECT * FROM preseason_rankings where position = '$pos' ORDER BY proj_points DESC LIMIT $limit");
+        while ($row = mysqli_fetch_array($result)) {
+            $base = $row['proj_points'];
+        }
+
+        return (int)$base;
+    }
 
     ?>

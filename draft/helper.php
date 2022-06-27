@@ -3,10 +3,8 @@
     include 'header.php';
 
     // Ideas for next year
-    // Ability to view each manager's roster sorted by lineup and compare lineups (week 1 matchup?)
     // Look into VORP, VONA, VOLS (value based drafting)
     // Additional notifications like "that was a great pick" or "you should really consider this stat based on your roster"
-    // Factor in league schedule somehow
 
     $currentYear = date('Y');
     // For a new year, just update these few items
@@ -125,6 +123,8 @@
         }
     }
 
+    updateVols();
+
 ?>
 
 <body">
@@ -225,7 +225,7 @@
                                         &nbsp;|&nbsp;
                                         <a id="scramble">Scramble</a>
                                         &nbsp;|&nbsp;
-                                        <a href="schedule.php">Schedule</a>
+                                        <a href="schedule.php" target="_blank">Schedule</a>
                                         &nbsp;|&nbsp;
                                         <a href="index.html">Draft Home</a>
                                     </div>
@@ -239,6 +239,7 @@
                                             <th>SoS</th>
                                             <th>Line</th>
                                             <th>Tier</th>
+                                            <th>VOLS</th>
                                             <th></th>
                                             <th>GP</th>
                                             <th>Pts</th>
@@ -268,7 +269,7 @@
                                                 if (in_array($count, $allMyNextPicks)) {
                                                     $myRank = $row['my_rank']+2;
                                                     echo '<tr class="color-black"><td>'.$myRank.'</td><td data-order="999">></td><td></td><td></td><td></td><td></td><td></td>
-                                                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
+                                                    <td></td><td></td><td></td><td></td><td></td><td><td></td></td><td></td><td></td><td></td><td></td><td></td></tr>';
                                                 }
                                                 $count++;
                                             ?>
@@ -281,6 +282,7 @@
                                                     <td class="color-<?php echo $sosColor; ?>"><?php echo $row['sos']; ?></td>
                                                     <td class="color-<?php echo $lineColor; ?>"><?php echo ($row['position'] != 'DEF') ? $row['line'] : ''; ?></td>
                                                     <td><?php echo $row['tier']; ?></td>
+                                                    <td><?php echo $row['vols']; ?></td>
                                                     <td><a class="btn btn-secondary selected-btn <?php echo $btnColor; ?>"><i class="icon-plus"></i></a></td>
                                                     <td><?php echo $row['games_played']; ?></td>
                                                     <td><?php echo $row['points']; ?></td>
@@ -469,9 +471,9 @@
 
     var playersTable = $('#datatable-players').DataTable({
         "columnDefs": [
-            { "width": "25px", "targets": 8 },
-            { "sortable": false, "targets": [8,16,17]},
-            { "visible": false, "targets": 17 }
+            { "width": "25px", "targets": 9 },
+            { "sortable": false, "targets": [9,17,18]},
+            { "visible": false, "targets": 18 }
         ],
         "pageLength": 20,
         "order": []

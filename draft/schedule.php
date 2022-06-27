@@ -12,7 +12,7 @@
 
     <?php
     $currentYear = date('Y');
-    $allPositions = ['QB','RB','RB','WR','WR','WR','TE','W/R/T','Q/W/R/T','K','DEF','BN','BN','BN','BN','BN','BN'];
+    $allPositions = ['QB','RB','RB','WR','WR','WR','TE','W/R/T','Q/W/R/T','K','DEF'];
     $manager = 1;
     if (isset($_GET['id'])) {
         $manager = $_GET['id'];

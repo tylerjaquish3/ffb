@@ -42,6 +42,9 @@
             <div class="content-body">
                 <div class="row">
                     <div class="col-xs-12 col-md-6">
+                        <a class="btn btn-secondary" href="helper.php">Back to Helper</a>
+                    </div>
+                    <div class="col-xs-12 col-md-6">
                         <div class="card">
                             <div class="card-body">
                                 <div class="position-relative">
@@ -58,7 +61,7 @@
                                                 }
                                             } ?>
                                         </select>
-                                        Projected record: <span id="record">10-4</span>
+                                        Projected record: <span id="record"></span>
                                     </div>
                                 </div>
                             </div>
@@ -66,7 +69,7 @@
                     </div>
                 </div>
                 
-                <div class="row">
+                <div class="row" style="direction:ltr">
                 <?php
                 for ($x = 1; $x < 15; $x++) {
                     headToHead($x);
@@ -285,18 +288,16 @@
             cache: false,
             success: function(response) {
                 let data = JSON.parse(response);
-                console.log(data);
-
-                data.forEach(function (item) {
-
-                    console.log(item);
+                allMatchups = data.allMatchups;
+                allMatchups.forEach(function (item) {
                     let outcome = item.oppName+' wins '+item.opp+' - '+item.mine;
                     if (item.mine > item.opp) {
                         outcome = item.manName+' wins '+item.mine+' - '+item.opp;
                     }
-
                     $("#outcome"+item.week).html(outcome);
                 });
+
+                $('#record').text(data.record);
             }
         });
 

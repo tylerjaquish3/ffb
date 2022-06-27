@@ -126,6 +126,7 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'schedule') {
         }
     }
     
+    $wins = $losses = 0;
     foreach ($schedule as $week => $opp) {
         $points['manName'] = getManagerName($manager);
         $points['oppName'] = $opp['name'];
@@ -135,9 +136,18 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'schedule') {
         $points['week'] = $week;
 
         $allMatchups[] = $points;
+        if ($points['mine'] > $points['opp']) {
+            $wins++;
+        } else {
+            $losses++;
+        }
     }
+    $data = [
+        'record' => $wins.' - '.$losses,
+        'allMatchups' => $allMatchups
+    ];
 
-    echo json_encode($allMatchups);
+    echo json_encode($data);
     die;
 }
 

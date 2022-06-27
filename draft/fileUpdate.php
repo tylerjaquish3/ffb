@@ -85,7 +85,7 @@
                                         <h6><a href="https://www.fantasypros.com/nfl/players/team-changes.php" target="_blank">Get Data</a></h6>
                                         <form action="preseasonFileUpdate.php" method="POST">
                                             <input type="hidden" name="team-change" value="true">
-                                            <button type="submit" <?php echo $disabled; ?>>Update</button>
+                                            <button class="btn btn-secondary" type="submit" <?php echo $disabled; ?>>Update</button>
                                         </form>
                                     </div>
                                 </div>
@@ -105,7 +105,7 @@
                                         <h6><a href="" target="_blank">Get Data</a></h6>
                                         <form action="preseasonFileUpdate.php" method="POST">
                                             <input type="hidden" name="player-rookies" value="true">
-                                            <button type="submit" <?php echo $disabled; ?>>Update</button>
+                                            <button class="btn btn-secondary" type="submit" <?php echo $disabled; ?>>Update</button>
                                         </form>
                                     </div>
                                 </div>
@@ -123,7 +123,7 @@
                                         <h5>Back to Draft Page</h5>
                                         <form action="index.html" method="POST">
                                             <input type="hidden" name="player-rookies" value="true">
-                                            <button type="submit">Back</button>
+                                            <button class="btn btn-secondary" type="submit">Back</button>
                                         </form>
                                     </div>
                                 </div>
@@ -146,7 +146,7 @@
                                         <h6><a href="" target="_blank">Get Data</a></h6>
                                         <form action="preseasonFileUpdate.php" method="POST">
                                             <input type="hidden" name="team-oline" value="true">
-                                            <button type="submit" <?php echo $disabled; ?>>Update</button>
+                                            <button class="btn btn-secondary" type="submit" <?php echo $disabled; ?>>Update</button>
                                         </form>
                                     </div>
                                 </div>
@@ -166,7 +166,7 @@
                                         <h6><a href="https://www.fantasypros.com/nfl/points-allowed.php" target="_blank">Get Data</a></h6>
                                         <form action="preseasonFileUpdate.php" method="POST">
                                             <input type="hidden" name="team-sos" value="true">
-                                            <button type="submit" <?php echo $disabled; ?>>Update</button>
+                                            <button class="btn btn-secondary" type="submit" <?php echo $disabled; ?>>Update</button>
                                         </form>
                                     </div>
                                 </div>
@@ -186,7 +186,7 @@
                                         <h6><a href="http://www.espn.com/nfl/schedulegrid" target="_blank">Get Data</a></h6>
                                         <form action="preseasonFileUpdate.php" method="POST">
                                             <input type="hidden" name="team-byes" value="true">
-                                            <button type="submit" <?php echo $disabled; ?>>Update</button>
+                                            <button class="btn btn-secondary" type="submit" <?php echo $disabled; ?>>Update</button>
                                         </form>
                                     </div>
                                 </div>
@@ -210,7 +210,7 @@
                                         <h6><a href="" target="_blank">Get Data</a></h6>
                                         <form action="preseasonFileUpdate.php" method="POST">
                                             <input type="hidden" name="player-projPoints" value="true">
-                                            <button type="submit" <?php echo $disabled; ?>>Update</button>
+                                            <button class="btn btn-secondary" type="submit" <?php echo $disabled; ?>>Update</button>
                                         </form>
                                     </div>
                                 </div>
@@ -229,7 +229,7 @@
                                         <h5>Player Points</h5>
                                         <form action="preseasonFileUpdate.php" method="POST">
                                             <input type="hidden" name="player-points" value="true">
-                                            <button type="submit">Update</button>
+                                            <button class="btn btn-secondary" type="submit">Update</button>
                                         </form>
                                     </div>
                                 </div>
@@ -250,7 +250,7 @@
                                         <h6><a href="" target="_blank">Get Data</a></h6>
                                         <form action="preseasonFileUpdate.php" method="POST">
                                             <input type="hidden" name="player-adp" value="true">
-                                            <button type="submit" <?php echo $disabled; ?>>Update</button>
+                                            <button class="btn btn-secondary" type="submit" <?php echo $disabled; ?>>Update</button>
                                         </form>
                                     </div>
                                 </div>
@@ -270,7 +270,7 @@
                                         <h5>FFB Schedule</h5>
                                         <form action="preseasonFileUpdate.php" method="POST">
                                             <input type="hidden" name="ffb-schedule" value="true">
-                                            <button type="submit" <?php echo $disabled; ?>>Update</button>
+                                            <button class="btn btn-secondary" type="submit" <?php echo $disabled; ?>>Update</button>
                                         </form>
                                     </div>
                                 </div>

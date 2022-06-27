@@ -3,7 +3,7 @@
     include '../functions.php';
 
     // Only need to do this once to save the nfl teams
-    // $teams = file_get_contents('draft/files/leagueHierarchy.json');
+    $teams = file_get_contents('files/leagueHierarchy.json');
     // saveTeams($teams);
 
     // This is if you need to lookup and save a single player using the sandbox

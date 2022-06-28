@@ -46,11 +46,11 @@
                                             <th>My Rank</th>
                                             <th>ADP</th>
                                             <th>Player</th>
-                                            <th>Pos</th>
                                             <th>Team</th>
                                             <th>Bye</th>
                                             <th>SoS</th>
                                             <th>Tier</th>
+                                            <th>VOLS</th>
                                             <th>GP</th>
                                             <th>Pass Att</th>
                                             <th>Pass Comp</th>
@@ -64,11 +64,11 @@
                                             <th>Rec</th>
                                             <th>Rec Yds</th>
                                             <th>Rec TDs</th>
-                                            <th>Fum</th>
                                             <th>Pts</th>
                                             <th>Pts/Gm</th>
                                             <th>Proj Pts</th>
-                                            <th></th>
+                                            <th>Selected?</th>
+                                            <th>Pos</th>
                                         </thead>
                                         <tbody>
                                             <?php
@@ -92,12 +92,15 @@
                                                 <tr class="color-<?php echo $color; ?>">
                                                     <td><?php echo $row['my_rank']; ?></td>
                                                     <td><?php echo $row['adp']; ?></td>
-                                                    <td><?php echo '<a data-toggle="modal" data-target="#player-data" onclick="showPlayerData('.(int)$row[0].')">'.$row['player'].'</a>'; ?></td>
-                                                    <td><?php echo $row['position']; ?></td>
+                                                    <td>
+                                                        <?php echo '<a data-toggle="modal" data-target="#player-data" onclick="showPlayerData('.(int)$row[0].')">'.$row['player'].'</a>'; ?>
+                                                        <?php echo desigIcon($row['designation'], $row['notes'] ? true : false); ?>
+                                                    </td>
                                                     <td><?php echo $row['team']; ?></td>
                                                     <td><?php echo $row['bye']; ?></td>
                                                     <td><?php echo $row['sos']; ?></td>
                                                     <td><?php echo $row['tier']; ?></td>
+                                                    <td><?php echo $row['vols']; ?></td>
                                                     <td><?php echo $row['games_played']; ?></td>
                                                     <td><?php echo $row['pass_attempts']; ?></td>
                                                     <td><?php echo $row['pass_completions']; ?></td>
@@ -111,11 +114,11 @@
                                                     <td><?php echo $row['rec_receptions']; ?></td>
                                                     <td><?php echo $row['rec_yards']; ?></td>
                                                     <td><?php echo $row['rec_touchdowns']; ?></td>
-                                                    <td><?php echo $row['fumbles']; ?></td>
                                                     <td><?php echo $row['points']; ?></td>
                                                     <td><?php echo $row['games_played'] > 0 ? round($row['points'] / $row['games_played'], 1) : null; ?></td>
                                                     <td><?php echo $row['proj_points']; ?></td>
                                                     <td><?php echo $row['ranking_id'] ? 'true' : 'false'; ?></td>
+                                                    <td><?php echo $row['position']; ?></td>
                                                 </tr>
                                             <?php } ?>
                                         </tbody>
@@ -140,10 +143,23 @@
                     <div class="row">
                         <div class="col-xs-12">
                             <input type="hidden" id="player-id">
-                            <div id="player-header"></div>
+                            <div class="row">
+                                <div class="col-xs-8">
+                                    <a id="mark-bust" class=""><i class="icon-aid-kit" title="Bust"></i></a>&nbsp;&nbsp;
+                                    <a id="mark-value" class=""><i class="icon-price-tag" title="Value"></i></a>&nbsp;&nbsp;
+                                    <a id="mark-sleeper" class=""><i class="icon-sleepy2" title="Sleeper"></i></a>&nbsp;&nbsp;
+                                    <a id="mark-breakout" class=""><i class="icon-star-full" title="Breakout"></i></a>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div id="player-header"></div>
+                                </div>
+                            </div>
                             <div id="fetched-data"></div>
+
                             <textarea id="player-notes" cols=150 rows=6></textarea>
-                            <br /><a class="btn btn-secondary mine" id="save-note">Save</a>
+
+                            <br />
+                            <br /><a class="btn btn-secondary mine" id="save-note">Save</a><div id="confirm"></div>
                         </div>
                     </div>
                 </div>
@@ -163,14 +179,15 @@
             "order": [
                 [0, "asc"]
             ],
-            "columnDefs": [{
-                "targets": [25],
-                "visible": false
-            }]
+            "columnDefs": [
+                { "width": "10px", "targets": 0},
+                { "width": "150px", "targets": 2},
+                {"targets": [24,25],"visible": false}
+            ]
         });
 
         $('#hide-selected').click(function () {
-            playersTable.columns([25]).search('false').draw();
+            playersTable.columns([24]).search('false').draw();
         });
 
         $('#show-all').click(function () {
@@ -182,7 +199,7 @@
             if (criteria == 'W/R/T') {
                 criteria = 'WR|RB|TE';
             }
-            playersTable.columns([3]).search(criteria, true, true).draw();
+            playersTable.columns([25]).search(criteria, true, true).draw();
         });
 
     });
@@ -214,6 +231,15 @@
                         $('#player-header').html(header);
                         $('#player-notes').val(item.notes);
                         $('#player-id').val(item.id);
+
+                        $('#mark-bust').removeClass('yep');
+                        $('#mark-value').removeClass('yep');
+                        $('#mark-sleeper').removeClass('yep');
+                        $('#mark-breakout').removeClass('yep');
+                        if (item.designation) {
+                            desig = item.designation;
+                            $('#mark-'+desig).addClass('yep');
+                        } 
                     } else {
                         let points = (item.pass_yards*.04)+(item.pass_touchdowns*4)+(item.rush_yards*.1)+(item.rush_touchdowns*6);
                         points += (item.rec_yards*.1)+(item.rec_touchdowns*6)+(item.rec_receptions*.5);
@@ -263,6 +289,36 @@
         });
     });
 
+    $('#mark-bust').click(function () {
+        updateDesignation('bust');
+    });
+    $('#mark-value').click(function () {
+        updateDesignation('value');
+    });
+    $('#mark-sleeper').click(function () {
+        updateDesignation('sleeper');
+    });
+    $('#mark-breakout').click(function () {
+        updateDesignation('breakout');
+    });
+
+    function updateDesignation(desig)
+    {
+        $.ajax({
+            type : 'post',
+            url : 'modalData.php',
+            data :  {
+                request: 'designation',
+                id: $('#player-id').val(),
+                designation: desig
+            },
+            success : function(data){
+                $('#confirm').html('Saved!');
+                location.reload();
+            }
+        });
+    }
+
 </script>
 
 <style>
@@ -287,6 +343,10 @@
     a, a:link, a:visited {
         color: black;
         cursor: pointer;
+    }
+
+    .yep {
+        color: #8cfa84 !important;
     }
 
 </style>

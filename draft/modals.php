@@ -225,10 +225,22 @@
                 <div class="row">
                     <div class="col-xs-12">
                         <input type="hidden" id="player-id">
-                        <div id="player-header"></div>
+                        <div class="row">
+                            <div class="col-xs-8">
+                                <a id="mark-bust" class=""><i class="icon-aid-kit" title="Bust"></i></a>&nbsp;&nbsp;
+                                <a id="mark-value" class=""><i class="icon-price-tag" title="Value"></i></a>&nbsp;&nbsp;
+                                <a id="mark-sleeper" class=""><i class="icon-sleepy2" title="Sleeper"></i></a>&nbsp;&nbsp;
+                                <a id="mark-breakout" class=""><i class="icon-star-full" title="Breakout"></i></a>
+                            </div>
+                            <div class="col-xs-4">
+                                <div id="player-header"></div>
+                            </div>
+                        </div>
                         <div id="fetched-data"></div>
 
                         <textarea id="player-notes" cols=150 rows=6></textarea>
+
+                        <br />
                         <br /><a class="btn btn-secondary mine" id="save-note">Save</a><div id="confirm"></div>
                     </div>
                 </div>
@@ -319,6 +331,12 @@
     </div>
 </div>
 
+<style>
+    .yep {
+        color: #8cfa84 !important;
+    }
+</style>
+
 <script>
 
     let draftOrder = <?php echo json_encode($draftOrder); ?>;
@@ -351,6 +369,15 @@
                         $('#player-header').html(header);
                         $('#player-notes').val(item.notes);
                         $('#player-id').val(item.id);
+
+                        $('#mark-bust').removeClass('yep');
+                        $('#mark-value').removeClass('yep');
+                        $('#mark-sleeper').removeClass('yep');
+                        $('#mark-breakout').removeClass('yep');
+                        if (item.designation) {
+                            desig = item.designation;
+                            $('#mark-'+desig).addClass('yep');
+                        } 
                     } else {
 
                         let points = (item.pass_yards*.04)+(item.pass_touchdowns*4)+(item.rush_yards*.1)+(item.rush_touchdowns*6);
@@ -732,5 +759,35 @@
             }
         });
     });
+
+    $('#mark-bust').click(function () {
+        updateDesignation('bust');
+    });
+    $('#mark-value').click(function () {
+        updateDesignation('value');
+    });
+    $('#mark-sleeper').click(function () {
+        updateDesignation('sleeper');
+    });
+    $('#mark-breakout').click(function () {
+        updateDesignation('breakout');
+    });
+
+    function updateDesignation(desig)
+    {
+        $.ajax({
+            type : 'post',
+            url : 'modalData.php',
+            data :  {
+                request: 'designation',
+                id: $('#player-id').val(),
+                designation: desig
+            },
+            success : function(data){
+                $('#confirm').html('Saved!');
+                location.reload();
+            }
+        });
+    }
 
 </script>

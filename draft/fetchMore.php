@@ -54,7 +54,6 @@
                                     <th>TDs</th>
                                     <th>Rec</th>
                                     <th>Proj Pts</th>
-                                    <th></th>
                                 </thead>
                                 <tbody>';
 
@@ -130,7 +129,10 @@
                                     <tr class="color-'.$row['position'].'">
                                         <td>'.$row['my_rank'].'</td>
                                         <td>'.$row['adp'].'</td>
-                                        <td><a data-toggle="modal" data-target="#player-data" onclick="showPlayerData('.(int)$row[0].')">'.$row['player'].'</a></td>
+                                        <td>
+                                            <a data-toggle="modal" data-target="#player-data" onclick="showPlayerData('.(int)$row[0].')">'.$row['player'].'</a>
+                                            '.$icon.'
+                                        </td>
                                         <td>'.$row['team'].'</td>
                                         <td>'.$row['bye'].'</td>
                                         <td class="color-'.$sosColor.'">'.$row['sos'].'</td>
@@ -145,11 +147,10 @@
                                         <td>'.($row['pass_touchdowns']+$row['rush_touchdowns']+$row['rec_touchdowns']).'</td>
                                         <td>'.$row['rec_receptions'].'</td>
                                         <td>'.$row['proj_points'].'</td>
-                                        <td>'.$icon.'</td>
                                     </tr>';
 
-                                    $lastProj = $row['proj_points'];
-                                    $lastPos = $row['position'];
+                                    // $lastProj = $row['proj_points'];
+                                    // $lastPos = $row['position'];
                                 }
                             $output .= '
                             </tbody>

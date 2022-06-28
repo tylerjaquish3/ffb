@@ -371,3 +371,24 @@ if (isset($_POST['request']) && $_POST['request'] == 'notes') {
     echo true;
     die;
 }
+
+if (isset($_POST['request']) && $_POST['request'] == 'designation') {
+    $playerId = $_POST['id'];
+
+    $result = mysqli_query($conn, "SELECT * FROM preseason_rankings WHERE id = $playerId");
+    while($row = mysqli_fetch_array($result)) {
+        $existingDesig = $row['designation'];
+    }
+
+    $desig = $_POST['designation'];
+    if ($existingDesig == $desig) {
+        $desig = null;
+    }
+
+    $sql = $conn->prepare("UPDATE preseason_rankings SET designation = ? WHERE id = ?");
+    $sql->bind_param('si', $desig, $playerId);
+    $sql->execute();
+
+    echo true;
+    die;
+}

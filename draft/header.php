@@ -45,7 +45,7 @@
     {
         $note = '';
         if ($hasNote) {
-            $note = '<i class="icon-file-text" title="Note"></i>';
+            $note = '&nbsp;<i class="icon-file-text" title="Note"></i>';
         }
         if ($id == 'bust') {
             return '<i class="icon-aid-kit" title="Bust"></i>'.$note;

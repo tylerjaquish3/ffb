@@ -248,7 +248,6 @@
                                             <th>TDs</th>
                                             <th>Rec</th>
                                             <th>Proj</th>
-                                            <th></th>
                                             <th>Pos</th>
                                         </thead>
                                         <tbody>
@@ -269,14 +268,17 @@
                                                 if (in_array($count, $allMyNextPicks)) {
                                                     $myRank = $row['my_rank']+2;
                                                     echo '<tr class="color-black"><td>'.$myRank.'</td><td data-order="999">></td><td></td><td></td><td></td><td></td><td></td>
-                                                    <td></td><td></td><td></td><td></td><td></td><td><td></td></td><td></td><td></td><td></td><td></td><td></td></tr>';
+                                                    <td></td><td></td><td></td><td></td><td></td><td><td></td></td><td></td><td></td><td></td><td></td></tr>';
                                                 }
                                                 $count++;
                                             ?>
                                                 <tr class="color-<?php echo $row['position']; ?>">
                                                     <td><?php echo $row['my_rank']; ?></td>
                                                     <td data-order="<?php echo $row['adp'] ? $row['adp'] : 999; ?>"><?php echo $row['adp']; ?></td>
-                                                    <td><?php echo '<a data-toggle="modal" data-target="#player-data" onclick="showPlayerData('.(int)$row[0].')">'.$row['player'].'</a>'; ?></td>
+                                                    <td>
+                                                        <?php echo '<a data-toggle="modal" data-target="#player-data" onclick="showPlayerData('.(int)$row[0].')">'.$row['player'].'</a>'; ?>
+                                                        <?php echo desigIcon($row['designation'], $row['notes'] ? true : false); ?>
+                                                    </td>
                                                     <td><?php echo $row['team']; ?></td>
                                                     <td><?php echo $row['bye']; ?></td>
                                                     <td class="color-<?php echo $sosColor; ?>"><?php echo $row['sos']; ?></td>
@@ -291,7 +293,6 @@
                                                     <td><?php echo $row['pass_touchdowns']+$row['rush_touchdowns']+$row['rec_touchdowns']; ?></td>
                                                     <td><?php echo $row['rec_receptions']; ?></td>
                                                     <td><?php echo $row['proj_points']; ?></td>
-                                                    <td><?php echo desigIcon($row['designation'], $row['notes'] ? true : false); ?></td>
                                                     <td><?php echo $row['position']; ?></td>
                                                 </tr>
                                             <?php } ?>
@@ -472,8 +473,8 @@
     var playersTable = $('#datatable-players').DataTable({
         "columnDefs": [
             { "width": "25px", "targets": 9 },
-            { "sortable": false, "targets": [9,17,18]},
-            { "visible": false, "targets": 18 }
+            { "sortable": false, "targets": [9,16,17]},
+            { "visible": false, "targets": 17 }
         ],
         "pageLength": 20,
         "order": []

@@ -372,6 +372,16 @@ if (isset($_POST['request']) && $_POST['request'] == 'notes') {
     die;
 }
 
+if (isset($_POST['request']) && $_POST['request'] == 'down') {
+    $sql = $conn->prepare("UPDATE preseason_rankings SET my_rank = ? WHERE id = ?");
+    $rank = 350;
+    $sql->bind_param('ii', $rank, $_POST['id']);
+    $sql->execute();
+
+    echo true;
+    die;
+}
+
 if (isset($_POST['request']) && $_POST['request'] == 'designation') {
     $playerId = $_POST['id'];
 

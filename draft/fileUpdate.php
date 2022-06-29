@@ -205,7 +205,7 @@
                                         <i class="icon-star-full font-large-2 white"></i>
                                     </div>
                                     <div class="p-2 bg-green-ffb media-body">
-                                        <?php $disabled = 'disabled'; if(file_exists('files/'.$year.'-projPoints.csv')) { $disabled = ''; } ?>
+                                        <?php $disabled = 'disabled'; if(file_exists('files/'.$year.'/projPoints.csv')) { $disabled = ''; } ?>
                                         <h5>Player Proj Points</h5>
                                         <h6><a href="" target="_blank">Get Data</a></h6>
                                         <form action="preseasonFileUpdate.php" method="POST">

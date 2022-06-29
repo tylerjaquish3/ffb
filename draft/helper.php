@@ -434,7 +434,10 @@
 
     <script src="/assets/chart.min.js" type="text/javascript"></script>
 
-    <?php include 'modals.php'; ?>
+    <?php 
+    include 'playerModal.php'; 
+    include 'modals.php'; 
+    ?>
 
 <script type="text/javascript">
 

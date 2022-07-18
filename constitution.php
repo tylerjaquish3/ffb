@@ -132,13 +132,12 @@ include 'sidebar.html';
                                 <br />
                                 <strong>Vote on the following:</strong>
                                 <ol>
-                                    <li>Change waiver settings to be based on standings or use FAAB system <a href="voteInfo.php#waivers">More info</a> </li>
-                                    <li>Keep the superflex position (Q/W/R/T) or go back to QB spot? <a href="voteInfo.php#superflex">More info</a> </li>
+                                    <li>Change waiver settings to be based on standings or use FAB system <a href="voteInfo.php#waivers">More info</a> </li>
                                     <li>Keep 2 IR positions or fewer? <a href="voteInfo.php#ir">More info</a></li>
                                 </ol>
                                 <strong>Determine 2022 draft order</strong><br />
                             
-                                <strong>Draft date: TBD | Location: Sunnyside, WA</strong>
+                                <strong>Draft date: September 5, 2022 | Time: TBD | Location: Sunnyside, WA</strong>
                             </div>
                         </div>
                     </div>

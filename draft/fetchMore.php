@@ -118,6 +118,7 @@
                                     )"
                                 );
                                 while ($row = mysqli_fetch_array($result)) {
+                                    
                                     $btnColor = ($myNextPick == 'Now!') ? 'mine' : 'taken';
                                     $sosColor = ($row['sos'] > 25) ? 'bad' : ($row['sos'] < 7 ? 'good' : '');
                                     $lineColor = ($row['line'] > 25) ? 'bad' : ($row['line'] < 7 ? 'good' : '');

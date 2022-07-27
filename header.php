@@ -8,12 +8,12 @@
 
     <title>Suntown FFB</title>
 
-    <link rel="icon" type="image/png" href="/images/favicon.jpg">
+    <link rel="icon" type="image/png" href="/images/football.ico">
 
     <meta property="og:title" content="Suntown Fantasy Football League" />
     <meta property="og:description" content="The best league in all the land" />
     <meta property="og:url" content="http://suntownffb.us" />
-    <meta property="og:image" content="http://suntownffb.us/images/favicon.jpg" />
+    <meta property="og:image" content="http://suntownffb.us/images/football.ico" />
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-touch-fullscreen" content="yes">

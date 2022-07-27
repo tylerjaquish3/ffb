@@ -101,17 +101,17 @@ include 'sidebar.html';
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">
                                 <ul>
-                                    <li>Waiver Time:	3 days</li>
-                                    <li>Waiver Type:	Continual rolling list</li>
+                                    <li>Waiver Time: 3 days</li>
+                                    <li>Waiver Type: FAB w/ Reverse order of standings tiebreak</li>
                                     <li>Weekly Waivers:	Game Time - Tuesday</li>
                                     <li>Post Draft Players:	Follow Waiver Rules</li>
-                                    <li>Playoffs:	Week 15, 16, and 17 (6 teams)</li>
-                                    <li>Playoff Tie-Breaker:	Best regular season record vs opponent wins</li>
-                                    <li>Playoff Reseeding:	Yes</li>
-                                    <li>Divisions:	No</li>
-                                    <li>Roster Positions:	QB, WR, WR, WR, RB, RB, TE, W/R/T, Q/W/R/T, K, DEF, BN, BN, BN, BN, BN, BN, IR, IR</li>
-                                    <li>Fractional Points:	Yes</li>
-                                    <li>Negative Points:	Yes</li>
+                                    <li>Playoffs: Week 15, 16, and 17 (6 teams)</li>
+                                    <li>Playoff Tie-Breaker: Best regular season record vs opponent wins</li>
+                                    <li>Playoff Reseeding: Yes</li>
+                                    <li>Divisions: No</li>
+                                    <li>Roster Positions: QB, WR, WR, WR, RB, RB, TE, W/R/T, Q/W/R/T, K, DEF, BN, BN, BN, BN, BN, BN, IR, IR</li>
+                                    <li>Fractional Points: Yes</li>
+                                    <li>Negative Points: Yes</li>
                                 </ul>
                             </div>
                         </div>
@@ -123,21 +123,47 @@ include 'sidebar.html';
                 <div class="col-xs-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Meeting Agenda</h4>
+                            <h4>Meeting Agenda | 7.26.2022</h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">
-                                A point of emphasis for all vote elements is that there is no right or wrong, and all decisions shall be made to simply make the league better in general,
-                                not to give any strategies advantages or disadvantages.
                                 <br />
-                                <strong>Vote on the following:</strong>
+                                <strong>Voted on the following:</strong>
                                 <ol>
-                                    <li>Change waiver settings to be based on standings or use FAB system <a href="voteInfo.php#waivers">More info</a> </li>
-                                    <li>Keep 2 IR positions or fewer? <a href="voteInfo.php#ir">More info</a></li>
+                                    <li>Change waiver settings to use FAB system. | <strong>Vote passed to change to FAB system (vote was 6-3).</strong> More info below</li>
+                                    <li>Change number of IR positions or 1 or 0 | <strong>Voted to keep as-is with 2 IR spots (vote was 5-3).</strong></li>
                                 </ol>
-                                <strong>Determine 2022 draft order</strong><br />
+                                <strong>Determined 2022 draft order:</strong><br />
+
+                                <a href="https://www.cameo.com/recipient/62dac9a54baeecb8a4f7d7ce?from_share_sheet=1&utm_campaign=video_share_to_copy">Watch Dean Blandino Video Here</a>
+                                <ol>
+                                    <li>Matt</li>
+                                    <li>AJ</li>
+                                    <li>Cole</li>
+                                    <li>Ben</li>
+                                    <li>Justin</li>
+                                    <li>Cameron</li>
+                                    <li>Gavin</li>
+                                    <li>Andy</li>
+                                    <li>Tyler</li>
+                                    <li>Everett</li>
+                                </ol>
                             
-                                <strong>Draft date: September 5, 2022 | Time: TBD | Location: Sunnyside, WA</strong>
+                                <strong>Draft date: September 5, 2022 | Time: 3pm | Location: Sunnyside, WA</strong>
+                                <br /><br />
+                                FAB info:<br />
+                                <ul>
+                                    <li>In a Free Agents Budgets (FAB) waivers system, each manager receives a dollar amount to place blind offers on waived players throughout the season. 
+                                        The manager with the highest offer at the end of the waiver period claims that player, and that offer amount is deducted from the team's free agent budget for the season. 
+                                    </li>
+                                    <li>If multiple managers place an equal offer on a player, tiebreaker goes by reverse order of standings.</li>
+                                    <li>The FAB system charges you the exact amount you bid if your bid is successful. It will never automatically adjust your bid to beat any other bids by $1.</li>
+                                    <li>Each manager starts the season with a $200 budget.</li>
+                                    <li>FAB does not apply to free-agent pickups. All free agents can be picked up on a first-come, first-served basis, without bids. Just like before, players become free agents after the waiver period ends.</li>
+                                    <li>Minimum bid is $0.</li>
+                                    <li>Just like before, you can update/change/cancel your bid on a player on your team page before they process.</li>
+                                    <li>Waiver deadlines and periods remain the same (Game time - Tuesday).</li>
+                                </ul>
                             </div>
                         </div>
                     </div>

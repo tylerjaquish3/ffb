@@ -18,16 +18,21 @@ include 'sidebar.html';
                             <h4 class="card-title">Continual Rolling List Waivers vs FAB Info</h4>
                         </div>
                         <div class="card-body info-card">
-                            FAB stands for Free Agent Acquisition Budget (Yahoo calls it FAB)<br />
                             In a Free Agents Budgets (FAB) waivers system, each manager receives a dollar amount to place blind offers on waived players throughout the season. 
-                            The manager with the highest offer at the end of the waiver period claims that player, and that offer amount is deducted from the team's free agent budget for the season. If multiple managers place an equal offer on a player, tiebreak options are available as described above.
+                            The manager with the highest offer at the end of the waiver period claims that player, and that offer amount is deducted from the team's free agent budget for the season. If multiple managers place an equal offer on a player, tiebreak options are available.
                             <br />
-                            We could start with any amount of FAB budget, standard is $100 or $200, with the option to also place $0 bids.
+                            <br />
+                            We could start with any amount of FAB budget (standard is $100 or $200) with the option to also place $0 bids.
+                            <br />
                             <br />
                             The benefit to using the FAB system is that it gives everyone a chance to acquire a waiver player, and will be determined by who
-                            is willing to be the most aggressive with their budget.
+                            is willing to be the most aggressive with their budget. The downside is that there may be a learning curve to understanding how much players are worth.
+                            It also makes it harder to predict which managers will land a player versus the system currently in place.
                             <br />
-                            
+                            <br />
+                            Note: waiver periods would not change.
+                            <br />
+                            <br />
                             <b>Proposal:</b> Change the Waiver Priority setting to FAB with reverse order of standings as tiebreak, budget set to $200.
                         </div>
                     </div>
@@ -49,7 +54,8 @@ include 'sidebar.html';
                             It helps managers not have to use bench spots for injured players and therefore have better rosters. <br />
                             The argument against the IR spot is to make managers decide if the injured player is worth stashing (taking up a bench spot) while on IR.
                             This could create more activity for waivers.
-
+                            <br />
+                            <br />
                             <b>Proposal:</b> Change the number of IR spots to 1 or 0.
                         </div>
                     </div>

@@ -123,6 +123,31 @@ include 'sidebar.html';
                 <div class="col-xs-12">
                     <div class="card">
                         <div class="card-header">
+                            <h4>Meeting Agenda | 2023</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block" style="direction: ltr">
+                                <br />
+                                <strong>Vote on the following:</strong>
+                                <ol>
+                                    <li>Keep FAB system. | <strong></strong></li>
+                                    <li>Remove negative kicker points | <strong></strong></li>
+                                    <li>Players on waivers for 2 days vs 3 days | <strong></strong></li>
+                                </ol>
+                                <strong>Determine 2023 draft order: TBD</strong><br />
+                            
+                                <strong>Draft date: TBD | Location: Pasco, WA</strong>
+                                <br /><br />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="card">
+                        <div class="card-header">
                             <h4>Meeting Agenda | 7.26.2022</h4>
                         </div>
                         <div class="card-body">

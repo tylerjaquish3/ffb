@@ -283,7 +283,7 @@ include 'sidebar.html';
                                 </thead>
                                 <tbody>
                                     <?php
-                                    while ($row = mysqli_fetch_array($stats)) { ?>
+                                    while ($row = $stats->fetchArray()) { ?>
                                         <tr>
                                             <td><?php echo $row['manager']; ?></td>
                                             <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>

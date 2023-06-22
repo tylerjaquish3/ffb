@@ -63,7 +63,7 @@ include 'sidebar.html';
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $result = mysqli_query($conn, "SELECT name, IFNULL(pick1, 0) as pick1, IFNULL(pick10, 0) as pick10, adp
+                                    $result = $conn->query("SELECT name, IFNULL(pick1, 0) as pick1, IFNULL(pick10, 0) as pick10, adp
                                         FROM managers
                                         LEFT JOIN (
                                             SELECT COUNT(id) as pick1, manager_id FROM draft
@@ -82,7 +82,7 @@ include 'sidebar.html';
                                         WHERE round = 1
                                         GROUP BY manager_id
                                         ) average ON average.manager_id = managers.id");
-                                    while ($row = mysqli_fetch_array($result)) { ?>
+                                    while ($row = $result->fetchArray()) { ?>
                                         <tr>
                                             <td><?php echo $row['name']; ?></td>
                                             <td><?php echo $row['pick1']; ?></td>

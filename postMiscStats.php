@@ -8,12 +8,12 @@
     </thead>
     <tbody>
         <?php
-        $result = mysqli_query($conn, "SELECT managers.name, AVG(finish) as avg_finish,
+        $result = $conn->query("SELECT managers.name, AVG(finish) as avg_finish,
 			MIN(finish) as highest, MAX(finish) as lowest
 			FROM finishes
 			JOIN managers ON managers.id = finishes.manager_id
 			GROUP BY manager_id");
-        while ($row = mysqli_fetch_array($result)) { ?>
+        while ($row = $result->fetchArray()) { ?>
             <tr>
                 <td><?php echo $row['name']; ?></td>
                 <td><?php echo number_format($row['avg_finish'], 2, '.', ','); ?></td>
@@ -39,8 +39,7 @@
     </thead>
     <tbody>
         <?php
-        $result = mysqli_query(
-            $conn,
+        $result = $conn->query(
             "SELECT name, IFNULL(one_seeds, 0) as one_seeds, IFNULL(two_seeds, 0) as two_seeds, IFNULL(one_seeds, 0)+IFNULL(two_seeds, 0) as total
 	        FROM managers
 	        LEFT JOIN (SELECT COUNT(manager1_id) as one_seeds, manager1_id 
@@ -52,7 +51,7 @@
 	        WHERE (manager1_seed = 2 OR manager2_seed = 2) AND round = 'Semifinal'
 	        GROUP BY manager1_id) two ON managers.id = two.manager1_id"
         );
-        while ($row = mysqli_fetch_array($result)) { ?>
+        while ($row = $result->fetchArray()) { ?>
             <tr>
                 <td><?php echo $row['name']; ?></td>
                 <td><?php echo $row['one_seeds']; ?></td>
@@ -122,11 +121,10 @@
         $currentName = '';
         $name = 'dog';
         $currentStreak = $longestStreak = $appearances = 0;
-        $result = mysqli_query(
-            $conn,
+        $result = $conn->query(
             "SELECT * FROM finishes JOIN managers ON managers.id = finishes.manager_id"
         );
-        while ($row = mysqli_fetch_array($result)) {
+        while ($row = $result->fetchArray()) {
             $currentName = $row['name'];
 
             if ($currentName != $name && $name != 'dog') {
@@ -236,7 +234,7 @@
                 'total' => 0
             ]
         ];
-        $result = mysqli_query($conn, "SELECT name, round, COUNT(name) as num
+        $result = $conn->query("SELECT name, round, COUNT(name) as num
             FROM (
             SELECT year, round, managers.name, manager1_seed, manager2_seed, manager1_score, manager2_score
             FROM playoff_matchups pm
@@ -249,7 +247,7 @@
             WHERE (manager1_seed < manager2_seed) AND manager1_score < manager2_score 
             ) as underdog
             GROUP BY round, name");
-        while ($row = mysqli_fetch_array($result)) {
+        while ($row = $result->fetchArray()) {
 
             if ($row['round'] == 'Final') {
                 $managers[$row['name']]['final'] = $row['num'];
@@ -353,7 +351,7 @@
                 'total' => 0
             ]
         ];
-        $result = mysqli_query($conn, "SELECT name, round, COUNT(name) as num
+        $result = $conn->query("SELECT name, round, COUNT(name) as num
             FROM (
             SELECT year, round, managers.name, manager1_seed, manager2_seed, manager1_score, manager2_score
             FROM playoff_matchups pm
@@ -366,7 +364,7 @@
             WHERE (manager1_seed > manager2_seed) AND manager1_score > manager2_score 
             ) as underdog
             GROUP BY round, name");
-        while ($row = mysqli_fetch_array($result)) {
+        while ($row = $result->fetchArray()) {
 
             if ($row['round'] == 'Final') {
                 $managers[$row['name']]['final'] = $row['num'];
@@ -407,8 +405,7 @@
     </thead>
     <tbody>
         <?php
-        $result = mysqli_query(
-            $conn,
+        $result = $conn->query(
             "SELECT name, ptsTop, ptsBottom, gamest, gamesb
             FROM managers 
             LEFT JOIN (
@@ -421,7 +418,7 @@
             GROUP BY manager2_id
             ) l ON l.manager2_id = managers.id"
         );
-        while ($row = mysqli_fetch_array($result)) {
+        while ($row = $result->fetchArray()) {
 
             $points = $row['ptsTop'] + $row['ptsBottom'];
             $games = $row['gamest'] + $row['gamesb'];
@@ -515,8 +512,8 @@
 				'smallestLoss' => 999
 			]
 		];
-		$result = mysqli_query($conn, "SELECT * FROM playoff_matchups JOIN managers ON manager1_id = managers.id");
-		while ($row = mysqli_fetch_array($result)) { 
+		$result = $conn->query("SELECT * FROM playoff_matchups JOIN managers ON manager1_id = managers.id");
+		while ($row = $result->fetchArray()) { 
 			$diff = abs($row['manager1_score'] - $row['manager2_score']);
 			// if manager won
 			if ($row['manager1_score'] > $row['manager2_score']) {
@@ -529,8 +526,8 @@
 			}
 		}
 
-		$result = mysqli_query($conn, "SELECT * FROM playoff_matchups JOIN managers ON manager2_id = managers.id");
-		while ($row = mysqli_fetch_array($result)) { 
+		$result = $conn->query("SELECT * FROM playoff_matchups JOIN managers ON manager2_id = managers.id");
+		while ($row = $result->fetchArray()) { 
 			$diff = abs($row['manager2_score'] - $row['manager1_score']);
 			// if manager won
 			if ($row['manager2_score'] > $row['manager1_score']) {

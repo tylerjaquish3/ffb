@@ -164,8 +164,7 @@ include 'sidebar.html';
                                     </thead>
                                     <tbody>
                                         <?php
-                                        $result = mysqli_query(
-                                            $conn,
+                                        $result = $conn->query(
                                             "SELECT name, wins, losses, total, wins/total AS win_pct
                                             FROM managers
                                             JOIN (
@@ -183,7 +182,7 @@ include 'sidebar.html';
                                                 GROUP BY manager1_id
                                             ) t ON t.manager1_id = managers.id"
                                         );
-                                        while ($row = mysqli_fetch_array($result)) { ?>
+                                        while ($row = $result->fetchArray()) { ?>
                                             <tr>
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['wins']; ?></td>

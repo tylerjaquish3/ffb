@@ -69,8 +69,7 @@ include 'sidebar.html';
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $result = mysqli_query(
-                                        $conn,
+                                    $result = $conn->query(
                                         "SELECT name, ptsTop, ptsBottom, gamest, gamesb
                                         FROM managers
                                         LEFT JOIN (
@@ -83,7 +82,7 @@ include 'sidebar.html';
                                         GROUP BY manager2_id
                                         ) l ON l.manager2_id = managers.id"
                                     );
-                                    while ($row = mysqli_fetch_array($result)) {
+                                    while ($row = $result->fetchArray()) {
 
                                         $points = $row['ptsTop'] + $row['ptsBottom'];
                                         $games = $row['gamest'] + $row['gamesb'];

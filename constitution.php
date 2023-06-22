@@ -130,13 +130,12 @@ include 'sidebar.html';
                                 <br />
                                 <strong>Vote on the following:</strong>
                                 <ol>
-                                    <li>Keep FAB system. | <strong></strong></li>
-                                    <li>Remove negative kicker points | <strong></strong></li>
-                                    <li>Players on waivers for 2 days vs 3 days | <strong></strong></li>
+                                    <li>Keep FAB system. | <a href="voteInfo.php#fab">Info</a> <strong></strong></li>
+                                    <li>Remove negative kicker points | <a href="voteInfo.php#kicker-points">Info</a> <strong></strong></li>
                                 </ol>
                                 <strong>Determine 2023 draft order: TBD</strong><br />
                             
-                                <strong>Draft date: TBD | Location: Pasco, WA</strong>
+                                <strong>Draft date: 8.27.23 | Location: Pasco, WA</strong>
                                 <br /><br />
                             </div>
                         </div>

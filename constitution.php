@@ -133,7 +133,8 @@ include 'sidebar.html';
                                     <li>Keep FAB system. | <a href="voteInfo.php#fab">Info</a> <strong></strong></li>
                                     <li>Remove negative kicker points | <a href="voteInfo.php#kicker-points">Info</a> <strong></strong></li>
                                 </ol>
-                                <strong>Determine 2023 draft order: TBD</strong><br />
+                                <strong>Determine 2023 draft order: TBD</strong>
+                                <br /><br />
                             
                                 <strong>Draft date: 8.27.23 | Location: Pasco, WA</strong>
                                 <br /><br />
@@ -160,7 +161,7 @@ include 'sidebar.html';
                                 <strong>Determined 2022 draft order:</strong><br />
 
                                 <a href="https://www.cameo.com/recipient/62dac9a54baeecb8a4f7d7ce?from_share_sheet=1&utm_campaign=video_share_to_copy">Watch Dean Blandino Video Here</a>
-                            
+                                <br /><br />
                                 <strong>Draft date: September 5, 2022 | Time: 3pm | Location: Sunnyside, WA</strong>
                                 <br /><br />
                                 FAB info:<br />

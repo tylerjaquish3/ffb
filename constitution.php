@@ -123,7 +123,7 @@ include 'sidebar.html';
                 <div class="col-xs-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Meeting Agenda | 2023</h4>
+                            <h4>Meeting Agenda | 7.26.2023</h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">
@@ -160,18 +160,6 @@ include 'sidebar.html';
                                 <strong>Determined 2022 draft order:</strong><br />
 
                                 <a href="https://www.cameo.com/recipient/62dac9a54baeecb8a4f7d7ce?from_share_sheet=1&utm_campaign=video_share_to_copy">Watch Dean Blandino Video Here</a>
-                                <ol>
-                                    <li>Matt</li>
-                                    <li>AJ</li>
-                                    <li>Cole</li>
-                                    <li>Ben</li>
-                                    <li>Justin</li>
-                                    <li>Cameron</li>
-                                    <li>Gavin</li>
-                                    <li>Andy</li>
-                                    <li>Tyler</li>
-                                    <li>Everett</li>
-                                </ol>
                             
                                 <strong>Draft date: September 5, 2022 | Time: 3pm | Location: Sunnyside, WA</strong>
                                 <br /><br />
@@ -188,6 +176,36 @@ include 'sidebar.html';
                                     <li>Just like before, you can update/change/cancel your bid on a player on your team page before they process.</li>
                                     <li>Waiver deadlines and periods remain the same (Game time - Tuesday).</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Meeting Agenda | 8.3.2021</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block" style="direction: ltr">
+                                <br />
+                                <strong>Voted on the following:</strong>
+                                <ol>
+                                    <li>Include/exclude IDP positions and how many? | <strong>Voted to keep as-is.</strong></li>
+                                    <li>Keep the superflex position (Q/W/R/T) or go back to QB spot? | <strong>Voted to keep as-is.</strong></li>
+                                    <li>Keep 4 IR positions or fewer? | <strong>Voted to change to 2 IR positions.</strong></li>
+                                    <li>Team defense points awarded | <strong>Voted to add points for prop A (yards allowed). Voted to keep prop B (turnover points) as-is.</strong></li>
+                                    <li>Field goal yards per point | <strong>Voted to change to YPP stat category and remove ranges.</strong></li>
+                                    <li>Add license plate frame for loser? | <strong>Voted to make loser sit on a toilet during draft and their team name shall be set by the champion.</strong></li>
+                                    <li>Change to 2 team DEF positions | <strong>Voted to keep as-is.</strong></li>
+                                    <li>Remove Justin from the league | <strong>Voted unanimously.</strong></li>
+                                </ol>
+                                <strong>Determined 2021 draft order</strong><br />
+
+                                <strong>Draft date: September 6, 2021 | Time: 4pm | Location: Spokane Valley, WA</strong>
+                                
                             </div>
                         </div>
                     </div>

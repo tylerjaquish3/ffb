@@ -260,3 +260,7 @@ tr.color-black td {
 .nav-item a {
     color: white;
 }
+
+.navbar-nav .nav-link {
+    padding-top: 0px !important;
+}

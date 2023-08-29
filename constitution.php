@@ -123,20 +123,48 @@ include 'sidebar.html';
                 <div class="col-xs-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Meeting Agenda | 7.26.2023</h4>
+                            <h4>Meeting Agenda | TBD 2024</h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">
                                 <br />
-                                <strong>Vote on the following:</strong>
-                                <ol>
-                                    <li>Keep FAB system. | <a href="voteInfo.php#fab">Info</a> <strong></strong></li>
-                                    <li>Remove negative kicker points | <a href="voteInfo.php#kicker-points">Info</a> <strong></strong></li>
-                                </ol>
-                                <strong>Determine 2023 draft order: TBD</strong>
+                                <strong>Vote on the following: TBD</strong>
+                                <!-- <ol>
+                                    <li>Keep FAB system. | <strong>Voted to keep FAB system as-is (vote was 6-0).</strong></li>
+                                    <li>Remove negative kicker points | <strong>Voted to reduce the negative kicker points to the following (vote was 4-1):</strong><br />
+                                    <ul><li>0-19 yds: -3 pts</li><li>20-29 yds: -2 pts</li><li>30-39 yds: -1 pts</li></ul></li>
+                                </ol> -->
+                                <br /><br />
+                                <strong>Determine 2024 draft order</strong>
                                 <br /><br />
                             
-                                <strong>Draft date: 8.27.23 | Location: Pasco, WA</strong>
+                                <strong>Draft date: TBD | Time: TBD  | Location: Spokane, WA</strong>
+                                <br /><br />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Meeting Agenda | 8.2.2023</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block" style="direction: ltr">
+                                <br />
+                                <strong>Voted on the following:</strong>
+                                <ol>
+                                    <li>Keep FAB system. | <strong>Voted to keep FAB system as-is (vote was 6-0).</strong></li>
+                                    <li>Remove negative kicker points | <strong>Voted to reduce the negative kicker points to the following (vote was 4-1):</strong><br />
+                                    <ul><li>0-19 yds: -3 pts</li><li>20-29 yds: -2 pts</li><li>30-39 yds: -1 pts</li></ul></li>
+                                </ol>
+                                <strong>Determined 2023 draft order (bingo balls determined who picked their draft spot next)</strong>
+                                <br /><br />
+                            
+                                <strong>Draft date: 8.27.23 | Time: 2pm  | Location: Pasco, WA</strong>
                                 <br /><br />
                             </div>
                         </div>
@@ -162,7 +190,7 @@ include 'sidebar.html';
 
                                 <a href="https://www.cameo.com/recipient/62dac9a54baeecb8a4f7d7ce?from_share_sheet=1&utm_campaign=video_share_to_copy">Watch Dean Blandino Video Here</a>
                                 <br /><br />
-                                <strong>Draft date: September 5, 2022 | Time: 3pm | Location: Sunnyside, WA</strong>
+                                <strong>Draft date: 9.5.22 | Time: 3pm | Location: Sunnyside, WA</strong>
                                 <br /><br />
                                 FAB info:<br />
                                 <ul>
@@ -205,7 +233,7 @@ include 'sidebar.html';
                                 </ol>
                                 <strong>Determined 2021 draft order</strong><br />
 
-                                <strong>Draft date: September 6, 2021 | Time: 4pm | Location: Spokane Valley, WA</strong>
+                                <strong>Draft date: 9.6.21 | Time: 4pm | Location: Spokane Valley, WA</strong>
                                 
                             </div>
                         </div>

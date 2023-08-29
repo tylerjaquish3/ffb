@@ -214,10 +214,7 @@ include 'sidebar.html';
             <div class="row">
                 <div class="col-xs-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title">Miscellaneous Stats</h4>
-                        </div>
-                        <div class="card-body down15">
+                        <div class="card-body">
                             <div class="row">
                                 <div class="col-xs-12 col-lg-6 table-padding">
                                     <div class="card-header" style="float: left">

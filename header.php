@@ -52,7 +52,9 @@
         <div class="navbar-wrapper">
             <div class="navbar-header">
                 <ul class="nav navbar-nav">
-                    <li class="nav-item mobile-menu hidden-md-up float-xs-left"><a class="nav-link nav-menu-main menu-toggle hidden-xs"><i class="icon-menu5 font-large-1"></i></a></li>
+                    <li class="nav-item mobile-menu hidden-md-up float-xs-left">
+                        <a class="nav-link nav-menu-main menu-toggle hidden-xs"><i class="icon-menu5 font-large-1"></i></a>
+                    </li>
                     <li class="nav-item tab-size">
                         <a href="/"><h2>Suntown FFB</h2></a>
                     </li>

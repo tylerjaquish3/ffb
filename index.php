@@ -182,7 +182,7 @@ include 'sidebar.html';
                                                 GROUP BY manager1_id
                                             ) t ON t.manager1_id = managers.id"
                                         );
-                                        while ($row = $result->fetchArray()) { ?>
+                                        while ($row = mysqli_fetch_array($result)) { ?>
                                             <tr>
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['wins']; ?></td>

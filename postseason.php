@@ -82,7 +82,7 @@ include 'sidebar.html';
                                         GROUP BY manager2_id
                                         ) l ON l.manager2_id = managers.id"
                                     );
-                                    while ($row = $result->fetchArray()) {
+                                    while ($row = mysqli_fetch_array($result)) {
 
                                         $points = $row['ptsTop'] + $row['ptsBottom'];
                                         $games = $row['gamest'] + $row['gamesb'];

@@ -8,8 +8,8 @@ $versusSet = false;
 if (isset($_GET['id'])) {
 
     $managerName = $_GET['id'];
-    $result = $conn->query("SELECT * FROM managers WHERE name = '" . $managerName . "'");
-    while ($row = $result->fetchArray()) {
+    $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '" . $managerName . "'");
+    while ($row = mysqli_fetch_array($result)) {
         $managerId = $row['id'];
     }
 
@@ -20,8 +20,8 @@ if (isset($_GET['id'])) {
         while( in_array( ($versus = mt_rand(1,10)), [$managerId] ) );
     }
 
-    $result = $conn->query("SELECT * FROM managers WHERE id = '" . $versus . "'");
-    while ($row = $result->fetchArray()) {
+    $result = mysqli_query($conn, "SELECT * FROM managers WHERE id = '" . $versus . "'");
+    while ($row = mysqli_fetch_array($result)) {
         $versusName = $row['name'];
     }
 }
@@ -106,13 +106,13 @@ if (isset($_GET['id'])) {
                             <div class="row">
                                 <div class="col-lg-6 col-xs-12">
                                     <?php
-                                    $result = $conn->query(
+                                    $result = mysqli_query($conn, 
                                         "SELECT * FROM manager_fun_facts mff
                                         JOIN fun_facts ff ON mff.fun_fact_id = ff.id
                                         JOIN managers ON managers.id = mff.manager_id
                                         WHERE is_positive = 1 and manager_id = $managerId"
                                     );
-                                    while ($row = $result->fetchArray()) { 
+                                    while ($row = mysqli_fetch_array($result)) { 
                                         $value = $row['value'];
                                         if (isfloat($row['value']) && isDecimal($row['value'])) {
                                             $value = number_format($row['value'], 2, '.', ',');
@@ -126,13 +126,13 @@ if (isset($_GET['id'])) {
                                 </div>
                                 <div class="col-lg-6 col-xs-12">
                                     <?php
-                                    $result = $conn->query(
+                                    $result = mysqli_query($conn, 
                                         "SELECT * FROM manager_fun_facts mff
                                         JOIN fun_facts ff ON mff.fun_fact_id = ff.id
                                         JOIN managers ON managers.id = mff.manager_id
                                         WHERE is_positive = 0 and manager_id = $managerId"
                                     );
-                                    while ($row = $result->fetchArray()) { 
+                                    while ($row = mysqli_fetch_array($result)) { 
                                         $value = $row['value'];
                                         if (isfloat($row['value']) && isDecimal($row['value'])) {
                                             $value = number_format($row['value'], 2, '.', ',');
@@ -171,7 +171,7 @@ if (isset($_GET['id'])) {
                                     </thead>
                                     <tbody>
                                         <?php
-                                        $result = $conn->query(
+                                        $result = mysqli_query($conn, 
                                             "SELECT name, SUM(CASE
                                                 WHEN manager1_score > manager2_score THEN 1
                                                 ELSE 0
@@ -186,7 +186,7 @@ if (isset($_GET['id'])) {
                                             GROUP BY manager2_id
                                             ORDER BY wins DESC"
                                         );
-                                        while ($row = $result->fetchArray()) { ?>
+                                        while ($row = mysqli_fetch_array($result)) { ?>
                                             <tr>
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['wins']; ?></td>
@@ -205,7 +205,7 @@ if (isset($_GET['id'])) {
                                     </thead>
                                     <tbody>
                                         <?php
-                                        $result = $conn->query(
+                                        $result = mysqli_query($conn, 
                                             "SELECT name, w.wins+w2.wins AS totalWins, l.losses+l2.losses AS totalLosses
                                             FROM managers
                                             JOIN (
@@ -245,7 +245,7 @@ if (isset($_GET['id'])) {
                                             ) l2 ON l2.manager1_id = managers.id
                                             WHERE name != '" . $_GET['id'] . "'"
                                         );
-                                        while ($row = $result->fetchArray()) { ?>
+                                        while ($row = mysqli_fetch_array($result)) { ?>
                                             <tr>
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['totalWins']; ?></td>
@@ -321,7 +321,7 @@ if (isset($_GET['id'])) {
                                     </thead>
                                     <tbody>
                                         <?php
-                                        $result = $conn->query(
+                                        $result = mysqli_query($conn, 
                                             "SELECT d.year,
                                             (SELECT round_pick FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as position,
                                             (SELECT player || ' - ' || position FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as r1_pick,
@@ -332,7 +332,7 @@ if (isset($_GET['id'])) {
                                             FROM draft d
                                             WHERE manager_id = $managerId AND round = 1"
                                         );
-                                        while ($array = $result->fetchArray()) { ?>
+                                        while ($array = mysqli_fetch_array($result)) { ?>
                                             <tr>
                                                 <td><?php echo $array['year']; ?></td>
                                                 <td><?php echo $array['position']; ?></td>
@@ -367,14 +367,14 @@ if (isset($_GET['id'])) {
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $result = $conn->query(
+                                    $result = mysqli_query($conn, 
                                         "SELECT COUNT(round) as times, player FROM draft
                                         WHERE manager_id = $managerId
                                         GROUP BY player
                                         HAVING times > 2
                                         ORDER BY times DESC"
                                     );
-                                    while ($array = $result->fetchArray()) { ?>
+                                    while ($array = mysqli_fetch_array($result)) { ?>
                                         <tr>
                                             <td><?php echo $array['player']; ?></td>
                                             <td><?php echo $array['times']; ?></td>
@@ -393,8 +393,8 @@ if (isset($_GET['id'])) {
                         <div class="card-body" style="background: #fff;">
                             <select id="versus-select">
                                 <?php
-                                $result = $conn->query("SELECT * FROM managers WHERE id != $managerId ORDER BY name ASC");
-                                while ($row = $result->fetchArray()) {
+                                $result = mysqli_query($conn, "SELECT * FROM managers WHERE id != $managerId ORDER BY name ASC");
+                                while ($row = mysqli_fetch_array($result)) {
                                     if ($row['id'] == $versus) {
                                         echo '<option selected value="'.$row['id'].'">'.$row['name'].'</option>';
                                     } else {
@@ -410,18 +410,18 @@ if (isset($_GET['id'])) {
                                         $wins = $losses = $total = $pf = $pa = $ptsAvg = $bigWin = $bigLoss = $postTotal = $postWins = $postLosses = 0;
                                         $closeLoss = -9999;
                                         $closeWin = 9999;
-                                        $result = $conn->query(
+                                        $result = mysqli_query($conn, 
                                             "SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score, winning_manager_id
                                             FROM regular_season_matchups
                                             WHERE manager1_id = $managerId
                                             AND manager2_id = $versus
                                             UNION
-                                            SELECT year, round, manager1_id, manager2_id, manager1_score, manager2_score, IIF(manager1_score > manager2_score, manager1_id, manager2_id)
+                                            SELECT year, round, manager1_id, manager2_id, manager1_score, manager2_score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
                                             FROM playoff_matchups
                                             WHERE (manager1_id = $managerId AND manager2_id = $versus) OR (manager1_id = $versus AND manager2_id = $managerId)
                                             ORDER BY year, week_number DESC"
                                         );
-                                        while ($array = $result->fetchArray()) {
+                                        while ($array = mysqli_fetch_array($result)) {
 
                                             $isPost = (int)$array['week_number'] == 0;
 
@@ -478,7 +478,7 @@ if (isset($_GET['id'])) {
                                         </thead>
                                         <tbody>
                                             <?php
-                                            $result = $conn->query(
+                                            $result = mysqli_query($conn, 
                                                 "SELECT * FROM (
                                                     SELECT year, week_number, manager1_id AS man1, manager2_id AS man2,
                                                     manager1_score AS man1score, manager2_score AS man2score, winning_manager_id
@@ -487,12 +487,12 @@ if (isset($_GET['id'])) {
                                                     AND manager2_id = $versus
                                                 UNION
                                                     SELECT year, round, manager1_id AS man1, manager2_id AS man2,
-                                                    manager1_score AS man1score, manager2_score AS man2score, IIF(manager1_score > manager2_score, manager1_id, manager2_id)
+                                                    manager1_score AS man1score, manager2_score AS man2score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
                                                     FROM playoff_matchups
                                                     WHERE (manager1_id = $managerId AND manager2_id = $versus)
                                                 UNION
                                                     SELECT year, round, manager2_id AS man2, manager1_id AS man1,
-                                                    manager2_score AS man1score, manager1_score AS man2score, IIF(manager1_score > manager2_score, manager1_id, manager2_id)
+                                                    manager2_score AS man1score, manager1_score AS man2score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
                                                     FROM playoff_matchups
                                                     WHERE (manager1_id = $versus AND manager2_id = $managerId)
                                                     ORDER BY YEAR
@@ -500,7 +500,7 @@ if (isset($_GET['id'])) {
                                                 ORDER BY YEAR desc, CASE WHEN (week_number <> '0' AND CAST(week_number AS SIGNED) <> 0) THEN CAST(week_number AS SIGNED) ELSE 9999 END DESC
                                                 "
                                             );
-                                            while ($array = $result->fetchArray()) { ?>
+                                            while ($array = mysqli_fetch_array($result)) { ?>
                                                 <tr class="highlight">
                                                     <td><?php echo $array['year']; ?></td>
                                                     <td><?php echo $array['week_number']; ?></td>

@@ -7,8 +7,8 @@ include 'sidebar.html';
 if (isset($_GET['id'])) {
     $season = $_GET['id'];
 } else {
-    $result = $conn->query("SELECT DISTINCT year FROM finishes ORDER BY year DESC LIMIT 1");
-    while ($row = $result->fetchArray()) {
+    $result = mysqli_query($conn, "SELECT DISTINCT year FROM finishes ORDER BY year DESC LIMIT 1");
+    while ($row = mysqli_fetch_array($result)) {
         $season = $row['year'];
     }
 }
@@ -39,8 +39,8 @@ foreach ($seasonNumbers as $standings) {
                 <div class="col-xs-12">
                     <select id="year-select">
                         <?php
-                        $result = $conn->query("SELECT DISTINCT year FROM finishes ORDER BY year DESC");
-                        while ($row = $result->fetchArray()) {
+                        $result = mysqli_query($conn, "SELECT DISTINCT year FROM finishes ORDER BY year DESC");
+                        while ($row = mysqli_fetch_array($result)) {
                             if ($row['year'] == $season) {
                                 echo '<option selected value="'.$row['year'].'">'.$row['year'].'</option>';
                             } else {

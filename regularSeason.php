@@ -158,8 +158,8 @@ include 'sidebar.html';
                         <h3>When was the last time ... </h3>
                         <select id="manager1-select">
                             <?php
-                            $result = $conn->query("SELECT * FROM managers ORDER BY name ASC");
-                            while ($row = $result->fetchArray()) {
+                            $result = mysqli_query($conn, "SELECT * FROM managers ORDER BY name ASC");
+                            while ($row = mysqli_fetch_array($result)) {
                                 echo '<option value="'.$row['id'].'">'.$row['name'].'</option>';
                             }
                             ?>

@@ -7,19 +7,19 @@ include 'sidebar.html';
 
 // Look up how many weeks of data there are
 $weeks = 0;
-$result = mysqli_query($conn, "SELECT distinct week FROM rosters 
+$result = query("SELECT distinct week FROM rosters 
     WHERE YEAR = $season");
-while ($row = mysqli_fetch_array($result)) {
+while ($row = fetch_array($result)) {
     $weeks++;
 }
 
 // Look up all the actual points
 $posPts = [];
-$result = mysqli_query($conn, "SELECT position, manager, SUM(points) as pts 
+$result = query("SELECT position, manager, SUM(points) as pts 
     FROM rosters 
     WHERE YEAR = $season
     GROUP BY manager, position");
-while ($row = mysqli_fetch_array($result)) {
+while ($row = fetch_array($result)) {
     $posPts[$row['manager']][$row['position']] = round($row['pts'], 1);
 }
 
@@ -84,19 +84,19 @@ function printFinderRow($team, $targets, $pos)
                                     <?php
                                     // Look up all the actual points
                                     $playerPts = [];
-                                    $result = mysqli_query($conn, "SELECT player, SUM(points) as pts FROM rosters 
+                                    $result = query("SELECT player, SUM(points) as pts FROM rosters 
                                         WHERE YEAR = $season
                                         GROUP BY player");
-                                    while ($row = mysqli_fetch_array($result)) {
+                                    while ($row = fetch_array($result)) {
                                         $name = substr($row['player'], 0, strrpos($row['player'], ' '));
                                         $playerPts[$name] = round($row['pts'], 1);
                                     }
 
                                     $targets = [];
-                                    $result = mysqli_query($conn, "SELECT player, proj_points, name, position FROM preseason_rankings pr JOIN draft_selections ds ON ds.ranking_id = pr.id
+                                    $result = query("SELECT player, proj_points, name, position FROM preseason_rankings pr JOIN draft_selections ds ON ds.ranking_id = pr.id
                                         JOIN managers m ON m.id = ds.manager_id
                                         WHERE is_mine = 0");
-                                    while ($row = mysqli_fetch_array($result)) {
+                                    while ($row = fetch_array($result)) {
 
                                         $pts = 0;
                                         if (isset($playerPts[$row['player']])) {
@@ -138,28 +138,28 @@ function printFinderRow($team, $targets, $pos)
                                     <?php
                                     // Look up how many weeks of data there are
                                     $weeks = 0;
-                                    $result = mysqli_query($conn, "SELECT distinct week FROM rosters 
+                                    $result = query("SELECT distinct week FROM rosters 
                                         WHERE YEAR = $season");
-                                    while ($row = mysqli_fetch_array($result)) {
+                                    while ($row = fetch_array($result)) {
                                         $weeks++;
                                     }
 
                                     // Look up all the actual points
                                     $playerPts = [];
-                                    $result = mysqli_query($conn, "SELECT player, SUM(points) as pts FROM rosters 
+                                    $result = query("SELECT player, SUM(points) as pts FROM rosters 
                                         WHERE YEAR = $season
                                         GROUP BY player");
-                                    while ($row = mysqli_fetch_array($result)) {
+                                    while ($row = fetch_array($result)) {
                                         $name = substr($row['player'], 0, strrpos($row['player'], ' '));
                                         $playerPts[$name] = round($row['pts'], 1);
                                     }
 
-                                    $result = mysqli_query($conn, "SELECT player, proj_points, name FROM preseason_rankings pr 
+                                    $result = query("SELECT player, proj_points, name FROM preseason_rankings pr 
                                         JOIN draft_selections ds ON ds.ranking_id = pr.id
                                         JOIN schedule s ON s.manager1_id = 1 AND pr.bye = s.week
                                         JOIN managers m ON m.id = s.manager2_id
                                         WHERE is_mine = 1");
-                                    while ($row = mysqli_fetch_array($result)) {
+                                    while ($row = fetch_array($result)) {
 
                                         $pts = 0;
                                         if (isset($playerPts[$row['player']])) {

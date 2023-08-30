@@ -11,28 +11,30 @@ include 'sidebar.html';
 
         <div class="content-body">
 
-            <div class="row" id="fab">
+            <div class="row" id="new_pos">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">Keep FAB System for Waivers</h4>
+                            <h4 class="card-title">Add an 18th Roster Position</h4>
                         </div>
                         <div class="card-body info-card">
-                            Last year we voted and approved a Free Agents Budgets (FAB) waivers system, each manager receives a dollar amount to place blind offers on waived players throughout the season. 
-                            More information (refresher) of the FAB system can be found on the Constitution page, 2022 Meeting Agenda section.
+                            In order to make the draft more even, it is proposed to add an 18th roster position so there are 18 rounds in the draft. This would
+                            prevent the first pick in the first round from also having the first pick in the last round.
                             <br />
                             <br />
-                            The benefit to using the FAB system is that it gives everyone a chance to acquire a waiver player, and will be determined by who
-                            is willing to be the most aggressive with their budget. The downside is that there may be a learning curve to understanding how much players are worth.
-                            It also makes it harder to predict which managers will land a player versus the system currently in place.
+                            The other question would be what position to add. The two options are an additional Bench position or an additional W/R/T position.
+                            Both proposals would make the free agent pool smaller. Adding a bench spot would allow managers to hold more players, so navigating
+                            bye weeks would be easier. Adding a W/R/T position would make the flex position more valuable and would allow managers to start more
+                            RBs or WRs (most likely), but it would make it harder than it is now to fill your roster with only 6 bench spots.
                             <br />
                             <br />
-                            <b>Proposal:</b> Keep the Waiver Priority setting to FAB with reverse order of standings as tiebreak, budget set to $200.
+                            <b>Proposal A:</b> Add an additional Bench position.<br />
+                            <b>Proposal B:</b> Add an additional W/R/T position.
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row" id="kicker-points">
+            <!-- <div class="row" id="kicker-points">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -61,7 +63,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <!-- <div class="row" id="waivers">
                 <div class="col-sm-12 table-padding">
                     <div class="card">

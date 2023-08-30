@@ -36,14 +36,14 @@
                 $scoreFinal2 = $data[6];
 
                 // look up manager id
-                $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$nameFinal'");
-                while($row = mysqli_fetch_array($result)) 
+                $result = query("SELECT * FROM managers WHERE name = '$nameFinal'");
+                while($row = fetch_array($result)) 
                 {
                     $manager1 = $row['id'];
                 }
 
-                $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$nameFinal2'");
-                while($row = mysqli_fetch_array($result)) 
+                $result = query("SELECT * FROM managers WHERE name = '$nameFinal2'");
+                while($row = fetch_array($result)) 
                 {
                     $manager2 = $row['id'];
                 }
@@ -52,7 +52,7 @@
                     $sql = "INSERT INTO playoff_matchups (year, round, manager1_id, manager2_id, manager1_seed, manager2_seed, manager1_score, manager2_score) 
                     VALUES ($year, 'Final', $manager1, $manager2, $seedFinal, $seedFinal2, $scoreFinal, $scoreFinal2)";
                     var_dump($sql);
-                    mysqli_query($conn, $sql);
+                    query($sql);
                 }
 
                 $nameFinal = '';
@@ -67,14 +67,14 @@
                 $scoreSemi2 = $data[4];
 
                 // look up manager id
-                $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$nameSemi'");
-                while($row = mysqli_fetch_array($result)) 
+                $result = query("SELECT * FROM managers WHERE name = '$nameSemi'");
+                while($row = fetch_array($result)) 
                 {
                     $manager1 = $row['id'];
                 }
 
-                $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$nameSemi2'");
-                while($row = mysqli_fetch_array($result)) 
+                $result = query("SELECT * FROM managers WHERE name = '$nameSemi2'");
+                while($row = fetch_array($result)) 
                 {
                     $manager2 = $row['id'];
                 }
@@ -83,7 +83,7 @@
                     $sql = "INSERT INTO playoff_matchups (year, round, manager1_id, manager2_id, manager1_seed, manager2_seed, manager1_score, manager2_score) 
                     VALUES ($year, 'Semifinal', $manager1, $manager2, $seedSemi, $seedSemi2, $scoreSemi, $scoreSemi2)";
                     var_dump($sql);
-                    mysqli_query($conn, $sql);
+                    query($sql);
                 }
 
                 $nameSemi = '';
@@ -100,14 +100,14 @@
                     $scoreQuarter2 = $data[2];
 
                     // look up manager id
-                    $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$nameQuarter'");
-                    while($row = mysqli_fetch_array($result)) 
+                    $result = query("SELECT * FROM managers WHERE name = '$nameQuarter'");
+                    while($row = fetch_array($result)) 
                     {
                         $manager1 = $row['id'];
                     }
 
-                    $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$nameQuarter2'");
-                    while($row = mysqli_fetch_array($result)) 
+                    $result = query("SELECT * FROM managers WHERE name = '$nameQuarter2'");
+                    while($row = fetch_array($result)) 
                     {
                         $manager2 = $row['id'];
                     }
@@ -116,7 +116,7 @@
                         $sql = "INSERT INTO playoff_matchups (year, round, manager1_id, manager2_id, manager1_seed, manager2_seed, manager1_score, manager2_score) 
                         VALUES ($year, 'Quarterfinal', $manager1, $manager2, $seedQuarter, $seedQuarter2, $scoreQuarter, $scoreQuarter2)";
                         var_dump($sql);
-                        mysqli_query($conn, $sql);
+                        query($sql);
                     }
 
                 }

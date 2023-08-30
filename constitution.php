@@ -128,13 +128,10 @@ include 'sidebar.html';
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">
                                 <br />
-                                <strong>Vote on the following: TBD</strong>
-                                <!-- <ol>
-                                    <li>Keep FAB system. | <strong>Voted to keep FAB system as-is (vote was 6-0).</strong></li>
-                                    <li>Remove negative kicker points | <strong>Voted to reduce the negative kicker points to the following (vote was 4-1):</strong><br />
-                                    <ul><li>0-19 yds: -3 pts</li><li>20-29 yds: -2 pts</li><li>30-39 yds: -1 pts</li></ul></li>
-                                </ol> -->
-                                <br /><br />
+                                <strong>Vote on the following: </strong>
+                                <ol>
+                                    <li>Add an 18th roster position (BN or W/R/T?) | <a href="voteInfo#new_pos">More Info</a><strong></strong></li>
+                                </ol>
                                 <strong>Determine 2024 draft order</strong>
                                 <br /><br />
                             

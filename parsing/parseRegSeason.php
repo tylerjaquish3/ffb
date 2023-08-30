@@ -44,14 +44,14 @@
             $manager2score = $score[1];
 
             // look up manager id
-            $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$manager1name'");
-            while($row = mysqli_fetch_array($result)) 
+            $result = query("SELECT * FROM managers WHERE name = '$manager1name'");
+            while($row = fetch_array($result)) 
             {
                 $manager1 = $row['id'];
             }
 
-            $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$manager2name'");
-            while($row = mysqli_fetch_array($result)) 
+            $result = query("SELECT * FROM managers WHERE name = '$manager2name'");
+            while($row = fetch_array($result)) 
             {
                 $manager2 = $row['id'];
             }
@@ -68,7 +68,7 @@
                 $sql = "INSERT INTO regular_season_matchups (year, week_number, manager1_id, manager2_id, manager1_score, manager2_score, winning_manager_id, losing_manager_id) 
                 VALUES ($year, $week, $manager1, $manager2, $manager1score, $manager2score, $winningManager, $losingManager)";
                 var_dump($sql);
-                mysqli_query($conn, $sql);
+                query($sql);
             }
 
         }

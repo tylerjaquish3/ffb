@@ -46,8 +46,8 @@ if (($handle = fopen("2019draft.csv", "r")) !== FALSE) {
             $round = str_replace('Round ', '', $currentRound);
 
             // look up manager id
-            $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$managername'");
-            while ($row2 = mysqli_fetch_array($result)) {
+            $result = query("SELECT * FROM managers WHERE name = '$managername'");
+            while ($row2 = fetch_array($result)) {
                 $manager = $row2['id'];
             }
 
@@ -55,7 +55,7 @@ if (($handle = fopen("2019draft.csv", "r")) !== FALSE) {
                 $sql = "INSERT INTO draft (year, round, round_pick, overall_pick, manager_id, position, player) 
                     VALUES ($currentYear, $round, $roundPick, $overallPick, $manager, '$position', '$player')";
                 // var_dump($sql);
-                mysqli_query($conn, $sql);
+                query($sql);
             }
         }
 

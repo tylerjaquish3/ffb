@@ -33,8 +33,8 @@ if (($handle = fopen("teamNames.csv", "r")) !== FALSE) {
         if (isset($data[2]) && $data[2] != '') {
 
             // look up manager id
-            $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$managername'");
-            while ($row2 = mysqli_fetch_array($result)) {
+            $result = query("SELECT * FROM managers WHERE name = '$managername'");
+            while ($row2 = fetch_array($result)) {
                 $manager = $row2['id'];
             }
 
@@ -42,7 +42,7 @@ if (($handle = fopen("teamNames.csv", "r")) !== FALSE) {
                 $sql = "INSERT INTO team_names (manager_id, year, name, moves, trades) 
                     VALUES ($manager, $year, '$teamName', $moves, $trades)";
                 // var_dump($sql);
-                mysqli_query($conn, $sql);
+                query($sql);
             }
         }
 

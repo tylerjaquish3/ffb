@@ -32,8 +32,8 @@
                     $finish = $data[$i];
 
                     // look up manager id
-                    $result = mysqli_query($conn, "SELECT * FROM managers WHERE name = '$managername'");
-                    while($row2 = mysqli_fetch_array($result)) 
+                    $result = query("SELECT * FROM managers WHERE name = '$managername'");
+                    while($row2 = fetch_array($result)) 
                     {
                         $manager = $row2['id'];
                     }
@@ -41,7 +41,7 @@
                     if ($year != '' && isset($manager) && $finish != 'x') {
                         $sql = "INSERT INTO finishes (year, manager_id, finish) VALUES ($year, $manager, $finish)";
                         // var_dump($sql);
-                        mysqli_query($conn, $sql);
+                        query($sql);
                     }
                 }
 

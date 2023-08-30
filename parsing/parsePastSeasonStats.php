@@ -37,7 +37,7 @@ if (($handle = fopen("2019_stats.csv", "r")) !== FALSE) {
                 WHERE player = '{$player}'";
 
             // var_dump($sql);die;
-            mysqli_query($conn, $sql);
+            query($sql);
 
         }
 

@@ -28,8 +28,8 @@ if (($handle = fopen("seasonCSV.csv", "r")) !== FALSE) {
 
             $sql = "SELECT * FROM 2019_rosters WHERE manager = '{$manager}' AND week = $week AND roster_spot = '{$rosterSpot}'";
             // var_dump($sql);
-            $rosters = mysqli_query($conn, $sql);
-            while($dbRow = mysqli_fetch_array($rosters)) {
+            $rosters = query($sql);
+            while($dbRow = fetch_array($rosters)) {
 
                 similar_text($dbRow['player'], $player, $perc);
 
@@ -105,7 +105,7 @@ function addOffense($rosterId, $stats, $conn)
         VALUES ($rosterId, $passYds, $passTds, $ints, $rushYds, $rushTds, $receptions, $recYds, $recTds, $fumbles, $fgMade, $patMade,
             $tackles, $tackleAsst, $idpSacks, $idpInt, $idpFum, $defSacks, $defInt, $defFum)";
     // var_dump($sql);
-    mysqli_query($conn, $sql);
+    query($sql);
 }
 
 function addKicker($rosterId, $stats, $conn)
@@ -122,7 +122,7 @@ function addKicker($rosterId, $stats, $conn)
         VALUES ($rosterId, $passYds, $passTds, $ints, $rushYds, $rushTds, $receptions, $recYds, $recTds, $fumbles, $fgMade, $patMade,
             $tackles, $tackleAsst, $idpSacks, $idpInt, $idpFum, $defSacks, $defInt, $defFum)";
     // var_dump($sql);
-    mysqli_query($conn, $sql);
+    query($sql);
 }
 
 function addDefense($rosterId, $stats, $conn)
@@ -140,7 +140,7 @@ function addDefense($rosterId, $stats, $conn)
         VALUES ($rosterId, $passYds, $passTds, $ints, $rushYds, $rushTds, $receptions, $recYds, $recTds, $fumbles, $fgMade, $patMade,
             $tackles, $tackleAsst, $idpSacks, $idpInt, $idpFum, $defSacks, $defInt, $defFum)";
      //var_dump($sql);
-    mysqli_query($conn, $sql);
+    query($sql);
 }
 
 function addIdp($rosterId, $stats, $conn)
@@ -160,5 +160,5 @@ function addIdp($rosterId, $stats, $conn)
         VALUES ($rosterId, $passYds, $passTds, $ints, $rushYds, $rushTds, $receptions, $recYds, $recTds, $fumbles, $fgMade, $patMade,
             $tackles, $tackleAsst, $idpSacks, $idpInt, $idpFum, $defSacks, $defInt, $defFum)";
      //var_dump($sql);
-    mysqli_query($conn, $sql);
+    query($sql);
 }

@@ -22,9 +22,10 @@ include 'sidebar.html';
                                 <thead>
                                     <th>Year</th>
                                     <th>Week</th>
-                                    <th>Manager</th>
-                                    <th>Opponent</th>
-                                    <th>Score</th>
+                                    <th>Manager 1</th>
+                                    <th>Manager 2</th>
+                                    <th>Score 1</th>
+                                    <th>Score 2</th>
                                 </thead>
                                 <tbody>
                                     <?php
@@ -43,7 +44,8 @@ include 'sidebar.html';
                                             } else {
                                                 echo '<td><span class="badge badge-secondary">' . $matchup['manager2'] . '</span></td>';
                                             } ?>
-                                            <td><?php echo $matchup['score']; ?></td>
+                                            <td><?php echo $matchup['score1']; ?></td>
+                                            <td><?php echo $matchup['score2']; ?></td>
                                         </tr>
 
                                     <?php } ?>

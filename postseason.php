@@ -18,7 +18,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Matchups</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-postseason">
+                            <table class="table table-responsive table-striped nowrap full-width" id="datatable-postseason">
                                 <thead>
                                     <th>Year</th>
                                     <th>Round</th>
@@ -79,7 +79,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Records</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-records">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-records">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Quarter Wins</th>

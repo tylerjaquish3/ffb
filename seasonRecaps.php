@@ -322,7 +322,6 @@ foreach ($seasonNumbers as $standings) {
                                             <td><?php echo $draft['name']; ?></td>
                                             <td><?php echo $draft['position']; ?></td>
                                         </tr>
-
                                     <?php }
                                     } ?>
                                 </tbody>
@@ -339,9 +338,10 @@ foreach ($seasonNumbers as $standings) {
                             <table class="table table-responsive table-striped nowrap" id="datatable-regSeason">
                                 <thead>
                                     <th>Week</th>
-                                    <th>Manager</th>
-                                    <th>Opponent</th>
-                                    <th>Score</th>
+                                    <th>Manager 1</th>
+                                    <th>Manager 2</th>
+                                    <th>Score 1</th>
+                                    <th>Score 2</th>
                                 </thead>
                                 <tbody>
                                     <?php
@@ -361,10 +361,48 @@ foreach ($seasonNumbers as $standings) {
                                             } else {
                                                 echo '<td><span class="badge badge-secondary">' . $matchup['manager2'] . '</span></td>';
                                             } ?>
-                                            <td><?php echo $matchup['score']; ?></td>
+                                            <td><?php echo $matchup['score1']; ?></td>
+                                            <td><?php echo $matchup['score2']; ?></td>
                                         </tr>
 
                                     <?php }
+                                    } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 col-xs-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Trades</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive table-striped nowrap full-width" id="datatable-trades">
+                                <thead>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Player</th>
+                                    <th></th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $lastId = null;
+                                    foreach ($trades as $trade) {
+                                        if ($trade['trade_identifier'] != $lastId) {
+                                            echo "<tr class='black-row'><td></td><td></td><td></td><td>".$trade['trade_identifier']."</td></tr>";
+                                        }
+                                        ?>
+                                        <tr>
+                                            <td><?php echo $trade['m1']; ?></td>
+                                            <td><?php echo $trade['m2']; ?></td>
+                                            <td><?php echo $trade['player']; ?></td>
+                                            <td><?php echo $trade['trade_identifier']; ?></td>
+                                        </tr>
+                                    <?php 
+                                        $lastId = $trade['trade_identifier'];
                                     } ?>
                                 </tbody>
                             </table>
@@ -376,9 +414,6 @@ foreach ($seasonNumbers as $standings) {
     </div>
 </div>
 
-<!-- These /divs are added to get the footer aligned properly -->
-</div>
-</div>
 <?php include 'footer.html'; ?>
 
 <style>
@@ -387,6 +422,10 @@ foreach ($seasonNumbers as $standings) {
         font-size: 14px;
         padding: 0px 5px;
         margin-right: 5px;
+    }
+
+    tr.black-row td {
+        background-color: #bdbdbd;
     }
 
 </style>
@@ -431,6 +470,16 @@ foreach ($seasonNumbers as $standings) {
         $('#datatable-draft').DataTable({
             "order": [
                 [1, "asc"]
+            ]
+        });
+        
+        $('#datatable-trades').DataTable({
+            "columnDefs": [{
+                "targets": [3],
+                "visible": false,
+            }],
+            "order": [
+                [3, "desc"]
             ]
         });
     });

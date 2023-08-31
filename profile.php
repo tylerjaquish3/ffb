@@ -163,7 +163,7 @@ if (isset($_GET['id'])) {
                                     <option value="reg">Regular Season</option>
                                     <option value="post">Postseason</option>
                                 </select>
-                                <table class="table table-responsive" id="datatable-regSeason">
+                                <table class="table table-responsive table-striped nowrap" id="datatable-regSeason">
                                     <thead>
                                         <th>Manager</th>
                                         <th>Wins</th>
@@ -197,7 +197,7 @@ if (isset($_GET['id'])) {
                                     </tbody>
                                 </table>
 
-                                <table class="table table-responsive" id="datatable-postseason" style="display:none;">
+                                <table class="table table-responsive table-striped nowrap" id="datatable-postseason" style="display:none;">
                                     <thead>
                                         <th>Manager</th>
                                         <th>Wins</th>
@@ -265,7 +265,7 @@ if (isset($_GET['id'])) {
                             <div class="card-block">
                                 <canvas id="finishesChart" class="height-400"></canvas>
                                 <br />
-                                <table class="table table-responsive" id="datatable-seasons">
+                                <table class="table table-responsive table-striped nowrap" id="datatable-seasons">
                                     <thead>
                                         <th>Year</th>
                                         <th>Team Name</th>
@@ -309,7 +309,7 @@ if (isset($_GET['id'])) {
                         </div>
                         <div class="card-body">
                             <div class="card-block">
-                                <table class="table table-responsive" id="datatable-drafts">
+                                <table class="table table-responsive table-striped nowrap" id="datatable-drafts">
                                     <thead>
                                         <th>Year</th>
                                         <th>Pick #</th>
@@ -360,7 +360,7 @@ if (isset($_GET['id'])) {
                             <h4>Top Drafted Players</h4>
                         </div>
                         <div class="card-body">
-                            <table class="table table-responsive" id="datatable-topPlayers">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-topPlayers">
                                 <thead>
                                     <th>Player</th>
                                     <th>Times Drafted</th>
@@ -405,7 +405,7 @@ if (isset($_GET['id'])) {
                             </select>
                             <div class="row">
                                 <div class="col-xs-12 col-md-4">
-                                    <table class="table table-responsive">
+                                    <table class="table table-responsive table-striped nowrap">
                                     <?php
                                         $wins = $losses = $total = $pf = $pa = $ptsAvg = $bigWin = $bigLoss = $postTotal = $postWins = $postLosses = 0;
                                         $closeLoss = -9999;
@@ -467,7 +467,7 @@ if (isset($_GET['id'])) {
                                 </div>
                                 <div class="col-xs-12 col-md-8">
 
-                                    <table class="table table-responsive" id="datatable-versus">
+                                    <table class="table table-responsive table-striped nowrap" id="datatable-versus">
                                         <thead>
                                             <th>Year</th>
                                             <th>Week</th>

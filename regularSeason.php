@@ -12,7 +12,7 @@ include 'sidebar.html';
 
         <div class="content-body">
             <div class="row">
-                <div class="col-xs-12 col-lg-5 table-padding">
+                <div class="col-xs-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Regular Season Matchups</h4>
@@ -52,7 +52,32 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-lg-7 table-padding">
+                <div class="col-xs-12 col-lg-6 table-padding">
+                    <div class="card-header" style="float: left">
+                        <h4>Regular Season</h4>
+                    </div>
+                    <div style="float: right">
+                        <select id="regMiscStats" class="dropdown">
+                            <option value="1">Win/Lose Streaks</option>
+                            <option value="2">Total Points</option>
+                            <option value="3">Season Points</option>
+                            <option value="4">Average PF/PA</option>
+                            <option value="5">Start Streaks</option>
+                            <option value="6">Win/Loss Margin</option>
+                            <option value="7">Weekly Points</option>
+                            <option value="8">Losses with Top 3 Pts</option>
+                            <option value="9">Wins with Bottom 3 Pts</option>
+                            <option value="10">Record Against Everyone</option>
+                            <option value="11">Draft Positions</option>
+                            <option value="12">Moves/Trades</option>
+                        </select>
+                    </div>
+                    <?php include 'regMiscStats.php'; ?>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Wins By Season</h4>
@@ -194,7 +219,7 @@ include 'sidebar.html';
     $(document).ready(function() {
 
         $('#datatable-regSeason').DataTable({
-            "pageLength": 20,
+            "pageLength": 25,
             "order": [
                 [0, "desc"]
             ]
@@ -389,6 +414,115 @@ include 'sidebar.html';
             "order": [
                 [0, "desc"],
                 [1, "desc"],
+            ]
+        });
+
+        $('#regMiscStats').change(function() {
+            showRegTable($('#regMiscStats').val());
+        });
+
+        function showRegTable(tableId) {
+            for (i = 1; i < 14; i++) {
+                $('#datatable-misc' + i).hide();
+            }
+            $('#datatable-misc' + tableId).show();
+        }
+
+        // Misc tables
+        $('#datatable-misc1').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [1, "desc"]
+            ]
+        });
+        $('#datatable-misc2').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [1, "desc"]
+            ]
+        });
+        $('#datatable-misc3').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [1, "desc"]
+            ]
+        });
+        $('#datatable-misc4').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [3, "desc"]
+            ]
+        });
+        $('#datatable-misc5').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [1, "desc"]
+            ]
+        });
+        $('#datatable-misc6').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [3, "desc"]
+            ]
+        });
+        $('#datatable-misc7').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [1, "desc"]
+            ]
+        });
+        $('#datatable-misc8').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [3, "desc"]
+            ]
+        });
+        $('#datatable-misc9').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [3, "desc"]
+            ]
+        });
+        $('#datatable-misc10').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [3, "desc"]
+            ]
+        });
+        $('#datatable-misc11').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [3, "asc"]
+            ]
+        });
+        $('#datatable-misc12').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [3, "desc"]
             ]
         });
 

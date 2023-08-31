@@ -1,5 +1,5 @@
 <!-- Win/lose streaks -->
-<table class="table" id="datatable-misc1">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc1">
 	<thead>
 		<th>Manager</th>
 		<th>Longest Win Streak</th>
@@ -74,7 +74,7 @@
 	</tfoot>
 </table>
 <!-- Total Points -->
-<table class="table" id="datatable-misc2" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc2" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Points For</th>
@@ -105,7 +105,7 @@
 	</tfoot>
 </table>
 <!-- Season points -->
-<table class="table" id="datatable-misc3" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc3" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Most PF</th>
@@ -143,7 +143,7 @@
 	</tfoot>
 </table>
 <!-- Average PF/PA -->
-<table class="table" id="datatable-misc4" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc4" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Avg PF</th>
@@ -174,7 +174,7 @@
 	</tfoot>
 </table>
 <!-- Start/end streaks -->
-<table class="table" id="datatable-misc5" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc5" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Best Start</th>
@@ -295,7 +295,7 @@
 	</tfoot>
 </table>
 <!-- Win/loss margin -->
-<table class="table" id="datatable-misc6" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc6" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Biggest Win</th>
@@ -330,7 +330,7 @@
 	</tfoot>
 </table>
 <!-- Weekly points -->
-<table class="table" id="datatable-misc7" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc7" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Most PF</th>
@@ -363,7 +363,7 @@
 	</tfoot>
 </table>
 <!-- Losses with Top 3 points -->
-<table class="table" id="datatable-misc8" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc8" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Wks with Top 3 Pts</th>
@@ -462,7 +462,7 @@
 	</tfoot>
 </table>
 <!-- Wins with Bottom 3 points -->
-<table class="table" id="datatable-misc9" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc9" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Wks with Bottom 3 Pts</th>
@@ -561,7 +561,7 @@
 	</tfoot>
 </table>
 <!-- Record against everyone -->
-<table class="table" id="datatable-misc10" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc10" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Wins</th>
@@ -658,7 +658,7 @@
 	</tfoot>
 </table>
 <!-- Draft position -->
-<table class="table" id="datatable-misc11" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc11" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>#1 Picks</th>
@@ -703,7 +703,7 @@
 	</tfoot>
 </table>
 <!-- Moves/trades -->
-<table class="table" id="datatable-misc12" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc12" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Moves</th>

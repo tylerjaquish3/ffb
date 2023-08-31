@@ -55,56 +55,21 @@ include 'sidebar.html';
                     </div>
                 </div>
                 <div class="col-xs-12 col-lg-6 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Points</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table" id="datatable-misc25">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Points</th>
-                                    <th># Matchups</th>
-                                    <th>Average</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    $result = $conn->query(
-                                        "SELECT name, ptsTop, ptsBottom, gamest, gamesb
-                                        FROM managers
-                                        LEFT JOIN (
-                                        SELECT COUNT(id) as gamest, SUM(manager1_score) AS ptsTop, manager1_id FROM playoff_matchups rsm
-                                        GROUP BY manager1_id
-                                        ) w ON w.manager1_id = managers.id
-
-                                        LEFT JOIN (
-                                        SELECT COUNT(id) as gamesb, SUM(manager2_score) AS ptsBottom, manager2_id FROM playoff_matchups rsm
-                                        GROUP BY manager2_id
-                                        ) l ON l.manager2_id = managers.id"
-                                    );
-                                    while ($row = fetch_array($result)) {
-
-                                        $points = $row['ptsTop'] + $row['ptsBottom'];
-                                        $games = $row['gamest'] + $row['gamesb'];
-                                        $average = $points / $games;
-                                        ?>
-                                        <tr>
-                                            <td><?php echo $row['name']; ?></td>
-                                            <td><?php echo number_format($points, 2, '.', ','); ?></td>
-                                            <td><?php echo $games; ?></td>
-                                            <td><?php echo number_format($average, 2, '.', ','); ?></td>
-                                        </tr>
-
-                                    <?php } ?>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan=4>Points scored in postseason matchups</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
+                    <div class="card-header" style="float: left">
+                        <h4>Postseason</h4>
                     </div>
+                    <div style="float: right">
+                        <select id="postMiscStats" class="dropdown">
+                            <option value="20">Average Finish</option>
+                            <option value="21">First Round Byes</option>
+                            <option value="22">Appearances</option>
+                            <option value="23">Underdog Wins</option>
+                            <option value="24">Top Seed Losses</option>
+                            <option value="25">Playoff Points</option>
+                            <option value="26">Win/Loss Margin</option>
+                        </select>
+                    </div>
+                    <?php include 'postMiscStats.php'; ?>
                 </div>
             </div>
             <div class="row">
@@ -156,24 +121,86 @@ include 'sidebar.html';
 <script type="text/javascript">
     $(document).ready(function() {
 
-        $('#datatable-postseason').DataTable({
+        $('#postMiscStats').change(function() {
+            showPostTable($('#postMiscStats').val());
+        });
+
+        function showPostTable(tableId) {
+            for (i = 20; i < 27; i++) {
+                $('#datatable-misc' + i).hide();
+            }
+            $('#datatable-misc' + tableId).show();
+        }
+
+        let postseasonTable = $('#datatable-postseason').DataTable({
             "columnDefs": [{
                 "targets": [5],
                 "visible": false,
                 "searchable": false
             }],
+            "search": {
+                "caseInsensitive": false
+            },
             "order": [
                 [0, "desc"],
                 [5, "desc"]
             ]
         });
 
+        $('#datatable-misc20').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [1, "asc"]
+            ]
+        });
+        $('#datatable-misc21').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [3, "desc"]
+            ]
+        });
+        $('#datatable-misc22').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [1, "desc"]
+            ]
+        });
+        $('#datatable-misc23').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [4, "desc"]
+            ]
+        });
+        $('#datatable-misc24').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [4, "desc"]
+            ]
+        });
         $('#datatable-misc25').DataTable({
             "searching": false,
             "paging": false,
             "info": false,
             "order": [
                 [3, "desc"]
+            ]
+        });
+        $('#datatable-misc26').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [1, "desc"]
             ]
         });
 

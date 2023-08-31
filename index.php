@@ -155,7 +155,7 @@ include 'sidebar.html';
                         </div>
                         <div class="card-body">
                             <div class="position-relative">
-                                <table class="table table-responsive" id="datatable-wins">
+                                <table class="table table-responsive table-striped nowrap" id="datatable-wins">
                                     <thead>
                                         <th>Manager</th>
                                         <th>Wins</th>
@@ -164,8 +164,8 @@ include 'sidebar.html';
                                     </thead>
                                     <tbody>
                                         <?php
-                                        $result = $conn->query(
-                                            "SELECT name, wins, losses, total, wins/total AS win_pct
+                                        $result = query(
+                                            "SELECT name, wins, losses, total, 100.0*wins/total AS win_pct
                                             FROM managers
                                             JOIN (
                                                 SELECT COUNT(manager1_id) AS wins, manager1_id FROM regular_season_matchups rsm
@@ -187,7 +187,7 @@ include 'sidebar.html';
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['wins']; ?></td>
                                                 <td><?php echo $row['losses']; ?></td>
-                                                <td><?php echo number_format($row['win_pct'] * 100, 1) . ' %'; ?></td>
+                                                <td><?php echo number_format($row['win_pct'], 1) . ' %'; ?></td>
                                             </tr>
 
                                         <?php } ?>
@@ -439,7 +439,6 @@ include 'sidebar.html';
                 [1, "desc"]
             ]
         });
-
 
         Chart.defaults.global.defaultFontSize = 9;
         var ctx = $('#postseasonChart');

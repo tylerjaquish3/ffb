@@ -18,7 +18,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Draft Results</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-draft">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-draft">
                                 <thead>
                                     <th>Year</th>
                                     <th>Round</th>
@@ -54,7 +54,7 @@ include 'sidebar.html';
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <!-- Draft position -->
-                            <table class="table" id="datatable-misc11">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-misc11">
                                 <thead>
                                     <th>Manager</th>
                                     <th>#1 Picks</th>

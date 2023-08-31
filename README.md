@@ -3,9 +3,8 @@
 
 # Ideas
 
-- Add dashboard postseason stuff to postseason page?
-- Add dashboard reg season stuff to Regular season page?
-- postseason filter search for Final
+- Profile page, add pie chart for wins vs each opponent
+- Profile page, in grid with all teams and records, highlight the top values for each column
 - players included in trades?
 - Awards page, inaccurate data for 
     - Most Total TDs (current season)

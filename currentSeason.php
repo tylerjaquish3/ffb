@@ -97,7 +97,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Points</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe row-border order-column" id="datatable-currentPoints">
+                            <table class="stripe nowrap row-border order-column" id="datatable-currentPoints">
                                 <thead>
                                     <tr>
                                     <th>Manager</th>
@@ -187,7 +187,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Top Weekly Performers</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe row-border order-column" id="datatable-bestWeek">
+                            <table class="stripe nowrap row-border order-column" id="datatable-bestWeek">
                                 <thead>
                                     <th>Week</th>
                                     <th>Top QB</th>
@@ -267,7 +267,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Stats</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe row-border order-column" id="datatable-currentStats">
+                            <table class="stripe nowrap row-border order-column" id="datatable-currentStats">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Total Yds</th>
@@ -312,7 +312,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Stats Against</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe row-border order-column" id="datatable-statsAgainst">
+                            <table class="stripe nowrap row-border order-column" id="datatable-statsAgainst">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Total Yds</th>
@@ -357,7 +357,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Optimal Lineups</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe row-border order-column" id="datatable-optimal">
+                            <table class="stripe nowrap row-border order-column" id="datatable-optimal">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Opponent</th>
@@ -403,7 +403,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Worst Draft Picks</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-worstDraft">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-worstDraft">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Player</th>
@@ -433,7 +433,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Best Draft Picks</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-bestDraft">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-bestDraft">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Player</th>
@@ -463,7 +463,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Record Against Everyone</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-everyone">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-everyone">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Wins</th>
@@ -494,7 +494,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Points From Draft</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-drafted">
+                            <table class="stripe nowrap row-border order-column" id="datatable-drafted">
                                 <thead>
                                     <th>Manager</th>
                                     <th>All Drafted</th>
@@ -528,7 +528,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Draft Performance</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-draftPerformance">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-draftPerformance">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Pick #</th>
@@ -647,9 +647,14 @@ include 'sidebar.html';
         });
 
         $('#datatable-drafted').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
+            searching: false,
+            paging: false,
+            info: false,
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                left: 1
+            },
             "order": [
                 [1, "desc"]
             ]

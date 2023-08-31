@@ -7,6 +7,7 @@ function query($sql)
     global $conn, $DB_TYPE;
 
     if ($DB_TYPE == 'sqlite') {
+        $sql = str_replace("if(", "iif(", $sql);
         $sql = str_replace("IF(", "IIF(", $sql);
         $sql = str_replace("IF (", "IIF (", $sql);
 
@@ -56,6 +57,7 @@ if ($pageName == 'Regular Season') {
     $winsChart = getWinsChartNumbers();
     $scatterChart = getPointMargins();
     $pfwins = getPfWinsData();
+    $dashboardNumbers = getDashboardNumbers();
 }
 if ($pageName == 'Postseason') {
     $postseasonMatchups = getPostseasonMatchups();
@@ -941,15 +943,15 @@ function getCurrentSeasonBestWeek()
 {
     global $conn, $season;
     $bestWeek = [];
-    $result = query("SELECT week, MAX(IIF(roster_spot='QB', points, NULL)) AS top_qb,
-        MAX(IIF(roster_spot='RB', points, NULL)) AS top_rb,
-        MAX(IIF(roster_spot='WR', points, NULL)) AS top_wr,
-        MAX(IIF(roster_spot='TE', points, NULL)) AS top_te,
-        MAX(IIF(roster_spot='W/R/T', points, NULL)) AS top_wrt,
-        MAX(IIF(roster_spot='Q/W/R/T', points, NULL)) AS top_qwrt,
-        MAX(IIF(roster_spot='K', points, NULL)) AS top_k,
-        MAX(IIF(roster_spot='DEF', points, NULL)) AS top_def,
-        MAX(IIF(roster_spot='BN', points, NULL)) AS top_bn
+    $result = query("SELECT week, MAX(IF(roster_spot='QB', points, NULL)) AS top_qb,
+        MAX(IF(roster_spot='RB', points, NULL)) AS top_rb,
+        MAX(IF(roster_spot='WR', points, NULL)) AS top_wr,
+        MAX(IF(roster_spot='TE', points, NULL)) AS top_te,
+        MAX(IF(roster_spot='W/R/T', points, NULL)) AS top_wrt,
+        MAX(IF(roster_spot='Q/W/R/T', points, NULL)) AS top_qwrt,
+        MAX(IF(roster_spot='K', points, NULL)) AS top_k,
+        MAX(IF(roster_spot='DEF', points, NULL)) AS top_def,
+        MAX(IF(roster_spot='BN', points, NULL)) AS top_bn
         FROM rosters
         WHERE YEAR = $season
         GROUP BY week");

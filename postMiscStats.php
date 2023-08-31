@@ -1,5 +1,5 @@
 <!-- Average finish -->
-<table class="table" id="datatable-misc20">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc20">
     <thead>
         <th>Manager</th>
         <th>Average Finish</th>
@@ -30,7 +30,7 @@
     </tfoot>
 </table>
 <!-- First round byes -->
-<table class="table" id="datatable-misc21" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc21" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>#1 Seed</th>
@@ -68,7 +68,7 @@
     </tfoot>
 </table>
 <!-- Appearances -->
-<table class="table" id="datatable-misc22" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc22" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Appearances</th>
@@ -162,7 +162,7 @@
     </tfoot>
 </table>
 <!-- Underdog wins -->
-<table class="table" id="datatable-misc23" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc23" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Quarterfinal</th>
@@ -279,7 +279,7 @@
     </tfoot>
 </table>
 <!-- Top seed losses -->
-<table class="table" id="datatable-misc24" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc24" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Quarterfinal</th>
@@ -396,7 +396,7 @@
     </tfoot>
 </table>
 <!-- Playoff points -->
-<table class="table" id="datatable-misc25" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc25" style="display:none;">
     <thead>
         <th>Manager</th>
         <th>Points</th>
@@ -440,7 +440,7 @@
     </tfoot>
 </table>
 <!-- Win/loss margin -->
-<table class="table" id="datatable-misc26" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc26" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Biggest Win</th>

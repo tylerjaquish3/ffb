@@ -123,7 +123,7 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                         <div class="card-body">
                             <div class="card-block">
-                                <table class="table table-responsive" id="datatable-standings">
+                                <table class="table table-responsive table-striped nowrap" id="datatable-standings">
                                     <thead>
                                         <th>Rank</th>
                                         <th>Seed</th>
@@ -161,7 +161,7 @@ foreach ($seasonNumbers as $standings) {
                 <div class="col-lg-6 col-xs-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3>Postseason</h3>
+                            <h3>Playoff Bracket</h3>
                         </div>
                         <div class="card-body">
                             <div class="card-block">
@@ -303,7 +303,7 @@ foreach ($seasonNumbers as $standings) {
                             <h4 style="float: right">Draft Results</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-draft">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-draft">
                                 <thead>
                                     <th>Round</th>
                                     <th>Overall Pick</th>
@@ -336,7 +336,7 @@ foreach ($seasonNumbers as $standings) {
                             <h4 style="float: right">Regular Season Matchups</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-regSeason">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-regSeason">
                                 <thead>
                                     <th>Week</th>
                                     <th>Manager</th>

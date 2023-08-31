@@ -97,7 +97,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Points</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column" id="datatable-currentPoints">
+                            <table class="table table-striped nowrap row-border order-column full-width" id="datatable-currentPoints">
                                 <thead>
                                     <tr>
                                     <th>Manager</th>
@@ -187,7 +187,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Top Weekly Performers</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column" id="datatable-bestWeek">
+                            <table class="stripe nowrap row-border order-column full-width" id="datatable-bestWeek">
                                 <thead>
                                     <th>Week</th>
                                     <th>Top QB</th>
@@ -698,15 +698,15 @@ include 'sidebar.html';
 
 <style>
     #datatable-currentStats_wrapper, #datatable-statsAgainst_wrapper {
-        max-width: 1060px;
+        max-width: 1100px;
     }
-    #datatable-currentPoints_wrapper {
+    /* #datatable-currentPoints_wrapper {
         max-width: 820px;
-    }
-    #datatable-bestWeek_wrapper {
+    } */
+    /* #datatable-bestWeek_wrapper {
         max-width: 1395px;
-    }
+    } */
     #datatable-optimal_wrapper {
-        max-width: 1525px;
+        max-width: 1620px;
     }
 </style>

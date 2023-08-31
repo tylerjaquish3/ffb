@@ -71,6 +71,7 @@ if ((strpos($pageName, 'Recap') !== false)) {
     $postseasonMatchups = getPostseasonMatchups();
     $seasonNumbers = getAllNumbersBySeason();
     $draftResults = getDraftResults();
+    $trades = getTrades();
 }
 if ($pageName == 'Current Season') {
     $points = getCurrentSeasonPoints();
@@ -456,13 +457,10 @@ function getSeasonNumbers()
 }
 
 /**
- * Undocumented function
- *
- * @return array
+ * Query for all regular season matchups
  */
 function getRegularSeasonMatchups()
 {
-    global $conn;
     $results = [];
     $prevWeek = $prevYear = 0;
 
@@ -496,7 +494,8 @@ function getRegularSeasonMatchups()
                 'week' => $row['week_number'],
                 'manager1' => $row['m1'],
                 'manager2' => $row['m2'],
-                'score' => $row['manager1_score'] . ' - ' . $row['manager2_score'],
+                'score1' => $row['manager1_score'],
+                'score2' => $row['manager2_score'],
                 'winner' => $winner
             ];
         }
@@ -893,6 +892,41 @@ function getAllNumbersBySeason()
 }
 
 /**
+ * Query for trades based on season selected
+ */
+function getTrades()
+{
+    global $conn;
+    $results = [];
+
+    if (isset($_GET['id'])) {
+        $season = $_GET['id'];
+    } else {
+        $result = query("SELECT DISTINCT year FROM finishes ORDER BY year DESC LIMIT 1");
+        while ($row = fetch_array($result)) {
+            $season = $row['year'];
+        }
+    }
+
+    $result = query("SELECT m.name as m1, l.name as m2, trades.year, player, trade_identifier
+        FROM trades 
+        LEFT JOIN managers m ON trades.manager_from_id = m.id
+        LEFT JOIN (
+            SELECT trades.id, name, manager_to_id, year FROM trades 
+                JOIN managers ON managers.id = trades.manager_to_id
+            ) l ON l.manager_to_id = trades.manager_to_id AND l.id = trades.id
+        WHERE trades.year = $season
+        ORDER BY trade_identifier, m1");
+    while ($row = fetch_array($result)) {
+
+        $results[] = $row;
+        
+    }
+
+    return $results;
+}
+
+/**
  * Undocumented function
  *
  * @return array
@@ -1248,16 +1282,12 @@ function getDraftPoints()
 }
 
 /**
- * Undocumented function
- *
- * @return array
+ * Query and logic for worst draft picks based on points and pick number
  */
 function getWorstDraftPicks()
 {
     global $conn, $season;
     $response = [];
-
-    // query("SET SQL_BIG_SELECTS=1");
 
     $qbMedian = getMedian('qb');
     $wrtMedian = getMedian('wrt');
@@ -1266,12 +1296,26 @@ function getWorstDraftPicks()
     // Don't want to just be above average, but to be a bit worse than that
     $multiplier = .8;
 
+    $traded = [];
+    $trades = query("SELECT player FROM trades WHERE year = $season");
+    while ($row = fetch_array($trades)) {
+        $traded[] = $row['player'];
+    }
+
     $result = query("SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
         JOIN managers ON rosters.manager = managers.name
         JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
         WHERE rosters.YEAR = $season
         GROUP BY manager, overall_pick, rosters.player, draft.position");
     while ($row = fetch_array($result)) {
+
+        $playerName = $row['player'];
+        // remove last word in playername (team)
+        $playerName = substr($playerName, 0, strrpos($playerName, ' '));
+        // If player was traded, skip them
+        if (in_array($playerName, $traded)) {
+            continue;
+        }
 
         if ($row['position'] == 'QB') {
             if ($row['points'] < ($qbMedian*$multiplier) && $row['overall_pick'] < 40) {

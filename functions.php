@@ -1119,12 +1119,10 @@ function getCurrentSeasonStatsAgainst()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getCurrentSeasonTopPerformers()
 {
-    global $conn, $season;
+    global $season;
     $response = [];
 
     $result = query("SELECT * FROM rosters WHERE YEAR = $season ORDER BY points DESC LIMIT 1");
@@ -1219,19 +1217,23 @@ function getCurrentSeasonBestTeamWeek()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getDraftedPoints($dir, $round)
 {
-    global $conn, $season;
+    global $DB_TYPE, $season;
     $response = [];
 
     // query("SET SQL_BIG_SELECTS=1");
 
+    // Need to do different join for sqlite vs mysql
+    $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
+    if ($DB_TYPE == 'mysql') {
+        $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
+    }
+
     $result = query("SELECT rosters.manager, sum(points) as points FROM rosters
         JOIN managers ON rosters.manager = managers.name
-        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
+        $join
         WHERE rosters.year = $season AND roster_spot NOT IN ('BN', 'IR') and draft.round $dir $round
         GROUP BY manager");
 
@@ -1247,22 +1249,26 @@ function getDraftedPoints($dir, $round)
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getDraftPoints()
 {
-    global $conn, $week, $season;
+    global $week, $season, $DB_TYPE;
     $response = [];
 
     $drafted = getDraftedPoints('>', 0);
     $lateRound = getDraftedPoints('>', 9);
     $earlyRound = getDraftedPoints('<', 6);
 
+    // Need to do different join for sqlite vs mysql
+    $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
+    if ($DB_TYPE == 'mysql') {
+        $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
+    }
+
     $retained = [];
     $result = query("SELECT manager, COUNT(rosters.player) as players FROM rosters
         JOIN managers ON rosters.manager = managers.name
-        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
+        $join
         WHERE rosters.year = $season AND WEEK = $week
         GROUP BY manager");
     while ($row = fetch_array($result)) {
@@ -1317,7 +1323,7 @@ function getDraftPoints()
  */
 function getWorstDraftPicks()
 {
-    global $conn, $season;
+    global $DB_TYPE, $season;
     $response = [];
 
     $qbMedian = getMedian('qb');
@@ -1333,9 +1339,15 @@ function getWorstDraftPicks()
         $traded[] = $row['player'];
     }
 
+     // Need to do different join for sqlite vs mysql
+     $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
+     if ($DB_TYPE == 'mysql') {
+         $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
+     }
+
     $result = query("SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
         JOIN managers ON rosters.manager = managers.name
-        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
+        $join
         WHERE rosters.YEAR = $season
         GROUP BY manager, overall_pick, rosters.player, draft.position");
     while ($row = fetch_array($result)) {
@@ -1399,7 +1411,7 @@ function getMedian($pos)
  */
 function getBestDraftPicks()
 {
-    global $season;
+    global $season, $DB_TYPE;
     $response = [];
 
     $qbMedian = getMedian('qb');
@@ -1408,9 +1420,15 @@ function getBestDraftPicks()
     // Don't want to just be above average, but to be a bit better than that
     $multiplier = 1.4;
 
+    // Need to do different join for sqlite vs mysql
+    $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
+    if ($DB_TYPE == 'mysql') {
+        $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
+    }
+
     $result = query("SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
         JOIN managers ON rosters.manager = managers.name
-        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
+        $join
         WHERE rosters.year = $season
         GROUP BY manager, overall_pick, rosters.player, draft.position");
     while ($row = fetch_array($result)) {
@@ -1435,17 +1453,21 @@ function getBestDraftPicks()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getPlayersRetained()
 {
-    global $conn, $week, $season;
+    global $DB_TYPE, $week, $season;
     $response = [];
+
+    // Need to do different join for sqlite vs mysql
+    $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
+    if ($DB_TYPE == 'mysql') {
+        $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
+    }
 
     $result = query("SELECT manager, COUNT(rosters.player) as players FROM rosters
         JOIN managers ON rosters.manager = managers.name
-        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
+        $join
         WHERE rosters.year = $season AND WEEK = $week
         GROUP BY manager");
     while ($row = fetch_array($result)) {
@@ -1500,16 +1522,24 @@ function getRecordAgainstEveryone()
     return $managers;
 }
 
+/**
+ * Undocumented function
+ */
 function getAllDraftedPlayerDetails()
 {
-    global $conn, $season;
+    global $DB_TYPE, $season;
     $response = [];
 
+    // Need to do different join for sqlite vs mysql
+    $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
+    if ($DB_TYPE == 'mysql') {
+        $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
+    }
     $result = query("SELECT rosters.manager, draft.overall_pick, draft.position, draft.round, rosters.player,
         SUM(points) AS points, COUNT(rosters.player) AS GP
         FROM rosters
         JOIN managers ON rosters.manager = managers.name
-        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
+        $join
         WHERE rosters.year = $season AND rosters.roster_spot NOT IN ('BN','IR')
         GROUP BY manager, overall_pick, rosters.player, draft.position, round");
     while ($row = fetch_array($result)) {
@@ -1519,6 +1549,9 @@ function getAllDraftedPlayerDetails()
     return $response;
 }
 
+/**
+ * Undocumented function
+ */
 function getBestRoundPicks()
 {
     $result = getAllDraftedPlayerDetails();

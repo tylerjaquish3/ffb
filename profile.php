@@ -321,14 +321,19 @@ if (isset($_GET['id'])) {
                                     </thead>
                                     <tbody>
                                         <?php
+                                         // Need to do different join for sqlite vs mysql
+                                        $playerPos = "player || ' - ' || position";
+                                        if ($DB_TYPE == 'mysql') {
+                                            $playerPos = "CONCAT(player,' - ',position)";
+                                        }
                                         $result = query(
                                             "SELECT d.year,
                                             (SELECT round_pick FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as position,
-                                            (SELECT player || ' - ' || position FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as r1_pick,
-                                            (SELECT player || ' - ' || position FROM draft WHERE manager_id = $managerId AND round = 2 AND year = d.year) as r2_pick,
-                                            (SELECT player || ' - ' || position FROM draft WHERE manager_id = $managerId AND round = 3 AND year = d.year) as r3_pick,
-                                            (SELECT player || ' - ' || position FROM draft WHERE manager_id = $managerId AND round = 4 AND year = d.year) as r4_pick,
-                                            (SELECT player || ' - ' || position FROM draft WHERE manager_id = $managerId AND round = 5 AND year = d.year) as r5_pick
+                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as r1_pick,
+                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 2 AND year = d.year) as r2_pick,
+                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 3 AND year = d.year) as r3_pick,
+                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 4 AND year = d.year) as r4_pick,
+                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 5 AND year = d.year) as r5_pick
                                             FROM draft d
                                             WHERE manager_id = $managerId AND round = 1"
                                         );

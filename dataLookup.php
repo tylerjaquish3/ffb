@@ -13,8 +13,8 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'standings') {
     $standings = $allYears = [];
     $currYear = null;
 
-    $result = $conn->query("SELECT distinct year FROM regular_season_matchups ORDER BY YEAR DESC");
-    while ($row = $result->fetchArray()) {
+    $result = query("SELECT distinct year FROM regular_season_matchups ORDER BY YEAR DESC");
+    while ($row = fetch_array($result)) {
         $allYears[] = $row['year'];
     }
 
@@ -29,8 +29,8 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'standings') {
             ];
         }
 
-        $result = $conn->query("SELECT * FROM regular_season_matchups WHERE year = $year ORDER BY YEAR DESC, week_number asc");
-        while ($row = $result->fetchArray()) {
+        $result = query("SELECT * FROM regular_season_matchups WHERE year = $year ORDER BY YEAR DESC, week_number asc");
+        while ($row = fetch_array($result)) {
             $week = $row['week_number']; 
         
             // If going to the next week, then store the standings at this point
@@ -115,8 +115,8 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'schedule') {
     $currentYear = date('Y');
 
     $schedule = $allMatchups = [];
-    $result = $conn->query("SELECT * FROM schedule where manager1_id = $manager OR manager2_id = $manager ORDER BY week ASC");
-    while ($row = $result->fetchArray()) {
+    $result = query("SELECT * FROM schedule where manager1_id = $manager OR manager2_id = $manager ORDER BY week ASC");
+    while ($row = fetch_array($result)) {
         if ($row['manager1_id'] == $manager) {
             $schedule[$row['week']]['id'] = $row['manager2_id'];
             $schedule[$row['week']]['name'] = getManagerName($row['manager2_id']);
@@ -151,9 +151,11 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'schedule') {
     die;
 }
 
+/**
+ * Undocumented function
+ */
 function getPoints($manager, $week)
 {
-    global $conn;
     $allPositions = ['QB','RB','RB','WR','WR','WR','TE','W/R/T','Q/W/R/T','K','DEF','BN','BN','BN','BN','BN','BN'];
 
     $myRoster = [];
@@ -162,11 +164,11 @@ function getPoints($manager, $week)
     foreach ($allPositions as $pos) {
         $myRoster[] = [$pos => null];
     }
-    $result = $conn->query(        "SELECT * FROM preseason_rankings
+    $result = query("SELECT * FROM preseason_rankings
         JOIN draft_selections ON preseason_rankings.id = draft_selections.ranking_id
         WHERE manager_id = $manager AND bye != $week ORDER BY pick_number ASC"
     );
-    while ($row = $result->fetchArray()) {
+    while ($row = fetch_array($result)) {
         foreach ($myRoster as $key => &$rosterPos) {
             foreach ($rosterPos as $k => &$pos) {
                 $filled = false;

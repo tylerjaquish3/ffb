@@ -6,6 +6,20 @@ include 'sidebar.html';
 
 ?>
 
+
+<!-- Notice: Undefined offset: 0 in C:\code\ffb\functions.php on line 1140
+
+Notice: Trying to access array offset on value of type null in C:\code\ffb\functions.php on line 1140
+
+Notice: Undefined offset: 0 in C:\code\ffb\functions.php on line 1141
+
+Notice: Trying to access array offset on value of type null in C:\code\ffb\functions.php on line 1141
+
+Notice: Undefined offset: 0 in C:\code\ffb\functions.php on line 1142
+
+Notice: Trying to access array offset on value of type null in -->
+
+
 <div class="app-content content container-fluid">
     <div class="content-wrapper">
         <div class="content-header row"></div>
@@ -283,7 +297,7 @@ include 'sidebar.html';
                                 </thead>
                                 <tbody>
                                     <?php
-                                    while ($row = $stats->fetchArray()) { ?>
+                                    while ($row = fetch_array($stats)) { ?>
                                         <tr>
                                             <td><?php echo $row['manager']; ?></td>
                                             <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>

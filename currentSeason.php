@@ -700,9 +700,9 @@ include 'sidebar.html';
     #datatable-currentStats_wrapper, #datatable-statsAgainst_wrapper {
         max-width: 1100px;
     }
-    /* #datatable-currentPoints_wrapper {
-        max-width: 820px;
-    } */
+    #datatable-drafted_wrapper {
+        max-width: 800px;
+    }
     /* #datatable-bestWeek_wrapper {
         max-width: 1395px;
     } */

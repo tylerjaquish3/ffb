@@ -102,6 +102,18 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Draft Positions</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <canvas id="draftSpotsChart" style="height: 600px"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -125,6 +137,51 @@ include 'sidebar.html';
             "order": [
                 [3, "asc"]
             ]
+        });
+
+        var ctx = $('#draftSpotsChart');
+
+        var years = <?php echo json_encode($draftSpotChart['years']); ?>;
+        var yearLabels = years.split(",");
+        var teams = <?php echo json_encode($draftSpotChart['spot']); ?>;
+        let colors = ["#4f267f","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
+        let x = 0;
+        let dataset = [];
+        for (const [key, value] of Object.entries(teams)) {
+            let obj = {};
+            obj.label = key;
+            obj.data = value.split(",");
+            obj.backgroundColor = 'rgba(39, 125, 161, 0.1)';
+            obj.borderColor = colors[x];
+            obj.fill = false;
+            dataset.push(obj);
+            x++;
+        }
+
+        var data = {
+            labels: yearLabels,
+            datasets: dataset
+        };
+
+        var options = {
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Draft Position',
+                        fontSize: 20
+                    },
+                    ticks: {
+                        reverse: true,
+                    }
+                }]
+            }
+        };
+
+        var myBarChart = new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: options,
         });
 
     });

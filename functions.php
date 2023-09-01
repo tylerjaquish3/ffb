@@ -1344,7 +1344,6 @@ function getWorstDraftPicks()
         // remove last word in playername (team)
         $playerName = substr($playerName, 0, strrpos($playerName, ' '));
 
-        dd($row);
         // If player was traded, skip them
         if (in_array($playerName, $traded)) {
             continue;

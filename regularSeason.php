@@ -206,7 +206,7 @@ include 'sidebar.html';
                         </select><br>
                         <h3>... place?</h3>
                         <br />
-                        <button id="lookup-btn">Search</button>
+                        <button class="btn btn-secondary" id="lookup-btn">Search</button>
                         <br /><br />
                     </div>
                 </div>
@@ -235,11 +235,10 @@ include 'sidebar.html';
         });
 
         var ctx = $("#winsChart");
-
         var years = <?php echo json_encode($winsChart['years']); ?>;
         var yearLabels = years.split(",");
         var teams = <?php echo json_encode($winsChart['wins']); ?>;
-        let colors = ['#F94144', '#F3722C', '#F8961E', '#F9844A', '#F9C74F', '#90BE6D', '#43AA8B', '#4D908E', '#577590', '#277DA1'];
+        let colors = ["#4f267f","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
         let x = 0;
         let dataset = [];
         for (const [key, value] of Object.entries(teams)) {

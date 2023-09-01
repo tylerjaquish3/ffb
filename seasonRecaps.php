@@ -32,7 +32,6 @@ foreach ($seasonNumbers as $standings) {
 
 <div class="app-content content container-fluid">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
 
         <div class="content-body">
             <div class="row">
@@ -414,6 +413,8 @@ foreach ($seasonNumbers as $standings) {
     </div>
 </div>
 
+</div>
+</div>
 <?php include 'footer.html'; ?>
 
 <style>

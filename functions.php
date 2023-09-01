@@ -65,6 +65,7 @@ if ($pageName == 'Postseason') {
 }
 if ($pageName == 'Draft') {
     $draftResults = getDraftResults();
+    $draftSpotChart = getDraftChartNumbers();
 }
 if ((strpos($pageName, 'Recap') !== false)) {
     $regSeasonMatchups = getRegularSeasonMatchups();
@@ -540,12 +541,9 @@ function getSeasonWins()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getWinsChartNumbers()
 {
-    global $conn;
     $response = ['years' => ''];
 
     $result = query("SELECT DISTINCT year FROM finishes");
@@ -589,12 +587,10 @@ function getWinsChartNumbers()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getPointMargins()
 {
-    global $conn, $season;
+    global $season;
     $response = [];
     $priorYear = null;
 
@@ -735,9 +731,11 @@ function getPostseasonMatchups()
     return $results;
 }
 
+/**
+ * Undocumented function
+ */
 function getPostseasonRecord()
 {
-    global $conn;
     $response = [];
 
     $managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
@@ -802,12 +800,9 @@ function getPostseasonRecord()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getDraftResults()
 {
-    global $conn;
     $results = [];
 
     $result = query("SELECT *
@@ -822,13 +817,49 @@ function getDraftResults()
 }
 
 /**
+ * Query draft data for draft position by year chart
+ */
+function getDraftChartNumbers()
+{
+    $response = ['years' => ''];
+
+    $result = query("SELECT DISTINCT year FROM draft ORDER BY year ASC");
+    while ($row = fetch_array($result)) {
+        $response['years'] .= $row['year'].', ';
+    }
+
+    $result = query("SELECT * FROM draft
+        JOIN managers ON managers.id = draft.manager_id
+        WHERE round = 1
+        ORDER BY year ASC");
+    while ($row = fetch_array($result)) {
+        $managerName = $row['name'];
+        $spot = $row['overall_pick'];
+
+        if (!isset($response['spot'][$managerName])) {
+            $response['spot'][$managerName] = '';
+        }
+
+        $response['spot'][$managerName] .= $spot.', ';
+    }
+
+    $response['years'] = rtrim($response['years'], ', ');
+    foreach ($response['spot'] as $team => &$spot) {
+        // Add 2 blank years for andy and cam
+        if ($team == 'Andy' || $team == 'Cameron') {
+            $spot = ', ,'.$spot;
+        }
+        $spot = rtrim($spot, ', ');
+    }
+
+    return $response;
+}
+
+/**
  * Undocumented function
- *
- * @return array
  */
 function getAllNumbersBySeason()
 {
-    global $conn;
     $results = [];
 
     if (isset($_GET['id'])) {
@@ -856,7 +887,7 @@ function getAllNumbersBySeason()
         while ($row2 = fetch_array($result2)) {
             $pf += $row2['manager1_score'];
             $pa += $row2['manager2_score'];
-            if ($row2['manager1_score'] > $row2['manager2_score']) {
+            if ($row2['winning_manager_id'] == $managerId) {
                 $wins++;
             } else {
                 $losses++;
@@ -1312,6 +1343,8 @@ function getWorstDraftPicks()
         $playerName = $row['player'];
         // remove last word in playername (team)
         $playerName = substr($playerName, 0, strrpos($playerName, ' '));
+
+        dd($row);
         // If player was traded, skip them
         if (in_array($playerName, $traded)) {
             continue;
@@ -1340,9 +1373,12 @@ function getWorstDraftPicks()
     return array_slice($response,0,15);
 }
 
+/**
+ * Find the average score by position
+ */
 function getMedian($pos)
 {
-    global $conn, $season, $week;
+    global $season, $week;
 
     $result = query("SELECT position, avg(points) AS points 
         FROM rosters WHERE YEAR = $season
@@ -1361,12 +1397,10 @@ function getMedian($pos)
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getBestDraftPicks()
 {
-    global $conn, $season;
+    global $season;
     $response = [];
 
     $qbMedian = getMedian('qb');

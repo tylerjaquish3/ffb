@@ -12,7 +12,6 @@
     - most championships should be 6
 - Current season, combine players that got traded midseason
 - Draft page, add chart for positions by round?
-- Draft page, add chart for draft position by manager year to year
 
 - draft order based on wives/gfs responses to something?
 

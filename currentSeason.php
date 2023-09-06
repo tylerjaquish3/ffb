@@ -27,7 +27,7 @@ Notice: Trying to access array offset on value of type null in -->
         <div class="content-body">
             <div class="row">
 
-                <div class="col-xs-12 col-lg-4">
+                <div class="col-sm-12 col-lg-4">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -105,7 +105,7 @@ Notice: Trying to access array offset on value of type null in -->
                     </div>
                 </div>
 
-                <div class="col-xs-12 col-lg-8 table-padding">
+                <div class="col-sm-12 col-lg-8 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Points</h4>
@@ -195,7 +195,7 @@ Notice: Trying to access array offset on value of type null in -->
 
             </div>
             <div class="row">
-                <div class="col-xs-12 table-padding">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Top Weekly Performers</h4>
@@ -275,7 +275,7 @@ Notice: Trying to access array offset on value of type null in -->
 
             </div>
             <div class="row">
-                <div class="col-xs-12 table-padding">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Stats</h4>
@@ -320,7 +320,7 @@ Notice: Trying to access array offset on value of type null in -->
             </div>
 
             <div class="row">
-                <div class="col-xs-12 table-padding">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Stats Against</h4>
@@ -365,7 +365,7 @@ Notice: Trying to access array offset on value of type null in -->
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 table-padding">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Optimal Lineups</h4>
@@ -411,7 +411,7 @@ Notice: Trying to access array offset on value of type null in -->
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 col-md-6 col-lg-4">
+                <div class="col-sm-12 col-md-6 col-lg-4">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Worst Draft Picks</h4>
@@ -441,7 +441,7 @@ Notice: Trying to access array offset on value of type null in -->
                     </div>
                 </div>
 
-                <div class="col-xs-12 col-md-6 col-lg-4">
+                <div class="col-sm-12 col-md-6 col-lg-4">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Best Draft Picks</h4>
@@ -471,7 +471,7 @@ Notice: Trying to access array offset on value of type null in -->
                     </div>
                 </div>
 
-                <div class="col-xs-12 col-lg-4">
+                <div class="col-sm-12 col-lg-4">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Record Against Everyone</h4>
@@ -502,7 +502,7 @@ Notice: Trying to access array offset on value of type null in -->
             </div>
             <div class="row">
 
-                <div class="col-xs-12 col-lg-7">
+                <div class="col-sm-12 col-lg-7">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Points From Draft</h4>
@@ -536,7 +536,7 @@ Notice: Trying to access array offset on value of type null in -->
                     </div>
                 </div>
                 
-                <div class="col-xs-12 col-lg-5">
+                <div class="col-sm-12 col-lg-5">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Performance</h4>

@@ -12,7 +12,7 @@ include 'sidebar.html';
 
         <div class="content-body">
             <div class="row">
-                <div class="col-xs-12 col-lg-6 table-padding">
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Matchups</h4>
@@ -54,12 +54,12 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-lg-6 table-padding">
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card-header" style="float: left">
                         <h4>Postseason</h4>
                     </div>
                     <div style="float: right">
-                        <select id="postMiscStats" class="dropdown">
+                        <select id="postMiscStats" class="dropdown form-control">
                             <option value="20">Average Finish</option>
                             <option value="21">First Round Byes</option>
                             <option value="22">Appearances</option>
@@ -73,7 +73,7 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 col-lg-6 table-padding">
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Records</h4>

@@ -12,7 +12,7 @@ include 'sidebar.html';
         <div class="content-body">
             <!-- Statistics -->
             <div class="row">
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -27,7 +27,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -42,7 +42,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -57,7 +57,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -77,69 +77,31 @@ include 'sidebar.html';
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">Trophy</h4>
+                            <h4 class="card-title"><a href="trophy.php">Trophy</a></h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr;">
                             <div class="row">
-                                <div class="col-xs-4">
+                                <div class="col-sm-1"></div>
+                                <div class="col-sm-10">
                                     <div class="row" style="direction: ltr;">
-                                        <div class="col-xs-6"><div class="plaque">2016 CHAMPION<br />COLE BOBOTH</div></div>
-                                        <div class="col-xs-6"><div class="plaque">2014 CHAMPION<br />JUSTIN DIDIER</div></div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-6"><div class="plaque">2017 CHAMPION<br />COLE BOBOTH</div></div>
-                                        <div class="col-xs-6"><div class="plaque">2015 CHAMPION<br />JUSTIN DIDIER</div></div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-4">
-                                    <div class="row">
-                                        <div class="col-xs-6"><div class="plaque">2012 CHAMPION<br />AJ SARTIN</div></div>
-                                        <div class="col-xs-6"><div class="plaque">2010 CHAMPION<br />CAMERON BOBOTH</div></div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-6"><div class="plaque">2013 CHAMPION<br />ANDY STAMSCHROR</div></div>
-                                        <div class="col-xs-6"><div class="plaque">2011 CHAMPION<br />BEN BARDELL</div></div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-4">
-                                    <div class="row">
-                                        <div class="col-xs-6"><div class="plaque">2008 CHAMPION<br />TYLER JAQUISH</div></div>
-                                        <div class="col-xs-6"><div class="plaque">2006 CHAMPION<br />AJ SARTIN</div></div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-6"><div class="plaque">2009 CHAMPION<br />MATT REID</div></div>
-                                        <div class="col-xs-6"><div class="plaque">2007 CHAMPION<br />JUSTIN DIDIER</div></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr />
-                            <div class="row">
-                                <div class="col-xs-4">
-                                    <div class="row" style="direction: ltr;">
-
-                                    </div>
-                                    <div class="row">
-
-                                    </div>
-                                </div>
-                                <div class="col-xs-4">
-                                    <div class="row">
-                                        <div class="col-xs-6"></div>
-                                        <div class="col-xs-6"><div class="plaque">2022 CHAMPION<br />JUSTIN DIDIER</div></div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-6"></div>
-                                        <div class="col-xs-6"></div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-4">
-                                    <div class="row">
-                                        <div class="col-xs-6"><div class="plaque">2020 CHAMPION<br />MATT REID</div></div>
-                                        <div class="col-xs-6"><div class="plaque">2018 CHAMPION<br />JUSTIN DIDIER</div></div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-6"><div class="plaque">2021 CHAMPION<br />JUSTIN DIDIER</div></div>
-                                        <div class="col-xs-6"><div class="plaque">2019 CHAMPION<br />CAMERON BOBOTH</div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2008">2008 CHAMPION<br />TYLER JAQUISH</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2007">2007 CHAMPION<br />JUSTIN DIDIER</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2006">2006 CHAMPION<br />AJ SARTIN</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2011">2011 CHAMPION<br />BEN BARDELL</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2010">2010 CHAMPION<br />CAMERON BOBOTH</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2009">2009 CHAMPION<br />MATT REID</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2014">2014 CHAMPION<br />JUSTIN DIDIER</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2013">2013 CHAMPION<br />ANDY STAMSCHROR</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2012">2012 CHAMPION<br />AJ SARTIN</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2017">2017 CHAMPION<br />COLE BOBOTH</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2016">2016 CHAMPION<br />COLE BOBOTH</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2015">2015 CHAMPION<br />JUSTIN DIDIER</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2020">2020 CHAMPION<br />MATT REID</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2019">2019 CHAMPION<br />CAMERON BOBOTH</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2018">2018 CHAMPION<br />JUSTIN DIDIER</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="currentSeason.php">2023 CHAMPION<br />TBD</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2022">2022 CHAMPION<br />JUSTIN DIDIER</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2021">2021 CHAMPION<br />JUSTIN DIDIER</a></div></div>
                                     </div>
                                 </div>
                             </div>
@@ -148,10 +110,10 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-xl-4 col-xs-12 table-padding">
+                <div class="col-xl-4 col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">Regular Season Record</h4>
+                            <h4 class="card-title"><a href="regularSeason.php">Regular Season Record</a></h4>
                         </div>
                         <div class="card-body">
                             <div class="position-relative">
@@ -197,10 +159,10 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-8 col-xs-12 table-padding">
+                <div class="col-xl-8 col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">Postseason</h4>
+                            <h4 class="card-title"><a href="postseason.php">Postseason</a></h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block">
@@ -212,16 +174,16 @@ include 'sidebar.html';
             </div>
 
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-xs-12 col-lg-6 table-padding">
+                                <div class="col-sm-12 col-lg-6 table-padding">
                                     <div class="card-header" style="float: left">
-                                        <h4>Postseason</h4>
+                                        <h4><a href="postseason.php">Postseason Stats</a></h4>
                                     </div>
                                     <div style="float: right">
-                                        <select id="postMiscStats" class="dropdown">
+                                        <select id="postMiscStats" class="dropdown form-control">
                                             <option value="20">Average Finish</option>
                                             <option value="21">First Round Byes</option>
                                             <option value="22">Appearances</option>
@@ -233,12 +195,12 @@ include 'sidebar.html';
                                     </div>
                                     <?php include 'postMiscStats.php'; ?>
                                 </div>
-                                <div class="col-xs-12 col-lg-6 table-padding">
+                                <div class="col-sm-12 col-lg-6 table-padding">
                                     <div class="card-header" style="float: left">
-                                        <h4>Regular Season</h4>
+                                        <h4><a href="regularSeason.php">Regular Season Stats</a></h4>
                                     </div>
                                     <div style="float: right">
-                                        <select id="regMiscStats" class="dropdown">
+                                        <select id="regMiscStats" class="dropdown form-control">
                                             <option value="1">Win/Lose Streaks</option>
                                             <option value="2">Total Points</option>
                                             <option value="3">Season Points</option>
@@ -450,7 +412,8 @@ include 'sidebar.html';
                 datasets: [{
                         label: 'Playoff Appearances',
                         data: <?php echo json_encode($postseasonChart['appearances']); ?>,
-                        backgroundColor: '#04015d'
+                        // backgroundColor: '#04015d'
+                        backgroundColor: '#297eff'
                     },
                     {
                         label: 'Championship Appearances',
@@ -459,7 +422,8 @@ include 'sidebar.html';
                     {
                         label: 'Championship Wins',
                         data: <?php echo json_encode($postseasonChart['ships']); ?>,
-                        backgroundColor: '#2eff37'
+                        // backgroundColor: '#2eff37'
+                        backgroundColor: '#2eb82e'
                     }
                 ]
             },

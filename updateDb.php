@@ -12,7 +12,7 @@ include 'sidebar.html';
 
         <div class="content-body">
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h3>SQL Inserts</h3>

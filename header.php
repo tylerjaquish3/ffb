@@ -24,28 +24,25 @@
     <link rel="stylesheet" type="text/css" href="assets/icomoon.css">
     <link rel="stylesheet" type="text/css" href="assets/flag-icon.min.css">
     <link rel="stylesheet" type="text/css" href="assets/pace.css">
-    <!-- END VENDOR CSS-->
+
     <!-- BEGIN ROBUST CSS-->
     <link rel="stylesheet" type="text/css" href="assets/bootstrap-extended.min.css">
     <link rel="stylesheet" type="text/css" href="assets/app.min.css">
     <link rel="stylesheet" type="text/css" href="assets/colors.min.css">
     <link rel="stylesheet" type="text/css" href="assets/custom-rtl.min.css">
-    <!-- END ROBUST CSS-->
+
     <!-- BEGIN Page Level CSS-->
     <link rel="stylesheet" type="text/css" href="assets/vertical-menu.min.css">
     <link rel="stylesheet" type="text/css" href="assets/vertical-overlay-menu.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/palette-gradient.min.css">
-    <!-- END Page Level CSS-->
-    <!-- BEGIN Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="assets/style-rtl.css">
-    <!-- END Custom CSS-->
-    <link href="assets/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="assets/owl.carousel.min.css">
+
+    <link rel="stylesheet" type="text/css" href="assets/datatables.min.css">
     <link rel="stylesheet" type="text/css" href="assets/suntown.css">
     <link rel="stylesheet" type="text/css" href="assets/responsive.css">
 
 </head>
 
-<body data-open="click" data-menu="vertical-menu" data-col="2-columns" class="vertical-layout vertical-menu 2-columns  fixed-navbar">
+<body data-open="click" data-menu="vertical-menu" data-col="2-columns" class="vertical-layout vertical-menu 2-columns fixed-navbar">
 
     <!-- navbar-fixed-top-->
     <nav class="header-navbar navbar navbar-with-menu navbar-fixed-top navbar-semi-dark navbar-shadow">
@@ -61,7 +58,11 @@
                     <li class="nav-item tab-size-alt">
                         <a href="/"><h2>FFB</h2></a>
                     </li>
-                    <li class="nav-item hidden-md-up float-xs-right"><a data-toggle="collapse" data-target="#navbar-mobile" class="nav-link open-navbar-container"><i class="icon-ellipsis pe-2x icon-icon-rotate-right-right"></i></a></li>
+                    <li class="nav-item hidden-md-up float-xs-right">
+                        <a data-toggle="collapse" data-target="#navbar-mobile" class="nav-link open-navbar-container">
+                            <i class="icon-ellipsis pe-2x icon-icon-rotate-right-right"></i>
+                        </a>
+                    </li>
                 </ul>
             </div>
             <div class="navbar-container content container-fluid">

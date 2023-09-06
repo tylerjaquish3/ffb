@@ -65,7 +65,7 @@ function printFinderRow($team, $targets, $pos)
         <div class="content-body">
             <div class="row">
 
-                <div class="col-xs-12 col-md-6 table-padding">
+                <div class="col-sm-12 col-md-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Players to Target</h4>
@@ -119,7 +119,7 @@ function printFinderRow($team, $targets, $pos)
                     </div>
                 </div>
 
-                <div class="col-xs-12 col-md-6 table-padding">
+                <div class="col-sm-12 col-md-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>My Trade Candidates</h4>
@@ -176,7 +176,7 @@ function printFinderRow($team, $targets, $pos)
                     </div>
                 </div>
 
-                <div class="col-xs-12 col-md-6 table-padding">
+                <div class="col-sm-12 col-md-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Points by Position</h4>
@@ -205,7 +205,7 @@ function printFinderRow($team, $targets, $pos)
                     </div>
                 </div>
 
-                <div class="col-xs-12 table-padding">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Trade Finder</h4>

@@ -13,7 +13,7 @@ include 'sidebar.html';
         <div class="content-body">
 
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4>League Info</h4>
@@ -45,7 +45,7 @@ include 'sidebar.html';
             </div>
 
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4>Draft</h4>
@@ -68,7 +68,7 @@ include 'sidebar.html';
             </div>
 
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4>League Rules</h4>
@@ -93,7 +93,7 @@ include 'sidebar.html';
             </div>
 
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4>League Settings</h4>
@@ -120,7 +120,7 @@ include 'sidebar.html';
             </div>
 
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4>Meeting Agenda | TBD 2024</h4>
@@ -144,7 +144,7 @@ include 'sidebar.html';
             </div>
 
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4>Meeting Agenda | 8.2.2023</h4>
@@ -170,7 +170,7 @@ include 'sidebar.html';
             </div>
 
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4>Meeting Agenda | 7.26.2022</h4>
@@ -209,7 +209,7 @@ include 'sidebar.html';
             </div>
             
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4>Meeting Agenda | 8.3.2021</h4>

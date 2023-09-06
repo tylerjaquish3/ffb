@@ -1,5 +1,5 @@
     <div class="footer">
-        v2.0.3 (9/6/23)
+        <?php echo $version.' '.$vDate; ?>
     </div>
     
     <!-- BEGIN VENDOR JS-->

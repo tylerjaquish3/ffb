@@ -549,7 +549,7 @@ if (isset($_GET['id'])) {
     </div>
 </div>
 
-<?php include 'footer.html'; ?>
+<?php include 'footer.php'; ?>
 
 <script type="text/javascript">
     $(document).ready(function() {

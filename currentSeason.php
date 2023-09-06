@@ -572,7 +572,7 @@ Notice: Trying to access array offset on value of type null in -->
     </div>
 </div>
 
-<?php include 'footer.html'; ?>
+<?php include 'footer.php'; ?>
 
 <script src="/assets/dataTables-fixedColumns.min.js" type="text/javascript"></script>
 

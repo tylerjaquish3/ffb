@@ -259,7 +259,7 @@ function printFinderRow($team, $targets, $pos)
     </div>
 </div>
 
-<?php include 'footer.html'; ?>
+<?php include 'footer.php'; ?>
 
 <script type="text/javascript">
 

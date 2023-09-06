@@ -13,7 +13,7 @@ include 'sidebar.html';
         <div class="content-body">
 
             <div class="row">
-                <div class="col-xs-12 table-padding">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">Fun Facts</h4>
@@ -25,14 +25,14 @@ include 'sidebar.html';
                                 $result = query("SELECT * FROM managers WHERE id = $x");
                                 while ($row = fetch_array($result)) {
                                     echo '<div class="row">
-                                            <div class="col-xs-12 text-center">
-                                                <h4>'.$row['name'].'</h4>
+                                            <div class="col-sm-12 text-center">
+                                                <h4><a href="profile.php?id='.$row['name'].'">'.$row['name'].'</a></h4>
                                             </div>
                                         </div>
                                         <div class="row">';
                                 }
                             ?>
-                                <div class="col-lg-6 col-xs-12">
+                                <div class="col-lg-6 col-sm-12">
                                     <?php
                                         $result = query( 
                                             "SELECT * FROM manager_fun_facts mff
@@ -45,7 +45,7 @@ include 'sidebar.html';
                                             if (isfloat($row['value']) && isDecimal($row['value'])) {
                                                 $value = number_format($row['value'], 2, '.', ',');
                                             } ?>
-                                            <div class="col-xs-6 award good">
+                                            <div class="col-sm-6 award good">
                                                 <strong><?php echo $row['fact']; ?> </strong><br />
                                                 <?php echo $value; ?> <br />
                                                 <?php echo $row['note']; ?>
@@ -54,7 +54,7 @@ include 'sidebar.html';
 
                                     ?>
                                 </div>
-                                <div class="col-lg-6 col-xs-12">
+                                <div class="col-lg-6 col-sm-12">
                                     <?php
                                         $result = query(
                                             "SELECT * FROM manager_fun_facts mff
@@ -67,7 +67,7 @@ include 'sidebar.html';
                                             if (isfloat($row['value']) && isDecimal($row['value'])) {
                                                 $value = number_format($row['value'], 2, '.', ',');
                                             } ?>
-                                            <div class="col-xs-6 award bad">
+                                            <div class="col-sm-6 award bad">
                                                 <strong><?php echo $row['fact']; ?> </strong><br />
                                                 <?php echo $value; ?> <br />
                                                 <?php echo $row['note']; ?>

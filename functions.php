@@ -1039,15 +1039,9 @@ function getCurrentSeasonBestWeek()
 
 /**
  * Undocumented function
- *
- * @param [type] $week
- * @param [type] $pts
- * @param [type] $pos
- * @return array
  */
 function queryBestWeekPlayer($week, $pts, $pos)
 {
-    global $conn;
     $response = [];
 
     $result = query("SELECT * FROM rosters WHERE week = $week AND points = $pts and roster_spot = '$pos'");
@@ -1064,8 +1058,6 @@ function queryBestWeekPlayer($week, $pts, $pos)
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getCurrentSeasonStatsAgainst()
 {
@@ -1185,8 +1177,6 @@ function getCurrentSeasonTopPerformers()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getCurrentSeasonBestTeamWeek()
 {

@@ -35,7 +35,7 @@ if (isset($_GET['id'])) {
         <div class="content-body">
             <!-- Headline Statistics -->
             <div class="row">
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -50,7 +50,7 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -65,7 +65,7 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -80,7 +80,7 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -100,11 +100,11 @@ if (isset($_GET['id'])) {
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">Awards</h4>
+                            <h4 class="card-title"><a href="awards.php">Awards</a></h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr;">
                             <div class="row">
-                                <div class="col-lg-6 col-xs-12">
+                                <div class="col-lg-6 col-sm-12">
                                     <?php
                                     $result = query(
                                         "SELECT * FROM manager_fun_facts mff
@@ -117,14 +117,14 @@ if (isset($_GET['id'])) {
                                         if (isfloat($row['value']) && isDecimal($row['value'])) {
                                             $value = number_format($row['value'], 2, '.', ',');
                                         } ?>
-                                        <div class="col-xs-6 award good">
+                                        <div class="col-sm-6 award good">
                                             <strong><?php echo $row['fact']; ?> </strong><br />
                                             <?php echo $value; ?> <br />
                                             <?php echo $row['note']; ?>
                                         </div>
                                     <?php } ?>
                                 </div>
-                                <div class="col-lg-6 col-xs-12">
+                                <div class="col-lg-6 col-sm-12">
                                     <?php
                                     $result = query(
                                         "SELECT * FROM manager_fun_facts mff
@@ -137,7 +137,7 @@ if (isset($_GET['id'])) {
                                         if (isfloat($row['value']) && isDecimal($row['value'])) {
                                             $value = number_format($row['value'], 2, '.', ',');
                                         } ?>
-                                        <div class="col-xs-6 award bad">
+                                        <div class="col-sm-6 award bad">
                                             <strong><?php echo $row['fact']; ?> </strong><br />
                                             <?php echo $value; ?> <br />
                                             <?php echo $row['note']; ?>
@@ -152,13 +152,13 @@ if (isset($_GET['id'])) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-xl-4 col-lg-12">
+                <div class="col-sm-12 col-md-3">
                     <div class="card">
+                        <div class="card-header">
+                            <h3>Record vs. Opponent</h3>
+                        </div>
                         <div class="card-body">
                             <div class="position-relative">
-                                <div class="card-header">
-                                    <h3>Record vs. Opponent</h3>
-                                </div>
                                 <select id="oppRecordSelector" class="dropdown">
                                     <option value="reg">Regular Season</option>
                                     <option value="post">Postseason</option>
@@ -259,8 +259,11 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-8 col-lg-12 table-padding">
+                <div class="col-sm-12 col-md-9 table-padding">
                     <div class="card">
+                    <div class="card-header">
+                            <h3>Seasons</h3>
+                        </div>
                         <div class="card-body">
                             <div class="card-block">
                                 <canvas id="finishesChart" class="height-400"></canvas>
@@ -302,10 +305,10 @@ if (isset($_GET['id'])) {
             </div>
 
             <div class="row">
-                <div class="col-xs-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Drafts</h4>
+                            <h4><a href="draft.php">Drafts</a></h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block">
@@ -359,10 +362,10 @@ if (isset($_GET['id'])) {
             </div>
 
             <div class="row">
-                <div class="col-xs-12 col-lg-4">
+                <div class="col-sm-12 col-lg-4">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Top Drafted Players</h4>
+                            <h4><a href="draft.php">Top Drafted Players</a></h4>
                         </div>
                         <div class="card-body">
                             <table class="table table-responsive table-striped nowrap" id="datatable-topPlayers">
@@ -390,26 +393,33 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-lg-8" id="versus">
+                <div class="col-sm-12 col-lg-8" id="versus">
                     <div class="card">
                         <div class="card-header">
                             <h4>Head to Head</h4>
                         </div>
-                        <div class="card-body" style="background: #fff;">
-                            <select id="versus-select">
-                                <?php
-                                $result = query("SELECT * FROM managers WHERE id != $managerId ORDER BY name ASC");
-                                while ($row = fetch_array($result)) {
-                                    if ($row['id'] == $versus) {
-                                        echo '<option selected value="'.$row['id'].'">'.$row['name'].'</option>';
-                                    } else {
-                                        echo '<option value="'.$row['id'].'">'.$row['name'].'</option>';
-                                    }
-                                }
-                                ?>
-                            </select>
+                        <div class="card-body" style="direction: ltr;">
                             <div class="row">
-                                <div class="col-xs-12 col-md-4">
+                                <div class="col-sm-12 col-md-4 d-md-none">
+                                    <h5 style="text-align: center;">Choose Opponent</h5>
+                                </div>
+                                <div class="col-sm-12 col-md-4">
+                                    <select id="versus-select" class="form-control w-50">
+                                        <?php
+                                        $result = query("SELECT * FROM managers WHERE id != $managerId ORDER BY name ASC");
+                                        while ($row = fetch_array($result)) {
+                                            if ($row['id'] == $versus) {
+                                                echo '<option selected value="'.$row['id'].'">'.$row['name'].'</option>';
+                                            } else {
+                                                echo '<option value="'.$row['id'].'">'.$row['name'].'</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-4">
                                     <table class="table table-responsive table-striped nowrap">
                                     <?php
                                         $wins = $losses = $total = $pf = $pa = $ptsAvg = $bigWin = $bigLoss = $postTotal = $postWins = $postLosses = 0;
@@ -470,7 +480,7 @@ if (isset($_GET['id'])) {
                                     </table>
 
                                 </div>
-                                <div class="col-xs-12 col-md-8">
+                                <div class="col-sm-12 col-md-8">
 
                                     <table class="table table-responsive table-striped nowrap" id="datatable-versus">
                                         <thead>
@@ -641,7 +651,8 @@ if (isset($_GET['id'])) {
                 datasets: [{
                     label: 'Finish',
                     data: finishData,
-                    borderColor: '#2eff37',
+                    // borderColor: '#2eff37',
+                    borderColor: '#2eb82e',
                 }]
             },
             options: {

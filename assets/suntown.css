@@ -1,9 +1,11 @@
 html body {
-    background-color: #04015d;
+    /* background-color: #04015d; */
+    background-color: #297eff;
 }
 
 .header-navbar.navbar-semi-dark .navbar-header {
-    background-color: #04015d;
+    /* background-color: #04015d; */
+    background-color: #297eff;
     color: #fff;
 }
 
@@ -18,7 +20,8 @@ div#navbar-mobile {
 .main-menu.menu-dark .navigation,
 .main-menu.menu-dark,
 .main-menu.menu-dark .navigation > li.open > ul {
-    background-color: #2eff37;
+    /* background-color: #2eff37; */
+    background-color: #2eb82e;
 }
 
 .main-menu.menu-dark .navigation li a {
@@ -28,7 +31,8 @@ div#navbar-mobile {
 .main-menu.menu-dark .navigation > li:hover > a,
 .main-menu.menu-dark .navigation > li.open .hover > a,
 .main-menu.menu-dark .navigation > li.open > a {
-    background-color: #04015d;
+    /* background-color: #04015d; */
+    background-color: #297eff;
 }
 
 body.vertical-layout.vertical-menu.menu-collapsed
@@ -45,11 +49,13 @@ body.vertical-layout.vertical-menu.menu-collapsed
     a.menu-title,
 .main-menu.menu-dark .navigation > li > ul,
 .main-menu.menu-dark ul.menu-popout {
-    background-color: #04015d;
+    /* background-color: #04015d; */
+    background-color: #297eff;
 }
 
 .bg-green-ffb {
-    background-color: #2eff37 !important;
+    /* background-color: #2eff37 !important; */
+    background-color: #2eb82e !important;
     color: #000 !important;
 }
 
@@ -67,15 +73,26 @@ th {
     text-align: left;
 }
 
+a {
+    color: #000;
+    text-decoration: underline;
+}
+
 a.btn.btn-primary,
 .btn-primary:active:hover {
     background-color: #eee;
-    border-color: #04015d;
+    /* border-color: #04015d; */
+    border-color: #297eff;
     width: 215px;
 }
 
 a.btn.btn-primary:hover {
-    color: #2eff37;
+    /* color: #2eff37; */
+    color: #2eb82e;
+}
+
+a:hover {
+    color: #dbdbdb;
 }
 
 .card {
@@ -87,7 +104,12 @@ a.btn.btn-primary:hover {
 }
 
 .card-header {
-    background: #2eff37;
+    /* background: #2eff37; */
+    background: #2eb82e;
+}
+
+.card-body {
+    background: #fff;
 }
 
 .down15 {
@@ -112,7 +134,8 @@ span.badge {
 }
 
 .badge-primary {
-    background-color: #2eff37;
+    /* background-color: #2eff37; */
+    background-color: #2eb82e;
 }
 
 .badge-secondary {
@@ -163,6 +186,11 @@ span.seed {
     color: burlywood;
     margin: 5px 0px;
     direction: ltr;
+}
+
+.plaque a, .plaque a:hover {
+    color: burlywood !important;
+    text-decoration: none;
 }
 
 .info-card {

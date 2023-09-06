@@ -12,7 +12,7 @@ include 'sidebar.html';
 
         <div class="content-body">
             <div class="row">
-                <div class="col-xs-12 col-lg-6 table-padding">
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Regular Season Matchups</h4>
@@ -54,12 +54,12 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-lg-6 table-padding">
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card-header" style="float: left">
                         <h4>Regular Season</h4>
                     </div>
                     <div style="float: right">
-                        <select id="regMiscStats" class="dropdown">
+                        <select id="regMiscStats" class="dropdown form-control">
                             <option value="1">Win/Lose Streaks</option>
                             <option value="2">Total Points</option>
                             <option value="3">Season Points</option>
@@ -79,7 +79,7 @@ include 'sidebar.html';
             </div>
 
             <div class="row">
-                <div class="col-xs-12 table-padding">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Wins By Season</h4>
@@ -128,7 +128,7 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 table-padding">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Points For and Against</h4>
@@ -142,7 +142,7 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 table-padding">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">PF/PA vs Wins</h4>
@@ -156,7 +156,7 @@ include 'sidebar.html';
                 </div>
             </div>
 
-            <div class="col-xs-12 col-md-6 col-lg-4 table-padding">
+            <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
                 <div class="card">
                     <div class="card-header">
                         <h4>Results</h4>
@@ -176,7 +176,7 @@ include 'sidebar.html';
                 </div>
             </div>
 
-            <div class="col-xs-12 col-md-6 col-lg-4">
+            <div class="col-sm-12 col-md-6 col-lg-4">
                 <div class="card">
                     <div class="card-header">
                         <h4 style="float: right">Standings Lookup</h4>

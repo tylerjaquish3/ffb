@@ -34,9 +34,12 @@ foreach ($seasonNumbers as $standings) {
     <div class="content-wrapper">
 
         <div class="content-body">
-            <div class="row">
-                <div class="col-xs-12">
-                    <select id="year-select">
+            <div class="row" style="direction: ltr;">
+                <div class="col-sm-12 d-md-none">
+                    <h5 style="margin-top: 5px; color: #fff;">Choose Season</h5>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <select id="year-select" class="form-control">
                         <?php
                         $result = query("SELECT DISTINCT year FROM finishes ORDER BY year DESC");
                         while ($row = fetch_array($result)) {
@@ -49,10 +52,10 @@ foreach ($seasonNumbers as $standings) {
                         ?>
                     </select>
                 </div>
-            <div>
+            </div>
             <!-- Statistics -->
             <div class="row">
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -67,7 +70,7 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -82,7 +85,7 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -97,7 +100,7 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="media">
@@ -115,7 +118,7 @@ foreach ($seasonNumbers as $standings) {
             </div>
 
             <div class="row">
-                <div class="col-lg-6 col-xs-12">
+                <div class="col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h3>Standings</h3>
@@ -157,7 +160,7 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 col-xs-12">
+                <div class="col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h3>Playoff Bracket</h3>
@@ -296,7 +299,7 @@ foreach ($seasonNumbers as $standings) {
             </div>
 
             <div class="row">
-                <div class="col-lg-6 col-xs-12">
+                <div class="col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Results</h4>
@@ -328,7 +331,7 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 col-xs-12">
+                <div class="col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Regular Season Matchups</h4>
@@ -373,7 +376,7 @@ foreach ($seasonNumbers as $standings) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-6 col-xs-12">
+                <div class="col-lg-6 col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Trades</h4>

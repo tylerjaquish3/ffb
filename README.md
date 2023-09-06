@@ -12,6 +12,12 @@
     - most championships should be 6
 - Current season, combine players that got traded midseason
 - Draft page, add chart for positions by round?
+- add team logos?
+- add trophy graphic on trophy page
+- profile page, add chart for draft spot over years
+- profile page, add chart for positions drafted?
 
 - draft order based on wives/gfs responses to something?
+
+fun fact ideas...
 

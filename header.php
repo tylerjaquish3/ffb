@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 
     <title>Suntown FFB</title>
+    <?php $version = "v2.0.4"; 
+    $vDate = "(9/6/23)"; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">
 
@@ -37,8 +39,8 @@
     <link rel="stylesheet" type="text/css" href="assets/owl.carousel.min.css">
 
     <link rel="stylesheet" type="text/css" href="assets/datatables.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/suntown.css">
-    <link rel="stylesheet" type="text/css" href="assets/responsive.css">
+    <link rel="stylesheet" type="text/css" href="assets/suntown.css?v=<?php echo $version; ?>">
+    <link rel="stylesheet" type="text/css" href="assets/responsive.css?v=<?php echo $version; ?>">
 
 </head>
 

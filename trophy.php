@@ -104,7 +104,7 @@ include 'sidebar.html';
     </div>
 </div>
 
-<?php include 'footer.html'; ?>
+<?php include 'footer.php'; ?>
 
 <script type="text/javascript">
 

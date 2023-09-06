@@ -418,7 +418,7 @@ foreach ($seasonNumbers as $standings) {
 
 </div>
 </div>
-<?php include 'footer.html'; ?>
+<?php include 'footer.php'; ?>
 
 <style>
 

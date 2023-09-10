@@ -971,8 +971,8 @@ function getCurrentSeasonPoints()
         GROUP BY manager, roster_spot");
     while ($row = fetch_array($result)) {
         $points[$row['manager']][$row['roster_spot']] = [
-            'projected' => $row['projected'],
-            'points' => $row['points']
+            'projected' => round($row['projected'], 1),
+            'points' => round($row['points'], 1)
         ];
     }
 

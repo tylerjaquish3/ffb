@@ -6,20 +6,6 @@ include 'sidebar.html';
 
 ?>
 
-
-<!-- Notice: Undefined offset: 0 in C:\code\ffb\functions.php on line 1140
-
-Notice: Trying to access array offset on value of type null in C:\code\ffb\functions.php on line 1140
-
-Notice: Undefined offset: 0 in C:\code\ffb\functions.php on line 1141
-
-Notice: Trying to access array offset on value of type null in C:\code\ffb\functions.php on line 1141
-
-Notice: Undefined offset: 0 in C:\code\ffb\functions.php on line 1142
-
-Notice: Trying to access array offset on value of type null in -->
-
-
 <div class="app-content content container-fluid">
     <div class="content-wrapper">
         <div class="content-header row"></div>
@@ -145,44 +131,44 @@ Notice: Trying to access array offset on value of type null in -->
                                                 <i>Projected</i>
                                             </td>
                                             <td data-order="<?php echo $values['QB']['points']; ?>">
-                                                <strong><?php echo round($values['QB']['points'], 1); ?></strong><br />
-                                                <i><?php echo round($values['QB']['projected'], 1); ?></i>
+                                                <strong><?php echo $values['QB']['points']; ?></strong><br />
+                                                <i><?php echo $values['QB']['projected']; ?></i>
                                             </td>
                                             <td data-order="<?php echo $values['RB']['points']; ?>">
-                                                <strong><?php echo round($values['RB']['points'], 1); ?></strong><br />
-                                                <i><?php echo round($values['RB']['projected'], 1); ?></i>
+                                                <strong><?php echo $values['RB']['points']; ?></strong><br />
+                                                <i><?php echo $values['RB']['projected']; ?></i>
                                             </td>
                                             <td data-order="<?php echo $values['WR']['points']; ?>">
-                                                <strong><?php echo round($values['WR']['points'], 1); ?></strong><br />
-                                                <i><?php echo round($values['WR']['projected'], 1); ?></i>
+                                                <strong><?php echo $values['WR']['points']; ?></strong><br />
+                                                <i><?php echo $values['WR']['projected']; ?></i>
                                             </td>
                                             <td data-order="<?php echo $values['TE']['points']; ?>">
-                                                <strong><?php echo round($values['TE']['points'], 1); ?></strong><br />
-                                                <i><?php echo round($values['TE']['projected'], 1); ?></i>
+                                                <strong><?php echo $values['TE']['points']; ?></strong><br />
+                                                <i><?php echo $values['TE']['projected']; ?></i>
                                             </td>
                                             <td data-order="<?php echo $values['W/R/T']['points']; ?>">
-                                                <strong><?php echo round($values['W/R/T']['points'], 1); ?></strong><br />
-                                                <i><?php echo round($values['W/R/T']['projected'], 1); ?></i>
+                                                <strong><?php echo $values['W/R/T']['points']; ?></strong><br />
+                                                <i><?php echo $values['W/R/T']['projected']; ?></i>
                                             </td>
                                             <td data-order="<?php echo $values['Q/W/R/T']['points']; ?>">
-                                                <strong><?php echo round($values['Q/W/R/T']['points'], 1); ?></strong><br />
-                                                <i><?php echo round($values['Q/W/R/T']['projected'], 1); ?></i>
+                                                <strong><?php echo $values['Q/W/R/T']['points']; ?></strong><br />
+                                                <i><?php echo $values['Q/W/R/T']['projected']; ?></i>
                                             </td>
                                             <td data-order="<?php echo $values['K']['points']; ?>">
-                                                <strong><?php echo round($values['K']['points'], 1); ?></strong><br />
-                                                <i><?php echo round($values['K']['projected'], 1); ?></i>
+                                                <strong><?php echo $values['K']['points']; ?></strong><br />
+                                                <i><?php echo $values['K']['projected']; ?></i>
                                             </td>
                                             <td data-order="<?php echo $values['DEF']['points']; ?>">
-                                                <strong><?php echo round($values['DEF']['points'], 1); ?></strong><br />
-                                                <i><?php echo round($values['DEF']['projected'], 1); ?></i>
+                                                <strong><?php echo $values['DEF']['points']; ?></strong><br />
+                                                <i><?php echo $values['DEF']['projected']; ?></i>
                                             </td>
                                             <td data-order="<?php echo $values['BN']['points']; ?>">
-                                                <strong><?php echo round($values['BN']['points'], 1); ?></strong><br />
-                                                <i><?php echo round($values['BN']['projected'], 1); ?></i>
+                                                <strong><?php echo $values['BN']['points']; ?></strong><br />
+                                                <i><?php echo $values['BN']['projected']; ?></i>
                                             </td>
                                             <td data-order="<?php echo $totalPoints; ?>">
-                                                <strong><?php echo round($totalPoints, 1); ?></strong><br />
-                                                <i><?php echo round($totalProjected, 1); ?></i>
+                                                <strong><?php echo $totalPoints; ?></strong><br />
+                                                <i><?php echo $totalProjected; ?></i>
                                             </td>
                                         </tr>
 
@@ -579,7 +565,6 @@ Notice: Trying to access array offset on value of type null in -->
 <script type="text/javascript">
     $(document).ready(function() {
 
-
         $('#datatable-currentPoints').DataTable({
             searching: false,
             paging: false,
@@ -717,9 +702,6 @@ Notice: Trying to access array offset on value of type null in -->
     #datatable-drafted_wrapper {
         max-width: 800px;
     }
-    /* #datatable-bestWeek_wrapper {
-        max-width: 1395px;
-    } */
     #datatable-optimal_wrapper {
         max-width: 1620px;
     }

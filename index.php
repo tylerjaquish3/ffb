@@ -146,7 +146,7 @@ include 'sidebar.html';
                                         );
                                         while ($row = fetch_array($result)) { ?>
                                             <tr>
-                                                <td><?php echo $row['name']; ?></td>
+                                                <td><a href="profile.php?id=<?php echo $row['name'];?>"><?php echo $row['name']; ?></a></td>
                                                 <td><?php echo $row['wins']; ?></td>
                                                 <td><?php echo $row['losses']; ?></td>
                                                 <td><?php echo number_format($row['win_pct'], 1) . ' %'; ?></td>

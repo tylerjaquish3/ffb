@@ -16,6 +16,7 @@
 - add trophy graphic on trophy page
 - profile page, add chart for draft spot over years
 - profile page, add chart for positions drafted?
+- make sidebar collapsible
 
 - draft order based on wives/gfs responses to something?
 

@@ -25,15 +25,17 @@ include 'sidebar.html';
                                 </p>
 
                                 <p>The Suntown Fantasy Football league began many moons ago, as a group of college students that enjoyed watching football together.
-                                    The ten league members, as they stand today, began competing in 2008. However, the coveted league trophy dates back to 2006, where
-                                    the league only contained eight members. The data on this website dates back to 2006 to correlate with the league trophy.</p>
+                                    The core of the league began in 2004 with just six members: Gavin, Tyler, AJ, Andy, Everett, and Ben. In 2005, the league grew to 
+                                    eight members, as Cole and Matt joined the league. In 2006, the league remained at eight members, however, Justin replaced Andy
+                                    in the league. And finally in 2008, the league grew to ten members, as Cameron and Andy (re)joined the league.
+                                    The coveted league trophy was introduced in 2006, where the league only contained eight members. 
+                                    Henceforth, the data on this website dates back to 2006 to correlate with the league trophy.</p>
 
                                 <p>This league will always be a free, head-to-head league hosted by Yahoo. The only prize is a plaque with the champion's name inscribed that gets added to the league trophy,
                                     as well as the trophy living with the champion until a new champion is crowned. The league has also voted that the 10th place finisher
                                     must pay for the new plaque at the end of each season, sit on a toilet during the next draft, and their team name (for the following season) shall be set by the champion.</p>
 
-                                <p>The league matchups schedule shall use data from prior seasons to determine the optimal weekly schedules for each manager to face opponents as equally as possible.
-                                    Since this has been enacted relatively recently, the data is skewed and may take several seasons to even out the schedules.
+                                <p>The league matchups schedule shall use data from prior seasons to determine the optimal weekly schedules for each manager to face all opponents as equally as possible.
                                 </p>
 
                                 <p>All parts of this constitution, including rules and practices, may be modified or amended with a majority vote. However, if deemed minor, changes may be made by the commissioner without
@@ -84,7 +86,7 @@ include 'sidebar.html';
                                     </li>
                                     <li>Smack talk is encouraged, especially if it hurts feelings.</li>
                                     <li>Players added and dropped in the same day shall return to Free Agent status (not Waivers).</li>
-                                    <li>Rules can be changed with a majority vote. However, in season rule changes require a super-majority (80% yea).</li>
+                                    <li>Rules/settings can be changed with a majority vote. However, in-season changes require a super-majority (80% yea).</li>
                                 </ul>
                             </div>
                         </div>
@@ -135,7 +137,7 @@ include 'sidebar.html';
                                 <strong>Determine 2024 draft order</strong>
                                 <br /><br />
                             
-                                <strong>Draft date: TBD | Time: TBD  | Location: Spokane, WA</strong>
+                                <strong>Draft date: TBD  | Location: Spokane, WA</strong>
                                 <br /><br />
                             </div>
                         </div>
@@ -231,7 +233,6 @@ include 'sidebar.html';
                                 <strong>Determined 2021 draft order</strong><br />
 
                                 <strong>Draft date: 9.6.21 | Time: 4pm | Location: Spokane Valley, WA</strong>
-                                
                             </div>
                         </div>
                     </div>

@@ -12,7 +12,7 @@ include 'sidebar.html';
 
         <div class="content-body">
             <div class="row">
-                <div class="col-sm-12 col-lg-6 table-padding">
+                <div class="col-sm-12 col-lg-7 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Regular Season Matchups</h4>
@@ -25,7 +25,11 @@ include 'sidebar.html';
                                     <th>Manager 1</th>
                                     <th>Manager 2</th>
                                     <th>Score 1</th>
+                                    <th>Note</th>
                                     <th>Score 2</th>
+                                    <th>Note</th>
+                                    <th>Search 1</th>
+                                    <th>Search 2</th>
                                 </thead>
                                 <tbody>
                                     <?php
@@ -45,7 +49,11 @@ include 'sidebar.html';
                                                 echo '<td><span class="badge badge-secondary">' . $matchup['manager2'] . '</span></td>';
                                             } ?>
                                             <td><?php echo $matchup['score1']; ?></td>
+                                            <td style="font-size: 11px;"><?php echo $matchup['score1note']; ?></td>
                                             <td><?php echo $matchup['score2']; ?></td>
+                                            <td style="font-size: 11px;"><?php echo $matchup['score2note']; ?></td>
+                                            <td><?php echo $matchup['score1noteSearch']; ?></td>
+                                            <td><?php echo $matchup['score2noteSearch']; ?></td>
                                         </tr>
 
                                     <?php } ?>
@@ -54,7 +62,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-lg-6 table-padding">
+                <div class="col-sm-12 col-lg-5 table-padding">
                     <div class="card-header" style="float: left">
                         <h4>Regular Season</h4>
                     </div>
@@ -156,58 +164,115 @@ include 'sidebar.html';
                 </div>
             </div>
 
-            <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Results</h4>
-                        <span id="count"></span>
+            <div class="row" style="direction: ltr;">
+                <div class="col-sm-12 col-md-6 col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Team Standings Lookup</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr; text-align: center;">
+                            <h3>When was the last time ... </h3>
+                            <select id="manager1-select">
+                                <?php
+                                $result = query("SELECT * FROM managers ORDER BY name ASC");
+                                while ($row = fetch_array($result)) {
+                                    echo '<option value="'.$row['id'].'">'.$row['name'].'</option>';
+                                }
+                                ?>
+                            </select><br>
+                            <h3>... was in ...</h3>
+                            <select id="place1">
+                                <option value="1">First</option>
+                                <option value="2">Second</option>
+                                <option value="3">Third</option>
+                                <option value="4">Fourth</option>
+                                <option value="5">Fifth</option>
+                                <option value="6">Sixth</option>
+                                <option value="7">Seventh</option>
+                                <option value="8">Eighth</option>
+                                <option value="9">Ninth</option>
+                                <option value="10">Tenth</option>
+                            </select><br>
+                            <h3>... place?</h3>
+                            <br />
+                            <button class="btn btn-secondary" id="lookup-btn">Search</button>
+                            <br /><br />
+                        </div>
                     </div>
-                    <div class="card-body" style="background: #fff; direction: ltr">
-                        <table class="table table-responsive" id="datatable-results">
-                            <thead>
-                                <th>Year</th>
-                                <th>Week</th>
-                                <th>Record</th>
-                                <th>Points</th>
-                            </thead>
-                            <tbody id="postData"></tbody>
-                        </table>
+                </div>
+
+                <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Results</h4>
+                            <span id="count"></span>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive" id="datatable-results">
+                                <thead>
+                                    <th>Year</th>
+                                    <th>Week</th>
+                                    <th>Record</th>
+                                    <th>Points</th>
+                                </thead>
+                                <tbody id="postData"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-sm-12 col-md-6 col-lg-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 style="float: right">Standings Lookup</h4>
+            <div class="row" style="direction: ltr;">
+                <div class="col-sm-12 col-md-6 col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">League Standings History</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr; text-align: center;">
+                            <h3>
+                                Year
+                                <select id="year-select1">
+                                    <?php
+                                    $result = query("SELECT distinct year FROM regular_season_matchups order by year desc");
+                                    while ($row = fetch_array($result)) {
+                                        echo '<option value="'.$row['year'].'">'.$row['year'].'</option>';
+                                    }
+                                    ?>
+                                </select>
+                                Week
+                                <select id="week-select">
+                                    <?php
+                                    $result = query("SELECT distinct week_number FROM regular_season_matchups");
+                                    while ($row = fetch_array($result)) {
+                                        echo '<option value="'.$row['week_number'].'">'.$row['week_number'].'</option>';
+                                    }
+                                    ?>
+                                </select><br>
+                            </h3>
+                            
+                            <button class="btn btn-secondary" id="lookup-standings-btn">Search</button>
+                            <br /><br />
+                        </div>
                     </div>
-                    <div class="card-body" style="background: #fff; direction: ltr; text-align: center;">
-                        <h3>When was the last time ... </h3>
-                        <select id="manager1-select">
-                            <?php
-                            $result = query("SELECT * FROM managers ORDER BY name ASC");
-                            while ($row = fetch_array($result)) {
-                                echo '<option value="'.$row['id'].'">'.$row['name'].'</option>';
-                            }
-                            ?>
-                        </select><br>
-                        <h3>... was in ...</h3>
-                        <select id="place1">
-                            <option value="1">First</option>
-                            <option value="2">Second</option>
-                            <option value="3">Third</option>
-                            <option value="4">Fourth</option>
-                            <option value="5">Fifth</option>
-                            <option value="6">Sixth</option>
-                            <option value="7">Seventh</option>
-                            <option value="8">Eighth</option>
-                            <option value="9">Ninth</option>
-                            <option value="10">Tenth</option>
-                        </select><br>
-                        <h3>... place?</h3>
-                        <br />
-                        <button class="btn btn-secondary" id="lookup-btn">Search</button>
-                        <br /><br />
+                </div>
+
+                <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Results</h4>
+                            <span id="count"></span>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive" id="datatable-league-standings">
+                                <thead>
+                                    <th>Rank</th>
+                                    <th>Manager</th>
+                                    <th>Record</th>
+                                    <th>Points</th>
+                                </thead>
+                                <tbody id="postData-standings"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -223,8 +288,13 @@ include 'sidebar.html';
         $('#datatable-regSeason').DataTable({
             "pageLength": 25,
             "order": [
-                [0, "desc"]
-            ]
+                [0, "desc"],
+                [1, "desc"]
+            ],
+            "columnDefs": [{
+                "targets": [8,9],
+                "visible": false,
+            }],
         });
 
         $('#datatable-pfpawins').DataTable({
@@ -409,6 +479,38 @@ include 'sidebar.html';
         });
 
         $('#datatable-results').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [0, "desc"],
+                [1, "desc"],
+            ]
+        });
+
+        $('#lookup-standings-btn').click(function () {
+
+            year = $('#year-select1').val();
+            week = $('#week-select').val();
+
+            $.ajax({
+                url : 'dataLookup.php',
+                method: 'POST',
+                dataType: 'text',
+                data: {
+                    dataType: "league-standings",
+                    year: year,
+                    week: week
+                },
+                cache: false,
+                success: function(response) {
+                    let data = JSON.parse(response);
+                    $("#postData-standings").html(data.return);
+                }
+            });
+        });
+
+        $('#datatable-league-standings').DataTable({
             "searching": false,
             "paging": false,
             "info": false,

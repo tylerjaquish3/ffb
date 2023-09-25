@@ -211,4 +211,59 @@ function getPoints($manager, $week)
     return round($myTotal, 1);
 }
 
+if (isset($_POST['dataType']) && $_POST['dataType'] == 'league-standings') {
+
+    $return = '';
+    $year = $_POST['year'];
+    $week = $_POST['week'];
+    $standings = [];
+
+    $overallYearStandings = [];
+
+    for ($x = 1; $x < 11; $x++) {
+        $standings[] = [
+            'man' => $x, 'wins' => 0, 'losses' => 0, 'points' => 0, 'name' => ''
+        ];
+    }
+
+    $result = query("SELECT * FROM regular_season_matchups 
+        JOIN managers ON regular_season_matchups.manager1_id = managers.id
+        WHERE year = $year and week_number <= $week");
+    while ($row = fetch_array($result)) {
+        $week = $row['week_number']; 
+    
+        foreach ($standings as &$standing) {
+            if ($standing['man'] == $row['manager1_id']) {
+                if ($row['winning_manager_id'] == $row['manager1_id']) {
+                    $standing['wins']++;
+                } else {
+                    $standing['losses']++;
+                }
+                $standing['name'] = $row['name'];
+                $standing['points'] += $row['manager1_score'];
+            }
+        }
+    }
+
+    // Sort by wins and points
+    usort($standings, function($b, $a) { 
+        $rdiff = $a['wins'] - $b['wins'];
+        if ($rdiff) return $rdiff; 
+        return $a['points'] - $b['points']; 
+    });
+
+    // Return table rows
+    $rank = 1;
+    foreach ($standings as $data) {
+        $record = $data['wins'].' - '.$data['losses'];
+        $return .= '<tr><td>'.$rank.'</td><td>'.$data['name'].'</td><td>'.$record.'</td><td>'.$data['points'].'</td></tr>';
+        $rank++;
+    }
+
+    $done = [
+        'return' => $return,
+    ];
+    echo json_encode($done);
+    die;
+}
 ?>

@@ -1,5 +1,6 @@
 <?php
 
+
 $pageName = "Current Season";
 include 'header.php';
 include 'sidebar.html';
@@ -11,6 +12,25 @@ include 'sidebar.html';
         <div class="content-header row"></div>
 
         <div class="content-body">
+            <div class="row" style="direction: ltr;">
+                <div class="col-sm-12 d-md-none">
+                    <h5 style="margin-top: 5px; color: #fff;">Choose Season</h5>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <select id="year-select" class="form-control">
+                        <?php
+                        $result = query("SELECT DISTINCT year FROM rosters WHERE year > 2019 ORDER BY year DESC");
+                        while ($row = fetch_array($result)) {
+                            if ($row['year'] == $selectedSeason) {
+                                echo '<option selected value="'.$row['year'].'">'.$row['year'].'</option>';
+                            } else {
+                                echo '<option value="'.$row['year'].'">'.$row['year'].'</option>';
+                            }
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
             <div class="row">
 
                 <div class="col-sm-12 col-lg-4">
@@ -150,10 +170,14 @@ include 'sidebar.html';
                                                 <strong><?php echo $values['W/R/T']['points']; ?></strong><br />
                                                 <i><?php echo $values['W/R/T']['projected']; ?></i>
                                             </td>
-                                            <td data-order="<?php echo $values['Q/W/R/T']['points']; ?>">
-                                                <strong><?php echo $values['Q/W/R/T']['points']; ?></strong><br />
-                                                <i><?php echo $values['Q/W/R/T']['projected']; ?></i>
-                                            </td>
+                                            <?php if (isset($values['Q/W/R/T'])) { ?>
+                                                <td data-order="<?php echo $values['Q/W/R/T']['points']; ?>">
+                                                    <strong><?php echo $values['Q/W/R/T']['points']; ?></strong><br />
+                                                    <i><?php echo $values['Q/W/R/T']['projected']; ?></i>
+                                                </td>
+                                            <?php } else {
+                                                echo '<td></td>';
+                                            } ?>
                                             <td data-order="<?php echo $values['K']['points']; ?>">
                                                 <strong><?php echo $values['K']['points']; ?></strong><br />
                                                 <i><?php echo $values['K']['projected']; ?></i>
@@ -171,7 +195,6 @@ include 'sidebar.html';
                                                 <i><?php echo $totalProjected; ?></i>
                                             </td>
                                         </tr>
-
                                     <?php } ?>
                                 </tbody>
                             </table>
@@ -251,7 +274,6 @@ include 'sidebar.html';
                                                 <i><?php echo $players['bn']['points']. ' points'; ?></i>
                                             </td>
                                         </tr>
-
                                     <?php } ?>
                                 </tbody>
                             </table>
@@ -342,7 +364,6 @@ include 'sidebar.html';
                                             <td><?php echo $row['rec_yds']; ?></td>
                                             <td><?php echo $row['rec_tds']; ?></td>
                                         </tr>
-
                                     <?php } ?>
                                 </tbody>
                             </table>
@@ -564,6 +585,12 @@ include 'sidebar.html';
 
 <script type="text/javascript">
     $(document).ready(function() {
+
+        let baseUrl = "<?php echo $BASE_URL; ?>";
+
+        $('#year-select').change(function() {
+            window.location = baseUrl+'currentSeason.php?id='+$('#year-select').val();
+        });
 
         $('#datatable-currentPoints').DataTable({
             searching: false,

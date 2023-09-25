@@ -133,6 +133,7 @@ include 'sidebar.html';
                                 <strong>Vote on the following: </strong>
                                 <ol>
                                     <li>Add an 18th roster position (BN or W/R/T?) | <a href="voteInfo#new_pos">More Info</a><strong></strong></li>
+                                    <li>Replacing toilet seat as punishment? | <a href="voteInfo#new_pos">More Info</a><strong></strong></li>
                                 </ol>
                                 <strong>Determine 2024 draft order</strong>
                                 <br /><br />

@@ -10,10 +10,10 @@ function query($sql)
         $sql = str_replace("if(", "iif(", $sql);
         $sql = str_replace("IF(", "IIF(", $sql);
         $sql = str_replace("IF (", "IIF (", $sql);
-
+// var_dump($sql);
         return $conn->query($sql);
-    } 
-        
+    }
+
     return mysqli_query($conn, $sql);
 }
 
@@ -75,6 +75,8 @@ if ((strpos($pageName, 'Recap') !== false)) {
     $trades = getTrades();
 }
 if ($pageName == 'Current Season') {
+    $selectedSeason = isset($_GET['id']) ? $_GET['id'] : $season;
+
     $points = getCurrentSeasonPoints();
     $stats = getCurrentSeasonStats();
     $statsAgainst = getCurrentSeasonStatsAgainst();
@@ -90,30 +92,6 @@ if ($pageName == 'Current Season') {
     $draftRounds = getBestRoundPicks();
 }
 
-function saveUserActivity($pageName)
-{
-    global $conn;
-
-    try {
-        // Lookup manager id by IP address
-        $managerId = null;
-        $ipAddress = $_SERVER['REMOTE_ADDR'];
-        $result = query("SELECT manager_id from ip_addresses WHERE ip_address = '".$ipAddress."'");
-        while ($row = fetch_array($result)) {
-            $managerId = $row['manager_id'];
-        }
-
-        // Save activity
-        date_default_timezone_set('America/Los_Angeles');
-        $timestamp = date('Y-m-d H:i:s');
-        $sql = $conn->prepare("INSERT INTO user_activity (ip_address, manager_id, page, created_at) VALUES (?,?,?,?)");
-        $sql->bind_param('siss', $ipAddress, $managerId, $pageName, $timestamp);
-        $sql->execute();
-    } catch (\Exception $ex) {
-        // Do nothing, just don't fail on this
-    }
-}
-
 function getManagerName($id) {
     $managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
 
@@ -122,12 +100,9 @@ function getManagerName($id) {
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getDashboardNumbers()
 {
-    global $conn;
     $response = [];
 
     $result = query("select count(distinct(year)) as num_years from finishes");
@@ -184,12 +159,9 @@ function getDashboardNumbers()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getPostseasonChartNumbers()
 {
-    global $conn;
     $response = [];
 
     $result2 = query("SELECT * FROM managers");
@@ -237,12 +209,9 @@ function getPostseasonChartNumbers()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getProfileNumbers()
 {
-    global $conn;
     $response = [];
     $managerId = 0;
 
@@ -377,12 +346,9 @@ function getProfileNumbers()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getFinishesChartNumbers()
 {
-    global $conn;
     $results = ['years' => '', 'finishes' => ''];
 
     if (isset($_GET)) {
@@ -406,12 +372,9 @@ function getFinishesChartNumbers()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getSeasonNumbers()
 {
-    global $conn;
     $results = [];
 
     if (isset($_GET)) {
@@ -505,18 +468,95 @@ function getRegularSeasonMatchups()
         $prevWeek = $currentWeek;
     }
 
+    $results = getNotes($results, 'week');
+    $results = getNotes($results, 'year');
+    $results = getNotes($results, 'all time');
+
     return $results;
 }
 
 /**
+ * Take regular season matchups and find notes about the scores
+ */
+function getNotes(array $matchups, string $period) 
+{
+    $groupBy = $return = [];
+    foreach ($matchups as &$element) {
+        if (!isset($element['score1note'])) {
+            $element['score1note'] = $element['score1noteSearch'] = '';
+        }
+        if (!isset($element['score2note'])) {
+            $element['score2note'] = $element['score2noteSearch'] = '';
+        }
+
+        if ($period == 'all time') {
+            $groupBy['all'] = $matchups;
+        } else {
+            $groupBy[$element['year']][] = $element;
+        }
+    }
+
+    if ($period == 'week') {
+        $firstGroup = $groupBy;
+        $groupBy = [];
+        foreach ($firstGroup as $year => $matchups) {
+            foreach ($matchups as $matchup) {
+                $groupBy[$year.' - '.$matchup['week']][] = $matchup;
+            }
+        }
+    }
+
+    $period = ucwords($period);
+
+    foreach ($groupBy as $group => $matchups) {
+        $highest = 0;
+        $lowest = 417417;
+        // Find the highest and lowest score in the group
+        foreach ($matchups as $element) {
+            if ($element['score1'] > $highest) {
+                $highest = $element['score1'];
+            }
+            if ($element['score2'] > $highest) {
+                $highest = $element['score2'];
+            }
+            if ($element['score1'] < $lowest) {
+                $lowest = $element['score1'];
+            }
+            if ($element['score2'] < $lowest) {
+                $lowest = $element['score2'];
+            }
+        }
+
+        foreach ($matchups as $key => $element) {
+            if ($element['score1'] == $highest) {
+                $matchups[$key]['score1note'] = '<span class="badge badge-primary" alt="all time high">'.$period.'<i class="icon-arrow-up"></i></span>';
+                $matchups[$key]['score1noteSearch'] = $period.' high';
+            }
+            if ($element['score1'] == $lowest) {
+                $matchups[$key]['score1note'] = '<span class="badge badge-secondary">'.$period.'<i class="icon-arrow-down"></i></span>';
+                $matchups[$key]['score1noteSearch'] = $period.' low';
+            }
+            if ($element['score2'] == $highest) {
+                $matchups[$key]['score2note'] = '<span class="badge badge-primary">'.$period.'<i class="icon-arrow-up"></i></span>';
+                $matchups[$key]['score2noteSearch'] = $period.' high';
+            }
+            if ($element['score2'] == $lowest) {
+                $matchups[$key]['score2note'] = '<span class="badge badge-secondary">'.$period.'<i class="icon-arrow-down"></i></span>';
+                $matchups[$key]['score1noteSearch'] = $period.' low';
+            }
+        }
+
+        $return = array_merge($return, $matchups);
+    }
+
+    return $return;
+}
+
+/**
  * Undocumented function
- *
- * @return array
  */
 function getSeasonWins()
 {
-    global $conn;
-
     $response = [];
     $result = query("SELECT * FROM finishes
         JOIN managers ON managers.id = finishes.manager_id");
@@ -637,12 +677,9 @@ function getPointMargins()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getPfWinsData()
 {
-    global $conn;
     $response = [];
 
     $result = query("SELECT * FROM finishes
@@ -683,12 +720,9 @@ function getPfWinsData()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getPostseasonMatchups()
 {
-    global $conn;
     $results = [];
 
     $result = query("SELECT m.name as m1, l.name as m2, rsm.year, rsm.round, rsm.manager1_seed, rsm.manager2_seed, rsm.manager1_score, rsm.manager2_score
@@ -927,7 +961,6 @@ function getAllNumbersBySeason()
  */
 function getTrades()
 {
-    global $conn;
     $results = [];
 
     if (isset($_GET['id'])) {
@@ -959,15 +992,13 @@ function getTrades()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getCurrentSeasonPoints()
 {
-    global $conn, $season;
+    global $selectedSeason;
 
     $result = query("SELECT manager, roster_spot, SUM(points) AS points, SUM(projected) AS projected FROM rosters r
-        WHERE YEAR = $season
+        WHERE YEAR = $selectedSeason
         GROUP BY manager, roster_spot");
     while ($row = fetch_array($result)) {
         $points[$row['manager']][$row['roster_spot']] = [
@@ -981,32 +1012,28 @@ function getCurrentSeasonPoints()
 
 /**
  * Undocumented function
- *
- * @return void
  */
 function getCurrentSeasonStats()
 {
-    global $conn, $season;
+    global $selectedSeason;
 
     $result = query("SELECT manager, SUM(pass_yds) AS pass_yds, SUM(pass_tds) AS pass_tds, SUM(ints) AS ints, SUM(rush_yds) AS rush_yds, SUM(rush_tds) AS rush_tds,
         SUM(receptions) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds, SUM(fumbles) AS fum, SUM(fg_made) AS fg_made, SUM(pat_made) AS pat_made,
         SUM(def_sacks) AS def_sacks, SUM(def_int) AS def_int, SUM(def_fum) AS def_fum
         FROM rosters r
         JOIN stats s ON s.roster_id = r.id
-        WHERE YEAR = $season and roster_spot != 'BN'
+        WHERE YEAR = $selectedSeason and roster_spot != 'BN'
         GROUP BY manager");
 
     return $result;
 }
 
 /**
- * Undocumented function
- *
- * @return array
+ * Get the best performance of each week for each position
  */
 function getCurrentSeasonBestWeek()
 {
-    global $conn, $season;
+    global $selectedSeason;
     $bestWeek = [];
     $result = query("SELECT week, MAX(IF(roster_spot='QB', points, NULL)) AS top_qb,
         MAX(IF(roster_spot='RB', points, NULL)) AS top_rb,
@@ -1018,7 +1045,7 @@ function getCurrentSeasonBestWeek()
         MAX(IF(roster_spot='DEF', points, NULL)) AS top_def,
         MAX(IF(roster_spot='BN', points, NULL)) AS top_bn
         FROM rosters
-        WHERE YEAR = $season
+        WHERE YEAR = $selectedSeason
         GROUP BY week");
     while ($row = fetch_array($result)) {
         $week = $row['week'];
@@ -1038,11 +1065,14 @@ function getCurrentSeasonBestWeek()
 }
 
 /**
- * Undocumented function
+ * Run query for best week by roster spot
  */
 function queryBestWeekPlayer($week, $pts, $pos)
 {
     $response = [];
+    if (!$pts) {
+        return ['manager' => '', 'player' => '', 'points' => ''];
+    }
 
     $result = query("SELECT * FROM rosters WHERE week = $week AND points = $pts and roster_spot = '$pos'");
     while ($row = fetch_array($result)) {
@@ -1057,11 +1087,11 @@ function queryBestWeekPlayer($week, $pts, $pos)
 }
 
 /**
- * Undocumented function
+ * Compile all stats against
  */
 function getCurrentSeasonStatsAgainst()
 {
-    global $conn, $season;
+    global $selectedSeason;
     $managers = ['Tyler', 'Matt', 'Justin', 'Ben', 'AJ', 'Gavin', 'Cameron', 'Cole', 'Everett', 'Andy'];
     foreach ($managers as $manager) {
         $response[$manager] = [
@@ -1079,7 +1109,7 @@ function getCurrentSeasonStatsAgainst()
 
     $result = query("SELECT year, week_number, name, manager2_id FROM regular_season_matchups rsm
         JOIN managers ON rsm.manager1_id = managers.id
-        WHERE year = $season
+        WHERE year = $selectedSeason
         ORDER BY week_number");
     while ($row = fetch_array($result)) {
         $week = $row['week_number'];
@@ -1091,7 +1121,7 @@ function getCurrentSeasonStatsAgainst()
             FROM rosters r
             JOIN managers m ON m.name = r.manager
             JOIN stats s ON s.roster_id = r.id
-            WHERE YEAR = $season AND week = $week AND m.id = $opponent and roster_spot != 'BN'
+            WHERE YEAR = $selectedSeason AND week = $week AND m.id = $opponent and roster_spot != 'BN'
             GROUP BY manager");
         while ($row2 = fetch_array($result2)) {
             $response[$row['name']]['pass_yds'] += $row2['pass_yds'];
@@ -1114,10 +1144,10 @@ function getCurrentSeasonStatsAgainst()
  */
 function getCurrentSeasonTopPerformers()
 {
-    global $season;
+    global $selectedSeason;
     $response = [];
 
-    $result = query("SELECT * FROM rosters WHERE YEAR = $season ORDER BY points DESC LIMIT 1");
+    $result = query("SELECT * FROM rosters WHERE YEAR = $selectedSeason ORDER BY points DESC LIMIT 1");
     while ($row = fetch_array($result)) {
         $response['topPerformer'] = [
             'manager' => $row['manager'],
@@ -1137,7 +1167,7 @@ function getCurrentSeasonTopPerformers()
     $result = query("SELECT manager, (SUM(pass_tds)+SUM(rush_tds)+SUM(rec_tds)) AS total_tds
         FROM rosters
         JOIN stats ON stats.roster_id = rosters.id
-        WHERE YEAR = $season
+        WHERE YEAR = $selectedSeason
         GROUP BY manager
         ORDER BY total_tds DESC LIMIT 1");
     while ($row = fetch_array($result)) {
@@ -1150,7 +1180,7 @@ function getCurrentSeasonTopPerformers()
     $result = query("SELECT manager, (SUM(pass_yds)+SUM(rush_yds)+SUM(rec_yds)) AS total_yds
         FROM rosters
         JOIN stats ON stats.roster_id = rosters.id
-        WHERE YEAR = $season
+        WHERE YEAR = $selectedSeason
         GROUP BY manager
         ORDER BY total_yds DESC LIMIT 1");
     while ($row = fetch_array($result)) {
@@ -1162,7 +1192,7 @@ function getCurrentSeasonTopPerformers()
 
     $result = query("SELECT manager, SUM(points) AS bench_pts
         FROM rosters
-        WHERE YEAR = $season AND roster_spot = 'BN'
+        WHERE YEAR = $selectedSeason AND roster_spot = 'BN'
         GROUP BY manager
         ORDER BY bench_pts DESC LIMIT 1");
     while ($row = fetch_array($result)) {
@@ -1176,11 +1206,11 @@ function getCurrentSeasonTopPerformers()
 }
 
 /**
- * Undocumented function
+ * Calculate optimal lineups for each team
  */
 function getCurrentSeasonBestTeamWeek()
 {
-    global $conn, $season;
+    global $selectedSeason;
     $response = [];
 
     $result = query("SELECT m.name as m1, l.name as m2, rsm.year, rsm.week_number, rsm.manager1_score, rsm.manager2_score
@@ -1190,7 +1220,7 @@ function getCurrentSeasonBestTeamWeek()
         SELECT name, manager2_id, year, week_number, manager2_score FROM regular_season_matchups rsm2
             JOIN managers ON managers.id = rsm2.manager2_id
         ) l ON l.manager2_id = rsm.manager2_id AND l.year = rsm.year AND l.week_number = rsm.week_number
-        WHERE rsm.year = $season
+        WHERE rsm.year = $selectedSeason
         ORDER BY rsm.manager1_score DESC");
     while ($row = fetch_array($result)) {
         $response['best'][] = [
@@ -1210,7 +1240,7 @@ function getCurrentSeasonBestTeamWeek()
  */
 function getDraftedPoints($dir, $round)
 {
-    global $DB_TYPE, $season;
+    global $DB_TYPE, $selectedSeason;
     $response = [];
 
     // query("SET SQL_BIG_SELECTS=1");
@@ -1220,12 +1250,13 @@ function getDraftedPoints($dir, $round)
     if ($DB_TYPE == 'mysql') {
         $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
     }
-
-    $result = query("SELECT rosters.manager, sum(points) as points FROM rosters
+    $query = "SELECT rosters.manager, sum(points) as points FROM rosters
         JOIN managers ON rosters.manager = managers.name
         $join
-        WHERE rosters.year = $season AND roster_spot NOT IN ('BN', 'IR') and draft.round $dir $round
-        GROUP BY manager");
+        WHERE rosters.year = $selectedSeason AND roster_spot NOT IN ('BN', 'IR') and draft.round $dir $round
+        GROUP BY manager";
+
+    $result = query($query);
 
     while ($row = fetch_array($result)) {
         $response[] = [
@@ -1238,11 +1269,11 @@ function getDraftedPoints($dir, $round)
 }
 
 /**
- * Undocumented function
+ * Calculate points earned from drafted players
  */
 function getDraftPoints()
 {
-    global $week, $season, $DB_TYPE;
+    global $selectedSeason, $DB_TYPE;
     $response = [];
 
     $drafted = getDraftedPoints('>', 0);
@@ -1255,18 +1286,24 @@ function getDraftPoints()
         $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
     }
 
+    $result = query("SELECT MAX(WEEK) AS maxweek FROM rosters WHERE YEAR = $selectedSeason");
+    while ($row = fetch_array($result)) {
+        $week = $row['maxweek'];
+    }
+
     $retained = [];
-    $result = query("SELECT manager, COUNT(rosters.player) as players FROM rosters
+    $query = "SELECT manager, COUNT(rosters.player) as players FROM rosters
         JOIN managers ON rosters.manager = managers.name
         $join
-        WHERE rosters.year = $season AND WEEK = $week
-        GROUP BY manager");
+        WHERE rosters.year = $selectedSeason AND WEEK = $week
+        GROUP BY manager";
+    $result = query($query);
     while ($row = fetch_array($result)) {
         $retained[] = $row;
     }
 
     $result = query("SELECT rosters.manager, sum(points) AS points FROM rosters
-        WHERE rosters.YEAR = $season AND roster_spot NOT IN ('BN', 'IR')
+        WHERE rosters.YEAR = $selectedSeason AND roster_spot NOT IN ('BN', 'IR')
         GROUP BY manager");
     while ($row = fetch_array($result)) {
 
@@ -1313,7 +1350,7 @@ function getDraftPoints()
  */
 function getWorstDraftPicks()
 {
-    global $DB_TYPE, $season;
+    global $DB_TYPE, $selectedSeason;
     $response = [];
 
     $qbMedian = getMedian('qb');
@@ -1324,7 +1361,7 @@ function getWorstDraftPicks()
     $multiplier = .8;
 
     $traded = [];
-    $trades = query("SELECT player FROM trades WHERE year = $season");
+    $trades = query("SELECT player FROM trades WHERE year = $selectedSeason");
     while ($row = fetch_array($trades)) {
         $traded[] = $row['player'];
     }
@@ -1338,7 +1375,7 @@ function getWorstDraftPicks()
     $result = query("SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
         JOIN managers ON rosters.manager = managers.name
         $join
-        WHERE rosters.YEAR = $season
+        WHERE rosters.YEAR = $selectedSeason
         GROUP BY manager, overall_pick, rosters.player, draft.position");
     while ($row = fetch_array($result)) {
 
@@ -1379,10 +1416,10 @@ function getWorstDraftPicks()
  */
 function getMedian($pos)
 {
-    global $season, $week;
+    global $selectedSeason, $week;
 
     $result = query("SELECT position, avg(points) AS points 
-        FROM rosters WHERE YEAR = $season
+        FROM rosters WHERE YEAR = $selectedSeason
         GROUP BY position");
     while ($row = fetch_array($result)) {
         $data[$row['position']] = $row['points'];
@@ -1401,7 +1438,7 @@ function getMedian($pos)
  */
 function getBestDraftPicks()
 {
-    global $season, $DB_TYPE;
+    global $selectedSeason, $DB_TYPE;
     $response = [];
 
     $qbMedian = getMedian('qb');
@@ -1419,7 +1456,7 @@ function getBestDraftPicks()
     $result = query("SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
         JOIN managers ON rosters.manager = managers.name
         $join
-        WHERE rosters.year = $season
+        WHERE rosters.year = $selectedSeason
         GROUP BY manager, overall_pick, rosters.player, draft.position");
     while ($row = fetch_array($result)) {
 
@@ -1446,7 +1483,7 @@ function getBestDraftPicks()
  */
 function getPlayersRetained()
 {
-    global $DB_TYPE, $week, $season;
+    global $DB_TYPE, $week, $selectedSeason;
     $response = [];
 
     // Need to do different join for sqlite vs mysql
@@ -1458,7 +1495,7 @@ function getPlayersRetained()
     $result = query("SELECT manager, COUNT(rosters.player) as players FROM rosters
         JOIN managers ON rosters.manager = managers.name
         $join
-        WHERE rosters.year = $season AND WEEK = $week
+        WHERE rosters.year = $selectedSeason AND WEEK = $week
         GROUP BY manager");
     while ($row = fetch_array($result)) {
         $response[] = $row;
@@ -1468,13 +1505,11 @@ function getPlayersRetained()
 }
 
 /**
- * Undocumented function
- *
- * @return array
+ * Calculate record if we had played against everyone every week
  */
 function getRecordAgainstEveryone()
 {
-    global $conn, $season;
+    global $selectedSeason;
     $index = -1;
 
     $managers = [
@@ -1492,10 +1527,10 @@ function getRecordAgainstEveryone()
     $scores = [];
     $result = query("SELECT week_number, name, manager1_score FROM regular_season_matchups rsm
         JOIN managers ON managers.id = rsm.manager1_id
-        where year = $season
+        where year = $selectedSeason
         ORDER BY year, week_number, manager1_score ASC");
     while ($row = fetch_array($result)) {
-        $scores[$season][$row['week_number']][$row['name']] = $row['manager1_score'];
+        $scores[$selectedSeason][$row['week_number']][$row['name']] = $row['manager1_score'];
     }
     foreach ($scores as $year => $weekArray) {
         foreach ($weekArray as $week) {
@@ -1517,7 +1552,7 @@ function getRecordAgainstEveryone()
  */
 function getAllDraftedPlayerDetails()
 {
-    global $DB_TYPE, $season;
+    global $DB_TYPE, $selectedSeason;
     $response = [];
 
     // Need to do different join for sqlite vs mysql
@@ -1530,7 +1565,7 @@ function getAllDraftedPlayerDetails()
         FROM rosters
         JOIN managers ON rosters.manager = managers.name
         $join
-        WHERE rosters.year = $season AND rosters.roster_spot NOT IN ('BN','IR')
+        WHERE rosters.year = $selectedSeason AND rosters.roster_spot NOT IN ('BN','IR')
         GROUP BY manager, overall_pick, rosters.player, draft.position, round");
     while ($row = fetch_array($result)) {
         $response[] = $row;
@@ -1547,7 +1582,7 @@ function getBestRoundPicks()
     $result = getAllDraftedPlayerDetails();
 
     $best = [];
-    for ($x = 1; $x < 18; $x++) {
+    for ($x = 1; $x < 25; $x++) {
         $best[$x] = ['manager' => '', 'player' => '', 'points' => 0];
     }
 
@@ -1571,20 +1606,18 @@ function getBestRoundPicks()
 
 /**
  * Undocumented function
- *
- * @return array
  */
 function getOptimalLineupPoints()
 {
-    global $conn, $season;
+    global $selectedSeason;
     $response = [];
 
-    $result1 = query("SELECT distinct week FROM rosters WHERE YEAR = $season");
+    $result1 = query("SELECT distinct week FROM rosters WHERE YEAR = $selectedSeason");
     while ($week = fetch_array($result1)) {
         $week = $week['week'];
 
         $result2 = query("SELECT distinct manager FROM rosters
-            WHERE YEAR = $season AND week = $week");
+            WHERE YEAR = $selectedSeason AND week = $week");
         while ($manager = fetch_array($result2)) {
             $manager = $manager['manager'];
 
@@ -1592,12 +1625,12 @@ function getOptimalLineupPoints()
             $roster = [];
 
             $result3 = query("SELECT * FROM rosters
-                WHERE YEAR = $season AND week = $week and manager = '".$manager."'");
+                WHERE YEAR = $selectedSeason AND week = $week and manager = '".$manager."'");
             while ($row = fetch_array($result3)) {
 
                 $result4 = query("SELECT * FROM regular_season_matchups
                     join managers on regular_season_matchups.manager1_id = managers.id
-                    WHERE YEAR = $season AND week_number = $week and managers.name = '".$manager."'");
+                    WHERE YEAR = $selectedSeason AND week_number = $week and managers.name = '".$manager."'");
                 while ($row2 = fetch_array($result4)) {
 
                     $winLoss = ($row2['manager1_score'] > $row2['manager2_score']) ? 'Win' : 'Loss';
@@ -1608,7 +1641,7 @@ function getOptimalLineupPoints()
 
                     $result5 = query("SELECT * FROM managers
                         JOIN rosters on rosters.manager = managers.name
-                        WHERE YEAR = $season AND week = $week and managers.id = $manager2");
+                        WHERE YEAR = $selectedSeason AND week = $week and managers.id = $manager2");
                     while ($team = fetch_array($result5)) {
                         $opponent = $team['name'];
 
@@ -1658,9 +1691,6 @@ function getOptimalLineupPoints()
 
 /**
  * Undocumented function
- *
- * @param array $roster
- * @return float
  */
 function checkRosterForOptimal(array $roster)
 {
@@ -1768,8 +1798,9 @@ function isDecimal($val)
 
 function dd($text)
 {
-    // var_dump($text);
-    echo '<pre>';
+    // Move down so its below the header
+    echo "<br /><br /><br />";
+    echo '<pre style="direction: ltr; float: left;">';
     var_dump($text);
     echo '</pre>';
     die;
@@ -1786,9 +1817,9 @@ if(isset($_POST['sql-stmt'])) {
         if ($stmt != '') {
             $success = query($stmt);
 
-            if (!$success) {
-                dd('connection error');
-            }
+            // if (!$success) {
+            //     dd('connection error');
+            // }
 
             while ($row = fetch_array($success)) {
                 echo '<pre>';

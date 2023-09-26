@@ -2,6 +2,8 @@
 
 include 'connections.php';
 
+// phpinfo(); exit;
+
 function query($sql)
 {
     global $conn, $DB_TYPE;
@@ -647,7 +649,8 @@ function getRegularSeasonMatchups()
         SELECT name, manager2_id, year, week_number, manager2_score FROM regular_season_matchups rsm2
             JOIN managers ON managers.id = rsm2.manager2_id
         ) l ON l.manager2_id = rsm.manager2_id AND l.year = rsm.year AND l.week_number = rsm.week_number
-        ORDER BY rsm.year, rsm.week_number ASC");
+        ORDER BY rsm.year, rsm.week_number ASC
+        ");
     while ($row = fetch_array($result)) {
 
         $currentYear = $row['year'];
@@ -693,17 +696,18 @@ function getRegularSeasonMatchups()
 function getNotes(array $matchups, string $period) 
 {
     $groupBy = $return = [];
-    foreach ($matchups as &$element) {
-        if (!isset($element['score1note'])) {
-            $element['score1note'] = $element['score1noteSearch'] = '';
-        }
-        if (!isset($element['score2note'])) {
-            $element['score2note'] = $element['score2noteSearch'] = '';
-        }
 
-        if ($period == 'all time') {
-            $groupBy['all'] = $matchups;
-        } else {
+    if ($period == 'all time') {
+        $groupBy['all'] = $matchups;
+    } else {
+        foreach ($matchups as &$element) {
+            if (!isset($element['score1note'])) {
+                $element['score1note'] = $element['score1noteSearch'] = '';
+            }
+            if (!isset($element['score2note'])) {
+                $element['score2note'] = $element['score2noteSearch'] = '';
+            }
+
             $groupBy[$element['year']][] = $element;
         }
     }
@@ -720,11 +724,11 @@ function getNotes(array $matchups, string $period)
 
     $period = ucwords($period);
 
-    foreach ($groupBy as $group => $matchups) {
+    foreach ($groupBy as $group => $head) {
         $highest = 0;
         $lowest = 417417;
         // Find the highest and lowest score in the group
-        foreach ($matchups as $element) {
+        foreach ($head as $element) {
             if ($element['score1'] > $highest) {
                 $highest = $element['score1'];
             }
@@ -739,26 +743,26 @@ function getNotes(array $matchups, string $period)
             }
         }
 
-        foreach ($matchups as $key => $element) {
+        foreach ($head as $key => $element) {
             if ($element['score1'] == $highest) {
-                $matchups[$key]['score1note'] = '<span class="badge badge-primary" alt="all time high">'.$period.'<i class="icon-arrow-up"></i></span>';
-                $matchups[$key]['score1noteSearch'] = $period.' high';
+                $head[$key]['score1note'] = '<span class="badge badge-primary" alt="all time high">'.$period.'<i class="icon-arrow-up"></i></span>';
+                $head[$key]['score1noteSearch'] = $period.' high';
             }
             if ($element['score1'] == $lowest) {
-                $matchups[$key]['score1note'] = '<span class="badge badge-secondary">'.$period.'<i class="icon-arrow-down"></i></span>';
-                $matchups[$key]['score1noteSearch'] = $period.' low';
+                $head[$key]['score1note'] = '<span class="badge badge-secondary">'.$period.'<i class="icon-arrow-down"></i></span>';
+                $head[$key]['score1noteSearch'] = $period.' low';
             }
             if ($element['score2'] == $highest) {
-                $matchups[$key]['score2note'] = '<span class="badge badge-primary">'.$period.'<i class="icon-arrow-up"></i></span>';
-                $matchups[$key]['score2noteSearch'] = $period.' high';
+                $head[$key]['score2note'] = '<span class="badge badge-primary">'.$period.'<i class="icon-arrow-up"></i></span>';
+                $head[$key]['score2noteSearch'] = $period.' high';
             }
             if ($element['score2'] == $lowest) {
-                $matchups[$key]['score2note'] = '<span class="badge badge-secondary">'.$period.'<i class="icon-arrow-down"></i></span>';
-                $matchups[$key]['score1noteSearch'] = $period.' low';
+                $head[$key]['score2note'] = '<span class="badge badge-secondary">'.$period.'<i class="icon-arrow-down"></i></span>';
+                $head[$key]['score1noteSearch'] = $period.' low';
             }
         }
 
-        $return = array_merge($return, $matchups);
+        $return = array_merge($return, $head);
     }
 
     return $return;

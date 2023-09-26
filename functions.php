@@ -534,11 +534,12 @@ function getFoesArray()
                 manager2_score AS man1score, manager1_score AS man2score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
                 FROM playoff_matchups
                 WHERE (manager1_id = $versus AND manager2_id = $managerId)
-            )");
+            ) AS T");
             while ($row = fetch_array($result)) {
+                $postseasonTypes = ['Final', 'Semifinal', 'Quarterfinal'];
                 $data[] = [
                     'opponent' => getManagerName($versus),
-                    'is_postseason' => gettype($row['week_number']) == 'string' ? true : false,
+                    'is_postseason' => in_array($row['week_number'], $postseasonTypes) ? true : false,
                     'week' => $row['week_number'],
                     'manager1_id' => $row['man1'],
                     'manager2_id' => $row['man2'],

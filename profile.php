@@ -294,7 +294,6 @@ if (isset($_GET['id'])) {
                                                 <td><?php echo $array['moves']; ?></td>
                                                 <td><?php echo $array['trades']; ?></td>
                                             </tr>
-
                                         <?php } ?>
                                     </tbody>
                                 </table>
@@ -476,12 +475,10 @@ if (isset($_GET['id'])) {
                                         <tr><td>Closest Win</td><td><?php echo round($closeWin, 2); ?></td></tr>
                                         <tr><td>Closest Loss</td><td><?php echo round($closeLoss, 2); ?></td></tr>
 
-
                                     </table>
-
                                 </div>
-                                <div class="col-sm-12 col-md-8">
 
+                                <div class="col-sm-12 col-md-8">
                                     <table class="table table-responsive table-striped nowrap" id="datatable-versus">
                                         <thead>
                                             <th>Year</th>
@@ -537,14 +534,103 @@ if (isset($_GET['id'])) {
                                         </tbody>
                                     </table>
                                 </div>
-
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-12 col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>High/Low Foes</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-responsive table-striped nowrap">
+                                    
+                                        <tr>
+                                            <td>Reg. Season Matchups</td>
+                                            <td><?php echo $foes['reg_season_matchups']['manager']; ?></td>
+                                            <td><?php echo $foes['reg_season_matchups']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Reg. Season Wins</td>
+                                            <td><?php echo $foes['reg_season_wins']['manager']; ?></td>
+                                            <td><?php echo $foes['reg_season_wins']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Reg. Season Losses</td>
+                                            <td><?php echo $foes['reg_season_losses']['manager']; ?></td>
+                                            <td><?php echo $foes['reg_season_losses']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Postseason Matchups</td>
+                                            <td><?php echo $foes['postseason_matchups']['manager']; ?></td>
+                                            <td><?php echo $foes['postseason_matchups']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Postseason Wins</td>
+                                            <td><?php echo $foes['postseason_wins']['manager']; ?></td>
+                                            <td><?php echo $foes['postseason_wins']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Postseason Losses</td>
+                                            <td><?php echo $foes['postseason_losses']['manager']; ?></td>
+                                            <td><?php echo $foes['postseason_losses']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Overall Winning %</td>
+                                            <td><?php echo $foes['overall_win_pct']['manager']; ?></td>
+                                            <td><?php echo $foes['overall_win_pct']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total Points For</td>
+                                            <td><?php echo $foes['total_pf']['manager']; ?></td>
+                                            <td><?php echo $foes['total_pf']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total Points Against</td>
+                                            <td><?php echo $foes['total_pa']['manager']; ?></td>
+                                            <td><?php echo $foes['total_pa']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Average Points For</td>
+                                            <td><?php echo $foes['average_pf']['manager']; ?></td>
+                                            <td><?php echo $foes['average_pf']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Average Points Against</td>
+                                            <td><?php echo $foes['average_pa']['manager']; ?></td>
+                                            <td><?php echo $foes['average_pa']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Biggest Win</td>
+                                            <td><?php echo $foes['biggest_win']['manager']; ?></td>
+                                            <td><?php echo $foes['biggest_win']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Biggest Loss</td>
+                                            <td><?php echo $foes['biggest_loss']['manager']; ?></td>
+                                            <td><?php echo $foes['biggest_loss']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Closest Win</td>
+                                            <td><?php echo $foes['closest_win']['manager']; ?></td>
+                                            <td><?php echo $foes['closest_win']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Closest Loss</td>
+                                            <td><?php echo $foes['closest_loss']['manager']; ?></td>
+                                            <td><?php echo $foes['closest_loss']['value']; ?></td>
+                                        </tr>
 
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
         </div>
     </div>
 </div>

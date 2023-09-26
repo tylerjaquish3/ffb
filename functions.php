@@ -50,6 +50,7 @@ if ((strpos($pageName, 'Profile') !== false)) {
     $profileNumbers = getProfileNumbers();
     $finishesChart = getFinishesChartNumbers();
     $seasonNumbers = getSeasonNumbers();
+    $foes = getFoesArray();
 }
 if ($pageName == 'Regular Season') {
     $regSeasonMatchups = getRegularSeasonMatchups();
@@ -413,11 +414,221 @@ function getSeasonNumbers()
                 'trades' => $row['trades']
             ];
         }
+
+        $mostPf = $mostPa = $mostWinPct = $mostMoves = 0;
+        $leastPf = $leastPa = $leastWinPct = $leastMoves = 417417;
+
+        foreach ($results as $year => $stats) {
+            if ($stats['pf'] > $mostPf) {
+                $mostPf = $stats['pf'];
+            }
+            if ($stats['pa'] > $mostPa) {
+                $mostPa = $stats['pa'];
+            }
+            if ($stats['pf'] < $leastPf) {
+                $leastPf = $stats['pf'];
+            }
+            if ($stats['pa'] < $leastPa) {
+                $leastPa = $stats['pa'];
+            }
+            if ($stats['win_pct'] > $mostWinPct) {
+                $mostWinPct = $stats['win_pct'];
+            }
+            if ($stats['win_pct'] < $leastWinPct) {
+                $leastWinPct = $stats['win_pct'];
+            }
+            if ($stats['moves'] > $mostMoves) {
+                $mostMoves = $stats['moves'];
+            }
+            if ($stats['moves'] < $leastMoves) {
+                $leastMoves = $stats['moves'];
+            }
+        }
+        foreach ($results as $year => &$stats) {
+            if ($stats['pf'] == $mostPf) {
+                $stats['pf'] = '<span class="badge badge-primary">'.$mostPf.'</span>';
+            }
+            if ($stats['pa'] == $mostPa) {
+                $stats['pa'] = '<span class="badge badge-primary">'.$mostPa.'</span>';
+            }
+            if ($stats['pf'] == $leastPf) {
+                $stats['pf'] = '<span class="badge badge-secondary">'.$leastPf.'</span>';
+            }
+            if ($stats['pa'] == $leastPa) {
+                $stats['pa'] = '<span class="badge badge-secondary">'.$leastPa.'</span>';
+            }
+            if ($stats['win_pct'] == $mostWinPct) {
+                $stats['win_pct'] = '<span class="badge badge-primary">'.$mostWinPct.'</span>';
+            }
+            if ($stats['win_pct'] == $leastWinPct) {
+                $stats['win_pct'] = '<span class="badge badge-secondary">'.$leastWinPct.'</span>';
+            }
+            if ($stats['moves'] == $mostMoves) {
+                $stats['moves'] = '<span class="badge badge-primary">'.$mostMoves.'</span>';
+            }
+            if ($stats['moves'] == $leastMoves) {
+                $stats['moves'] = '<span class="badge badge-secondary">'.$leastMoves.'</span>';
+            }
+        }
     } else {
         // redirect to index
     }
 
     return $results;
+}
+
+/**
+ * Calculate highs and lows against each manager for profile page
+ */
+function getFoesArray()
+{
+    $results = [
+        'reg_season_matchups' => ['manager' => '', 'value' => ''],
+        'reg_season_wins' => ['manager' => '', 'value' => ''],
+        'reg_season_losses' => ['manager' => '', 'value' => ''],
+        'postseason_matchups' => ['manager' => '', 'value' => ''],
+        'postseason_wins' => ['manager' => '', 'value' => ''],
+        'postseason_losses' => ['manager' => '', 'value' => ''],
+        'overall_win_pct' => ['manager' => '', 'value' => ''],
+        'total_pf' => ['manager' => '', 'value' => ''],
+        'total_pa' => ['manager' => '', 'value' => ''],
+        'average_pf' => ['manager' => '', 'value' => ''],
+        'average_pa' => ['manager' => '', 'value' => ''],
+        'biggest_win' => ['manager' => '', 'value' => ''],
+        'biggest_loss' => ['manager' => '', 'value' => ''],
+        'closest_win' => ['manager' => '', 'value' => ''],
+        'closest_loss' => ['manager' => '', 'value' => '']
+    ];
+
+    $categories = array_keys($results);
+
+    if (isset($_GET)) {
+
+        $allFoes = [];
+        $result = query("SELECT * FROM managers");
+        while ($row = fetch_array($result)) {
+            if ($row['name'] == $_GET['id']) {
+                $managerId = $row['id'];
+            } else {
+                $allFoes[] = $row['id'];
+            }
+        }
+
+        $allOpponents = [];
+        foreach ($allFoes as $versus) {
+
+            $data = [];
+            $result = query("SELECT * FROM (
+                SELECT year, week_number, manager1_id AS man1, manager2_id AS man2,
+                manager1_score AS man1score, manager2_score AS man2score, winning_manager_id
+                FROM regular_season_matchups
+                WHERE manager1_id = $managerId
+                AND manager2_id = $versus
+            UNION
+                SELECT year, round, manager1_id AS man1, manager2_id AS man2,
+                manager1_score AS man1score, manager2_score AS man2score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
+                FROM playoff_matchups
+                WHERE (manager1_id = $managerId AND manager2_id = $versus)
+            UNION
+                SELECT year, round, manager2_id AS man2, manager1_id AS man1,
+                manager2_score AS man1score, manager1_score AS man2score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
+                FROM playoff_matchups
+                WHERE (manager1_id = $versus AND manager2_id = $managerId)
+            )");
+            while ($row = fetch_array($result)) {
+                $data[] = [
+                    'opponent' => getManagerName($versus),
+                    'is_postseason' => gettype($row['week_number']) == 'string' ? true : false,
+                    'week' => $row['week_number'],
+                    'manager1_id' => $row['man1'],
+                    'manager2_id' => $row['man2'],
+                    'manager1_score' => $row['man1score'],
+                    'manager2_score' => $row['man2score'],
+                    'margin' => $row['man1score'] - $row['man2score'],
+                    'winning_manager_id' => $row['winning_manager_id']
+                ];
+            }
+
+            $totals = [
+                'reg_season_matchups' => 0,'reg_season_wins' => 0,'reg_season_losses' => 0,
+                'postseason_matchups' => 0,'postseason_wins' => 0,'postseason_losses' => 0,
+                'overall_wins' => 0,'overall_matchups' => 0,
+                'overall_win_pct' => 0,
+                'total_pf' => 0,'total_pa' => 0,
+                'average_pf' => 0,'average_pa' => 0,
+                'biggest_win' => 0,'biggest_loss' => 0,
+                'closest_win' => 417417,'closest_loss' => -417417
+            ];
+            foreach ($data as $match) {
+                
+                $totals['opponent'] = $match['opponent'];
+                if ($match['is_postseason']) {
+                    $totals['postseason_matchups']++;
+                    $totals['postseason_wins'] += $match['winning_manager_id'] == $managerId ? 1 : 0;
+                    $totals['postseason_losses'] += $match['winning_manager_id'] != $managerId ? 1 : 0;
+                } else {
+                    $totals['reg_season_matchups']++;
+                    $totals['reg_season_wins'] += $match['winning_manager_id'] == $managerId ? 1 : 0;
+                    $totals['reg_season_losses'] += $match['winning_manager_id'] != $managerId ? 1 : 0;
+                }
+                $totals['total_pf'] += $match['manager1_score'];
+                $totals['total_pa'] += $match['manager2_score'];
+                $totals['overall_wins'] += $match['winning_manager_id'] == $managerId ? 1 : 0;
+                $totals['overall_matchups']++;
+                $totals['overall_win_pct'] = round($totals['overall_wins'] * 100 / $totals['overall_matchups'], 1);
+                $totals['average_pf'] = round($totals['total_pf'] / $totals['overall_matchups'], 1);
+                $totals['average_pa'] = round($totals['total_pa'] / $totals['overall_matchups'], 1);
+                if ($match['margin'] > $totals['biggest_win']) {
+                    $totals['biggest_win'] = round($match['margin'], 2);
+                }
+                if ($match['margin'] < $totals['biggest_loss']) {
+                    $totals['biggest_loss'] = round($match['margin'], 2);
+                }
+                if ($match['margin'] < $totals['closest_win'] && $match['margin'] > 0) {
+                    $totals['closest_win'] = round($match['margin'], 2);
+                }
+                if ($match['margin'] > $totals['closest_loss'] && $match['margin'] < 0) {
+                    $totals['closest_loss'] = round($match['margin'], 2);
+                }
+            }
+            $allOpponents[] = $totals;
+        }
+
+        foreach ($categories as $category) {
+            $results = sortAndAssign($allOpponents, $category, $results);
+        }
+
+    } else {
+        // redirect to index
+    }
+
+    return $results;
+}
+
+function sortAndAssign(array $array, string $category, array $result)
+{
+    usort($array, function ($item1, $item2) use ($category) {
+        return $item2[$category] <=> $item1[$category];
+    });
+
+    // Sort asc for these categories
+    if ($category == "biggest_loss" || $category == "closest_win") {
+        usort($array, function ($item1, $item2) use ($category) {
+            return $item1[$category] <=> $item2[$category];
+        });
+    }
+
+    // Account for ties
+    $best = $result[$category]['value'] = $array[0][$category];
+    $result[$category]['manager'] = $array[0]['opponent'];
+    foreach ($array as $key => $opp) {
+        if ($key != 0 && $opp[$category] == $best) {
+            $result[$category]['manager'] .= ', '.$opp['opponent'];
+            $result[$category]['value'] = $opp[$category];
+        }
+    }
+
+    return $result;
 }
 
 /**

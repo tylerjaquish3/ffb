@@ -13,6 +13,7 @@
 - profile page, add chart for positions drafted?
 - make sidebar collapsible
 - current season, most tables, highlight highs/lows in each column
+- add new leader indicator on awards
 
 - draft order based on wives/gfs responses to something?
 

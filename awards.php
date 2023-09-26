@@ -64,14 +64,14 @@ if (isset($_GET['id'])) {
                                             $value = $row['value'];
                                             if (isfloat($row['value']) && isDecimal($row['value'])) {
                                                 $value = number_format($row['value'], 2, '.', ',');
-                                            } ?>
-                                            <div class="col-sm-6 award good">
-                                                <strong><?php echo $row['fact']; ?> </strong><br />
-                                                <?php echo $value; ?> <br />
-                                                <?php echo $row['note']; ?>
-                                            </div>
-                                        <?php }
-
+                                            } 
+                                            echo '<div class="col-sm-6 award good">';
+                                            if ($row['new_leader']) {
+                                                echo '<i class="icon-warning" style="font-size: 15px"></i>';
+                                            }
+                                            echo '<strong>'.$row['fact'].'</strong><br />'.$value.'<br />'.$row['note'];
+                                            echo '</div>';
+                                        }
                                     ?>
                                 </div>
                                 <div class="col-lg-6 col-sm-12">
@@ -89,13 +89,14 @@ if (isset($_GET['id'])) {
                                             $value = $row['value'];
                                             if (isfloat($row['value']) && isDecimal($row['value'])) {
                                                 $value = number_format($row['value'], 2, '.', ',');
-                                            } ?>
-                                            <div class="col-sm-6 award bad">
-                                                <strong><?php echo $row['fact']; ?> </strong><br />
-                                                <?php echo $value; ?> <br />
-                                                <?php echo $row['note']; ?>
-                                            </div>
-                                    <?php } ?>
+                                            } 
+                                            echo '<div class="col-sm-6 award bad">';
+                                            if ($row['new_leader']) {
+                                                echo '<i class="icon-warning" style="font-size: 15px"></i>';
+                                            }
+                                            echo '<strong>'.$row['fact'].'</strong><br />'.$value.'<br />'.$row['note'];
+                                            echo '</div>';
+                                     } ?>
                                 </div>
                             </div>
                             <hr />

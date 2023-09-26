@@ -38,7 +38,7 @@ include 'sidebar.html';
                         <div class="card-body">
                             <div class="media">
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
+                                    <i class="icon-coin-dollar font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
                                     <h5>Top Week Performance</h5>
@@ -53,7 +53,7 @@ include 'sidebar.html';
                         <div class="card-body">
                             <div class="media">
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
+                                    <i class="icon-clipboard font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
                                     <h5>Best Draft Pick</h5>
@@ -68,7 +68,7 @@ include 'sidebar.html';
                         <div class="card-body">
                             <div class="media">
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
+                                    <i class="icon-flag font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
                                     <h5>Most Total TDs (incl. BN)</h5>
@@ -83,7 +83,7 @@ include 'sidebar.html';
                         <div class="card-body">
                             <div class="media">
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
+                                    <i class="icon-earth font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
                                     <h5>Most Total Yards (incl. BN)</h5>
@@ -98,7 +98,7 @@ include 'sidebar.html';
                         <div class="card-body">
                             <div class="media">
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
+                                    <i class="icon-power-cord font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
                                     <h5>Best Bench</h5>

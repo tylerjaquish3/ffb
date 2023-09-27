@@ -3,7 +3,6 @@
 
 # Ideas
 
-- Profile page, add pie chart for wins vs each opponent
 - Profile page, line chart for points each season vs league average
 - Current season, combine players that got traded midseason
 - Draft page, add chart for positions by round?
@@ -12,6 +11,13 @@
 - profile page, add chart for draft spot over years
 - profile page, add chart for positions drafted?
 - make sidebar collapsible
+- parse old rosters to get players, points, etc.
+    - then make pages more dynamic where you can click on matchups and it will show the players & points
+    - make page to show rosters
+    - find the best players ever drafted
+    - also grab postseason matchup rosters
+    - get date/week from trades + points to see who won the trade
+
 
 - draft order based on wives/gfs responses to something?
 

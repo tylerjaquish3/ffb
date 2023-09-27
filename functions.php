@@ -53,6 +53,7 @@ if ((strpos($pageName, 'Profile') !== false)) {
     $finishesChart = getFinishesChartNumbers();
     $seasonNumbers = getSeasonNumbers();
     $foes = getFoesArray();
+    $winsChart = getProfileWinsChartNumbers();
 }
 if ($pageName == 'Regular Season') {
     $regSeasonMatchups = getRegularSeasonMatchups();
@@ -633,6 +634,46 @@ function sortAndAssign(array $array, string $category, array $result)
     }
 
     return $result;
+}
+
+/**
+ * Undocumented function
+ */
+function getProfileWinsChartNumbers()
+{
+    $response = ['managers' => ''];
+    $allFoes = $wins = [];
+    $result = query("SELECT * FROM managers ORDER BY id ASC");
+    while ($row = fetch_array($result)) {
+        if ($row['name'] == $_GET['id']) {
+            $managerId = $row['id'];
+        } else {
+            $allFoes[] = $row['name'];
+        }
+    }
+
+    $response['managers'] = $allFoes;
+
+    $result = query("SELECT name, SUM(CASE
+            WHEN manager1_score > manager2_score THEN 1
+            ELSE 0
+        END) AS wins,
+        SUM(CASE
+            WHEN manager1_score < manager2_score THEN 1
+            ELSE 0
+        END) AS losses
+        FROM regular_season_matchups rsm
+        JOIN managers ON managers.id = rsm.manager2_id
+        WHERE manager1_id = $managerId
+        GROUP BY manager2_id
+        ORDER BY managers.id ASC");
+    while ($row = fetch_array($result)) {
+        $wins[] = $row['wins'];
+    }
+
+    $response['wins'] = $wins;
+
+    return $response;
 }
 
 /**

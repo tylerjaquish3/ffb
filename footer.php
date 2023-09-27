@@ -15,7 +15,6 @@
     <script src="/assets/app.min.js" type="text/javascript"></script>
     <script src="/assets/owl.carousel.min.js" type="text/javascript"></script>
 
-    <!-- <link rel="stylesheet" type="text/css" href="/assets/style-rtl.css"> -->
 </body>
 
 </html>

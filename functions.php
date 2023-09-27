@@ -93,6 +93,7 @@ if ($pageName == 'Current Season') {
     $everyoneRecord = getRecordAgainstEveryone();
     $draftPerformance = getAllDraftedPlayerDetails();
     $draftRounds = getBestRoundPicks();
+    $scatterChart = getPointsForScatter();
 }
 
 function getManagerName($id) {
@@ -1818,6 +1819,38 @@ function getBestRoundPicks()
     }
 
     return $best;
+}
+
+/**
+ * Get PF & PA for this season to show on current season page
+ */
+function getPointsForScatter()
+{
+    global $season;
+    $response = [];
+    $totalPts = 0;
+
+    $result = query("SELECT name, sum(manager1_score) as pf, sum(manager2_score) as pa FROM regular_season_matchups rsm
+        JOIN managers ON managers.id = rsm.manager1_id
+        WHERE year = $season
+        GROUP BY name");
+    while ($row = fetch_array($result)) {
+
+        $totalPts += $row['pf'];
+        $response[$row['name']] = [
+            [
+                'x' => round($row['pf'], 1),
+                'y' => round($row['pa'], 1)
+            ]
+        ];
+    }
+
+    $data = [
+        'average' => round($totalPts / 10, 1),
+        'chart' => $response,
+    ];
+
+    return $data;
 }
 
 /**

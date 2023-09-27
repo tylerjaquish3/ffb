@@ -12,7 +12,6 @@
 - profile page, add chart for draft spot over years
 - profile page, add chart for positions drafted?
 - make sidebar collapsible
-- current season, most tables, highlight highs/lows in each column
 
 - draft order based on wives/gfs responses to something?
 

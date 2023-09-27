@@ -22,22 +22,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <!-- BEGIN VENDOR CSS-->
     <link rel="stylesheet" type="text/css" href="assets/bootstrap.min.css">
-    <!-- font icons-->
     <link rel="stylesheet" type="text/css" href="assets/icomoon.css">
-    <!-- <link rel="stylesheet" type="text/css" href="assets/flag-icon.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/pace.css"> -->
-
-    <!-- BEGIN ROBUST CSS-->
+    <link rel="stylesheet" type="text/css" href="assets/vertical-menu.min.css">
     <link rel="stylesheet" type="text/css" href="assets/bootstrap-extended.min.css">
     <link rel="stylesheet" type="text/css" href="assets/app.min.css">
     <link rel="stylesheet" type="text/css" href="assets/colors.min.css">
     <link rel="stylesheet" type="text/css" href="assets/custom-rtl.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/owl.carousel.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/datatables.min.css">
 
     <!-- BEGIN Page Level CSS-->
-    <link rel="stylesheet" type="text/css" href="assets/vertical-menu.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/owl.carousel.min.css">
-
-    <link rel="stylesheet" type="text/css" href="assets/datatables.min.css">
     <link rel="stylesheet" type="text/css" href="assets/suntown.css?v=<?php echo $version; ?>">
     <link rel="stylesheet" type="text/css" href="assets/responsive.css?v=<?php echo $version; ?>">
 

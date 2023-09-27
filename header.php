@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 
     <title>Suntown FFB</title>
-    <?php $version = "v2.0.5"; 
-    $vDate = "(9/25/23)"; ?>
+    <?php $version = "v2.1.0"; 
+    $vDate = "(9/27/23)"; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">
 
@@ -24,8 +24,8 @@
     <link rel="stylesheet" type="text/css" href="assets/bootstrap.min.css">
     <!-- font icons-->
     <link rel="stylesheet" type="text/css" href="assets/icomoon.css">
-    <link rel="stylesheet" type="text/css" href="assets/flag-icon.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/pace.css">
+    <!-- <link rel="stylesheet" type="text/css" href="assets/flag-icon.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/pace.css"> -->
 
     <!-- BEGIN ROBUST CSS-->
     <link rel="stylesheet" type="text/css" href="assets/bootstrap-extended.min.css">
@@ -35,7 +35,6 @@
 
     <!-- BEGIN Page Level CSS-->
     <link rel="stylesheet" type="text/css" href="assets/vertical-menu.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/vertical-overlay-menu.min.css">
     <link rel="stylesheet" type="text/css" href="assets/owl.carousel.min.css">
 
     <link rel="stylesheet" type="text/css" href="assets/datatables.min.css">

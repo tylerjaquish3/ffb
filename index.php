@@ -402,11 +402,11 @@ include 'sidebar.html';
             ]
         });
 
-        Chart.defaults.global.defaultFontSize = 9;
+        // Chart.defaults.global.defaultFontSize = 9;
         var ctx = $('#postseasonChart');
 
         var stackedBar = new Chart(ctx, {
-            type: 'horizontalBar',
+            type: 'bar',
             data: {
                 labels: <?php echo json_encode($postseasonChart['managers']); ?>,
                 datasets: [{
@@ -428,13 +428,14 @@ include 'sidebar.html';
                 ]
             },
             options: {
+                indexAxis: 'y',
                 scales: {
-                    xAxes: [{
+                    x: {
                         stacked: true
-                    }],
-                    yAxes: [{
+                    },
+                    y: {
                         stacked: true
-                    }]
+                    }
                 }
             }
         });

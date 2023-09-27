@@ -165,23 +165,24 @@ include 'sidebar.html';
 
         var options = {
             scales: {
-                yAxes: [{
-                    scaleLabel: {
+                y: {
+                    display: true,
+                    title: {
                         display: true,
-                        labelString: 'Draft Position',
-                        fontSize: 20
+                        text: 'Draft Position',
+                        font: {
+                            size: 20
+                        }
                     },
-                    ticks: {
-                        reverse: true,
-                    }
-                }]
+                    reverse: true
+                }
             }
         };
 
         var myBarChart = new Chart(ctx, {
             type: 'line',
             data: data,
-            options: options,
+            options: options
         });
 
     });

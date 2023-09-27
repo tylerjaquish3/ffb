@@ -328,13 +328,16 @@ include 'sidebar.html';
 
         var options = {
             scales: {
-                yAxes: [{
-                    scaleLabel: {
+                y: {
+                    display: true,
+                    title: {
                         display: true,
-                        labelString: 'Wins',
-                        fontSize: 20
+                        text: 'Wins',
+                        font: {
+                            size: 20
+                        }
                     }
-                }]
+                }
             }
         };
 
@@ -342,9 +345,7 @@ include 'sidebar.html';
             type: 'line',
             data: data,
             options: options,
-
         });
-
 
         // Chart for scatter of weekly points
         var ctx2 = $("#scatterChart");
@@ -366,6 +367,7 @@ include 'sidebar.html';
             obj.data = value;
             obj.showLine = false;
             obj.pointBackgroundColor = pointColor;
+            obj.borderColor = pointColor;
             dataset2.push(obj);
             i++;
         }
@@ -377,26 +379,26 @@ include 'sidebar.html';
             },
             options: {
                 scales: {
-                    xAxes: [{
-                        type: 'linear',
-                        position: 'bottom'
-                    }]
-                },
-                scales: {
-                    yAxes: [{
-                        scaleLabel: {
+                    y: {
+                        display: true,
+                        title: {
                             display: true,
-                            labelString: 'Manager Score vs. League Average',
-                            fontSize: 20
+                            text: 'Manager Score vs. League Average',
+                            font: {
+                                size: 20
+                            }
                         }
-                    }],
-                    xAxes: [{
-                        scaleLabel: {
+                    },
+                    x: {
+                        display: true,
+                        title: {
                             display: true,
-                            labelString: 'Opponent Score vs. League Average',
-                            fontSize: 20
+                            text: 'Opponent Score vs. League Average',
+                            font: {
+                                size: 20
+                            }
                         }
-                    }]
+                    }
                 }
             }
         });
@@ -406,7 +408,6 @@ include 'sidebar.html';
         let ctx3 = $("#pfwinsChart");
 
         let pfpawins = <?php echo json_encode($pfwins); ?>;
-        let j = 0;
         let dataset3 = [];
         for (const [key, value] of Object.entries(pfpawins)) {
 
@@ -420,8 +421,8 @@ include 'sidebar.html';
             obj.data = value;
             obj.showLine = false;
             obj.pointBackgroundColor = pointColor;
+            obj.borderColor = pointColor;
             dataset3.push(obj);
-            j++;
         }
 
         let scatterChart2 = new Chart(ctx3, {
@@ -431,26 +432,26 @@ include 'sidebar.html';
             },
             options: {
                 scales: {
-                    xAxes: [{
-                        type: 'linear',
-                        position: 'bottom'
-                    }]
-                },
-                scales: {
-                    yAxes: [{
-                        scaleLabel: {
+                    y: {
+                        display: true,
+                        title: {
                             display: true,
-                            labelString: 'Season Points',
-                            fontSize: 20
+                            text: 'Season Points',
+                            font: {
+                                size: 20
+                            }
                         }
-                    }],
-                    xAxes: [{
-                        scaleLabel: {
+                    },
+                    x: {
+                        display: true,
+                        title: {
                             display: true,
-                            labelString: 'Season Wins',
-                            fontSize: 20
+                            text: 'Season Wins',
+                            font: {
+                                size: 20
+                            }
                         }
-                    }]
+                    }
                 }
             }
         });

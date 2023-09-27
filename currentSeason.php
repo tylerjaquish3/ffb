@@ -575,6 +575,22 @@ include 'sidebar.html';
                 </div>
 
             </div>
+
+            <div class="row">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Points For and Against</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <div class="card-block">
+                                <canvas id="scatterChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -603,7 +619,33 @@ include 'sidebar.html';
             },
             order: [
                 [10, "desc"]
-            ]
+            ],
+            initComplete: function() {
+                var api = this.api();
+                
+                api.columns(':not(:first)').every(function() {
+                    var col = this.index();
+                    var array = [];
+                    api.cells(null, col).every(function() {
+                        var cell = this.node();
+                        var record_id = $(cell).attr("data-order");
+                        array.push(record_id)
+                    })
+
+                    last = array.length-1;
+                    array.sort(function(a, b){return b-a});
+
+                    api.cells(null, col).every( function() {
+                        var cell = this.node();
+                        var record_id = $( cell ).attr( "data-order" );
+                        if (record_id === array[0]) {
+                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
+                        } else if (record_id === array[last]) {
+                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
+                        }
+                    });
+                });
+            }
         });
 
         $('#datatable-currentStats').DataTable({
@@ -617,7 +659,26 @@ include 'sidebar.html';
             },
             order: [
                 [2, "desc"]
-            ]
+            ],
+            initComplete: function() {
+                var api = this.api();
+                api.columns(':not(:first)').every(function() {
+                    var col = this.index();
+                    var data = this.data().unique().map(function(value) {
+                        return parseInt(value);
+                    }).toArray().sort(function(a, b){return b-a});
+
+                    last = data.length-1;
+                    api.cells(null, col).every(function() {
+                        var cell = parseInt(this.data());
+                        if (cell === data[0]) {
+                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
+                        } else if (cell === data[last]) {
+                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
+                        }
+                    });
+                });
+            }
         });
 
         $('#datatable-bestWeek').DataTable({
@@ -645,7 +706,26 @@ include 'sidebar.html';
             },
             order: [
                 [2, "desc"]
-            ]
+            ],
+            initComplete: function() {
+                var api = this.api();
+                api.columns(':not(:first)').every(function() {
+                    var col = this.index();
+                    var data = this.data().unique().map(function(value) {
+                        return parseInt(value);
+                    }).toArray().sort(function(a, b){return b-a});
+
+                    last = data.length-1;
+                    api.cells(null, col).every(function() {
+                        var cell = parseInt(this.data());
+                        if (cell === data[0]) {
+                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
+                        } else if (cell === data[last]) {
+                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
+                        }
+                    });
+                });
+            }
         });
 
         $('#datatable-bestTeamWeek').DataTable({
@@ -669,7 +749,26 @@ include 'sidebar.html';
             },
             order: [
                 [3, "desc"]
-            ]
+            ],
+            initComplete: function() {
+                var api = this.api();
+                api.columns(':not(:first)').every(function() {
+                    var col = this.index();
+                    var data = this.data().unique().map(function(value) {
+                        return parseInt(value);
+                    }).toArray().sort(function(a, b){return b-a});
+
+                    last = data.length-1;
+                    api.cells(null, col).every(function() {
+                        var cell = parseInt(this.data());
+                        if (cell === data[0]) {
+                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
+                        } else if (cell === data[last]) {
+                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
+                        }
+                    });
+                });
+            }
         });
 
         $('#datatable-drafted').DataTable({
@@ -683,7 +782,26 @@ include 'sidebar.html';
             },
             "order": [
                 [1, "desc"]
-            ]
+            ],
+            initComplete: function() {
+                var api = this.api();
+                api.columns(':not(:first)').every(function() {
+                    var col = this.index();
+                    var data = this.data().unique().map(function(value) {
+                        return parseInt(value);
+                    }).toArray().sort(function(a, b){return b-a});
+
+                    last = data.length-1;
+                    api.cells(null, col).every(function() {
+                        var cell = parseInt(this.data());
+                        if (cell === data[0]) {
+                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
+                        } else if (cell === data[last]) {
+                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
+                        }
+                    });
+                });
+            }
         });
 
         $('#datatable-bestDraft').DataTable({
@@ -717,6 +835,109 @@ include 'sidebar.html';
             "order": [
                 [1, "asc"]
             ]
+        });
+
+        const avg = <?php echo json_encode($scatterChart['average']); ?>;
+        const quadrants = {
+            id: 'quadrants',
+            beforeDraw(chart, args, options) {
+                const {ctx, chartArea: {left, top, right, bottom}, scales: {x, y}} = chart;
+                const midX = x.getPixelForValue(avg);
+                const midY = y.getPixelForValue(avg);
+                ctx.save();
+                ctx.fillStyle = options.topLeft;
+                ctx.fillRect(left, top, midX - left, midY - top);
+                ctx.fillStyle = options.topRight;
+                ctx.fillRect(midX, top, right - midX, midY - top);
+                ctx.fillStyle = options.bottomRight;
+                ctx.fillRect(midX, midY, right - midX, bottom - midY);
+                ctx.fillStyle = options.bottomLeft;
+                ctx.fillRect(left, midY, midX - left, bottom - midY);
+                ctx.restore();
+            }
+        };
+
+        // Chart for scatter of pf
+        var ctx = $("#scatterChart");
+        var points = <?php echo json_encode($scatterChart['chart']); ?>;
+        let pointColor = '#000';
+        let dataset = [];
+        let labels = [];
+        for (const [key, value] of Object.entries(points)) {
+
+            let obj = {};
+            obj.label = key;
+            obj.data = value;
+            obj.datalabels = {
+                align: 'bottom'
+            };
+            labels.push(key);
+            dataset.push(obj);
+        }
+
+        let scatterChart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                labels: labels,
+                datasets: dataset
+            },
+            options: {
+                scales: {
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Points Against',
+                            font: {
+                                size: 15
+                            }
+                        }
+                    },
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Points For',
+                            font: {
+                                size: 15
+                            }
+                        }
+                    },
+                },
+                plugins: {
+                    quadrants: {
+                        topLeft: "rgba(255, 85, 85, 0.32)",
+                        topRight: "#bdbdbd",
+                        bottomRight: "rgb(172, 240, 172)",
+                        bottomLeft: "#bdbdbd",
+                    },
+                    legend: {
+                        display: false,
+                    },
+                    datalabels: {
+                        formatter: function(value, context) {
+                            return context.chart.data.labels[context.datasetIndex];
+                        },
+                        anchor: 'top',
+                        padding: 10
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function() {
+                                return '';
+                            },
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                return label+'(' + context.parsed.x + ' PF, ' + context.parsed.y + ' PA)';
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [quadrants,ChartDataLabels]
         });
 
     });

@@ -321,30 +321,26 @@ include 'sidebar.html';
             x++;
         }
 
-        var data = {
-            labels: yearLabels,
-            datasets: dataset
-        };
-
-        var options = {
-            scales: {
-                y: {
-                    display: true,
-                    title: {
+        var myBarChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: yearLabels,
+                datasets: dataset
+            },
+            options: {
+                scales: {
+                    y: {
                         display: true,
-                        text: 'Wins',
-                        font: {
-                            size: 20
+                        title: {
+                            display: true,
+                            text: 'Wins',
+                            font: {
+                                size: 20
+                            }
                         }
                     }
                 }
-            }
-        };
-
-        var myBarChart = new Chart(ctx, {
-            type: 'line',
-            data: data,
-            options: options,
+            },
         });
 
         // Chart for scatter of weekly points
@@ -352,7 +348,6 @@ include 'sidebar.html';
 
         var points = <?php echo json_encode($scatterChart); ?>;
         let pointColor = '#000';
-        let i = 0;
         let dataset2 = [];
         for (const [key, value] of Object.entries(points)) {
 
@@ -369,7 +364,6 @@ include 'sidebar.html';
             obj.pointBackgroundColor = pointColor;
             obj.borderColor = pointColor;
             dataset2.push(obj);
-            i++;
         }
 
         let scatterChart = new Chart(ctx2, {
@@ -402,7 +396,6 @@ include 'sidebar.html';
                 }
             }
         });
-
 
         // Chart for scatter of season wins and points
         let ctx3 = $("#pfwinsChart");

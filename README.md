@@ -1,5 +1,7 @@
 ### Suntown FFB website
 
+# Bugs
+
 
 # Ideas
 

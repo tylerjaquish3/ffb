@@ -40,17 +40,21 @@
     <tbody>
         <?php
         $result = query(
-            "SELECT name, IFNULL(one_seeds, 0) as one_seeds, IFNULL(two_seeds, 0) as two_seeds, IFNULL(one_seeds, 0)+IFNULL(two_seeds, 0) as total
-	        FROM managers
-	        LEFT JOIN (SELECT COUNT(manager1_id) as one_seeds, manager1_id 
-	        FROM playoff_matchups pm 
-	        WHERE manager1_seed = 1 and round = 'Semifinal'
-	        GROUP BY manager1_id) one ON managers.id = one.manager1_id
-	        LEFT JOIN (SELECT COUNT(manager1_id) as two_seeds, manager1_id 
-	        FROM playoff_matchups pm 
-	        WHERE (manager1_seed = 2 OR manager2_seed = 2) AND round = 'Semifinal'
-	        GROUP BY manager1_id) two ON managers.id = two.manager1_id"
-        );
+            "SELECT name, IFNULL(one_seeds, 0) as one_seeds, IFNULL(two_seeds1, 0)+IFNULL(two_seeds2, 0) as two_seeds, 
+            IFNULL(one_seeds, 0)+IFNULL(two_seeds1, 0)+IFNULL(two_seeds2, 0) as total
+            FROM managers
+            LEFT JOIN (SELECT COUNT(manager1_id) as one_seeds, manager1_id 
+                FROM playoff_matchups pm 
+                WHERE manager1_seed = 1 and round = 'Semifinal'
+                GROUP BY manager1_id) one ON managers.id = one.manager1_id
+            LEFT JOIN (SELECT COUNT(manager1_id) as two_seeds1, manager1_id 
+                FROM playoff_matchups pm 
+                WHERE manager1_seed = 2 AND round = 'Semifinal'
+                GROUP BY manager1_id) two1 ON managers.id = two1.manager1_id
+            LEFT JOIN (SELECT COUNT(manager2_id) as two_seeds2, manager2_id 
+                FROM playoff_matchups pm 
+                WHERE manager2_seed = 2 AND round = 'Semifinal'
+                GROUP BY manager2_id) two2 ON managers.id = two2.manager2_id");
         while ($row = fetch_array($result)) { ?>
             <tr>
                 <td><?php echo $row['name']; ?></td>

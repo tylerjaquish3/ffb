@@ -36,7 +36,7 @@ if (file_exists("players_cache_file.json")) {
                         <div class="card-body" style="direction: ltr;">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <table class="table table-striped nowrap" id="datatable-players">
+                                    <table class="table table-responsive table-striped nowrap" id="datatable-players">
                                         <thead>
                                             <th>Year</th>
                                             <th>Week</th>
@@ -80,7 +80,7 @@ if (file_exists("players_cache_file.json")) {
                 .appendTo('#datatable-players thead');
 
             $('#datatable-players').DataTable({
-                pageLength: 50,
+                pageLength: 25,
                 ajax: "players_cache_file.json",
                 columns: [
                     { data: "year" },

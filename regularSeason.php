@@ -48,9 +48,9 @@ include 'sidebar.html';
                                             } else {
                                                 echo '<td><span class="badge badge-secondary">' . $matchup['manager2'] . '</span></td>';
                                             } ?>
-                                            <td><?php echo $matchup['score1']; ?></td>
+                                            <td><?php echo '<a href="/rosters.php?year='.$matchup["year"].'&week='.$matchup["week"].'&manager='.$matchup['manager1'].'">'.$matchup['score1'].'</a>'; ?></td>
                                             <td style="font-size: 11px;"><?php echo $matchup['score1note']; ?></td>
-                                            <td><?php echo $matchup['score2']; ?></td>
+                                            <td><?php echo '<a href="/rosters.php?year='.$matchup["year"].'&week='.$matchup["week"].'&manager='.$matchup['manager2'].'">'.$matchup['score2'].'</a>'; ?></td>
                                             <td style="font-size: 11px;"><?php echo $matchup['score2note']; ?></td>
                                             <td><?php echo $matchup['score1noteSearch']; ?></td>
                                             <td><?php echo $matchup['score2noteSearch']; ?></td>

@@ -19,7 +19,7 @@ include 'sidebar.html';
                 <div class="col-sm-12 col-md-4">
                     <select id="year-select" class="form-control">
                         <?php
-                        $result = query("SELECT DISTINCT year FROM rosters WHERE year > 2019 ORDER BY year DESC");
+                        $result = query("SELECT DISTINCT year FROM rosters WHERE year > 2011 ORDER BY year DESC");
                         while ($row = fetch_array($result)) {
                             if ($row['year'] == $selectedSeason) {
                                 echo '<option selected value="'.$row['year'].'">'.$row['year'].'</option>';
@@ -142,9 +142,7 @@ include 'sidebar.html';
                                         foreach ($values as $pos => $stuff) {
                                             $totalPoints += $stuff['points'];
                                             $totalProjected += $stuff['projected'];
-                                        }
-
-                                        ?>
+                                        } ?>
                                         <tr>
                                             <td>
                                                 <strong><?php echo $manager; ?></strong><br />
@@ -382,6 +380,7 @@ include 'sidebar.html';
                                 <thead>
                                     <th>Manager</th>
                                     <th>Opponent</th>
+                                    <th></th>
                                     <th>Week</th>
                                     <th>Actual Points</th>
                                     <th>Opponent Score</th>
@@ -399,6 +398,10 @@ include 'sidebar.html';
                                         <tr>
                                             <td><?php echo $row['manager']; ?></td>
                                             <td><?php echo $row['opponent']; ?></td>
+                                            <td>
+                                                <?php echo '<a href="/rosters.php?year='.$row['year'].'&week='.$row['week'].'&manager='.$row['manager'].'">
+                                                <i class="icon-clipboard"></i></a>'; ?>
+                                                </td>
                                             <td><?php echo $row['week']; ?></td>
                                             <td><?php echo $row['points']; ?></td>
                                             <td><?php echo $row['oppPoints']; ?></td>
@@ -748,7 +751,7 @@ include 'sidebar.html';
                 leftColumns: 2
             },
             order: [
-                [3, "desc"]
+                [4, "desc"]
             ],
             initComplete: function() {
                 var api = this.api();

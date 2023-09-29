@@ -224,6 +224,10 @@ span.seed {
     text-align: center;
 }
 
+.text-right {
+    text-align: right;
+}
+
 .color-gray td, .color-gray {
     background-color: lightgray !important;
 }

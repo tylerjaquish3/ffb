@@ -13,13 +13,13 @@
 - profile page, add chart for draft spot over years
 - profile page, add chart for positions drafted?
 - make sidebar collapsible
-- parse old rosters to get players, points, etc.
-    - then make pages more dynamic where you can click on matchups and it will show the players & points
-    - make page to show rosters
-    - find the best players ever drafted
-    - also grab postseason matchup rosters
-    - get date/week from trades + points to see who won the trade
 
+- find the best players ever drafted
+- get date/week from trades + points to see who won the trade
+- grab postseason matchup rosters
+- rosters page, add chart for points by position for each manager
+- rosters page, add record for each manager
+- players page, where all players are listed and you can see what they did each week, season, who's team they're on, etc.
 
 - draft order based on wives/gfs responses to something?
 

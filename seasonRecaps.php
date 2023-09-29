@@ -363,8 +363,8 @@ foreach ($seasonNumbers as $standings) {
                                             } else {
                                                 echo '<td><span class="badge badge-secondary">' . $matchup['manager2'] . '</span></td>';
                                             } ?>
-                                            <td><?php echo $matchup['score1']; ?></td>
-                                            <td><?php echo $matchup['score2']; ?></td>
+                                            <td><?php echo '<a href="/rosters.php?year='.$matchup['year'].'&week='.$matchup['week'].'&manager='.$matchup['manager1'].'">'.$matchup['score1'].'</a>'; ?></td>
+                                            <td><?php echo '<a href="/rosters.php?year='.$matchup['year'].'&week='.$matchup['week'].'&manager='.$matchup['manager2'].'">'.$matchup['score2'].'</a>'; ?></td>
                                         </tr>
 
                                     <?php }

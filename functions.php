@@ -96,6 +96,9 @@ if ($pageName == 'Current Season') {
     $draftRounds = getBestRoundPicks();
     $scatterChart = getPointsForScatter();
 }
+if ($pageName == 'Rosters') {
+    $recap = getMatchupRecapNumbers();
+}
 
 function getManagerName($id) {
     $managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
@@ -1964,6 +1967,7 @@ function getOptimalLineupPoints()
             $response[] = [
                 'manager' => $manager,
                 'week' => $week,
+                'year' => $selectedSeason,
                 'optimal' => round($optimal, 2),
                 'points' => round($points, 2),
                 'projected' => round($projected, 2),
@@ -2074,6 +2078,92 @@ function checkRosterForOptimal(array $roster)
     }
 
     return $optimal;
+}
+
+function getMatchupRecapNumbers()
+{
+    $managerName = 'Andy';
+    $year = 2023;
+    $week = 1;
+    if (isset($_GET['manager'])) {
+        $managerName = $_GET['manager'];
+        if (isset($_GET['year'])) {
+            $year = $_GET['year'];
+        }
+        if (isset($_GET['week'])) {
+            $week = $_GET['week'];
+        }
+    }
+    $recap = [
+        'winner' => '', 'loser' => '', 'margin1' => 0, 'margin2' => 0, 'projected1' => 0, 'projected2' => 0,
+        'top_scorer1' => 0, 'top_scorer2' => 0, 'bottom_scorer1' => 417, 'bottom_scorer2' => 417,
+        'top_scorer_name1' => '', 'top_scorer_name2' => '', 'bottom_scorer_name1' => '', 'bottom_scorer_name2' => '',
+        'bench1' => 0, 'bench2' => 0
+    ];
+
+    $versus = '';
+
+    $result = query("SELECT * FROM rosters
+        JOIN managers on managers.name = rosters.manager
+        JOIN regular_season_matchups rsm on rsm.year = rosters.year and rsm.week_number = rosters.week
+        and rsm.manager1_id = managers.id
+        WHERE rosters.year = $year and rosters.week = $week and manager = '".$managerName."'");
+    while ($row = fetch_array($result)) {
+
+        $versusId = $row['manager2_id'];
+        $managerPoints = $row['manager1_score'];
+        $versusPoints = $row['manager2_score'];
+        
+        $margin1 = $managerPoints - $versusPoints;
+        $margin2 = $versusPoints - $managerPoints;
+
+        if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
+            $recap['bench1'] += $row['points'];
+        } else {
+            $recap['projected1'] += $row['projected'];
+            
+            if ($row['points'] > $recap['top_scorer1']) {
+                $recap['top_scorer1'] = $row['points'];
+                $recap['top_scorer_name1'] = $row['player'];
+            }
+            if ($row['points'] < $recap['bottom_scorer1']) {
+                $recap['bottom_scorer1'] = $row['points'];
+                $recap['bottom_scorer_name1'] = $row['player'];
+            }
+        }
+    }
+    
+    $result = query("SELECT * FROM managers 
+        JOIN rosters on managers.name = rosters.manager
+        WHERE rosters.year = $year AND rosters.week = $week AND managers.id = ".$versusId);
+    while ($row = fetch_array($result)) {
+        $versus = $row['manager'];
+        if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
+            $recap['bench2'] += $row['points'];
+        } else {
+            $recap['projected2'] += $row['projected'];
+
+            if ($row['points'] > $recap['top_scorer2']) {
+                $recap['top_scorer2'] = $row['points'];
+                $recap['top_scorer_name2'] = $row['player'];
+            }
+            if ($row['points'] < $recap['bottom_scorer2']) {
+                $recap['bottom_scorer2'] = $row['points'];
+                $recap['bottom_scorer_name2'] = $row['player'];
+            }
+        }
+    }
+
+    $recap['man1'] = $managerPoints > $versusPoints ? '<span class="badge badge-primary">'.$managerName.'</span>' : '<span class="badge badge-secondary">'.$managerName.'</span>';
+    $recap['man2'] = $managerPoints > $versusPoints ? '<span class="badge badge-secondary">'.$versus.'</span>' : '<span class="badge badge-primary">'.$versus.'</span>';
+    $recap['margin1'] = $margin1;
+    $recap['margin2'] = $margin2;
+    $recap['top_scorer1'] = $recap['top_scorer_name1'].' ('.$recap['top_scorer1'].')';
+    $recap['top_scorer2'] = $recap['top_scorer_name2'].' ('.$recap['top_scorer2'].')';
+    $recap['bottom_scorer1'] = $recap['bottom_scorer_name1'].' ('.$recap['bottom_scorer1'].')';
+    $recap['bottom_scorer2'] = $recap['bottom_scorer_name2'].' ('.$recap['bottom_scorer2'].')';
+    
+    return $recap;
 }
 
 function isfloat($val) 

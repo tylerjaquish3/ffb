@@ -524,25 +524,25 @@ if (isset($_GET['id'])) {
                                                 ORDER BY YEAR desc, CASE WHEN (week_number <> '0' AND CAST(week_number AS SIGNED) <> 0) THEN CAST(week_number AS SIGNED) ELSE 9999 END DESC
                                                 "
                                             );
-                                            while ($array = fetch_array($result)) { ?>
-                                                <tr class="highlight">
-                                                    <td><?php echo $array['year']; ?></td>
-                                                    <td><?php echo $array['week_number']; ?></td>
-                                                    <?php if ($array['winning_manager_id'] == $managerId) {
-                                                        echo '<td><span class="badge badge-primary">' . $managerName.'</span></td>';
+                                            while ($array = fetch_array($result)) {
+                                                echo '<tr class="highlight">
+                                                    <td>'.$array["year"].'</td>
+                                                    <td>'.$array["week_number"].'</td>';
+                                                    if ($array['winning_manager_id'] == $managerId) {
+                                                        echo '<td><span class="badge badge-primary">'.$managerName.'</span></td>';
                                                     } else {
-                                                        echo '<td><span class="badge badge-secondary">' . $managerName.'</span></td>';
-                                                    }?>
-                                                    <td><?php echo $array['man1score'].' - '.$array['man2score']; ?></td>
-                                                    <?php
+                                                        echo '<td><span class="badge badge-secondary">'.$managerName.'</span></td>';
+                                                    }
+                                                    echo '<td><a href="/rosters.php?year='.$array["year"].'&week='.$array["week_number"].'&manager='.$managerName.'">'.
+                                                        $array['man1score'].' - '.$array['man2score'].'</a></td>';
                                                     if ($array['winning_manager_id'] == $versus) {
                                                         echo '<td><span class="badge badge-primary">' . $versusName.'</span></td>';
                                                     } else {
                                                         echo '<td><span class="badge badge-secondary">' . $versusName.'</span></td>';
-                                                    } ?>
-                                                    <td><?php echo round(abs($array['man1score'] - $array['man2score']), 2); ?></td>
-                                                </tr>
-                                            <?php } ?>
+                                                    }
+                                                    echo '<td>'.round(abs($array['man1score'] - $array['man2score']), 2).'</td>
+                                                </tr>';
+                                            } ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -562,7 +562,6 @@ if (isset($_GET['id'])) {
                             <div class="row">
                                 <div class="col-sm-12">
                                     <table class="table table-responsive table-striped nowrap">
-                                    
                                         <tr>
                                             <td>Reg. Season Matchups</td>
                                             <td><?php echo $foes['reg_season_matchups']['manager']; ?></td>

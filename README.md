@@ -1,7 +1,7 @@
 ### Suntown FFB website
 
 # Bugs
-
+2019 redo the scrape because names are A. Ekeler with special char
 
 # Ideas
 
@@ -19,7 +19,6 @@
 - grab postseason matchup rosters
 - rosters page, add chart for points by position for each manager
 - rosters page, add record for each manager
-- players page, where all players are listed and you can see what they did each week, season, who's team they're on, etc.
 
 - draft order based on wives/gfs responses to something?
 

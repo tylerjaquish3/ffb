@@ -266,4 +266,57 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'league-standings') {
     echo json_encode($done);
     die;
 }
+
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'all-players') {
+
+    $result = query("SELECT player, SUM(points) as points from rosters 
+        WHERE player != '' AND player != '(Empty)'
+        GROUP BY player");
+    while ($row = fetch_array($result)) {
+
+        $players[] = [
+            'player' => clean($row['player']),
+            'points' => number_format($row['points'], 2)
+        ];
+    }
+    $content = new \stdClass();
+    $content->data = $players;
+
+    echo json_encode($content);
+    die;
+}
+
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'player-info') {
+
+    $return = '';
+    $player = $_GET['player'];
+    $details = [];
+
+    $result = query("SELECT year, manager, player, COUNT(week) as weeks, SUM(points) as points, SUM(projected) as projected 
+        FROM rosters 
+        JOIN managers ON rosters.manager = managers.name
+        WHERE player LIKE CONCAT(SUBSTRING('".$player."', 1, LENGTH('".$player."') - 4),'%')
+        GROUP BY year, manager, player
+        ORDER BY year DESC");
+    while ($row = fetch_array($result)) {
+        $details[] = [
+            'year' => $row['year'],
+            'player' => $row['player'],
+            'manager' => $row['manager'],
+            'weeks' => $row['weeks'],
+            'points' => round($row['points'], 2),
+            'projected' => round($row['projected'], 2)
+        ];
+    }
+
+    echo json_encode($details);
+    die;
+}
+
+function clean($string) {
+    $string = rtrim($string, ' ');
+
+    return preg_replace('/[^A-Za-z.0-9\-]/', ' ', $string); // Removes special chars.
+}
+
 ?>

@@ -4,23 +4,6 @@ $pageName = "Players";
 include 'header.php';
 include 'sidebar.html';
 
-if (file_exists("players_cache_file.json")) {
-    $players = json_decode(file_get_contents("players_cache_file.json"));
-} else {
-    $result = query( "SELECT * FROM rosters");
-    while ($row = fetch_array($result)) {
-        $row['roster'] = '<a href="/rosters.php?year='.$row["year"].'&week='.$row["week"].'&manager='.$row['manager'].'"><i class="icon-clipboard"></i></a>';
-        $row['points'] = number_format($row['points'], 2);
-        $row['projected'] = number_format($row['projected'], 2);
-
-        $players[] = $row;
-    }
-    $content = new \stdClass();
-    $content->data = $players;
-
-    file_put_contents("players_cache_file.json", json_encode($content));
-}
-
 ?>
 
 <div class="app-content content container-fluid">
@@ -36,16 +19,10 @@ if (file_exists("players_cache_file.json")) {
                         <div class="card-body" style="direction: ltr;">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <table class="table table-responsive table-striped nowrap" id="datatable-players">
+                                    <table class="table" id="datatable-players">
                                         <thead>
-                                            <th>Year</th>
-                                            <th>Week</th>
-                                            <th>Position</th>
-                                            <th>Roster Spot</th>
+                                            <th></th>
                                             <th>Player</th>
-                                            <th>Manager</th>
-                                            <th>Roster</th>
-                                            <th>Projected</th>
                                             <th>Points</th>
                                         </thead>
                                         <tbody></tbody>
@@ -71,77 +48,92 @@ if (file_exists("players_cache_file.json")) {
 <script type="text/javascript">
     $(document).ready(function() {
 
-        // Wait a second in case it needs to cache
-        setTimeout(function() {
+        function format ( rowData ) {
+            var div = $('<div/>')
+                .addClass( 'loading' )
+                .text( 'Loading...' );
 
-            $('#datatable-players thead tr')
-                .clone(true)
-                .addClass('filters')
-                .appendTo('#datatable-players thead');
-
-            $('#datatable-players').DataTable({
-                pageLength: 25,
-                ajax: "players_cache_file.json",
-                columns: [
-                    { data: "year" },
-                    { data: "week" },
-                    { data: "position" },
-                    { data: "roster_spot" },
-                    { data: "player" },
-                    { data: "manager" },
-                    { data: "roster", sortable: false },
-                    { data: "projected" },
-                    { data: "points" }
-                ],
-                order: [
-                    [0, "desc"]
-                ],
-                orderCellsTop: true,
-                fixedHeader: true,
-                initComplete: function () {
-                    var api = this.api();
-        
-                    // For each column
-                    api.columns().eq(0).each(function (colIdx) {
-                        // Set the header cell to contain the input element
-                        var cell = $('.filters th').eq(
-                            $(api.column(colIdx).header()).index()
-                        );
-                        var title = $(cell).text();
-                        if (title == 'Roster') {
-                            $(cell).html('');
-                        } else {
-                            $(cell).html('<input type="text" placeholder="Filter" />');
-                        }
-    
-                        // On every keypress in this input
-                        $('input',$('.filters th').eq($(api.column(colIdx).header()).index()))
-                        .off('keyup change')
-                        .on('change', function (e) {
-                            // Get the search value
-                            $(this).attr('title', $(this).val());
-                            var regexr = '({search})';
-
-                            var cursorPosition = this.selectionStart;
-                            // Search the column for that value
-                            api.column(colIdx)
-                            .search(
-                                this.value != ''
-                                    ? regexr.replace('{search}', '(((' + this.value + ')))')
-                                    : '',
-                                this.value != '',
-                                this.value == ''
-                            )
-                            .draw();
-                        })
-                        .on('keyup', function (e) {
-                            e.stopPropagation();
-                            $(this).trigger('change');
-                        });
-                    });
+            $.ajax( {
+                url: '/dataLookup.php',
+                data: {
+                    dataType: 'player-info',
+                    player: rowData.player,
+                    year: rowData.year
                 },
-            });
-        }, 1000);
+                dataType: 'json',
+                success: function (data) {
+
+                    let count = 1;
+                    const table = document.createElement("table");
+                    for (const row of data) {
+                        const thead = document.createElement("thead");
+                        for (const key of Object.keys(row)) {
+                            const th = document.createElement("th");
+                            th.textContent = key.charAt(0).toUpperCase() + key.slice(1);;
+                            thead.appendChild(th);
+                        }
+                        if (count == 1) {
+                            table.appendChild(thead);
+                        }
+                        
+                        const tr = document.createElement("tr");
+                        for (const key of Object.keys(row)) {
+                            const td = document.createElement("td");
+                            td.textContent = row[key];
+                            tr.appendChild(td);
+                        }
+
+                        table.appendChild(tr);
+                        count++;
+                    }
+
+                    div.removeClass('loading');
+                    div.text('');
+                    div.append(table);
+                }
+            } );
+
+            return div; 
+        }
+
+        var table = $('#datatable-players').DataTable({
+            pageLength: 25,
+            ajax: {
+                url: 'dataLookup.php',
+                data: {
+                    dataType: 'all-players'
+                }
+            },
+            columns: [
+                {
+                    className: 'dt-control',
+                    orderable: false,
+                    data: null,
+                    defaultContent: '<i class="icon-plus"></i>'
+                },
+                { data: "player" },
+                { data: "points" }
+            ],
+            order: [
+                [1, "asc"]
+            ],
+            
+        });
+
+        // Add event listener for opening and closing details
+        table.on('click', 'td.dt-control', function (e) {
+            let tr = e.target.closest('tr');
+            let row = table.row(tr);
+        
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide();
+            }
+            else {
+                // Open this row
+                row.child(format(row.data())).show();
+            }
+        });
 
     });
 </script>

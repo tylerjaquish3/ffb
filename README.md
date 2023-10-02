@@ -1,7 +1,9 @@
 ### Suntown FFB website
 
 # Bugs
-2019 redo the scrape because names are A. Ekeler with special char
+- D andre swift can't find details
+- take off - DEF from defenses so they group
+- entry for just Julio, Leonard, Rachaad, Scotty
 
 # Ideas
 

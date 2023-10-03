@@ -30,7 +30,7 @@ while ($row = fetch_array($result)) {
     $versusPoints = $row['manager2_score'];
 }
 
-$posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'R/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DB', 'BN', 'IR'];
+$posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DB', 'BN', 'IR'];
 
 ?>
 
@@ -105,80 +105,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'R/T', 'Q/W/R/T', 'K', 'DEF
             </div>
 
             <div class="row">
-                <div class="col-sm-12 col-lg-8" id="versus">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4>Roster</h4>
-                        </div>
-                        <div class="card-body" style="direction: ltr;">
-
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6">
-                                    <h2 class="text-center">
-                                        <?php echo $managerName; ?><br />
-                                        <?php echo 'Total: '.$managerPoints; ?>
-                                    </h2>
-                                    <table class="table table-responsive table-striped nowrap" id="datatable-managerRoster">
-                                        <thead>
-                                            <th>Position</th>
-                                            <th>Player</th>
-                                            <th>Projected</th>
-                                            <th>Points</th>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            $result = query( "SELECT * FROM rosters WHERE year = $year and week = $week and manager = '$managerName'");
-                                            while ($row = fetch_array($result)) {
-                                                $order = array_search($row['roster_spot'], $posOrder);
-                                                echo '<tr>';
-                                                echo '<td data-order='.$order.'>'.$row['roster_spot'].'</td>';
-                                                echo '<td>'.$row['player'].'</td>';
-                                                echo '<td class="text-right"><i>'.
-                                                    number_format($row['projected'], 2)
-                                                    .'</i></td>';
-                                                echo '<td class="text-right"><strong>'.
-                                                    number_format($row['points'], 2)
-                                                    .'</strong></td>';
-                                            } ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div class="col-sm-12 col-md-6">
-                                    <h2 class="text-center">
-                                        <?php echo $versus; ?><br />
-                                        <?php echo 'Total: '.$versusPoints; ?>
-                                    </h2>
-                                    <table class="table table-responsive table-striped nowrap" id="datatable-versusRoster">
-                                        <thead>
-                                            <th>Position</th>
-                                            <th>Player</th>
-                                            <th>Projected</th>
-                                            <th>Points</th>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            $result = query( "SELECT * FROM rosters WHERE year = $year and week = $week and manager = '$versus'");
-                                            while ($row = fetch_array($result)) {
-                                                $order = array_search($row['roster_spot'], $posOrder);
-                                                echo '<tr>';
-                                                echo '<td data-order='.$order.'>'.$row['roster_spot'].'</td>';
-                                                echo '<td>'.$row['player'].'</td>';
-                                                echo '<td class="text-right"><i>'.
-                                                    number_format($row['projected'], 2)
-                                                    .'</i></td>';
-                                                echo '<td class="text-right"><strong>'.
-                                                    number_format($row['points'], 2)
-                                                    .'</strong></td>';
-                                            } ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-12 col-lg-4">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4>Recap</h4>
@@ -217,9 +144,114 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'R/T', 'Q/W/R/T', 'K', 'DEF
                                             <td><?php echo $recap['bench1']; ?></td>
                                             <td><?php echo $recap['bench2']; ?></td>
                                         </tr>
-
                                     </table>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Matchup Rosters</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+
+                            <div class="row">
+                                <div class="col-sm-12 col-md-6">
+                                    <h2 class="text-center">
+                                        <?php echo $managerName; ?><br />
+                                        <?php echo 'Total: '.$managerPoints; ?>
+                                    </h2>
+                                    <table class="table table-responsive table-striped nowrap" id="datatable-managerRoster">
+                                        <thead>
+                                            <th>Position</th>
+                                            <th>Player</th>
+                                            <th>Projected</th>
+                                            <th>Points</th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $result = query("SELECT r.player, r.*, round FROM rosters r
+                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
+                                                WHERE r.year = $year AND week = $week AND manager = '$managerName'");
+                                            while ($row = fetch_array($result)) {
+                                                $order = array_search($row['roster_spot'], $posOrder);
+                                                echo '<tr>';
+                                                echo '<td data-order='.$order.'>'.$row['roster_spot'].'</td>';
+                                                echo '<td><a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a></td>';
+                                                echo '<td class="text-right"><i>'.
+                                                    number_format($row['projected'], 2)
+                                                    .'</i></td>';
+                                                echo '<td class="text-right"><strong>'.
+                                                    number_format($row['points'], 2)
+                                                    .'</strong></td>';
+                                                if ($row['round']) {
+                                                    echo '<td><i class="icon-table"></i></td>';
+                                                } else {
+                                                    echo '<td></td>';
+                                                }
+                                            } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="col-sm-12 col-md-6">
+                                    <h2 class="text-center">
+                                        <?php echo $versus; ?><br />
+                                        <?php echo 'Total: '.$versusPoints; ?>
+                                    </h2>
+                                    <table class="table table-responsive table-striped nowrap" id="datatable-versusRoster">
+                                        <thead>
+                                            <th>Position</th>
+                                            <th>Player</th>
+                                            <th>Projected</th>
+                                            <th>Points</th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $result = query("SELECT r.player, r.*, round FROM rosters r
+                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
+                                                WHERE r.year = $year AND week = $week AND manager = '$versus'");
+                                            while ($row = fetch_array($result)) {
+                                                $order = array_search($row['roster_spot'], $posOrder);
+                                                echo '<tr>';
+                                                echo '<td data-order='.$order.'>'.$row['roster_spot'].'</td>';
+                                                echo '<td><a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a></td>';
+                                                echo '<td class="text-right"><i>'.
+                                                    number_format($row['projected'], 2)
+                                                    .'</i></td>';
+                                                echo '<td class="text-right"><strong>'.
+                                                    number_format($row['points'], 2)
+                                                    .'</strong></td>';
+                                                if ($row['round']) {
+                                                    echo '<td><i class="icon-table"></i></td>';
+                                                } else {
+                                                    echo '<td></td>';
+                                                }
+                                            } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Points by Position</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block">
+                                <canvas id="posPointsChart" style="direction: ltr;"></canvas>
                             </div>
                         </div>
                     </div>
@@ -270,6 +302,40 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'R/T', 'Q/W/R/T', 'K', 'DEF
             ]
         });
 
-
+        var ctx = $('#posPointsChart');
+        var stackedBar = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($posPointsChart['labels']); ?>,
+                datasets: [{
+                        label: "<?php echo $managerName; ?>",
+                        data: <?php echo json_encode($posPointsChart['points'][$managerName]); ?>,
+                        // backgroundColor: '#04015d'
+                        backgroundColor: '#297eff'
+                    },
+                    {
+                        label: "<?php echo $versus; ?>",
+                        data: <?php echo json_encode($posPointsChart['points'][$versus]); ?>,
+                        backgroundColor: '#2eb82e'
+                    }
+                ]
+            },
+            options: {
+                plugins: {
+                    datalabels: {
+                        formatter: function(value, context) {
+                            return Math.round(value * 10) / 10;
+                        },
+                        align: 'center',
+                        anchor: 'center',
+                        color: 'white',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
     });
 </script>

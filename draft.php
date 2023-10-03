@@ -106,10 +106,24 @@ include 'sidebar.html';
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Draft Positions</h4>
+                            <h4 style="float: right">Draft Spots</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <canvas id="draftSpotsChart" style="height: 600px"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Draft Positions by Round</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block">
+                                <canvas id="posByRoundChart" style="direction: ltr;"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -140,7 +154,6 @@ include 'sidebar.html';
         });
 
         var ctx = $('#draftSpotsChart');
-
         var years = <?php echo json_encode($draftSpotChart['years']); ?>;
         var yearLabels = years.split(",");
         var teams = <?php echo json_encode($draftSpotChart['spot']); ?>;
@@ -158,31 +171,101 @@ include 'sidebar.html';
             x++;
         }
 
-        var data = {
-            labels: yearLabels,
-            datasets: dataset
-        };
-
-        var options = {
-            scales: {
-                y: {
-                    display: true,
-                    title: {
-                        display: true,
-                        text: 'Draft Position',
-                        font: {
-                            size: 20
-                        }
-                    },
-                    reverse: true
-                }
-            }
-        };
-
         var myBarChart = new Chart(ctx, {
             type: 'line',
-            data: data,
-            options: options
+            data: {
+                labels: yearLabels,
+                datasets: dataset
+            },
+            options: {
+                scales: {
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Draft Position',
+                            font: {
+                                size: 20
+                            }
+                        },
+                        reverse: true
+                    }
+                }
+            }
+        });
+
+        var ctx = $('#posByRoundChart');
+        var stackedBar = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($posByRoundChart['labels']); ?>,
+                datasets: [{
+                        label: "QB",
+                        data: <?php echo json_encode($posByRoundChart['QB']); ?>,
+                        backgroundColor: '#4f267f'
+                    },{
+                        label: "RB",
+                        data: <?php echo json_encode($posByRoundChart['RB']); ?>,
+                        backgroundColor: '#a6c6fa'
+                    },{
+                        label: "WR",
+                        data: <?php echo json_encode($posByRoundChart['WR']); ?>,
+                        backgroundColor: '#3cf06e'
+                    },{
+                        label: "TE",
+                        data: <?php echo json_encode($posByRoundChart['TE']); ?>,
+                        backgroundColor: '#f33c47'
+                    },{
+                        label: "K",
+                        data: <?php echo json_encode($posByRoundChart['K']); ?>,
+                        backgroundColor: '#f87598'
+                    },{
+                        label: "DEF",
+                        data: <?php echo json_encode($posByRoundChart['DEF']); ?>,
+                        backgroundColor: '#ff7f2c'
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: {
+                        stacked: true,
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Draft Round',
+                            font: {
+                                size: 20
+                            }
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Selections',
+                            font: {
+                                size: 20
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    datalabels: {
+                        formatter: function(value, context) {
+                            return Math.round(value * 10) / 10;
+                        },
+                        align: 'center',
+                        anchor: 'center',
+                        color: 'white',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
         });
 
     });

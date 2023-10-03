@@ -48,6 +48,15 @@ include 'sidebar.html';
 <script type="text/javascript">
     $(document).ready(function() {
 
+        let playerFilter = <?php echo isset($_GET['player']) ? "'".$_GET['player']."'" : 'null'; ?>;
+
+        setTimeout(function() {
+            if (playerFilter) {
+                $('#datatable-players_filter > label > input[type=search]').val(playerFilter);
+                $('#datatable-players_filter > label > input[type=search]').trigger('keyup');
+            }
+        }, 1000);
+
         function format ( rowData ) {
             var div = $('<div/>')
                 .addClass( 'loading' )
@@ -101,7 +110,8 @@ include 'sidebar.html';
             ajax: {
                 url: 'dataLookup.php',
                 data: {
-                    dataType: 'all-players'
+                    dataType: 'all-players',
+                    // filter: playerFilter
                 }
             },
             columns: [

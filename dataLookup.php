@@ -269,11 +269,18 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'league-standings') {
 
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'all-players') {
 
-    $result = query("SELECT player, SUM(points) as points from rosters 
-        WHERE player != '' AND player != '(Empty)'
-        GROUP BY player");
+    $query = "SELECT player, SUM(points) as points from rosters 
+            WHERE player != '' AND player != '(Empty)'
+            GROUP BY player";
+    if (isset($_GET['filter'])) {
+        $filter = $_GET['filter'];
+        $query = "SELECT player, SUM(points) as points from rosters 
+            WHERE player LIKE '$filter%'
+            GROUP BY player";
+    }
+        
+    $result = query($query);
     while ($row = fetch_array($result)) {
-
         $players[] = [
             'player' => clean($row['player']),
             'points' => number_format($row['points'], 2)
@@ -292,10 +299,15 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'player-info') {
     $player = $_GET['player'];
     $details = [];
 
+    $where = "WHERE player LIKE SUBSTRING('".$player."', 1, LENGTH('".$player."') - 4) || '%'";
+    if ($DB_TYPE == 'mysql') {
+        $where = "WHERE player LIKE CONCAT(SUBSTRING('".$player."', 1, LENGTH('".$player."') - 4),'%')";
+    }
+
     $result = query("SELECT year, manager, player, COUNT(week) as weeks, SUM(points) as points, SUM(projected) as projected 
         FROM rosters 
         JOIN managers ON rosters.manager = managers.name
-        WHERE player LIKE CONCAT(SUBSTRING('".$player."', 1, LENGTH('".$player."') - 4),'%')
+        ".$where."
         GROUP BY year, manager, player
         ORDER BY year DESC");
     while ($row = fetch_array($result)) {

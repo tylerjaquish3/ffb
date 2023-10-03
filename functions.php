@@ -70,6 +70,7 @@ if ($pageName == 'Postseason') {
 if ($pageName == 'Draft') {
     $draftResults = getDraftResults();
     $draftSpotChart = getDraftChartNumbers();
+    $posByRoundChart = getPositionsByRoundChartNumbers();
 }
 if ((strpos($pageName, 'Recap') !== false)) {
     $regSeasonMatchups = getRegularSeasonMatchups();
@@ -98,6 +99,7 @@ if ($pageName == 'Current Season') {
 }
 if ($pageName == 'Rosters') {
     $recap = getMatchupRecapNumbers();
+    $posPointsChart = getPositionPointsChartNumbers();
 }
 
 function getManagerName($id) {
@@ -1150,6 +1152,46 @@ function getDraftChartNumbers()
     return $response;
 }
 
+function getPositionsByRoundChartNumbers()
+{
+    $rounds = $qb = $rb = $wr = $te = $k = $def = [];
+    $result = query("SELECT round, position, count(position) as num 
+        FROM draft
+        WHERE position IN ('QB','RB','WR','TE','K','DEF')
+        GROUP BY round, position
+        ORDER BY round, position");
+    while ($row = fetch_array($result)) {
+
+        if (!in_array($row['round'], $rounds)) {
+            $rounds[] = $row['round'];
+        }
+        if ($row['position'] == 'QB') {
+            $qb[] = $row['num'];
+        } elseif ($row['position'] == 'RB') {
+            $rb[] = $row['num'];
+        } elseif ($row['position'] == 'WR') {
+            $wr[] = $row['num'];
+        } elseif ($row['position'] == 'TE') {
+            $te[] = $row['num'];
+        } elseif ($row['position'] == 'K') {
+            $k[] = $row['num'];
+        } elseif ($row['position'] == 'DEF') {
+            $def[] = $row['num'];
+        }
+
+    }
+
+    return [
+        'labels' => $rounds,
+        'QB' => $qb,
+        'RB' => $rb,
+        'WR' => $wr,
+        'TE' => $te,
+        'K' => $k,
+        'DEF' => $def
+    ];
+}
+
 /**
  * Undocumented function
  */
@@ -1306,7 +1348,7 @@ function getCurrentSeasonBestWeek()
         MAX(IF(roster_spot='DEF', points, NULL)) AS top_def,
         MAX(IF(roster_spot='BN', points, NULL)) AS top_bn
         FROM rosters
-        WHERE YEAR = $selectedSeason
+        WHERE rosters.year = $selectedSeason
         GROUP BY week");
     while ($row = fetch_array($result)) {
         $week = $row['week'];
@@ -1330,12 +1372,14 @@ function getCurrentSeasonBestWeek()
  */
 function queryBestWeekPlayer($week, $pts, $pos)
 {
+    global $selectedSeason;
     $response = [];
     if (!$pts) {
         return ['manager' => '', 'player' => '', 'points' => ''];
     }
 
-    $result = query("SELECT * FROM rosters WHERE week = $week AND points = $pts and roster_spot = '$pos'");
+    $result = query("SELECT * FROM rosters 
+        WHERE year = $selectedSeason AND week = $week AND points = $pts and roster_spot = '$pos'");
     while ($row = fetch_array($result)) {
         $response = [
             'manager' => $row['manager'],
@@ -2164,6 +2208,52 @@ function getMatchupRecapNumbers()
     $recap['bottom_scorer2'] = $recap['bottom_scorer_name2'].' ('.$recap['bottom_scorer2'].')';
     
     return $recap;
+}
+
+function getPositionPointsChartNumbers()
+{
+    $managerName = 'Andy';
+    $year = 2023;
+    $week = 1;
+    if (isset($_GET['manager'])) {
+        $managerName = $_GET['manager'];
+        if (isset($_GET['year'])) {
+            $year = $_GET['year'];
+        }
+        if (isset($_GET['week'])) {
+            $week = $_GET['week'];
+        }
+    }
+
+    $result = query("SELECT * FROM regular_season_matchups rsm
+        JOIN managers on managers.id = rsm.manager1_id
+        WHERE year = $year and week_number = $week and managers.name = '".$managerName."'");
+    while ($row = fetch_array($result)) {
+        $man2 = $row['manager2_id'];
+    }
+    $man2name = getManagerName($man2);
+
+    $labels = [];
+    $result = query("SELECT manager, roster_spot, sum(points) as points FROM rosters
+        JOIN managers on managers.name = rosters.manager
+        JOIN regular_season_matchups rsm on rsm.year = rosters.year and rsm.week_number = rosters.week
+        and rsm.manager1_id = managers.id
+        WHERE rosters.year = $year and rosters.week = $week and (manager = '".$managerName."' OR manager = '".$man2name."')
+        AND roster_spot != 'IR'
+        GROUP BY manager, roster_spot
+        ORDER BY roster_spot ASC");
+    while ($row = fetch_array($result)) {
+
+        if (!in_array($row['roster_spot'], $labels)) {
+            $labels[] = $row['roster_spot'];
+        }
+        $points[$row['manager']][] = $row['points'];
+    }
+
+    return [
+        'labels' => $labels,
+        'points' => $points
+    ];
 }
 
 function isfloat($val) 

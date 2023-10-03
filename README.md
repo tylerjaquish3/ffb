@@ -9,18 +9,17 @@
 
 - Profile page, line chart for points each season vs league average
 - Current season, combine players that got traded midseason
-- Draft page, add chart for positions by round?
 - add team logos?
 - add trophy graphic on trophy page
 - profile page, add chart for draft spot over years
 - profile page, add chart for positions drafted?
 - make sidebar collapsible
-
 - find the best players ever drafted
 - get date/week from trades + points to see who won the trade
 - grab postseason matchup rosters
-- rosters page, add chart for points by position for each manager
 - rosters page, add record for each manager
+- rosters page, add optimal lineups info on left
+- rosters page, show player rank on the season?
 
 - draft order based on wives/gfs responses to something?
 

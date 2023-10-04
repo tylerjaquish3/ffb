@@ -19,7 +19,7 @@ include 'sidebar.html';
                 <div class="col-sm-12 col-md-4">
                     <select id="year-select" class="form-control">
                         <?php
-                        $result = query("SELECT DISTINCT year FROM rosters WHERE year > 2011 ORDER BY year DESC");
+                        $result = query("SELECT DISTINCT year FROM rosters ORDER BY year DESC");
                         while ($row = fetch_array($result)) {
                             if ($row['year'] == $selectedSeason) {
                                 echo '<option selected value="'.$row['year'].'">'.$row['year'].'</option>';
@@ -120,17 +120,18 @@ include 'sidebar.html';
                             <table class="table table-striped nowrap row-border order-column full-width" id="datatable-currentPoints">
                                 <thead>
                                     <tr>
-                                    <th>Manager</th>
-                                    <th>QB</th>
-                                    <th>RB</th>
-                                    <th>WR</th>
-                                    <th>TE</th>
-                                    <th>W/R/T</th>
-                                    <th>Q/W/R/T</th>
-                                    <th>K</th>
-                                    <th>DEF</th>
-                                    <th>Bench</th>
-                                    <th>Total</th>
+                                        <th>Manager</th>
+                                        <?php
+                                        foreach ($points as $manager => $values) {
+                                            $headers = array_keys($values);
+                                            $currentPointsColCount = count($headers);
+                                            foreach ($headers as $header) {
+                                                echo '<th>'.$header.'</th>';
+                                            }
+                                            break;
+                                        }
+                                        ?>
+                                        <th>Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -148,46 +149,13 @@ include 'sidebar.html';
                                                 <strong><?php echo $manager; ?></strong><br />
                                                 <i>Projected</i>
                                             </td>
-                                            <td data-order="<?php echo $values['QB']['points']; ?>">
-                                                <strong><?php echo $values['QB']['points']; ?></strong><br />
-                                                <i><?php echo $values['QB']['projected']; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $values['RB']['points']; ?>">
-                                                <strong><?php echo $values['RB']['points']; ?></strong><br />
-                                                <i><?php echo $values['RB']['projected']; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $values['WR']['points']; ?>">
-                                                <strong><?php echo $values['WR']['points']; ?></strong><br />
-                                                <i><?php echo $values['WR']['projected']; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $values['TE']['points']; ?>">
-                                                <strong><?php echo $values['TE']['points']; ?></strong><br />
-                                                <i><?php echo $values['TE']['projected']; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $values['W/R/T']['points']; ?>">
-                                                <strong><?php echo $values['W/R/T']['points']; ?></strong><br />
-                                                <i><?php echo $values['W/R/T']['projected']; ?></i>
-                                            </td>
-                                            <?php if (isset($values['Q/W/R/T'])) { ?>
-                                                <td data-order="<?php echo $values['Q/W/R/T']['points']; ?>">
-                                                    <strong><?php echo $values['Q/W/R/T']['points']; ?></strong><br />
-                                                    <i><?php echo $values['Q/W/R/T']['projected']; ?></i>
+                                            <?php foreach ($values as $pos => $stuff) { ?>
+                                                <td data-order="<?php echo $stuff['projected']; ?>">
+                                                    <strong><?php echo $stuff['projected']; ?></strong><br />
+                                                    <i><?php echo $stuff['points']; ?></i>
                                                 </td>
-                                            <?php } else {
-                                                echo '<td></td>';
-                                            } ?>
-                                            <td data-order="<?php echo $values['K']['points']; ?>">
-                                                <strong><?php echo $values['K']['points']; ?></strong><br />
-                                                <i><?php echo $values['K']['projected']; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $values['DEF']['points']; ?>">
-                                                <strong><?php echo $values['DEF']['points']; ?></strong><br />
-                                                <i><?php echo $values['DEF']['projected']; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $values['BN']['points']; ?>">
-                                                <strong><?php echo $values['BN']['points']; ?></strong><br />
-                                                <i><?php echo $values['BN']['projected']; ?></i>
-                                            </td>
+                                            <?php } ?>
+                                        
                                             <td data-order="<?php echo $totalPoints; ?>">
                                                 <strong><?php echo $totalPoints; ?></strong><br />
                                                 <i><?php echo $totalProjected; ?></i>
@@ -211,66 +179,31 @@ include 'sidebar.html';
                             <table class="stripe nowrap row-border order-column full-width" id="datatable-bestWeek">
                                 <thead>
                                     <th>Week</th>
-                                    <th>Top QB</th>
-                                    <th>Top RB</th>
-                                    <th>Top WR</th>
-                                    <th>Top TE</th>
-                                    <th>Top W/R/T</th>
-                                    <th>Top Q/W/R/T</th>
-                                    <th>Top K</th>
-                                    <th>Top DEF</th>
-                                    <th>Top Bench</th>
+                                    <?php
+                                    foreach ($bestWeek as $manager => $values) {
+                                        $headers = array_keys($values);
+                                        $currentPointsColCount = count($headers);
+                                        foreach ($headers as $header) {
+                                            echo '<th>Top '.$header.'</th>';
+                                        }
+                                        break;
+                                    }
+                                    ?>
                                 </thead>
                                 <tbody>
                                     <?php
                                     foreach ($bestWeek as $week => $players) { ?>
                                         <tr>
                                             <td><?php echo $week; ?></td>
-                                            <td data-order="<?php echo $players['qb']['points']; ?>">
-                                                <strong><?php echo $players['qb']['manager']; ?></strong><br />
-                                                <?php echo $players['qb']['player']; ?><br />
-                                                <i><?php echo $players['qb']['points']. ' points'; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $players['rb']['points']; ?>">
-                                                <strong><?php echo $players['rb']['manager']; ?></strong><br />
-                                                <?php echo $players['rb']['player']; ?><br />
-                                                <i><?php echo $players['rb']['points']. ' points'; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $players['wr']['points']; ?>">
-                                                <strong><?php echo $players['wr']['manager']; ?></strong><br />
-                                                <?php echo $players['wr']['player']; ?><br />
-                                                <i><?php echo $players['wr']['points']. ' points'; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $players['te']['points']; ?>">
-                                                <strong><?php echo $players['te']['manager']; ?></strong><br />
-                                                <?php echo $players['te']['player']; ?><br />
-                                                <i><?php echo $players['te']['points']. ' points'; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $players['wrt']['points']; ?>">
-                                                <strong><?php echo $players['wrt']['manager']; ?></strong><br />
-                                                <?php echo $players['wrt']['player']; ?><br />
-                                                <i><?php echo $players['wrt']['points']. ' points'; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $players['qwrt']['points']; ?>">
-                                                <strong><?php echo $players['qwrt']['manager']; ?></strong><br />
-                                                <?php echo $players['qwrt']['player']; ?><br />
-                                                <i><?php echo $players['qwrt']['points']. ' points'; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $players['k']['points']; ?>">
-                                                <strong><?php echo $players['k']['manager']; ?></strong><br />
-                                                <?php echo $players['k']['player']; ?><br />
-                                                <i><?php echo $players['k']['points']. ' points'; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $players['def']['points']; ?>">
-                                                <strong><?php echo $players['def']['manager']; ?></strong><br />
-                                                <?php echo $players['def']['player']; ?><br />
-                                                <i><?php echo $players['def']['points']. ' points'; ?></i>
-                                            </td>
-                                            <td data-order="<?php echo $players['bn']['points']; ?>">
-                                                <strong><?php echo $players['bn']['manager']; ?></strong><br />
-                                                <?php echo $players['bn']['player']; ?><br />
-                                                <i><?php echo $players['bn']['points']. ' points'; ?></i>
-                                            </td>
+                                            <?php foreach ($players as $pos => $stuff) {
+                                                if ($pos != 'qb') { ?>
+                                                    <td data-order="<?php echo $stuff['points']; ?>">
+                                                        <strong><?php echo $stuff['manager']; ?></strong><br />
+                                                        <?php echo $stuff['player']; ?><br />
+                                                        <i><?php echo $stuff['points']. ' points'; ?></i>
+                                                    </td>
+                                                <?php }
+                                            } ?>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -606,11 +539,12 @@ include 'sidebar.html';
     $(document).ready(function() {
 
         let baseUrl = "<?php echo $BASE_URL; ?>";
-
+        
         $('#year-select').change(function() {
             window.location = baseUrl+'currentSeason.php?id='+$('#year-select').val();
         });
-
+        
+        let currentPointsColCount = parseInt("<?php echo $currentPointsColCount; ?>");
         $('#datatable-currentPoints').DataTable({
             searching: false,
             paging: false,
@@ -621,7 +555,7 @@ include 'sidebar.html';
                 leftColumns: 1
             },
             order: [
-                [10, "desc"]
+                [currentPointsColCount+1, "desc"]
             ],
             initComplete: function() {
                 var api = this.api();

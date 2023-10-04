@@ -1300,13 +1300,25 @@ function getCurrentSeasonPoints()
     global $selectedSeason;
 
     $result = query("SELECT manager, roster_spot, SUM(points) AS points, SUM(projected) AS projected FROM rosters r
-        WHERE YEAR = $selectedSeason
+        WHERE YEAR = $selectedSeason AND roster_spot != 'IR'
         GROUP BY manager, roster_spot");
     while ($row = fetch_array($result)) {
         $points[$row['manager']][$row['roster_spot']] = [
             'projected' => round($row['projected'], 1),
             'points' => round($row['points'], 1)
         ];
+    }
+
+    // Arrange in order based on posOrder
+    $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DB', 'BN'];
+    foreach ($points as $manager => &$point) {
+        $orderedPoints = [];
+        foreach ($posOrder as $pos) {
+            if (isset($point[$pos])) {
+                $orderedPoints[$pos] = $point[$pos];
+            }
+        }
+        $point = $orderedPoints;
     }
 
     return $points;
@@ -1341,10 +1353,14 @@ function getCurrentSeasonBestWeek()
         MAX(IF(roster_spot='RB', points, NULL)) AS top_rb,
         MAX(IF(roster_spot='WR', points, NULL)) AS top_wr,
         MAX(IF(roster_spot='TE', points, NULL)) AS top_te,
+        MAX(IF(roster_spot='W/R', points, NULL)) AS top_wrflex,
+        MAX(IF(roster_spot='W/T', points, NULL)) AS top_wtflex,
         MAX(IF(roster_spot='W/R/T', points, NULL)) AS top_wrt,
         MAX(IF(roster_spot='Q/W/R/T', points, NULL)) AS top_qwrt,
         MAX(IF(roster_spot='K', points, NULL)) AS top_k,
         MAX(IF(roster_spot='DEF', points, NULL)) AS top_def,
+        MAX(IF(roster_spot='DB', points, NULL)) AS top_db,
+        MAX(IF(roster_spot='D', points, NULL)) AS top_d,
         MAX(IF(roster_spot='BN', points, NULL)) AS top_bn
         FROM rosters
         WHERE rosters.year = $selectedSeason
@@ -1352,15 +1368,26 @@ function getCurrentSeasonBestWeek()
     while ($row = fetch_array($result)) {
         $week = $row['week'];
 
-        $bestWeek[$week]['qb'] = queryBestWeekPlayer($week, $row['top_qb'], 'QB');
-        $bestWeek[$week]['rb'] = queryBestWeekPlayer($week, $row['top_rb'], 'RB');
-        $bestWeek[$week]['wr'] = queryBestWeekPlayer($week, $row['top_wr'], 'WR');
-        $bestWeek[$week]['te'] = queryBestWeekPlayer($week, $row['top_te'], 'TE');
-        $bestWeek[$week]['wrt'] = queryBestWeekPlayer($week, $row['top_wrt'], 'W/R/T');
-        $bestWeek[$week]['qwrt'] = queryBestWeekPlayer($week, $row['top_qwrt'], 'Q/W/R/T');
-        $bestWeek[$week]['k'] = queryBestWeekPlayer($week, $row['top_k'], 'K');
-        $bestWeek[$week]['def'] = queryBestWeekPlayer($week, $row['top_def'], 'DEF');
-        $bestWeek[$week]['bn'] = queryBestWeekPlayer($week, $row['top_bn'], 'BN');
+        $bestWeek[$week]['QB'] = queryBestWeekPlayer($week, $row['top_qb'], 'QB');
+        $bestWeek[$week]['RB'] = queryBestWeekPlayer($week, $row['top_rb'], 'RB');
+        $bestWeek[$week]['WR'] = queryBestWeekPlayer($week, $row['top_wr'], 'WR');
+        $bestWeek[$week]['TE'] = queryBestWeekPlayer($week, $row['top_te'], 'TE');
+        $bestWeek[$week]['K'] = queryBestWeekPlayer($week, $row['top_k'], 'K');
+        $bestWeek[$week]['DEF'] = queryBestWeekPlayer($week, $row['top_def'], 'DEF');
+        $bestWeek[$week]['BN'] = queryBestWeekPlayer($week, $row['top_bn'], 'BN');
+
+        if ($row['top_wrt'])
+        $bestWeek[$week]['W/R/T'] = queryBestWeekPlayer($week, $row['top_wrt'], 'W/R/T');
+        if ($row['top_wrflex'])
+        $bestWeek[$week]['W/R'] = queryBestWeekPlayer($week, $row['top_wrflex'], 'W/R');
+        if ($row['top_wtflex'])
+        $bestWeek[$week]['W/T'] = queryBestWeekPlayer($week, $row['top_wtflex'], 'W/T');
+        if ($row['top_qwrt'])
+        $bestWeek[$week]['Q/W/R/T'] = queryBestWeekPlayer($week, $row['top_qwrt'], 'Q/W/R/T');
+        if ($row['top_db'])
+        $bestWeek[$week]['DB'] = queryBestWeekPlayer($week, $row['top_db'], 'DB');
+        if ($row['top_d'])
+        $bestWeek[$week]['D'] = queryBestWeekPlayer($week, $row['top_d'], 'D');
     }
 
     return $bestWeek;
@@ -1420,8 +1447,7 @@ function getCurrentSeasonStatsAgainst()
         $opponent = $row['manager2_id'];
 
         $result2 = query("SELECT manager, SUM(pass_yds) AS pass_yds, SUM(pass_tds) AS pass_tds, SUM(ints) AS ints, SUM(rush_yds) AS rush_yds, SUM(rush_tds) AS rush_tds,
-            SUM(receptions) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds, SUM(fumbles) AS fum, SUM(fg_made) AS fg_made, SUM(pat_made) AS pat_made,
-            SUM(def_sacks) AS def_sacks, SUM(def_int) AS def_int, SUM(def_fum) AS def_fum
+            SUM(receptions) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds
             FROM rosters r
             JOIN managers m ON m.name = r.manager
             JOIN stats s ON s.roster_id = r.id
@@ -1436,8 +1462,10 @@ function getCurrentSeasonStatsAgainst()
             $response[$row['name']]['receptions'] += $row2['rec'];
             $response[$row['name']]['rec_yds'] += $row2['rec_yds'];
             $response[$row['name']]['rec_tds'] += $row2['rec_tds'];
-            $response[$row['name']]['fumbles'] += $row2['fum'];
         }
+    }
+    if ($response['Tyler']['pass_yds'] == 0) {
+        return [];
     }
 
     return $response;
@@ -1449,7 +1477,16 @@ function getCurrentSeasonStatsAgainst()
 function getCurrentSeasonTopPerformers()
 {
     global $selectedSeason;
-    $response = [];
+    $response = [
+        'mostTds' => [
+            'manager' => 'Stats Not Available',
+            'points' => '',
+        ],
+        'mostYds' => [
+            'manager' => 'Stats Not Available',
+            'points' => '',
+        ]
+    ];
 
     $result = query("SELECT * FROM rosters WHERE YEAR = $selectedSeason ORDER BY points DESC LIMIT 1");
     while ($row = fetch_array($result)) {
@@ -1886,7 +1923,7 @@ function getBestRoundPicks()
     $result = getAllDraftedPlayerDetails();
 
     $best = [];
-    for ($x = 1; $x < 25; $x++) {
+    for ($x = 1; $x < 26; $x++) {
         $best[$x] = ['manager' => '', 'player' => '', 'points' => 0];
     }
 
@@ -1913,16 +1950,15 @@ function getBestRoundPicks()
  */
 function getPointsForScatter()
 {
-    global $season;
+    global $selectedSeason;
     $response = [];
     $totalPts = 0;
 
     $result = query("SELECT name, sum(manager1_score) as pf, sum(manager2_score) as pa FROM regular_season_matchups rsm
         JOIN managers ON managers.id = rsm.manager1_id
-        WHERE year = $season
+        WHERE year = $selectedSeason
         GROUP BY name");
     while ($row = fetch_array($result)) {
-
         $totalPts += $row['pf'];
         $response[$row['name']] = [
             [

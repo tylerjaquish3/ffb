@@ -5,7 +5,6 @@
 - rosters table, NYG and NYJ are grouped
 - fun facts current season margin doesnt update new_leader
 - make current season load faster
-- graham gano week 1 numbers wrong
 
 # Ideas
 

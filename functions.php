@@ -1096,16 +1096,15 @@ function getPostseasonRecord()
 }
 
 /**
- * Undocumented function
+ * Get players drafted
  */
 function getDraftResults()
 {
     $results = [];
 
-    $result = query("SELECT *
-        FROM managers m
-        JOIN draft ON manager_id = m.id
-        ");
+    $result = query("SELECT draft.*, sum(points) as points, r.manager FROM draft
+        JOIN rosters r ON draft.player = r.player and draft.year = r.year
+        GROUP BY r.year, overall_pick");
     while ($row = fetch_array($result)) {
         $results[] = $row;
     }
@@ -2139,14 +2138,15 @@ function getMatchupRecapNumbers()
         }
     }
     $recap = [
-        'winner' => '', 'loser' => '', 'margin1' => 0, 'margin2' => 0, 'projected1' => 0, 'projected2' => 0,
+        'man1' => '', 'man2' => '', 'margin1' => 0, 'margin2' => 0, 'projected1' => 0, 'projected2' => 0,
         'top_scorer1' => 0, 'top_scorer2' => 0, 'bottom_scorer1' => 417, 'bottom_scorer2' => 417,
         'top_scorer_name1' => '', 'top_scorer_name2' => '', 'bottom_scorer_name1' => '', 'bottom_scorer_name2' => '',
-        'bench1' => 0, 'bench2' => 0
+        'bench1' => 0, 'bench2' => 0, 'points1' => 0, 'points2' => 0,
+        'record1before' => '', 'record2before' => '', 'record1after' => '', 'record2after' => ''
     ];
 
     $versus = '';
-
+    $versusId = null;
     $result = query("SELECT * FROM rosters
         JOIN managers on managers.name = rosters.manager
         JOIN regular_season_matchups rsm on rsm.year = rosters.year and rsm.week_number = rosters.week
@@ -2176,6 +2176,10 @@ function getMatchupRecapNumbers()
             }
         }
     }
+
+    if (!$versusId) {
+        return $recap;
+    }
     
     $result = query("SELECT * FROM managers 
         JOIN rosters on managers.name = rosters.manager
@@ -2198,16 +2202,46 @@ function getMatchupRecapNumbers()
         }
     }
 
+    // Lookup records
+    if ($week == 1) {
+        $recap['record1before'] = '0 - 0';
+        $recap['record2before'] = '0 - 0';
+    } else {
+        $recap['record1before'] = getRecord($managerName, $year, $week-1);
+        $recap['record2before'] = getRecord($versus, $year, $week-1);
+    }
+    $recap['record1after'] = getRecord($managerName, $year, $week);
+    $recap['record2after'] = getRecord($versus, $year, $week);
+
     $recap['man1'] = $managerPoints > $versusPoints ? '<span class="badge badge-primary">'.$managerName.'</span>' : '<span class="badge badge-secondary">'.$managerName.'</span>';
     $recap['man2'] = $managerPoints > $versusPoints ? '<span class="badge badge-secondary">'.$versus.'</span>' : '<span class="badge badge-primary">'.$versus.'</span>';
     $recap['margin1'] = $margin1;
     $recap['margin2'] = $margin2;
+    $recap['points1'] = $managerPoints;
+    $recap['points2'] = $versusPoints;
     $recap['top_scorer1'] = $recap['top_scorer_name1'].' ('.$recap['top_scorer1'].')';
     $recap['top_scorer2'] = $recap['top_scorer_name2'].' ('.$recap['top_scorer2'].')';
     $recap['bottom_scorer1'] = $recap['bottom_scorer_name1'].' ('.$recap['bottom_scorer1'].')';
     $recap['bottom_scorer2'] = $recap['bottom_scorer_name2'].' ('.$recap['bottom_scorer2'].')';
     
     return $recap;
+}
+
+function getRecord($managerName, $year, $week)
+{
+    $wins = $losses = 0;
+    $result = query("SELECT * FROM regular_season_matchups rsm
+        JOIN managers on managers.id = rsm.manager1_id
+        WHERE year = $year and week_number <= $week and managers.name = '".$managerName."'");
+    while ($row = fetch_array($result)) {
+        $managerScore = $row['manager1_score'];
+        $versusScore = $row['manager2_score'];
+
+        $wins += $managerScore > $versusScore ? 1 : 0;
+        $losses += $managerScore > $versusScore ? 0 : 1;
+    }
+
+    return $wins.'-'.$losses;
 }
 
 function getPositionPointsChartNumbers()
@@ -2225,11 +2259,18 @@ function getPositionPointsChartNumbers()
         }
     }
 
+    $man2 = null;
     $result = query("SELECT * FROM regular_season_matchups rsm
         JOIN managers on managers.id = rsm.manager1_id
         WHERE year = $year and week_number = $week and managers.name = '".$managerName."'");
     while ($row = fetch_array($result)) {
         $man2 = $row['manager2_id'];
+    }
+    if (!$man2) {
+        return [
+            'labels' => [],
+            'points' => []
+        ];
     }
     $man2name = getManagerName($man2);
 
@@ -2254,6 +2295,41 @@ function getPositionPointsChartNumbers()
         'labels' => $labels,
         'points' => $points
     ];
+}
+
+function getPlayerRank($player, $year, $week)
+{
+    $rank = 1;
+    $result = query("SELECT * FROM rosters
+        WHERE year = $year and week = $week
+        ORDER BY points desc");
+    while ($row = fetch_array($result)) {
+        
+        if ($row['player'] == $player) {
+            if ($row['roster_spot'] == 'IR') {
+                return 'N/A';
+            }
+            return $rank;
+        }
+        $rank++;
+    }
+}
+
+function getPlayerPositionRank($player, $rosterSpot, $position, $year, $week)
+{
+    if ($rosterSpot == 'IR') {
+        return 'N/A';
+    }
+    $rank = 1;
+    $result = query("SELECT * FROM rosters
+        WHERE year = $year and week = $week and position = '".$position."'
+        ORDER BY points desc");
+    while ($row = fetch_array($result)) {
+        if ($row['player'] == $player) {
+            return $rank;
+        }
+        $rank++;
+    }
 }
 
 function isfloat($val) 

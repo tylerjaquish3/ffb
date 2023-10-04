@@ -134,6 +134,7 @@ include 'sidebar.html';
                                 <ol>
                                     <li>Add an 18th roster position (BN or W/R/T?) | <a href="voteInfo#new_pos">More Info</a><strong></strong></li>
                                     <li>Replacing toilet seat as punishment? | <a href="voteInfo#new_pos">More Info</a><strong></strong></li>
+                                    <li>Any reason to veto a trade or only obvious collusion? | <a href="voteInfo#new_pos">More Info</a><strong></strong></li>
                                 </ol>
                                 <strong>Determine 2024 draft order</strong>
                                 <br /><br />

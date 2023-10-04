@@ -401,7 +401,7 @@ include 'sidebar.html';
                                             <td>
                                                 <?php echo '<a href="/rosters.php?year='.$row['year'].'&week='.$row['week'].'&manager='.$row['manager'].'">
                                                 <i class="icon-clipboard"></i></a>'; ?>
-                                                </td>
+                                            </td>
                                             <td><?php echo $row['week']; ?></td>
                                             <td><?php echo $row['points']; ?></td>
                                             <td><?php echo $row['oppPoints']; ?></td>

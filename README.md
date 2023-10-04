@@ -1,9 +1,11 @@
 ### Suntown FFB website
 
 # Bugs
-- D andre swift can't find details
-- take off - DEF from defenses so they group
-- entry for just Julio, Leonard, Rachaad, Scotty
+- rosters table, LAR and LAC are grouped
+- rosters table, NYG and NYJ are grouped
+- fun facts current season margin doesnt update new_leader
+- make current season load faster
+- graham gano week 1 numbers wrong
 
 # Ideas
 
@@ -17,11 +19,13 @@
 - find the best players ever drafted
 - get date/week from trades + points to see who won the trade
 - grab postseason matchup rosters
-- rosters page, add record for each manager
-- rosters page, add optimal lineups info on left
-- rosters page, show player rank on the season?
+- rosters page,
+    - add optimal lineups info on left
+    - it would be cool to show what nfl team they were on that year
+- profile page, pie chart for postseason wins too
 
 - draft order based on wives/gfs responses to something?
+
 
 fun fact ideas...
 
@@ -38,3 +42,6 @@ Current season stats
 
 Fun facts
     - new leader for a long term category
+
+
+$managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];

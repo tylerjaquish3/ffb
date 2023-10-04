@@ -170,6 +170,7 @@ if (isset($_GET['id'])) {
                                         <th>Manager</th>
                                         <th>Wins</th>
                                         <th>Losses</th>
+                                        <th>Win %</th>
                                     </thead>
                                     <tbody>
                                         <?php
@@ -193,6 +194,7 @@ if (isset($_GET['id'])) {
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['wins']; ?></td>
                                                 <td><?php echo $row['losses']; ?></td>
+                                                <td><?php echo round(($row['wins'] * 100) / ($row['wins'] + $row['losses']), 1); ?></td>
                                             </tr>
 
                                         <?php } ?>
@@ -204,6 +206,7 @@ if (isset($_GET['id'])) {
                                         <th>Manager</th>
                                         <th>Wins</th>
                                         <th>Losses</th>
+                                        <th>Win %</th>
                                     </thead>
                                     <tbody>
                                         <?php
@@ -247,13 +250,22 @@ if (isset($_GET['id'])) {
                                             ) l2 ON l2.manager1_id = managers.id
                                             WHERE name != '" . $_GET['id'] . "'"
                                         );
-                                        while ($row = fetch_array($result)) { ?>
+                                        while ($row = fetch_array($result)) { 
+                                            $total = $row['totalWins'] + $row['totalLosses'];
+                                            $sort = ($total == 0) ? 0 : round(($row['totalWins'] * 100) / ($total), 1);
+                                            ?>
                                             <tr>
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['totalWins']; ?></td>
                                                 <td><?php echo $row['totalLosses']; ?></td>
+                                                <td data-sort="<?php echo $sort; ?>"><?php 
+                                                    if ($total == 0) {
+                                                        echo 'N/A';
+                                                    } else {
+                                                        echo round(($row['totalWins'] * 100) / ($total), 1);
+                                                    }
+                                                ?></td>
                                             </tr>
-
                                         <?php } ?>
                                     </tbody>
                                 </table>
@@ -332,6 +344,11 @@ if (isset($_GET['id'])) {
                                         <th>3rd Pick</th>
                                         <th>4th Pick</th>
                                         <th>5th Pick</th>
+                                        <th>6th Pick</th>
+                                        <th>7th Pick</th>
+                                        <th>8th Pick</th>
+                                        <th>9th Pick</th>
+                                        <th>10th Pick</th>
                                     </thead>
                                     <tbody>
                                         <?php
@@ -347,19 +364,29 @@ if (isset($_GET['id'])) {
                                             (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 2 AND year = d.year) as r2_pick,
                                             (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 3 AND year = d.year) as r3_pick,
                                             (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 4 AND year = d.year) as r4_pick,
-                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 5 AND year = d.year) as r5_pick
+                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 5 AND year = d.year) as r5_pick,
+                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 6 AND year = d.year) as r6_pick,
+                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 7 AND year = d.year) as r7_pick,
+                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 8 AND year = d.year) as r8_pick,
+                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 9 AND year = d.year) as r9_pick,
+                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 10 AND year = d.year) as r10_pick
                                             FROM draft d
                                             WHERE manager_id = $managerId AND round = 1"
                                         );
                                         while ($array = fetch_array($result)) { ?>
                                             <tr>
-                                                <td><?php echo $array['year']; ?></td>
+                                                <td><?php echo '<a href="/draft.php?manager='.$managerName.'&year='.$array['year'].'">'.$array['year'].'</a>'; ?></td>
                                                 <td><?php echo $array['position']; ?></td>
                                                 <td><?php echo $array['r1_pick']; ?></td>
                                                 <td><?php echo $array['r2_pick']; ?></td>
                                                 <td><?php echo $array['r3_pick']; ?></td>
                                                 <td><?php echo $array['r4_pick']; ?></td>
                                                 <td><?php echo $array['r5_pick']; ?></td>
+                                                <td><?php echo $array['r6_pick']; ?></td>
+                                                <td><?php echo $array['r7_pick']; ?></td>
+                                                <td><?php echo $array['r8_pick']; ?></td>
+                                                <td><?php echo $array['r9_pick']; ?></td>
+                                                <td><?php echo $array['r10_pick']; ?></td>
                                             </tr>
 
                                         <?php } ?>
@@ -369,7 +396,6 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="row">
@@ -382,21 +408,23 @@ if (isset($_GET['id'])) {
                             <table class="table table-responsive table-striped nowrap" id="datatable-topPlayers">
                                 <thead>
                                     <th>Player</th>
-                                    <th>Times Drafted</th>
+                                    <th>Years</th>
+                                    <th>Points</th>
                                 </thead>
                                 <tbody>
                                     <?php
                                     $result = query(
-                                        "SELECT COUNT(round) as times, player FROM draft
+                                        "SELECT draft.player, COUNT(distinct draft.year) as times, sum(points) as points FROM draft
+                                        JOIN rosters on draft.player = rosters.player and draft.year = rosters.year
                                         WHERE manager_id = $managerId
-                                        GROUP BY player
+                                        GROUP BY draft.player
                                         HAVING times > 2
-                                        ORDER BY times DESC"
-                                    );
+                                        ORDER BY times DESC");
                                     while ($array = fetch_array($result)) { ?>
                                         <tr>
                                             <td><?php echo $array['player']; ?></td>
                                             <td><?php echo $array['times']; ?></td>
+                                            <td><?php echo round($array['points'], 1); ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -679,7 +707,7 @@ if (isset($_GET['id'])) {
             "paging": false,
             "info": false,
             "order": [
-                [1, "desc"]
+                [3, "desc"]
             ]
         });
 
@@ -688,7 +716,7 @@ if (isset($_GET['id'])) {
             "paging": false,
             "info": false,
             "order": [
-                [1, "desc"]
+                [3, "desc"]
             ]
         });
 

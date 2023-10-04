@@ -12,7 +12,7 @@ include 'sidebar.html';
 
         <div class="content-body">
             <div class="row">
-                <div class="col-sm-12 col-lg-7 table-padding">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Results</h4>
@@ -27,6 +27,7 @@ include 'sidebar.html';
                                     <th>Player</th>
                                     <th>Manager</th>
                                     <th>Position</th>
+                                    <th>Points</th>
                                 </thead>
                                 <tbody>
                                     <?php
@@ -37,23 +38,24 @@ include 'sidebar.html';
                                             <td><?php echo $draft['round_pick']; ?></td>
                                             <td><?php echo $draft['overall_pick']; ?></td>
                                             <td><?php echo $draft['player']; ?></td>
-                                            <td><?php echo $draft['name']; ?></td>
+                                            <td><?php echo $draft['manager']; ?></td>
                                             <td><?php echo $draft['position']; ?></td>
+                                            <td><?php echo $draft['points']; ?></td>
                                         </tr>
-
                                     <?php } ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="row">
                 <div class="col-sm-12 col-lg-5 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Positions</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <!-- Draft position -->
                             <table class="table table-responsive table-striped nowrap" id="datatable-misc11">
                                 <thead>
                                     <th>Manager</th>
@@ -89,7 +91,6 @@ include 'sidebar.html';
                                             <td><?php echo $row['pick10']; ?></td>
                                             <td><?php echo round($row['adp'], 1); ?></td>
                                         </tr>
-
                                     <?php } ?>
                                 </tbody>
                                 <tfoot>
@@ -98,6 +99,68 @@ include 'sidebar.html';
                                     </tr>
                                 </tfoot>
                             </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-7 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Best Drafts</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="row">
+                                <div class="col-sm-12 col-lg-7">
+                                    <table class="table table-responsive table-striped nowrap" id="datatable-bestDrafts">
+                                        <thead>
+                                            <th>Manager</th>
+                                            <th>Year</th>
+                                            <th>Pick #</th>
+                                            <th>Points</th>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $result = query("SELECT r.manager, r.year, sum(points) as points, min(draft.overall_pick) as pick
+                                                FROM rosters r
+                                                JOIN draft on r.player = draft.player AND r.year = draft.year
+                                                GROUP BY r.manager, r.year
+                                                ORDER BY sum(points) DESC");
+                                            while ($row = fetch_array($result)) { ?>
+                                                <tr>
+                                                    <td><?php echo $row['manager']; ?></td>
+                                                    <td><?php echo '<a href="/draft.php?manager='.$row['manager'].'&year='.$row['year'].'">'.$row['year'].'</a>'; ?></td>
+                                                    <td><?php echo $row['pick']; ?></td>
+                                                    <td class="text-right"><?php echo number_format($row['points'], 1); ?></td>
+                                                </tr>
+                                            <?php } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-sm-12 col-lg-5">
+                                    <h4>Total Draft Points</h4>
+                                    <table class="table table-responsive table-striped nowrap" id="datatable-bestDraftTotals">
+                                        <thead>
+                                            <th>Manager</th>
+                                            <th>Points</th>
+                                            <th>Average</th>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $result = query("SELECT r.manager, sum(points) as points, count(distinct draft.year) as years
+                                                FROM rosters r
+                                                JOIN draft on r.player = draft.player AND r.year = draft.year
+                                                GROUP BY r.manager
+                                                ORDER BY sum(points) DESC");
+                                            while ($row = fetch_array($result)) { ?>
+                                                <tr>
+                                                    <td><?php echo $row['manager']; ?></td>
+                                                    <td class="text-right"><?php echo number_format($row['points'], 0); ?></td>
+                                                    <td class="text-right"><?php echo number_format($row['points']/$row['years'], 0); ?></td>
+                                                </tr>
+                                            <?php } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -118,7 +181,7 @@ include 'sidebar.html';
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">Draft Positions by Round</h4>
+                            <h4 class="card-title">Positions Drafted by Round</h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block">
@@ -132,24 +195,93 @@ include 'sidebar.html';
     </div>
 </div>
 
+<style>
+    #datatable-draft input[type=text] {
+        width: 100%;
+    }
+</style>
+
 <?php include 'footer.php'; ?>
 
 <script type="text/javascript">
     $(document).ready(function() {
 
+        let managerFilter = <?php echo isset($_GET['manager']) ? "'".$_GET['manager']."'" : 'null'; ?>;
+        let yearFilter = <?php echo isset($_GET['year']) ? "'".$_GET['year']."'" : 'null'; ?>;
+
+        $('#datatable-draft thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#datatable-draft thead');
+
         $('#datatable-draft').DataTable({
-            "order": [
+            order: [
                 [0, "desc"],
                 [3, "asc"]
-            ]
+            ],
+            orderCellsTop: true,
+            fixedHeader: true,
+            initComplete: function () {
+                var api = this.api();
+    
+                // For each column
+                api.columns()
+                .eq(0)
+                .each(function (colIdx) {
+                    // Set the header cell to contain the input element
+                    var cell = $('.filters th').eq($(api.column(colIdx).header()).index());
+                    var title = $(cell).text();
+                    $(cell).html('<input type="text" placeholder="filter" />');
+
+                    // On every keypress in this input
+                    $('input',$('.filters th').eq($(api.column(colIdx).header()).index()))
+                    .off('keyup change')
+                    .on('change', function (e) {
+                        // Get the search value
+                        $(this).attr('title', $(this).val());
+                        var regexr = '({search})';
+                        // Search the column for that value
+                        api
+                            .column(colIdx)
+                            .search(
+                                this.value != ''
+                                    ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                    : '',
+                                this.value != '',
+                                this.value == ''
+                            )
+                            .draw();
+                    })
+                    .on('keyup', function (e) {
+                        e.stopPropagation();
+                        $(this).trigger('change');
+                    });
+                });
+            },
         });
 
         $('#datatable-misc11').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [3, "asc"]
+            ]
+        });
+        
+        $('#datatable-bestDrafts').DataTable({
+            info: false,
+            order: [
+                [3, "desc"]
+            ]
+        });
+        
+        $('#datatable-bestDraftTotals').DataTable({
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
+                [2, "desc"]
             ]
         });
 
@@ -267,6 +399,14 @@ include 'sidebar.html';
             },
             plugins: [ChartDataLabels]
         });
+
+        if (managerFilter && yearFilter) {
+            $('#datatable-draft > thead > tr.filters > th:nth-child(6) > input[type=text]').val(managerFilter);
+            $('#datatable-draft > thead > tr.filters > th:nth-child(6) > input[type=text]').trigger('keyup');
+            $('#datatable-draft > thead > tr.filters > th:nth-child(1) > input[type=text]').val(yearFilter);
+            $('#datatable-draft > thead > tr.filters > th:nth-child(1) > input[type=text]').trigger('keyup');
+            $('#datatable-draft').DataTable().page.len(25).draw();
+        }
 
     });
 </script>

@@ -21,6 +21,7 @@ $result = query("SELECT * FROM managers WHERE name = '" . $managerName . "'");
 while ($row = fetch_array($result)) {
     $managerId = $row['id'];
 }
+$managerPoints = $versusPoints = 0;
 $result = query("SELECT * FROM regular_season_matchups rsm
     JOIN managers on managers.id = rsm.manager2_id
     WHERE year = $year and week_number = $week and manager1_id = $managerId");
@@ -115,34 +116,49 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                 <div class="col-sm-12">
                                     <table class="table table-responsive table-striped nowrap">
                                         <tr>
-                                            <td>Managers</td>
+                                            <td><strong>Managers</strong></td>
                                             <td><?php echo $recap['man1']; ?></td>
                                             <td><?php echo $recap['man2']; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Margin</td>
+                                            <td><strong>Total</strong></td>
+                                            <td><?php echo $recap['points1']; ?></td>
+                                            <td><?php echo $recap['points2']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Margin</strong></td>
                                             <td><?php echo $recap['margin1']; ?></td>
                                             <td><?php echo $recap['margin2']; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Projected</td>
+                                            <td><strong>Projected</strong></td>
                                             <td><?php echo $recap['projected1']; ?></td>
                                             <td><?php echo $recap['projected2']; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Top Scorer</td>
+                                            <td><strong>Top Scorer</strong></td>
                                             <td><?php echo $recap['top_scorer1']; ?></td>
                                             <td><?php echo $recap['top_scorer2']; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Bottom Scorer</td>
+                                            <td><strong>Bottom Scorer</strong></td>
                                             <td><?php echo $recap['bottom_scorer1']; ?></td>
                                             <td><?php echo $recap['bottom_scorer2']; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Bench Points</td>
+                                            <td><strong>Bench Points</strong></td>
                                             <td><?php echo $recap['bench1']; ?></td>
                                             <td><?php echo $recap['bench2']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Record Before</strong></td>
+                                            <td><?php echo $recap['record1before']; ?></td>
+                                            <td><?php echo $recap['record2before']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Record After</strong></td>
+                                            <td><?php echo $recap['record1after']; ?></td>
+                                            <td><?php echo $recap['record2after']; ?></td>
                                         </tr>
                                     </table>
                                 </div>
@@ -172,7 +188,9 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                             <th>Player</th>
                                             <th>Projected</th>
                                             <th>Points</th>
-                                            <th></th>
+                                            <th>Drafted?</th>
+                                            <th>Week Rk</th>
+                                            <th>Week Pos Rk</th>
                                         </thead>
                                         <tbody>
                                             <?php
@@ -180,6 +198,8 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                                 LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
                                                 WHERE r.year = $year AND week = $week AND manager = '$managerName'");
                                             while ($row = fetch_array($result)) {
+                                                $rank = getPlayerRank($row['player'], $row['year'], $row['week']);
+                                                $posRank = getPlayerPositionRank($row['player'], $row['roster_spot'], $row['position'], $row['year'], $row['week']);
                                                 $order = array_search($row['roster_spot'], $posOrder);
                                                 echo '<tr>';
                                                 echo '<td data-order='.$order.'>'.$row['roster_spot'].'</td>';
@@ -195,6 +215,8 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                                 } else {
                                                     echo '<td></td>';
                                                 }
+                                                echo '<td>'.$rank.'</td>';
+                                                echo '<td>'.$posRank.'</td>';
                                             } ?>
                                         </tbody>
                                     </table>
@@ -211,7 +233,9 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                             <th>Player</th>
                                             <th>Projected</th>
                                             <th>Points</th>
-                                            <th></th>
+                                            <th>Drafted?</th>
+                                            <th>Week Rk</th>
+                                            <th>Week Pos Rk</th>
                                         </thead>
                                         <tbody>
                                             <?php
@@ -219,6 +243,8 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                                 LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
                                                 WHERE r.year = $year AND week = $week AND manager = '$versus'");
                                             while ($row = fetch_array($result)) {
+                                                $rank = getPlayerRank($row['player'], $row['year'], $row['week']);
+                                                $posRank = getPlayerPositionRank($row['player'], $row['roster_spot'], $row['position'], $row['year'], $row['week']);
                                                 $order = array_search($row['roster_spot'], $posOrder);
                                                 echo '<tr>';
                                                 echo '<td data-order='.$order.'>'.$row['roster_spot'].'</td>';
@@ -234,6 +260,8 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                                 } else {
                                                     echo '<td></td>';
                                                 }
+                                                echo '<td>'.$rank.'</td>';
+                                                echo '<td>'.$posRank.'</td>';
                                             } ?>
                                         </tbody>
                                     </table>
@@ -309,13 +337,13 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                 labels: <?php echo json_encode($posPointsChart['labels']); ?>,
                 datasets: [{
                         label: "<?php echo $managerName; ?>",
-                        data: <?php echo json_encode($posPointsChart['points'][$managerName]); ?>,
+                        data: <?php echo isset($posPointsChart['points'][$managerName]) ? json_encode($posPointsChart['points'][$managerName]) : "0"; ?>,
                         // backgroundColor: '#04015d'
                         backgroundColor: '#297eff'
                     },
                     {
                         label: "<?php echo $versus; ?>",
-                        data: <?php echo json_encode($posPointsChart['points'][$versus]); ?>,
+                        data: <?php echo isset($posPointsChart['points'][$versus]) ? json_encode($posPointsChart['points'][$versus]) : "0"; ?>,
                         backgroundColor: '#2eb82e'
                     }
                 ]

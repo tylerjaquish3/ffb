@@ -5,6 +5,7 @@
 - rosters table, NYG and NYJ are grouped
 - fun facts current season margin doesnt update new_leader
 - make current season load faster
+- make cards full width on mobile?
 
 # Ideas
 
@@ -15,7 +16,6 @@
 - profile page, add chart for draft spot over years
 - profile page, add chart for positions drafted?
 - make sidebar collapsible
-- find the best players ever drafted
 - get date/week from trades + points to see who won the trade
 - grab postseason matchup rosters
 - rosters page,
@@ -32,15 +32,24 @@ Head to Head record
     - Any major trends in recent years?
     - Highest/lowest score against opponent
         - This year, last year, all time?
+    - Revenge game? 
+    - how many times 1st place plast last place
     
 Current season stats
-    - Major outliers (ex: only team to not have a rush TD)
-    - Revenge game? (last 5 weeks only)
-    - Match projections
+    - Major outliers
+        - (ex: only team to not have a rush TD)
+        - (ex: more int than 5 teams combined)
+    - Matchup projections
     - Play optimal lineup
 
 Fun facts
     - new leader for a long term category
+
+Generic league ideas
+    - no one is mathematically eliminated
+    - everyone has drafted Joe Flacco except Ben
+    - odds of making playoffs
+
 
 
 $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];

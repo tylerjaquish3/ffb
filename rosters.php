@@ -106,7 +106,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
             </div>
 
             <div class="row">
-                <div class="col-sm-12">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Recap</h4>
@@ -169,7 +169,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
             </div>
 
             <div class="row">
-                <div class="col-sm-12">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Matchup Rosters</h4>
@@ -256,7 +256,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                                     number_format($row['points'], 2)
                                                     .'</strong></td>';
                                                 if ($row['round']) {
-                                                    echo '<td><i class="icon-table"></i></td>';
+                                                    echo '<td><i class="icon-table" alt="Drafted"></i></td>';
                                                 } else {
                                                     echo '<td></td>';
                                                 }
@@ -356,7 +356,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                         },
                         align: 'center',
                         anchor: 'center',
-                        color: 'white',
+                        // color: 'white',
                         font: {
                             weight: 'bold'
                         }

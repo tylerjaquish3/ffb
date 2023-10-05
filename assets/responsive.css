@@ -2,6 +2,7 @@
     body {
         font-size: 10px;
     }
+
     .card-block {
         padding: 0.5rem;
         overflow: scroll;
@@ -28,8 +29,8 @@
     }
 
     .table-padding {
-        padding-left: 3px;
-        padding-right: 3px;
+        padding-left: 1px;
+        padding-right: 1px;
     }
 
     li.nav-item.hidden-md-up.float-xs-right {

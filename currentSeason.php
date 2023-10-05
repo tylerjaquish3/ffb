@@ -354,7 +354,7 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-12 col-md-6 col-lg-4">
+                <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Worst Draft Picks</h4>
@@ -384,7 +384,7 @@ include 'sidebar.html';
                     </div>
                 </div>
 
-                <div class="col-sm-12 col-md-6 col-lg-4">
+                <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Best Draft Picks</h4>
@@ -414,7 +414,7 @@ include 'sidebar.html';
                     </div>
                 </div>
 
-                <div class="col-sm-12 col-lg-4">
+                <div class="col-sm-12 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Record Against Everyone</h4>
@@ -445,7 +445,7 @@ include 'sidebar.html';
             </div>
             <div class="row">
 
-                <div class="col-sm-12 col-lg-7">
+                <div class="col-sm-12 col-lg-7 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Points From Draft</h4>
@@ -479,7 +479,7 @@ include 'sidebar.html';
                     </div>
                 </div>
                 
-                <div class="col-sm-12 col-lg-5">
+                <div class="col-sm-12 col-lg-5 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Performance</h4>

@@ -72,7 +72,7 @@ include 'sidebar.html';
                     <?php include 'postMiscStats.php'; ?>
                 </div>
             </div>
-            <div class="row">
+            <div class="row mt-2">
                 <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">

@@ -166,7 +166,7 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-12">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Spots</h4>

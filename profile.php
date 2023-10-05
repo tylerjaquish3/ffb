@@ -154,7 +154,7 @@ if (isset($_GET['id'])) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-12 col-md-3">
+                <div class="col-sm-12 col-md-3 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h3>Record vs. Opponent</h3>
@@ -328,7 +328,7 @@ if (isset($_GET['id'])) {
             </div>
 
             <div class="row">
-                <div class="col-sm-12">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4><a href="draft.php">Drafts</a></h4>
@@ -399,7 +399,7 @@ if (isset($_GET['id'])) {
             </div>
 
             <div class="row">
-                <div class="col-sm-12 col-lg-4">
+                <div class="col-sm-12 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4><a href="draft.php">Top Drafted Players</a></h4>
@@ -432,7 +432,7 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-lg-8" id="versus">
+                <div class="col-sm-12 col-lg-8 table-padding" id="versus">
                     <div class="card">
                         <div class="card-header">
                             <h4>Head to Head</h4>
@@ -579,9 +579,9 @@ if (isset($_GET['id'])) {
                     </div>
                 </div>
             </div>
+            
             <div class="row">
-                
-                <div class="col-sm-12 col-lg-6">
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>High/Low Foes</h4>

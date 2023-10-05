@@ -82,7 +82,7 @@ include 'sidebar.html';
                         <div class="card-body" style="background: #fff; direction: ltr;">
                             <div class="row">
                                 <div class="col-sm-1"></div>
-                                <div class="col-sm-10">
+                                <div class="col-sm-10 table-padding">
                                     <div class="row" style="direction: ltr;">
                                         <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2008">2008 CHAMPION<br />TYLER JAQUISH</a></div></div>
                                         <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2007">2007 CHAMPION<br />JUSTIN DIDIER</a></div></div>
@@ -174,15 +174,15 @@ include 'sidebar.html';
             </div>
 
             <div class="row">
-                <div class="col-sm-12">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-sm-12 col-lg-6 table-padding">
+                                <div class="col-sm-12 col-lg-6">
                                     <div class="card-header" style="float: left">
                                         <h4><a href="postseason.php">Postseason Stats</a></h4>
                                     </div>
-                                    <div style="float: right">
+                                    <div style="float: right; margin-right: 20px;">
                                         <select id="postMiscStats" class="dropdown form-control">
                                             <option value="20">Average Finish</option>
                                             <option value="21">First Round Byes</option>
@@ -195,7 +195,7 @@ include 'sidebar.html';
                                     </div>
                                     <?php include 'postMiscStats.php'; ?>
                                 </div>
-                                <div class="col-sm-12 col-lg-6 table-padding">
+                                <div class="col-sm-12 col-lg-6">
                                     <div class="card-header" style="float: left">
                                         <h4><a href="regularSeason.php">Regular Season Stats</a></h4>
                                     </div>

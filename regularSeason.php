@@ -86,7 +86,7 @@ include 'sidebar.html';
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -165,7 +165,7 @@ include 'sidebar.html';
             </div>
 
             <div class="row" style="direction: ltr;">
-                <div class="col-sm-12 col-md-6 col-lg-4">
+                <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Team Standings Lookup</h4>
@@ -223,7 +223,7 @@ include 'sidebar.html';
             </div>
 
             <div class="row" style="direction: ltr;">
-                <div class="col-sm-12 col-md-6 col-lg-4">
+                <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">League Standings History</h4>

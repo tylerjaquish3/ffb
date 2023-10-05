@@ -118,7 +118,7 @@ foreach ($seasonNumbers as $standings) {
             </div>
 
             <div class="row">
-                <div class="col-lg-6 col-sm-12">
+                <div class="col-lg-6 col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h3>Standings</h3>
@@ -160,7 +160,7 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 col-sm-12">
+                <div class="col-lg-6 col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h3>Playoff Bracket</h3>
@@ -299,7 +299,7 @@ foreach ($seasonNumbers as $standings) {
             </div>
 
             <div class="row">
-                <div class="col-lg-6 col-sm-12">
+                <div class="col-lg-6 col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Results</h4>
@@ -333,7 +333,7 @@ foreach ($seasonNumbers as $standings) {
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 col-sm-12">
+                <div class="col-lg-6 col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Regular Season Matchups</h4>
@@ -378,7 +378,7 @@ foreach ($seasonNumbers as $standings) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-6 col-sm-12">
+                <div class="col-lg-6 col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Trades</h4>

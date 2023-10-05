@@ -11,7 +11,7 @@ include 'sidebar.html';
         <div class="content-header row"></div>
         <div class="content-body"> 
             <div class="row">
-                <div class="col-sm-12">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>All Players</h4>
@@ -34,7 +34,7 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-12">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Top 100 Player Seasons</h4>
@@ -74,7 +74,7 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-12">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Top 100 Player Weeks</h4>

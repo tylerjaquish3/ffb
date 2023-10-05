@@ -38,7 +38,7 @@ include 'sidebar.html';
                                             <td><?php echo $draft['round_pick']; ?></td>
                                             <td><?php echo $draft['overall_pick']; ?></td>
                                             <td><?php echo $draft['player']; ?></td>
-                                            <td><?php echo $draft['manager']; ?></td>
+                                            <td><?php echo $draft['name']; ?></td>
                                             <td><?php echo $draft['position']; ?></td>
                                             <td><?php echo round($draft['points'], 1); ?></td>
                                         </tr>
@@ -257,7 +257,7 @@ include 'sidebar.html';
                         $(this).trigger('change');
                     });
                 });
-            },
+            }
         });
 
         $('#datatable-misc11').DataTable({

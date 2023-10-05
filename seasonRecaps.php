@@ -322,9 +322,9 @@ foreach ($seasonNumbers as $standings) {
                                             <td><?php echo $draft['round']; ?></td>
                                             <td><?php echo $draft['overall_pick']; ?></td>
                                             <td><?php echo '<a href="/players.php?player='.$draft['player'].'">'.$draft['player'].'</a>'; ?></td>
-                                            <td><?php echo $draft['manager']; ?></td>
+                                            <td><?php echo $draft['name']; ?></td>
                                             <td><?php echo $draft['position']; ?></td>
-                                            <td><?php echo $draft['points']; ?></td>
+                                            <td><?php echo round($draft['points'], 1); ?></td>
                                         </tr>
                                     <?php }
                                     } ?>

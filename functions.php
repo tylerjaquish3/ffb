@@ -1102,9 +1102,11 @@ function getDraftResults()
 {
     $results = [];
 
-    $result = query("SELECT draft.*, sum(points) as points, r.manager FROM draft
-        JOIN rosters r ON draft.player = r.player and draft.year = r.year
-        GROUP BY r.year, overall_pick");
+    $result = query("SELECT * FROM draft
+        JOIN managers m ON m.id = draft.manager_id
+        JOIN (SELECT sum(points) as points, YEAR, player
+            FROM rosters r GROUP BY r.year, r.player) AS rosters 
+        ON draft.player = rosters.player and draft.year = rosters.year");
     while ($row = fetch_array($result)) {
         $results[] = $row;
     }

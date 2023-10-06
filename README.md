@@ -5,6 +5,7 @@
 - rosters table, NYG and NYJ are grouped
 - fun facts current season margin doesnt update new_leader
 - make current season load faster
+- week 1 2021 rosters were updated on mysql but not sqlite
 
 # Ideas
 

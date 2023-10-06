@@ -294,37 +294,68 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                             <h4>Full Year Rosters</h4>
                         </div>
                         <div class="card-body" style="direction: ltr;">
+                            <?php
+                            $grouped = [];
+                            $result = query("SELECT week, player, points, roster_spot FROM rosters
+                                WHERE year = $year AND manager = '$managerName' AND player != '(Empty)'
+                                AND roster_spot NOT IN ('IR','BN') ORDER BY week ASC");
+                            while ($row = fetch_array($result)) {
+                                // group results by roster_spot and week
+                                $grouped[$row['week']][$row['roster_spot']][] = $row;
+                            } 
+                            // order grouped by roster_spot accoring to $posOrder
+                            $ordered = [];
+                            foreach ($grouped as $week => $positions) {
+                                foreach ($posOrder as $pos) {
+                                    if (isset($positions[$pos])) {
+                                        $ordered[$week][$pos] = $positions[$pos];
+                                    }
+                                }
+                            }
+                            // dd($ordered);
+                            ?>
                             <div class="row">
                                 <div class="col-sm-12">
                                     <table class="table table-responsive table-striped nowrap" id="datatable-yearlyRosters">
                                         <thead>
                                             <th>Week</th>
-                                            <?php
-                                            $result = query("SELECT week, roster_spot FROM rosters
-                                                WHERE year = $year AND manager = '$managerName'
-                                                AND roster_spot != 'IR' and roster_spot != 'BN'");
-                                            while ($row = fetch_array($result)) {
-                                                if ($row['week'] > 1) {
+                                            <?php 
+                                            $positionCounts = [];
+                                            foreach ($ordered as $week => $positions) {
+                                                // dd($position);
+                                                if ($week == 2) {
                                                     break;
                                                 }
-                                                echo '<th>'.$row['roster_spot'].'</th>';
+                                                foreach ($positions as $position => $players) {
+                                                    $count = count($players);
+                                                    foreach ($players as $player) {
+                                                        echo '<th>'.$position.'</th>';
+                                                    }
+                                                    $positionCounts[$position] = $count;
+                                                }
                                             } ?>
                                         </thead>
                                         <tbody>
                                             <?php
-                                            $result = query("SELECT * FROM rosters
-                                                WHERE year = $year AND manager = '$managerName'
-                                                AND roster_spot != 'IR' and roster_spot != 'BN'");
-                                            while ($row = fetch_array($result)) {
-                                                $order = array_search($row['roster_spot'], $posOrder);
+                                            foreach ($ordered as $week => $positions) {
+                                                echo '<tr>';
+                                                echo '<td>'.$week.'</td>';
 
-                                                if ($row['roster_spot'] == 'QB') {
-                                                    echo '<tr>';
-                                                    echo '<td data-order='.$order.'>'.$row['week'].'</td>';
+                                                foreach ($positions as $position => $players) {
+                                                    
+                                                    foreach ($players as $player) {
+                                                        echo '<td data-order="'.$player['points'].'">
+                                                            <a href="/players.php?player='.$player['player'].'">'.$player['player'].'</a><br />'.
+                                                            $player['points'].' pts</td>';
+                                                    }
+                                                    // if any positions were blank, put in an empty cell
+                                                    if (count($players) <= $positionCounts[$position]) {
+                                                        for ($i = 0; $i < $positionCounts[$position] - count($players); $i++) {
+                                                            echo '<td data-order="0"></td>';
+                                                        }
+                                                    }
                                                 }
-                                                echo '<td>
-                                                    <a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a><br />'.
-                                                    $row['points'].' pts</td>';
+                                                echo '</tr>';
                                             } ?>
                                         </tbody>
                                     </table>
@@ -385,7 +416,33 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
             info: false,
             order: [
                 [0, "asc"]
-            ]
+            ],
+            initComplete: function() {
+                var api = this.api();
+                
+                api.columns(':not(:first)').every(function() {
+                    var col = this.index();
+                    var array = [];
+                    api.cells(null, col).every(function() {
+                        var cell = this.node();
+                        var record_id = $(cell).attr("data-order");
+                        array.push(record_id)
+                    })
+
+                    last = array.length-1;
+                    array.sort(function(a, b){return b-a});
+
+                    api.cells(null, col).every( function() {
+                        var cell = this.node();
+                        var record_id = $( cell ).attr("data-order");
+                        if (record_id === array[0]) {
+                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
+                        } else if (record_id === array[last]) {
+                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
+                        }
+                    });
+                });
+            }
         });
 
         var ctx = $('#posPointsChart');

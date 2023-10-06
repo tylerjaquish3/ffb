@@ -31,7 +31,7 @@ while ($row = fetch_array($result)) {
     $versusPoints = $row['manager2_score'];
 }
 
-$posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DB', 'BN', 'IR'];
+$posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DL', 'DB', 'BN', 'IR'];
 
 ?>
 
@@ -127,8 +127,8 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                         </tr>
                                         <tr>
                                             <td><strong>Margin</strong></td>
-                                            <td><?php echo $recap['margin1']; ?></td>
-                                            <td><?php echo $recap['margin2']; ?></td>
+                                            <td><?php echo round($recap['margin1'], 2); ?></td>
+                                            <td><?php echo round($recap['margin2'], 2); ?></td>
                                         </tr>
                                         <tr>
                                             <td><strong>Projected</strong></td>
@@ -195,7 +195,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                         <tbody>
                                             <?php
                                             $result = query("SELECT r.player, r.*, round FROM rosters r
-                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
+                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year and draft.position = r.position
                                                 WHERE r.year = $year AND week = $week AND manager = '$managerName'");
                                             while ($row = fetch_array($result)) {
                                                 $rank = getPlayerRank($row['player'], $row['year'], $row['week']);
@@ -240,7 +240,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                         <tbody>
                                             <?php
                                             $result = query("SELECT r.player, r.*, round FROM rosters r
-                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
+                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year and draft.position = r.position
                                                 WHERE r.year = $year AND week = $week AND manager = '$versus'");
                                             while ($row = fetch_array($result)) {
                                                 $rank = getPlayerRank($row['player'], $row['year'], $row['week']);
@@ -271,6 +271,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                     </div>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
@@ -280,6 +281,54 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                         <div class="card-body">
                             <div class="card-block">
                                 <canvas id="posPointsChart" style="direction: ltr;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Full Year Rosters</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-responsive table-striped nowrap" id="datatable-yearlyRosters">
+                                        <thead>
+                                            <th>Week</th>
+                                            <?php
+                                            $result = query("SELECT week, roster_spot FROM rosters
+                                                WHERE year = $year AND manager = '$managerName'
+                                                AND roster_spot != 'IR' and roster_spot != 'BN'");
+                                            while ($row = fetch_array($result)) {
+                                                if ($row['week'] > 1) {
+                                                    break;
+                                                }
+                                                echo '<th>'.$row['roster_spot'].'</th>';
+                                            } ?>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $result = query("SELECT * FROM rosters
+                                                WHERE year = $year AND manager = '$managerName'
+                                                AND roster_spot != 'IR' and roster_spot != 'BN'");
+                                            while ($row = fetch_array($result)) {
+                                                $order = array_search($row['roster_spot'], $posOrder);
+
+                                                if ($row['roster_spot'] == 'QB') {
+                                                    echo '<tr>';
+                                                    echo '<td data-order='.$order.'>'.$row['week'].'</td>';
+                                                }
+                                                echo '<td>
+                                                    <a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a><br />'.
+                                                    $row['points'].' pts</td>';
+                                            } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -313,19 +362,28 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
         }
 
         $('#datatable-managerRoster').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [0, "asc"]
             ]
         });
         
         $('#datatable-versusRoster').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
+                [0, "asc"]
+            ]
+        });
+        
+        $('#datatable-yearlyRosters').DataTable({
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [0, "asc"]
             ]
         });

@@ -5,8 +5,6 @@
 - rosters table, NYG and NYJ are grouped
 - fun facts current season margin doesnt update new_leader
 - make current season load faster
-- make cards full width on mobile?
-- round numbers on rosters recap for margin
 
 # Ideas
 

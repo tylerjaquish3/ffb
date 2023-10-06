@@ -46,6 +46,7 @@ include 'sidebar.html';
                                         <thead>
                                             <th>Year</th>
                                             <th>Manager</th>
+                                            <th></th>
                                             <th>Player</th>
                                             <th>Points</th>
                                         </thead>
@@ -60,8 +61,14 @@ include 'sidebar.html';
                                         while ($array = fetch_array($result)) { ?>
                                             <tr>
                                                 <td><?php echo $array['year']; ?></td>
-                                                <td><?php echo $array['man']; ?></td>
-                                                <td><?php echo $array['player']; ?></td>
+                                                <td><?php echo '<a href="/profile.php?id='.$array['man'].'">'.$array['man'].'</a>'; ?></td>
+                                                <td>
+                                                    <?php echo '<a href="/rosters.php?year='.$array['year'].'&week=1&manager='.$array['man'].'">
+                                                    <i class="icon-clipboard"></i></a>&nbsp;&nbsp;&nbsp;';
+                                                    echo '<a href="/draft.php?year='.$array['year'].'&manager='.$array['man'].'">
+                                                    <i class="icon-table"></i></a>'; ?>
+                                                </td>
+                                                <td><?php echo '<a href="/players.php?player='.$array['player'].'">'.$array['player'].'</a>'; ?></td>
                                                 <td><?php echo round($array['points'], 1); ?></td>
                                             </tr>
                                         <?php } ?>
@@ -103,7 +110,7 @@ include 'sidebar.html';
                                             <tr>
                                                 <td><?php echo $row['year']; ?></td>
                                                 <td><?php echo $row['week']; ?></td>
-                                                <td><?php echo $row['man']; ?></td>
+                                                <td><?php echo '<a href="/profile.php?id='.$row['man'].'">'.$row['man'].'</a>'; ?></td>
                                                 <td>
                                                     <?php echo '<a href="/rosters.php?year='.$row['year'].'&week='.$row['week'].'&manager='.$row['man'].'">
                                                     <i class="icon-clipboard"></i></a>'; ?>
@@ -242,7 +249,7 @@ include 'sidebar.html';
         $('#datatable-playerSeasons').DataTable({
             pageLength: 10,
             order: [
-                [3, "desc"]
+                [4, "desc"]
             ]
         });
         

@@ -1374,9 +1374,6 @@ function getCurrentSeasonBestWeek()
         $bestWeek[$week]['RB'] = queryBestWeekPlayer($week, $row['top_rb'], 'RB');
         $bestWeek[$week]['WR'] = queryBestWeekPlayer($week, $row['top_wr'], 'WR');
         $bestWeek[$week]['TE'] = queryBestWeekPlayer($week, $row['top_te'], 'TE');
-        $bestWeek[$week]['K'] = queryBestWeekPlayer($week, $row['top_k'], 'K');
-        $bestWeek[$week]['DEF'] = queryBestWeekPlayer($week, $row['top_def'], 'DEF');
-        $bestWeek[$week]['BN'] = queryBestWeekPlayer($week, $row['top_bn'], 'BN');
 
         if ($row['top_wrt'])
         $bestWeek[$week]['W/R/T'] = queryBestWeekPlayer($week, $row['top_wrt'], 'W/R/T');
@@ -1390,6 +1387,10 @@ function getCurrentSeasonBestWeek()
         $bestWeek[$week]['DB'] = queryBestWeekPlayer($week, $row['top_db'], 'DB');
         if ($row['top_d'])
         $bestWeek[$week]['D'] = queryBestWeekPlayer($week, $row['top_d'], 'D');
+
+        $bestWeek[$week]['K'] = queryBestWeekPlayer($week, $row['top_k'], 'K');
+        $bestWeek[$week]['DEF'] = queryBestWeekPlayer($week, $row['top_def'], 'DEF');
+        $bestWeek[$week]['BN'] = queryBestWeekPlayer($week, $row['top_bn'], 'BN');
     }
 
     return $bestWeek;

@@ -717,7 +717,7 @@ include 'sidebar.html';
             fixedColumns:   {
                 left: 1
             },
-            "order": [
+            order: [
                 [1, "desc"]
             ],
             initComplete: function() {
@@ -742,34 +742,34 @@ include 'sidebar.html';
         });
 
         $('#datatable-bestDraft').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [3, "desc"]
             ]
         });
 
         $('#datatable-worstDraft').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [3, "asc"]
             ]
         });
 
         $('#datatable-everyone').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [3, "desc"]
             ]
         });
 
         $('#datatable-draftPerformance').DataTable({
-            "order": [
+            order: [
                 [1, "asc"]
             ]
         });

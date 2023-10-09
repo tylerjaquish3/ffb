@@ -36,11 +36,16 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'standings') {
             // If going to the next week, then store the standings at this point
             if ($week != $lastWeek) {
                 // Sort by wins and then points (if tied for wins)
-                usort($yearStandings, function($a, $b) {
-                    if ($b['wins'] - $a['wins'] == 0) {
-                        return $b['points'] - $a['points'];
+                usort($yearStandings, function($b, $a) { 
+                    $rdiff = $a['wins'] - $b['wins'];
+                    if ($rdiff) return $rdiff; 
+
+                    if ($a['points'] > $b['points']) {
+                        return 1;
+                    } else if ($a['points'] < $b['points']) {
+                        return -1;
                     }
-                    return $b['wins'] - $a['wins'];
+                    return 0; 
                 });
                 $overallYearStandings[$year][$week-1] = $yearStandings;
             }
@@ -60,11 +65,16 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'standings') {
         }
 
         // Need to do this one more time to account for the last week of the season
-        usort($yearStandings, function($a, $b) {
-            if ($b['wins'] - $a['wins'] == 0) {
-                return $b['points'] - $a['points'];
+        usort($yearStandings, function($b, $a) { 
+            $rdiff = $a['wins'] - $b['wins'];
+            if ($rdiff) return $rdiff; 
+
+            if ($a['points'] > $b['points']) {
+                return 1;
+            } else if ($a['points'] < $b['points']) {
+                return -1;
             }
-            return $b['wins'] - $a['wins'];
+            return 0; 
         });
         $overallYearStandings[$year][$week] = $yearStandings;
     }
@@ -88,9 +98,15 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'standings') {
 
     // Sort by year and week desc
     usort($allInPlace, function($b, $a) { 
-        $rdiff = $a['year'] - $b['year'];
+        $rdiff = $a['wins'] - $b['wins'];
         if ($rdiff) return $rdiff; 
-        return $a['week'] - $b['week']; 
+
+        if ($a['points'] > $b['points']) {
+            return 1;
+        } else if ($a['points'] < $b['points']) {
+            return -1;
+        }
+        return 0; 
     });
 
     // Return table rows
@@ -211,16 +227,17 @@ function getPoints($manager, $week)
     return round($myTotal, 1);
 }
 
-if (isset($_POST['dataType']) && $_POST['dataType'] == 'league-standings') {
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'league-standings') {
 
-    $return = '';
-    $year = $_POST['year'];
-    $week = $_POST['week'];
+    $return = [];
+    $year = $_GET['year'];
+    $week = $_GET['week'];
+    $nextWeek = $week + 1;
     $standings = [];
 
     for ($x = 1; $x < 11; $x++) {
         $standings[] = [
-            'man' => $x, 'wins' => 0, 'losses' => 0, 'points' => 0, 'name' => ''
+            'man' => $x, 'wins' => 0, 'losses' => 0, 'points' => 0, 'name' => '', 'next' => ''
         ];
     }
 
@@ -239,29 +256,49 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'league-standings') {
                 }
                 $standing['name'] = $row['name'];
                 $standing['points'] += $row['manager1_score'];
+                
+                // query to get the following week's matchup
+                $result2 = query("SELECT * FROM regular_season_matchups 
+                JOIN managers ON regular_season_matchups.manager2_id = managers.id
+                WHERE year = $year AND week_number = $nextWeek AND manager1_id = ".$row['manager1_id']);
+                while ($row2 = fetch_array($result2)) {
+                    $win = $row2['winning_manager_id'] == $row2['manager1_id'] ? 'W' : 'L';
+                    $standing['next'] = $row2['name'].' ('.$win.')';
+                }
             }
-        }
+        } 
     }
 
-    // Sort by wins and points
+    // Sort by wins and points to get rank
     usort($standings, function($b, $a) { 
         $rdiff = $a['wins'] - $b['wins'];
         if ($rdiff) return $rdiff; 
-        return $a['points'] - $b['points']; 
+
+        if ($a['points'] > $b['points']) {
+            return 1;
+        } else if ($a['points'] < $b['points']) {
+            return -1;
+        }
+        return 0; 
     });
 
-    // Return table rows
     $rank = 1;
     foreach ($standings as $data) {
         $record = $data['wins'].' - '.$data['losses'];
-        $return .= '<tr><td>'.$rank.'</td><td>'.$data['name'].'</td><td>'.$record.'</td><td>'.$data['points'].'</td></tr>';
+        $return[] = [
+            'rank' => $rank,
+            'manager' => $data['name'],
+            'record' => $record,
+            'points' => round($data['points'], 2),
+            'next' => $data['next']
+        ];
         $rank++;
     }
 
-    $done = [
-        'return' => $return,
-    ];
-    echo json_encode($done);
+    $content = new \stdClass();
+    $content->data = $return;
+
+    echo json_encode($content);
     die;
 }
 

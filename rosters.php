@@ -291,7 +291,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Full Year Rosters</h4>
+                            <h4><?php echo $managerName."'s Full Season Roster"; ?></h4>
                         </div>
                         <div class="card-body" style="direction: ltr;">
                             <?php
@@ -311,9 +311,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                         $ordered[$week][$pos] = $positions[$pos];
                                     }
                                 }
-                            }
-                            // dd($ordered);
-                            ?>
+                            } ?>
                             <div class="row">
                                 <div class="col-sm-12">
                                     <table class="table table-responsive table-striped nowrap" id="datatable-yearlyRosters">
@@ -322,7 +320,6 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                             <?php 
                                             $positionCounts = [];
                                             foreach ($ordered as $week => $positions) {
-                                                // dd($position);
                                                 if ($week == 2) {
                                                     break;
                                                 }

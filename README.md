@@ -6,6 +6,7 @@
 - fun facts current season margin doesnt update new_leader
 - make current season load faster
 - week 1 2021 rosters were updated on mysql but not sqlite
+- cam profile vs tyler, avg pf/pa don't match up with high/low foes
 
 # Ideas
 
@@ -13,7 +14,6 @@
 - Current season, combine players that got traded midseason
 - add team logos?
 - add trophy graphic on trophy page
-- profile page, add chart for draft spot over years
 - profile page, add chart for positions drafted?
 - make sidebar collapsible
 - get date/week from trades + points to see who won the trade
@@ -21,7 +21,6 @@
 - rosters page,
     - add optimal lineups info on left
     - it would be cool to show what nfl team they were on that year
-- profile page, pie chart for postseason wins too
 
 - draft order based on wives/gfs responses to something?
 

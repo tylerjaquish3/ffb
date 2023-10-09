@@ -54,6 +54,7 @@ if ((strpos($pageName, 'Profile') !== false)) {
     $seasonNumbers = getSeasonNumbers();
     $foes = getFoesArray();
     $winsChart = getProfileWinsChartNumbers();
+    $postseasonWinsChart = getProfilePostseasonWinsChartNumbers();
 }
 if ($pageName == 'Regular Season') {
     $regSeasonMatchups = getRegularSeasonMatchups();
@@ -359,7 +360,7 @@ function getProfileNumbers()
  */
 function getFinishesChartNumbers()
 {
-    $results = ['years' => '', 'finishes' => ''];
+    $results = ['years' => '', 'finishes' => '', 'regSeasons' => ''];
 
     if (isset($_GET)) {
 
@@ -373,6 +374,60 @@ function getFinishesChartNumbers()
 
         $results['years'] = rtrim($results['years'], ',');
         $results['finishes'] = rtrim($results['finishes'], ',');
+
+        // Get regular season standings at end of reg season
+        $years = explode(',', $results['years']);
+        $week = 14;
+        
+        foreach ($years as $year) {
+            
+            $standings = [];
+            for ($x = 1; $x < 11; $x++) {
+                $standings[] = [
+                    'man' => $x, 'wins' => 0, 'losses' => 0, 'points' => 0, 'name' => ''
+                ];
+            }
+
+            $result = query("SELECT * FROM regular_season_matchups 
+                JOIN managers ON regular_season_matchups.manager1_id = managers.id
+                WHERE year = $year and week_number <= $week");
+            while ($row = fetch_array($result)) {
+                foreach ($standings as &$standing) {
+                    if ($standing['man'] == $row['manager1_id']) {
+                        if ($row['winning_manager_id'] == $row['manager1_id']) {
+                            $standing['wins']++;
+                        } else {
+                            $standing['losses']++;
+                        }
+                        $standing['name'] = $row['name'];
+                        $standing['points'] += $row['manager1_score'];
+                    }
+                } 
+            }
+    
+            // Sort by wins and points to get rank
+            usort($standings, function($b, $a) { 
+                $rdiff = $a['wins'] - $b['wins'];
+                if ($rdiff) return $rdiff; 
+    
+                if ($a['points'] > $b['points']) {
+                    return 1;
+                } else if ($a['points'] < $b['points']) {
+                    return -1;
+                }
+                return 0; 
+            });
+
+            $rank = 1;
+            foreach ($standings as $data) {
+                if ($data['name'] == $_GET['id']) {
+                    $results['regSeasons'] .= $rank.',';
+                }
+                $rank++;
+            }
+
+        }
+        $results['regSeasons'] = rtrim($results['regSeasons'], ',');
     } else {
         // redirect to index
     }
@@ -677,6 +732,54 @@ function getProfileWinsChartNumbers()
     }
 
     $response['wins'] = $wins;
+
+    return $response;
+}
+
+/**
+ * Undocumented function
+ */
+function getProfilePostseasonWinsChartNumbers()
+{
+    $response = ['managers' => ''];
+    $allFoes = $wins = [];
+    $result = query("SELECT * FROM managers ORDER BY id ASC");
+    while ($row = fetch_array($result)) {
+        if ($row['name'] == $_GET['id']) {
+            $managerId = $row['id'];
+        } else {
+            $allFoes[] = $row['id'];
+            $wins[$row['id']] = 0;
+        }
+    }
+
+    $response['managers'] = $allFoes;
+    $result = query("SELECT * from playoff_matchups pm
+    WHERE manager1_id = $managerId or manager2_id = $managerId");
+    while ($row = fetch_array($result)) {
+        foreach ($allFoes as $foe) {
+            if ($row['manager1_id'] == $foe) {
+                $wins[$row['manager1_id']] += $row['manager2_score'] > $row['manager1_score'] ? 1 : 0;
+            } elseif ($row['manager2_id'] == $foe) {
+                $wins[$row['manager2_id']] += $row['manager1_score'] > $row['manager2_score'] ? 1 : 0;
+            }
+        }
+    }
+
+    $managers = [];
+    foreach ($wins as $man => $winCount) {
+        if ($winCount == 0) {
+            unset($wins[$man]);
+        } else {
+            $result = query("SELECT * FROM managers where id = $man");
+            while ($row = fetch_array($result)) {
+                $managers[] = $row['name'];
+            }
+        }
+    }
+
+    $response['wins'] = array_values($wins);
+    $response['managers'] = $managers;
 
     return $response;
 }

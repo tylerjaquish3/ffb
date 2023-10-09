@@ -247,10 +247,12 @@ include 'sidebar.html';
                                         echo '<option value="'.$row['week_number'].'">'.$row['week_number'].'</option>';
                                     }
                                     ?>
-                                </select><br>
+                                </select>
+                                <br>
                             </h3>
                             
-                            <button class="btn btn-secondary" id="lookup-standings-btn">Search</button>
+                            <button class="btn btn-secondary" id="lookup-standings-btn">Search</button> or 
+                            <button class="btn btn-secondary" id="next-week-standings-btn">Next Week</button>
                             <br /><br />
                         </div>
                     </div>
@@ -269,6 +271,7 @@ include 'sidebar.html';
                                     <th>Manager</th>
                                     <th>Record</th>
                                     <th>Points</th>
+                                    <th>Next Week</th>
                                 </thead>
                                 <tbody id="postData-standings"></tbody>
                             </table>
@@ -473,45 +476,53 @@ include 'sidebar.html';
         });
 
         $('#datatable-results').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [0, "desc"],
-                [1, "desc"],
+                [1, "desc"]
             ]
         });
 
-        $('#lookup-standings-btn').click(function () {
-
-            year = $('#year-select1').val();
-            week = $('#week-select').val();
-
-            $.ajax({
-                url : 'dataLookup.php',
-                method: 'POST',
-                dataType: 'text',
-                data: {
-                    dataType: "league-standings",
-                    year: year,
-                    week: week
-                },
-                cache: false,
-                success: function(response) {
-                    let data = JSON.parse(response);
-                    $("#postData-standings").html(data.return);
+        let standingsTable = $('#datatable-league-standings').DataTable({
+            searching: false,
+            paging: false,
+            info: false,
+            ajax: {
+                url: 'dataLookup.php',
+                data: function (d) {
+                    d.dataType = 'league-standings';
+                    d.year = $('#year-select1').val();
+                    d.week = $('#week-select').val();
                 }
-            });
+            },
+            columns: [
+                { data: "rank" },
+                { data: "manager" },
+                { data: "record" },
+                { data: "points" },
+                { data: "next" },
+            ],
+            order: [
+                [0, "asc"]
+            ]
         });
 
-        $('#datatable-league-standings').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [0, "desc"],
-                [1, "desc"],
-            ]
+        $('#next-week-standings-btn').click(function () {
+            let currWeek = $('#week-select').val();
+            let currYear = $('#year-select1').val();
+            if (currWeek == 14) {
+                $('#week-select').val(1);
+                $('#year-select1').val(parseInt(currYear) + 1);
+            } else {
+                $('#week-select').val(parseInt(currWeek) + 1);
+            }
+            standingsTable.ajax.reload();
+        });
+        
+        $('#lookup-standings-btn').click(function () {
+            standingsTable.ajax.reload();
         });
 
         $('#regMiscStats').change(function() {

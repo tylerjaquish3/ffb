@@ -279,6 +279,7 @@ if (isset($_GET['id'])) {
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <div class="card-block">
                                 <canvas id="winsChart" height="250px;"></canvas>
+                                <canvas id="postseasonWinsChart" height="250px;" style="display: none;"></canvas>
                             </div>
                         </div>
                     </div>
@@ -696,91 +697,102 @@ if (isset($_GET['id'])) {
             if ($('#oppRecordSelector').val() == 'reg') {
                 $('#datatable-regSeason').show();
                 $('#datatable-postseason').hide();
+                $('#postseasonWinsChart').hide();
+                $('#winsChart').show();
             } else {
                 $('#datatable-regSeason').hide();
                 $('#datatable-postseason').show();
+                $('#postseasonWinsChart').show();
+                $('#winsChart').hide();
             }
         });
 
         $('#datatable-regSeason').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [3, "desc"]
             ]
         });
 
         $('#datatable-postseason').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [3, "desc"]
             ]
         });
 
         $('#datatable-seasons').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [0, "desc"]
             ]
         });
 
         $('#datatable-teamNames').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [0, "desc"]
             ]
         });
 
         $('#datatable-drafts').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [0, "desc"]
             ]
         });
 
         $('#datatable-topPlayers').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [1, "desc"]
             ]
         });
 
         $('#datatable-versus').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [0, "desc"]
             ]
         });
 
         var ctx = $('#finishesChart');
-
         var years = <?php echo json_encode($finishesChart['years']); ?>;
         var yearLabels = years.split(",");
         var finishes = <?php echo json_encode($finishesChart['finishes']); ?>;
         var finishData = finishes.split(",");
+        var regSeason = <?php echo json_encode($finishesChart['regSeasons']); ?>;
+        var regSeasonData = regSeason.split(",");
 
         var line = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: yearLabels,
                 datasets: [{
-                    label: 'Finish',
+                    label: 'Overall Finish',
                     data: finishData,
                     // borderColor: '#2eff37',
                     borderColor: '#2eb82e',
+                    yAxisID: 'y',
+                },{
+                    label: 'Reg. Season Finish',
+                    data: regSeasonData,
+                    // borderColor: '#2eff37',
+                    borderColor: '#297eff',
                     yAxisID: 'y',
                 }]
             },
@@ -791,8 +803,34 @@ if (isset($_GET['id'])) {
                         min: 1,
                         max: 10
                     }
+                },
+                plugins: {
+                    quadrants: {
+                        topLeft: "rgb(172, 240, 172)",
+                        topRight: "rgb(172, 240, 172)",
+                        bottomRight: "#bdbdbd",
+                        bottomLeft: "#bdbdbd",
+                    },
                 }
-            }
+            },
+            plugins: [{
+                id: 'quadrants',
+                beforeDraw(chart, args, options) {
+                    const {ctx, chartArea: {left, top, right, bottom}, scales: {x, y}} = chart;
+                    const midX = x.getPixelForValue(6);
+                    const midY = y.getPixelForValue(6);
+                    ctx.save();
+                    ctx.fillStyle = options.topLeft;
+                    ctx.fillRect(left, top, midX - left, midY - top);
+                    ctx.fillStyle = options.topRight;
+                    ctx.fillRect(midX, top, right - midX, midY - top);
+                    ctx.fillStyle = options.bottomRight;
+                    ctx.fillRect(midX, midY, right - midX, bottom - midY);
+                    ctx.fillStyle = options.bottomLeft;
+                    ctx.fillRect(left, midY, midX - left, bottom - midY);
+                    ctx.restore();
+                }
+            }]
         });
         
         var ctx = $('#winsChart');
@@ -812,6 +850,43 @@ if (isset($_GET['id'])) {
             type: 'pie',
             data: {
                 labels: managers,
+                datasets: [obj]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    datalabels: {
+                        formatter: function(value, context) {
+                            return context.chart.data.labels[context.dataIndex]+': '+value;
+                        },
+                        color: 'black',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+        
+        var ctx = $('#postseasonWinsChart');
+        var postManagers = <?php echo json_encode($postseasonWinsChart['managers']); ?>;
+        var postseasonWins = <?php echo json_encode($postseasonWinsChart['wins']); ?>;
+
+        obj = {};
+        obj.label = 'Wins';
+        obj.data = postseasonWins;
+        obj.backgroundColor = colors;
+        obj.datalabels = {
+            align: 'end'
+        };
+
+        var postseasonWinsChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: postManagers,
                 datasets: [obj]
             },
             options: {

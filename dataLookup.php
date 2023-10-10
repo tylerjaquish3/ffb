@@ -356,4 +356,5 @@ function clean($string) {
     return preg_replace('/[^A-Za-z.\'0-9\-]/', ' ', $string); // Removes special chars.
 }
 
+
 ?>

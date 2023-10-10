@@ -4,6 +4,11 @@ $pageName = "Constitution";
 include 'header.php';
 include 'sidebar.html';
 
+$allYears = [];
+$result = query("SELECT distinct year FROM regular_season_matchups ORDER BY YEAR ASC");
+while ($row = fetch_array($result)) {
+    $allYears[] = $row['year'];
+}
 ?>
 
 <div class="app-content content container-fluid">
@@ -115,6 +120,54 @@ include 'sidebar.html';
                                     <li>Fractional Points: Yes</li>
                                     <li>Negative Points: Yes</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Roster Position History</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block" style="direction: ltr">
+                                <table id="datatable-settings" class="table table-responsive table-striped nowrap">
+                                    <thead>
+                                        <th>Count</th>
+                                        <?php
+                                        foreach ($allYears as $year) {
+                                            echo "<th>".$year."</th>";
+                                        } ?>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DL', 'DB', 'BN', 'IR'];
+                                        $result = query("SELECT roster_spot, year FROM rosters
+                                            WHERE week = 2 and manager = 'AJ'
+                                            ORDER BY year asc");
+                                        while ($row = fetch_array($result)) {
+                                            $spots[$row['year']][] =  $row['roster_spot'];
+                                        }
+
+                                        for ($i = 0; $i < 25; $i++) {
+                                            echo '<tr>';
+                                                echo '<td>'.($i+1).'</td>';
+                                                foreach ($allYears as $year) {
+                                                    
+                                                    if (isset($spots[$year][$i])) {
+                                                        $order = array_search($spots[$year][$i], $posOrder);
+                                                        echo "<td data-order='".$order."'>".$spots[$year][$i]."</td>";
+                                                    } else {
+                                                        echo "<td data-order='99'></td>";
+                                                    }
+                                                }
+                                            echo '</tr>';
+                                        } ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -249,4 +302,9 @@ include 'sidebar.html';
 
 <script type="text/javascript">
 
+    let settingsTable = $('#datatable-settings').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+    });
 </script>

@@ -1415,7 +1415,7 @@ function getCurrentSeasonPoints()
     }
 
     // Arrange in order based on posOrder
-    $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DB', 'BN'];
+    $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DL', 'DB', 'BN', 'IR'];
     foreach ($points as $manager => &$point) {
         $orderedPoints = [];
         foreach ($posOrder as $pos) {

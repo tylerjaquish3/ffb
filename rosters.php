@@ -195,7 +195,8 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                         <tbody>
                                             <?php
                                             $result = query("SELECT r.player, r.*, round FROM rosters r
-                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year and draft.position = r.position
+                                                JOIN managers m on m.name = r.manager
+                                                LEFT JOIN draft d on d.player = r.player AND d.year = r.year and d.position = r.position and d.manager_id = m.id
                                                 WHERE r.year = $year AND week = $week AND manager = '$managerName'");
                                             while ($row = fetch_array($result)) {
                                                 $rank = getPlayerRank($row['player'], $row['year'], $row['week']);

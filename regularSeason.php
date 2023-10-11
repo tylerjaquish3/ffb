@@ -205,7 +205,6 @@ include 'sidebar.html';
                     <div class="card">
                         <div class="card-header">
                             <h4>Results</h4>
-                            <span id="count"></span>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <table class="table table-responsive" id="datatable-results">
@@ -215,7 +214,7 @@ include 'sidebar.html';
                                     <th>Record</th>
                                     <th>Points</th>
                                 </thead>
-                                <tbody id="postData"></tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -273,7 +272,7 @@ include 'sidebar.html';
                                     <th>Points</th>
                                     <th>Next Week</th>
                                 </thead>
-                                <tbody id="postData-standings"></tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -283,10 +282,21 @@ include 'sidebar.html';
     </div>
 </div>
 
+<style>
+    #datatable-regSeason input[type=text] {
+        width: 100%;
+    }
+</style>
+
 <?php include 'footer.php'; ?>
 
 <script type="text/javascript">
     $(document).ready(function() {
+
+        $('#datatable-regSeason thead tr')
+            .clone(true)
+            .addClass('filters')
+            .appendTo('#datatable-regSeason thead');
 
         $('#datatable-regSeason').DataTable({
             "pageLength": 25,
@@ -298,6 +308,45 @@ include 'sidebar.html';
                 "targets": [8,9],
                 "visible": false,
             }],
+            orderCellsTop: true,
+            fixedHeader: true,
+            initComplete: function () {
+                var api = this.api();
+    
+                // For each column
+                api.columns()
+                .eq(0)
+                .each(function (colIdx) {
+                    // Set the header cell to contain the input element
+                    var cell = $('.filters th').eq($(api.column(colIdx).header()).index());
+                    var title = $(cell).text();
+                    $(cell).html('<input type="text" placeholder="filter" />');
+
+                    // On every keypress in this input
+                    $('input',$('.filters th').eq($(api.column(colIdx).header()).index()))
+                    .off('keyup change')
+                    .on('change', function (e) {
+                        // Get the search value
+                        $(this).attr('title', $(this).val());
+                        var regexr = '({search})';
+                        // Search the column for that value
+                        api
+                            .column(colIdx)
+                            .search(
+                                this.value != ''
+                                    ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                    : '',
+                                this.value != '',
+                                this.value == ''
+                            )
+                            .draw();
+                    })
+                    .on('keyup', function (e) {
+                        e.stopPropagation();
+                        $(this).trigger('change');
+                    });
+                });
+            }
         });
 
         $('#datatable-pfpawins').DataTable({
@@ -453,32 +502,25 @@ include 'sidebar.html';
         });
 
         $('#lookup-btn').click(function () {
-
-            manager1Id = $('#manager1-select').val();
-            place1 = $('#place1').val();
-
-            $.ajax({
-                url : 'dataLookup.php',
-                method: 'POST',
-                dataType: 'text',
-                data: {
-                    dataType: "standings",
-                    manager1: manager1Id,
-                    place: place1
-                },
-                cache: false,
-                success: function(response) {
-                    let data = JSON.parse(response);
-                    $("#postData").html(data.return);
-                    $("#count").html('Count: '+data.count);
-                }
-            });
+            lookupTable.ajax.reload();
         });
 
-        $('#datatable-results').DataTable({
+        let lookupTable = $('#datatable-results').DataTable({
             searching: false,
-            paging: false,
-            info: false,
+            ajax: {
+                url: 'dataLookup.php',
+                data: function (d) {
+                    d.dataType = 'standings';
+                    d.manager1 = $('#manager1-select').val();
+                    d.place1 = $('#place1').val();
+                }
+            },
+            columns: [
+                { data: "year" },
+                { data: "week" },
+                { data: "record" },
+                { data: "points" },
+            ],
             order: [
                 [0, "desc"],
                 [1, "desc"]

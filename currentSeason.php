@@ -309,7 +309,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Optimal Lineups</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column" id="datatable-optimal">
+                            <table class="table table-responsive" id="datatable-optimal">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Opponent</th>
@@ -325,29 +325,7 @@ include 'sidebar.html';
                                     <th>Actual Margin</th>
                                     <th>Optimal Margin</th>
                                 </thead>
-                                <tbody>
-                                    <?php
-                                    foreach ($optimal as $row) { ?>
-                                        <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo $row['opponent']; ?></td>
-                                            <td>
-                                                <?php echo '<a href="/rosters.php?year='.$row['year'].'&week='.$row['week'].'&manager='.$row['manager'].'">
-                                                <i class="icon-clipboard"></i></a>'; ?>
-                                            </td>
-                                            <td><?php echo $row['week']; ?></td>
-                                            <td><?php echo $row['points']; ?></td>
-                                            <td><?php echo $row['oppPoints']; ?></td>
-                                            <td><?php echo $row['result']; ?></td>
-                                            <td><?php echo $row['projected']; ?></td>
-                                            <td><?php echo $row['oppProjected']; ?></td>
-                                            <td><?php echo $row['optimal']; ?></td>
-                                            <td><?php echo $row['oppOptimal']; ?></td>
-                                            <td><?php echo abs(round($row['points'] - $row['oppPoints'], 2)); ?></td>
-                                            <td><?php echo abs(round($row['optimal'] - $row['oppOptimal'], 2)); ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -684,6 +662,28 @@ include 'sidebar.html';
             fixedColumns:   {
                 leftColumns: 2
             },
+            ajax: {
+                url: 'dataLookup.php',
+                data: function (d) {
+                    d.dataType = 'optimal-lineups';
+                    d.season = $('#year-select').val();
+                }
+            },
+            columns: [
+                { data: 'manager' },
+                { data: 'opponent' },
+                { data: 'roster_link', sortable: false },
+                { data: 'week' },
+                { data: 'points' },
+                { data: 'oppPoints' },
+                { data: 'result' },
+                { data: 'projected' },
+                { data: 'oppProjected' },
+                { data: 'optimal' },
+                { data: 'oppOptimal' },
+                { data: 'margin' },
+                { data: 'optimalMargin' }
+            ],
             order: [
                 [4, "desc"]
             ],

@@ -5,11 +5,11 @@ include 'functions.php';
 // var_dump($_POST);die;
 
 // Lookup standings by manager
-if (isset($_POST['dataType']) && $_POST['dataType'] == 'standings') {
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'standings') {
 
-    $return = '';
-    $manager = $_POST['manager1'];
-    $place = $_POST['place'];
+    $return = [];
+    $manager = $_GET['manager1'];
+    $place = $_GET['place1'];
     $standings = $allYears = [];
     $currYear = null;
 
@@ -113,15 +113,22 @@ if (isset($_POST['dataType']) && $_POST['dataType'] == 'standings') {
     foreach ($allInPlace as $data) {
         $losses = $data['week'] - $data['wins'];
         $record = $data['wins'].' - '.$losses;
-        $return .= '<tr><td>'.$data['year'].'</td><td>'.$data['week'].'</td><td>'.$record.'</td><td>'.$data['points'].'</td></tr>';
+        $return[] = [
+            'year'      => $data['year'],
+            'week'      => $data['week'],
+            'record'    => $record,
+            'points'    => round($data['points'], 1)
+        ];
     }
 
-    $done = [
-        'return' => $return,
-        'count' => count($allInPlace)
-    ];
-    echo json_encode($done);
+    $content = new \stdClass();
+    $content->data = $return;
+
+    echo json_encode($content);
     die;
+
+    // echo json_encode($done);
+    // die;
 }
 
 // Lookup schedule outcomes by manager
@@ -316,6 +323,96 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'all-players') {
     }
     $content = new \stdClass();
     $content->data = $players;
+
+    echo json_encode($content);
+    die;
+}
+
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
+    
+    $selectedSeason = $_GET['season'];
+    $response = [];
+
+    $result1 = query("SELECT distinct week FROM rosters WHERE YEAR = $selectedSeason");
+    while ($week = fetch_array($result1)) {
+        $week = $week['week'];
+
+        $result2 = query("SELECT distinct manager FROM rosters
+            WHERE YEAR = $selectedSeason AND week = $week");
+        while ($manager = fetch_array($result2)) {
+            $manager = $manager['manager'];
+
+            $projected = $points = 0;
+            $roster = [];
+
+            $result3 = query("SELECT * FROM rosters
+                WHERE YEAR = $selectedSeason AND week = $week and manager = '".$manager."'");
+            while ($row = fetch_array($result3)) {
+
+                $result4 = query("SELECT * FROM regular_season_matchups
+                    join managers on regular_season_matchups.manager1_id = managers.id
+                    WHERE YEAR = $selectedSeason AND week_number = $week and managers.name = '".$manager."'");
+                while ($row2 = fetch_array($result4)) {
+
+                    $winLoss = ($row2['manager1_score'] > $row2['manager2_score']) ? 'Win' : 'Loss';
+                    $manager2 = $row2['manager2_id'];
+
+                    $opponentProjected = $opponentPoints = 0;
+                    $opponentRoster = [];
+
+                    $result5 = query("SELECT * FROM managers
+                        JOIN rosters on rosters.manager = managers.name
+                        WHERE YEAR = $selectedSeason AND week = $week and managers.id = $manager2");
+                    while ($team = fetch_array($result5)) {
+                        $opponent = $team['name'];
+
+                        $opponentRoster[] = [
+                            'pos' => $team['position'],
+                            'points' => (float)$team['points']
+                        ];
+
+                        if ($team['roster_spot'] != 'BN' && $team['roster_spot'] != 'IR') {
+                            $opponentProjected += $team['projected'];
+                            $opponentPoints += $team['points'];
+                        }
+                    }
+                }
+
+                $roster[] = [
+                    'pos' => $row['position'],
+                    'points' => (float)$row['points']
+                ];
+
+                if ($row['roster_spot'] != 'BN' && $row['roster_spot'] != 'IR') {
+                    $projected += $row['projected'];
+                    $points += $row['points'];
+                }
+            }
+
+            $optimal = checkRosterForOptimal($roster);
+            $opponentOptimal = checkRosterForOptimal($opponentRoster);
+
+            $response[] = [
+                'manager' => $manager,
+                'week' => $week,
+                'roster_link' => '<a href="/rosters.php?year='.$selectedSeason.'&week='.$week.'&manager='.$manager.'"><i class="icon-clipboard"></i></a>',
+                'year' => $selectedSeason,
+                'optimal' => round($optimal, 2),
+                'points' => round($points, 2),
+                'projected' => round($projected, 2),
+                'result' => $winLoss,
+                'opponent' => $opponent,
+                'oppPoints' => round($opponentPoints, 2),
+                'oppProjected' => round($opponentProjected, 2),
+                'oppOptimal' => round($opponentOptimal, 2),
+                'margin' => abs(round($points - $opponentPoints, 2)),
+                'optimalMargin' => abs(round($optimal - $opponentOptimal, 2))
+            ];
+        }
+    }
+
+    $content = new \stdClass();
+    $content->data = $response;
 
     echo json_encode($content);
     die;

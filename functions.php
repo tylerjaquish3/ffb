@@ -12,11 +12,26 @@ function query($sql)
         $sql = str_replace("if(", "iif(", $sql);
         $sql = str_replace("IF(", "IIF(", $sql);
         $sql = str_replace("IF (", "IIF (", $sql);
-// var_dump($sql);
+
         return $conn->query($sql);
     }
 
     return mysqli_query($conn, $sql);
+}
+
+function draft_query($sql)
+{
+    global $conn2, $DB_TYPE;
+
+    if ($DB_TYPE == 'sqlite') {
+        $sql = str_replace("if(", "iif(", $sql);
+        $sql = str_replace("IF(", "IIF(", $sql);
+        $sql = str_replace("IF (", "IIF (", $sql);
+
+        return $conn2->query($sql);
+    }
+
+    return mysqli_query($conn2, $sql);
 }
 
 function fetch_array($result)
@@ -89,7 +104,6 @@ if ($pageName == 'Current Season') {
     $bestWeek = getCurrentSeasonBestWeek();
     $topPerformers = getCurrentSeasonTopPerformers();
     $teamWeek = getCurrentSeasonBestTeamWeek();
-    $optimal = getOptimalLineupPoints();
     $draftedPoints = getDraftPoints();
     $worstDraft = getWorstDraftPicks();
     $bestDraft = getBestDraftPicks();
@@ -2080,92 +2094,6 @@ function getPointsForScatter()
     ];
 
     return $data;
-}
-
-/**
- * Undocumented function
- */
-function getOptimalLineupPoints()
-{
-    global $selectedSeason;
-    $response = [];
-
-    $result1 = query("SELECT distinct week FROM rosters WHERE YEAR = $selectedSeason");
-    while ($week = fetch_array($result1)) {
-        $week = $week['week'];
-
-        $result2 = query("SELECT distinct manager FROM rosters
-            WHERE YEAR = $selectedSeason AND week = $week");
-        while ($manager = fetch_array($result2)) {
-            $manager = $manager['manager'];
-
-            $projected = $points = 0;
-            $roster = [];
-
-            $result3 = query("SELECT * FROM rosters
-                WHERE YEAR = $selectedSeason AND week = $week and manager = '".$manager."'");
-            while ($row = fetch_array($result3)) {
-
-                $result4 = query("SELECT * FROM regular_season_matchups
-                    join managers on regular_season_matchups.manager1_id = managers.id
-                    WHERE YEAR = $selectedSeason AND week_number = $week and managers.name = '".$manager."'");
-                while ($row2 = fetch_array($result4)) {
-
-                    $winLoss = ($row2['manager1_score'] > $row2['manager2_score']) ? 'Win' : 'Loss';
-                    $manager2 = $row2['manager2_id'];
-
-                    $opponentProjected = $opponentPoints = 0;
-                    $opponentRoster = [];
-
-                    $result5 = query("SELECT * FROM managers
-                        JOIN rosters on rosters.manager = managers.name
-                        WHERE YEAR = $selectedSeason AND week = $week and managers.id = $manager2");
-                    while ($team = fetch_array($result5)) {
-                        $opponent = $team['name'];
-
-                        $opponentRoster[] = [
-                            'pos' => $team['position'],
-                            'points' => (float)$team['points']
-                        ];
-
-                        if ($team['roster_spot'] != 'BN') {
-                            $opponentProjected += $team['projected'];
-                            $opponentPoints += $team['points'];
-                        }
-                    }
-                }
-
-                $roster[] = [
-                    'pos' => $row['position'],
-                    'points' => (float)$row['points']
-                ];
-
-                if ($row['roster_spot'] != 'BN') {
-                    $projected += $row['projected'];
-                    $points += $row['points'];
-                }
-            }
-
-            $optimal = checkRosterForOptimal($roster);
-            $opponentOptimal = checkRosterForOptimal($opponentRoster);
-
-            $response[] = [
-                'manager' => $manager,
-                'week' => $week,
-                'year' => $selectedSeason,
-                'optimal' => round($optimal, 2),
-                'points' => round($points, 2),
-                'projected' => round($projected, 2),
-                'result' => $winLoss,
-                'opponent' => $opponent,
-                'oppPoints' => round($opponentPoints, 2),
-                'oppProjected' => round($opponentProjected, 2),
-                'oppOptimal' => round($opponentOptimal, 2)
-            ];
-        }
-    }
-
-    return $response;
 }
 
 /**

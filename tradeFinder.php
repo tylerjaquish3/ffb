@@ -88,14 +88,17 @@ function printFinderRow($team, $targets, $pos)
                                         WHERE YEAR = $season
                                         GROUP BY player");
                                     while ($row = fetch_array($result)) {
-                                        $name = substr($row['player'], 0, strrpos($row['player'], ' '));
+                                        $name = $row['player'];
                                         $playerPts[$name] = round($row['pts'], 1);
                                     }
 
                                     $targets = [];
-                                    $result = query("SELECT player, proj_points, name, position FROM preseason_rankings pr JOIN draft_selections ds ON ds.ranking_id = pr.id
-                                        JOIN managers m ON m.id = ds.manager_id
-                                        WHERE is_mine = 0");
+                                    $result = draft_query("SELECT p.name as player, proj_points, m.name, positions.name as position FROM league_player_details lpd
+                                        JOIN players p on p.id = lpd.player_id
+                                        JOIN draft_selections ds ON ds.player_id = p.id
+                                        JOIN positions on positions.id = p.position_id
+                                        JOIN league_managers m ON m.id = ds.manager_id
+                                        WHERE manager_id != 10 and lpd.league_id = 1 and m.league_id = 1");
                                     while ($row = fetch_array($result)) {
 
                                         $pts = 0;
@@ -150,15 +153,16 @@ function printFinderRow($team, $targets, $pos)
                                         WHERE YEAR = $season
                                         GROUP BY player");
                                     while ($row = fetch_array($result)) {
-                                        $name = substr($row['player'], 0, strrpos($row['player'], ' '));
+                                        $name = $row['player'];
                                         $playerPts[$name] = round($row['pts'], 1);
                                     }
 
-                                    $result = query("SELECT player, proj_points, name FROM preseason_rankings pr 
-                                        JOIN draft_selections ds ON ds.ranking_id = pr.id
-                                        JOIN schedule s ON s.manager1_id = 1 AND pr.bye = s.week
-                                        JOIN managers m ON m.id = s.manager2_id
-                                        WHERE is_mine = 1");
+                                    $result = draft_query("SELECT p.name as player, proj_points, m.name, positions.name as position FROM league_player_details lpd
+                                    JOIN players p on p.id = lpd.player_id
+                                    JOIN draft_selections ds ON ds.player_id = p.id
+                                    JOIN positions on positions.id = p.position_id
+                                    JOIN league_managers m ON m.id = ds.manager_id
+                                    WHERE manager_id = 10 and lpd.league_id = 1 and m.league_id = 1");
                                     while ($row = fetch_array($result)) {
 
                                         $pts = 0;

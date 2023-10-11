@@ -452,39 +452,39 @@ foreach ($seasonNumbers as $standings) {
         });
 
         $('#datatable-postseason').DataTable({
-            "columnDefs": [{
-                "targets": [4],
-                "visible": false,
+            columnDefs: [{
+                targets: [4],
+                visible: false,
             }],
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [4, "desc"]
             ]
         });
 
         $('#datatable-standings').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [0, "asc"]
             ]
         });
 
         $('#datatable-draft').DataTable({
-            "order": [
+            order: [
                 [1, "asc"]
             ]
         });
         
         $('#datatable-trades').DataTable({
-            "columnDefs": [{
-                "targets": [3],
-                "visible": false,
+            columnDefs: [{
+                targets: [3],
+                visible: false,
             }],
-            "order": [
+            order: [
                 [3, "desc"]
             ]
         });

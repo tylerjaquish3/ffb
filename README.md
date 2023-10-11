@@ -4,9 +4,9 @@
 - rosters table, LAR and LAC are grouped
 - rosters table, NYG and NYJ are grouped
 - fun facts current season margin doesnt update new_leader
-- make current season load faster
 - week 1 2021 rosters were updated on mysql but not sqlite
 - cam profile vs tyler, avg pf/pa don't match up with high/low foes
+- Rosters page, matchup rosters table Drafted? column should mean drafted by that manager
 
 # Ideas
 

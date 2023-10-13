@@ -487,10 +487,19 @@ if (isset($_GET['id'])) {
                                             $postLosses += ($isPost && $array['winning_manager_id'] != $managerId) ? 1 : 0;
                                             $postTotal += ($isPost) ? 1: 0;
 
-                                            $pf += $array['manager1_score'];
-                                            $pa += $array['manager2_score'];
+                                            $manager1score = $array['manager1_score'];
+                                            $manager2score = $array['manager2_score'];
 
-                                            $margin = $array['manager1_score'] - $array['manager2_score'];
+                                            // Postseason matchup might be flipped!
+                                            if ($isPost && $array['manager2_id'] == $managerId) {
+                                                $manager1score = $array['manager2_score'];
+                                                $manager2score = $array['manager1_score'];
+                                            }
+
+                                            $pf += $manager1score;
+                                            $pa += $manager2score;
+
+                                            $margin = $manager1score - $manager2score;
                                             $bigWin = ($margin > 0 && $margin > $bigWin) ? $margin : $bigWin;
                                             $closeLoss = ($margin < 0 && $margin > $closeLoss) ? $margin : $closeLoss;
                                             $closeWin = ($margin > 0 && $margin < $closeWin) ? $margin : $closeWin;
@@ -508,8 +517,8 @@ if (isset($_GET['id'])) {
 
                                         <tr><td>Total Points For</td><td><?php echo $pf; ?></td></tr>
                                         <tr><td>Total Points Against</td><td><?php echo $pa; ?></td></tr>
-                                        <tr><td>Average Points For</td><td><?php echo round($pf/$total, 1); ?></td></tr>
-                                        <tr><td>Average Points Against</td><td><?php echo round($pa/$total, 1); ?></td></tr>
+                                        <tr><td>Average Points For</td><td><?php echo round($pf/($total+$postTotal), 1); ?></td></tr>
+                                        <tr><td>Average Points Against</td><td><?php echo round($pa/($total+$postTotal), 1); ?></td></tr>
 
                                         <tr><td>Biggest Win</td><td><?php echo round($bigWin, 2); ?></td></tr>
                                         <tr><td>Biggest Loss</td><td><?php echo round($bigLoss, 2); ?></td></tr>
@@ -627,22 +636,22 @@ if (isset($_GET['id'])) {
                                             <td><?php echo $foes['overall_win_pct']['value']; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Total Points For</td>
+                                            <td>Most Total Points For</td>
                                             <td><?php echo $foes['total_pf']['manager']; ?></td>
                                             <td><?php echo $foes['total_pf']['value']; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Total Points Against</td>
+                                            <td>Most Total Points Against</td>
                                             <td><?php echo $foes['total_pa']['manager']; ?></td>
                                             <td><?php echo $foes['total_pa']['value']; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Average Points For</td>
+                                            <td>Highest Average Points For</td>
                                             <td><?php echo $foes['average_pf']['manager']; ?></td>
                                             <td><?php echo $foes['average_pf']['value']; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Average Points Against</td>
+                                            <td>Highest Average Points Against</td>
                                             <td><?php echo $foes['average_pa']['manager']; ?></td>
                                             <td><?php echo $foes['average_pa']['value']; ?></td>
                                         </tr>

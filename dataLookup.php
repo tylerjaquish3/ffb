@@ -425,16 +425,17 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'player-info') {
     $player = str_replace("'", "''", $_GET['player']);
     $details = [];
 
-    $result = query("SELECT year, manager, player, COUNT(week) as weeks, SUM(points) as points, SUM(projected) as projected 
+    $result = query("SELECT year, manager, player, team, COUNT(week) as weeks, SUM(points) as points, SUM(projected) as projected 
         FROM rosters 
         JOIN managers ON rosters.manager = managers.name
         WHERE player = '$player'
-        GROUP BY year, manager, player
+        GROUP BY year, manager, player, team
         ORDER BY year DESC");
     while ($row = fetch_array($result)) {
         $details[] = [
             'year' => $row['year'],
             'player' => $row['player'],
+            'team' => $row['team'],
             // 'manager' => '<a href="/profile.php?id='.$row['manager'].'">'.$row['manager'].'</a>',
             'manager' => $row['manager'],
             'weeks' => $row['weeks'],

@@ -48,14 +48,15 @@ include 'sidebar.html';
                                             <th>Manager</th>
                                             <th></th>
                                             <th>Player</th>
+                                            <th>Team</th>
                                             <th>Points</th>
                                         </thead>
                                         <tbody>
                                         <?php
                                         $result = query(
-                                            "SELECT player, year, sum(points) as points, max(manager) as man
+                                            "SELECT player, year, team, sum(points) as points, max(manager) as man
                                             FROM rosters
-                                            GROUP BY player, year
+                                            GROUP BY player, year, team
                                             ORDER BY points DESC
                                             LIMIT 100");
                                         while ($array = fetch_array($result)) { ?>
@@ -69,6 +70,7 @@ include 'sidebar.html';
                                                     <i class="icon-table"></i></a>'; ?>
                                                 </td>
                                                 <td><?php echo '<a href="/players.php?player='.$array['player'].'">'.$array['player'].'</a>'; ?></td>
+                                                <td><?php echo $array['team']; ?></td>
                                                 <td><?php echo round($array['points'], 1); ?></td>
                                             </tr>
                                         <?php } ?>
@@ -96,14 +98,15 @@ include 'sidebar.html';
                                             <th>Manager</th>
                                             <th></th>
                                             <th>Player</th>
+                                            <th>Team</th>
                                             <th>Points</th>
                                         </thead>
                                         <tbody>
                                         <?php
                                         $result = query(
-                                            "SELECT player, week, year, sum(points) as points, max(manager) as man
+                                            "SELECT player, team, week, year, sum(points) as points, max(manager) as man
                                             FROM rosters
-                                            GROUP BY player, year, week
+                                            GROUP BY player, team, year, week
                                             ORDER BY points DESC
                                             LIMIT 100");
                                         while ($row = fetch_array($result)) { ?>
@@ -116,6 +119,7 @@ include 'sidebar.html';
                                                     <i class="icon-clipboard"></i></a>'; ?>
                                                 </td>
                                                 <td><?php echo '<a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a>'; ?></td>
+                                                <td><?php echo $row['team']; ?></td>
                                                 <td><?php echo round($row['points'], 1); ?></td>
                                             </tr>
                                         <?php } ?>
@@ -249,14 +253,14 @@ include 'sidebar.html';
         $('#datatable-playerSeasons').DataTable({
             pageLength: 10,
             order: [
-                [4, "desc"]
+                [5, "desc"]
             ]
         });
         
         $('#datatable-playerWeeks').DataTable({
             pageLength: 10,
             order: [
-                [5, "desc"]
+                [6, "desc"]
             ]
         });
 

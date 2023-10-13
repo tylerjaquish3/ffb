@@ -4,9 +4,7 @@
 - rosters table, LAR and LAC are grouped
 - rosters table, NYG and NYJ are grouped
 - fun facts current season margin doesnt update new_leader
-- week 1 2021 rosters were updated on mysql but not sqlite
-- cam profile vs tyler, avg pf/pa don't match up with high/low foes
-- Rosters page, matchup rosters table Drafted? column should mean drafted by that manager
+- make a script that looks at DEFs in roster and sets team column
 
 # Ideas
 
@@ -20,7 +18,6 @@
 - grab postseason matchup rosters
 - rosters page,
     - add optimal lineups info on left
-    - it would be cool to show what nfl team they were on that year
 
 - draft order based on wives/gfs responses to something?
 

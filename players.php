@@ -34,7 +34,7 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-12 table-padding">
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Top 100 Player Seasons</h4>
@@ -42,7 +42,7 @@ include 'sidebar.html';
                         <div class="card-body" style="direction: ltr;">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <table class="table table-striped nowrap" id="datatable-playerSeasons">
+                                    <table class="table table-striped nowrap table-responsive" id="datatable-playerSeasons">
                                         <thead>
                                             <th>Year</th>
                                             <th>Manager</th>
@@ -81,9 +81,8 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-12 table-padding">
+
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Top 100 Player Weeks</h4>
@@ -91,7 +90,7 @@ include 'sidebar.html';
                         <div class="card-body" style="direction: ltr;">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <table class="table table-striped nowrap" id="datatable-playerWeeks">
+                                    <table class="table table-striped nowrap table-responsive" id="datatable-playerWeeks">
                                         <thead>
                                             <th>Year</th>
                                             <th>Week</th>

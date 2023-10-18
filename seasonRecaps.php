@@ -130,6 +130,7 @@ foreach ($seasonNumbers as $standings) {
                                         <th>Rank</th>
                                         <th>Seed</th>
                                         <th>Manager</th>
+                                        <th></th>
                                         <th>Team Name</th>
                                         <th>Record</th>
                                         <th>PF</th>
@@ -144,7 +145,8 @@ foreach ($seasonNumbers as $standings) {
                                             <tr>
                                                 <td><?php echo $standings['finish']; ?></td>
                                                 <td><?php echo $standings['seed']; ?></td>
-                                                <td><?php echo $standings['manager']; ?></td>
+                                                <td><?php echo '<a href="/profile.php?id='.$standings['manager'].'">'.$standings['manager'].'</a>'; ?></td>
+                                                <td><?php echo '<a href="/rosters.php?year='.$season.'&week=1&manager='.$standings['manager'].'"><i class="icon-clipboard"></i></a>'; ?></td>
                                                 <td><?php echo $standings['team_name']; ?></td>
                                                 <td><?php echo $standings['record']; ?></td>
                                                 <td><?php echo $standings['pf']; ?></td>

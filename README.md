@@ -1,10 +1,11 @@
 ### Suntown FFB website
 
 # Bugs
-- rosters table, LAR and LAC are grouped
-- rosters table, NYG and NYJ are grouped
+- rosters table, lots of players don't have a team
+- set ffb_parser to handle NYG/NYJ & LAR/LAC going forward
+- set ffb_parser to insert team
 - fun facts current season margin doesnt update new_leader
-- make a script that looks at DEFs in roster and sets team column
+- aj is missing 2012 defenses for multiple weeks (NYG)
 
 # Ideas
 
@@ -18,6 +19,7 @@
 - grab postseason matchup rosters
 - rosters page,
     - add optimal lineups info on left
+- gather team game times to chart when fantasy points occurred
 
 - draft order based on wives/gfs responses to something?
 
@@ -49,3 +51,7 @@ Generic league ideas
 
 
 $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
+
+Yahoo API
+Client ID: dj0yJmk9Mjc0ZUJKQmk3NHVaJmQ9WVdrOVlrSkVNRkJ6Y1ZvbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWRl
+secret: 45e85dc510dc193bfd6a0d77c0282f7d98e8055d

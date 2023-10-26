@@ -214,7 +214,7 @@ include 'sidebar.html';
 
             </div>
             <div class="row">
-                <div class="col-sm-12 table-padding">
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Stats</h4>
@@ -256,10 +256,54 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-12 col-lg-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Stats by Week</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="stripe nowrap row-border order-column" id="datatable-currentWeekStats">
+                                <thead>
+                                    <th>Manager</th>
+                                    <th>Week</th>
+                                    <th>Total Yds</th>
+                                    <th>Total TDs</th>
+                                    <th>Pass Yds</th>
+                                    <th>Pass TDs</th>
+                                    <th>Ints</th>
+                                    <th>Rush Yds</th>
+                                    <th>Rush TDs</th>
+                                    <th>Rec</th>
+                                    <th>Rec Yds</th>
+                                    <th>Rec TDs</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    while ($row = fetch_array($weekStats)) { ?>
+                                        <tr>
+                                            <td><?php echo $row['manager']; ?></td>
+                                            <td><?php echo $row['week']; ?></td>
+                                            <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
+                                            <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
+                                            <td><?php echo $row['pass_yds']; ?></td>
+                                            <td><?php echo $row['pass_tds']; ?></td>
+                                            <td><?php echo $row['ints']; ?></td>
+                                            <td><?php echo $row['rush_yds']; ?></td>
+                                            <td><?php echo $row['rush_tds']; ?></td>
+                                            <td><?php echo $row['rec']; ?></td>
+                                            <td><?php echo $row['rec_yds']; ?></td>
+                                            <td><?php echo $row['rec_tds']; ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="row">
-                <div class="col-sm-12 table-padding">
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Stats Against</h4>
@@ -301,7 +345,52 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-12 col-lg-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Stats Against by Week</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="stripe nowrap row-border order-column" id="datatable-weekStatsAgainst">
+                                <thead>
+                                    <th>Manager</th>
+                                    <th>Week</th>
+                                    <th>Total Yds</th>
+                                    <th>Total TDs</th>
+                                    <th>Pass Yds</th>
+                                    <th>Pass TDs</th>
+                                    <th>Ints</th>
+                                    <th>Rush Yds</th>
+                                    <th>Rush TDs</th>
+                                    <th>Rec</th>
+                                    <th>Rec Yds</th>
+                                    <th>Rec TDs</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    foreach ($weekStatsAgainst as $row) { ?>
+                                        <tr>
+                                            <td><?php echo $row['manager']; ?></td>
+                                            <td><?php echo $row['week']; ?></td>
+                                            <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
+                                            <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
+                                            <td><?php echo $row['pass_yds']; ?></td>
+                                            <td><?php echo $row['pass_tds']; ?></td>
+                                            <td><?php echo $row['ints']; ?></td>
+                                            <td><?php echo $row['rush_yds']; ?></td>
+                                            <td><?php echo $row['rush_tds']; ?></td>
+                                            <td><?php echo $row['receptions']; ?></td>
+                                            <td><?php echo $row['rec_yds']; ?></td>
+                                            <td><?php echo $row['rec_tds']; ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <div class="row">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
@@ -596,6 +685,36 @@ include 'sidebar.html';
             }
         });
 
+        $('#datatable-currentWeekStats').DataTable({
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                left: 1
+            },
+            order: [
+                [2, "desc"]
+            ],
+            initComplete: function() {
+                var api = this.api();
+                api.columns(':not(:first)').every(function() {
+                    var col = this.index();
+                    var data = this.data().unique().map(function(value) {
+                        return parseInt(value);
+                    }).toArray().sort(function(a, b){return b-a});
+
+                    last = data.length-1;
+                    api.cells(null, col).every(function() {
+                        var cell = parseInt(this.data());
+                        if (cell === data[0]) {
+                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
+                        } else if (cell === data[last]) {
+                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
+                        }
+                    });
+                });
+            }
+        });
+
         $('#datatable-bestWeek').DataTable({
             searching: false,
             paging: false,
@@ -614,6 +733,36 @@ include 'sidebar.html';
             searching: false,
             paging: false,
             info: false,
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                left: 1
+            },
+            order: [
+                [2, "desc"]
+            ],
+            initComplete: function() {
+                var api = this.api();
+                api.columns(':not(:first)').every(function() {
+                    var col = this.index();
+                    var data = this.data().unique().map(function(value) {
+                        return parseInt(value);
+                    }).toArray().sort(function(a, b){return b-a});
+
+                    last = data.length-1;
+                    api.cells(null, col).every(function() {
+                        var cell = parseInt(this.data());
+                        if (cell === data[0]) {
+                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
+                        } else if (cell === data[last]) {
+                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
+                        }
+                    });
+                });
+            }
+        });
+
+        $('#datatable-weekStatsAgainst').DataTable({
             scrollX: "100%",
             scrollCollapse: true,
             fixedColumns:   {

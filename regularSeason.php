@@ -83,6 +83,30 @@ include 'sidebar.html';
                         </select>
                     </div>
                     <?php include 'regMiscStats.php'; ?>
+
+                    <br /><br />
+                    <div class="table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Weekly Ranks</h4>
+                            </div>
+                            <div class="card-body" style="direction: ltr;">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <table class="table table-striped nowrap" id="datatable-weeklyRanks">
+                                            <thead>
+                                                <th></th>
+                                                <th>Year</th>
+                                                <th>Manager</th>
+                                                <th>Avg. Weekly Rank</th>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -675,6 +699,100 @@ include 'sidebar.html';
                 [3, "desc"]
             ]
         });
+
+
+        var table = $('#datatable-weeklyRanks').DataTable({
+            pageLength: 10,
+            ajax: {
+                url: 'dataLookup.php',
+                data: {
+                    dataType: 'weekly-ranks'
+                }
+            },
+            columns: [
+                {
+                    className: 'dt-control',
+                    orderable: false,
+                    data: null,
+                    defaultContent: '<i class="icon-plus"></i>'
+                },
+                { data: "year" },
+                { data: "manager" },
+                { data: "avg_rank" }
+            ],
+            order: [
+                [1, "desc"],
+                [3, "asc"]
+            ]
+        });
+
+        // Add event listener for opening and closing details
+        table.on('click', 'td.dt-control', function (e) {
+            let tr = e.target.closest('tr');
+            let row = table.row(tr);
+        
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide();
+            }
+            else {
+                // Open this row
+                row.child(format(row.data())).show();
+            }
+        });
+
+        function format ( rowData ) {
+            var div = $('<div/>')
+                .addClass( 'loading' )
+                .text( 'Loading...' );
+
+            $.ajax( {
+                url: '/dataLookup.php',
+                data: {
+                    dataType: 'get-season-ranks',
+                    manager: rowData.manager,
+                    year: rowData.year
+                },
+                dataType: 'json',
+                success: function (data) {
+                    let count = 1;
+                    const table = document.createElement("table");
+                    const thead = document.createElement("thead");
+                    const tbody = document.createElement("tbody");
+                    for (const row of data) {
+                        if (count == 1) {
+                            for (const key of Object.keys(row)) {
+                                const th = document.createElement("th");
+                                th.textContent = key.charAt(0).toUpperCase() + key.slice(1);;
+                                thead.appendChild(th);
+                            }
+                            table.appendChild(thead);
+                        } 
+                        const tr = document.createElement("tr");
+                        for (const key of Object.keys(row)) {
+                            const td = document.createElement("td");
+                            td.textContent = row[key];
+                            tr.appendChild(td);
+                        }
+
+                        tbody.appendChild(tr);
+                        count++;
+                    }
+                    table.appendChild(tbody);
+
+                    div.removeClass('loading');
+                    div.text('');
+                    div.append(table);
+
+                    // Make the table into a datatable
+                    $(table).DataTable({
+                        paging: false
+                    });
+                }
+            } );
+
+            return div; 
+        }
 
     });
 </script>

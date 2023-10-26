@@ -2,8 +2,6 @@
 
 # Bugs
 - rosters table, lots of players don't have a team
-- set ffb_parser to handle NYG/NYJ & LAR/LAC going forward
-- set ffb_parser to insert team
 - fun facts current season margin doesnt update new_leader
 - aj is missing 2012 defenses for multiple weeks (NYG)
 
@@ -31,7 +29,7 @@ Head to Head record
     - Highest/lowest score against opponent
         - This year, last year, all time?
     - Revenge game? 
-    - how many times 1st place plast last place
+    - how many times 1st place beat last place
     
 Current season stats
     - Major outliers

@@ -100,7 +100,9 @@ if ($pageName == 'Current Season') {
 
     $points = getCurrentSeasonPoints();
     $stats = getCurrentSeasonStats();
+    $weekStats = getCurrentSeasonWeekStats();
     $statsAgainst = getCurrentSeasonStatsAgainst();
+    $weekStatsAgainst = getCurrentSeasonWeekStatsAgainst();
     $bestWeek = getCurrentSeasonBestWeek();
     $topPerformers = getCurrentSeasonTopPerformers();
     $teamWeek = getCurrentSeasonBestTeamWeek();
@@ -1444,19 +1446,35 @@ function getCurrentSeasonPoints()
 }
 
 /**
- * Undocumented function
+ * Get total season stats by manager for Current Season page
  */
 function getCurrentSeasonStats()
 {
     global $selectedSeason;
 
     $result = query("SELECT manager, SUM(pass_yds) AS pass_yds, SUM(pass_tds) AS pass_tds, SUM(ints) AS ints, SUM(rush_yds) AS rush_yds, SUM(rush_tds) AS rush_tds,
-        SUM(receptions) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds, SUM(fumbles) AS fum, SUM(fg_made) AS fg_made, SUM(pat_made) AS pat_made,
-        SUM(def_sacks) AS def_sacks, SUM(def_int) AS def_int, SUM(def_fum) AS def_fum
+        SUM(receptions) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds, SUM(fumbles) AS fum, SUM(fg_made) AS fg_made, SUM(pat_made) AS pat_made
         FROM rosters r
         JOIN stats s ON s.roster_id = r.id
-        WHERE YEAR = $selectedSeason and roster_spot != 'BN'
+        WHERE YEAR = $selectedSeason and roster_spot != 'BN' and roster_spot != 'IR'
         GROUP BY manager");
+
+    return $result;
+}
+
+/**
+ * Get season stats by manager and week for Current Season page
+ */
+function getCurrentSeasonWeekStats()
+{
+    global $selectedSeason;
+
+    $result = query("SELECT manager, week, SUM(pass_yds) AS pass_yds, SUM(pass_tds) AS pass_tds, SUM(ints) AS ints, SUM(rush_yds) AS rush_yds, SUM(rush_tds) AS rush_tds,
+        SUM(receptions) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds, SUM(fumbles) AS fum, SUM(fg_made) AS fg_made, SUM(pat_made) AS pat_made
+        FROM rosters r
+        JOIN stats s ON s.roster_id = r.id
+        WHERE YEAR = $selectedSeason and roster_spot != 'BN' and roster_spot != 'IR'
+        GROUP BY manager, week");
 
     return $result;
 }
@@ -1586,6 +1604,39 @@ function getCurrentSeasonStatsAgainst()
     }
     if ($response['Tyler']['pass_yds'] == 0) {
         return [];
+    }
+
+    return $response;
+}
+
+/**
+ * Compile all stats against by week
+ */
+function getCurrentSeasonWeekStatsAgainst()
+{
+    global $selectedSeason;
+    $managers = ['Tyler', 'Matt', 'Justin', 'Ben', 'AJ', 'Gavin', 'Cameron', 'Cole', 'Everett', 'Andy'];
+
+    $weekOpponents = [];
+    $result = query("SELECT year, week_number, name, manager2_id FROM regular_season_matchups rsm
+        JOIN managers ON rsm.manager1_id = managers.id
+        WHERE year = $selectedSeason
+        ORDER BY week_number");
+    while ($row = fetch_array($result)) {
+        $weekOpponents[$row['week_number']][$row['name']] = $row['manager2_id'];
+    }
+    
+    $response = [];
+    $result = query("SELECT manager, week, SUM(pass_yds) AS pass_yds, SUM(pass_tds) AS pass_tds, SUM(ints) AS ints, SUM(rush_yds) AS rush_yds, SUM(rush_tds) AS rush_tds,
+        SUM(receptions) AS receptions, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds, SUM(fumbles) AS fum, SUM(fg_made) AS fg_made, SUM(pat_made) AS pat_made
+        FROM rosters r
+        JOIN stats s ON s.roster_id = r.id
+        WHERE YEAR = $selectedSeason and roster_spot != 'BN' and roster_spot != 'IR'
+        GROUP BY manager, week");
+    while ($row = fetch_array($result)) {
+        $opponent = $weekOpponents[$row['week']][$row['manager']];
+        $row['manager'] = getManagerName($opponent);
+        $response[] = $row;
     }
 
     return $response;

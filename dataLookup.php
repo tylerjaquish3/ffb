@@ -455,4 +455,95 @@ function clean($string) {
 }
 
 
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'weekly-ranks') {
+    
+    $allRanks = getAllRanks();
+
+    $managers = [];
+    foreach ($allRanks as $manager => $years) {
+        foreach ($years as $year => $weeks) {
+            // get average of all values within $weeks
+            $total = count($weeks);
+            $sum = 0;
+            foreach ($weeks as $week => $rank) {
+                $sum += $rank;
+            }            
+            
+            $managers[] = [
+                'manager' => $manager,
+                'year' => $year,
+                'avg_rank' => number_format($sum/$total, 2)
+            ];
+        }
+    }
+    $content = new \stdClass();
+    $content->data = $managers;
+
+    echo json_encode($content);
+    die;
+}
+
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'get-season-ranks') {
+    $manager = $_GET['manager'];
+    $year = $_GET['year'];
+
+    $ranks = getAllRanks($manager, $year);
+
+    $opponents = [];
+    $result = query("SELECT *
+        FROM regular_season_matchups rsm
+        JOIN managers on managers.id = manager1_id
+        WHERE year = $year AND name = '".$manager."'
+        ORDER BY week_number asc");
+    while ($row = fetch_array($result)) {
+        $opponents[$row['week_number']] = getManagerName($row['manager2_id']);
+    }
+ 
+    $content = [];
+    foreach ($ranks as $week => $rank) {
+        $oppRanks = getAllRanks($opponents[$week], $year);
+
+        $content[] = [
+            'Week'          => $week,
+            'Rank'          => $rank,
+            'Opponent'      => $opponents[$week],
+            'Opponent Rank' => $oppRanks[$week],
+            'Result'        => $rank < $oppRanks[$week] ? 'Win' : 'Loss',
+            // 'R'             => '<a href="/rosters.php?year='.$year.'&week='.$week.'&manager='.$manager.'"><i class="icon-clipboard"></i></a>'
+        ];
+    }
+
+    echo json_encode($content);
+    die;
+}
+
+function getAllRanks(string $manager = null, int $year = null)
+{
+    $ranks = [];
+    $rank = 1;
+    $lastWeek = null;
+
+    $result = query("SELECT name, year, week_number, manager1_score
+        FROM regular_season_matchups rsm
+        JOIN managers on managers.id = manager1_id
+        ORDER BY year, week_number, manager1_score desc");
+    while ($row = fetch_array($result)) {
+
+        if ($row['week_number'] != $lastWeek) {
+            $rank = 1;
+        }
+
+        $ranks[$row['name']][$row['year']][$row['week_number']] = $rank;
+
+        $lastWeek = $row['week_number'];
+        $rank++;
+    }
+
+    if ($manager && $year) {
+        return $ranks[$manager][$year];
+    }
+
+    return $ranks;
+}
+
 ?>

@@ -4,42 +4,59 @@ include 'yahooSharedFunctions.php';
 
 echo '<br /><br /><a href="/yahooApi.php">Start Over</a><br /><br />';
 
-$verifier = $_POST['code'];
-
-if (!$verifier) {
-    echo 'Verifier code no good';
-    exit;
-}
-
-echo 'Verifier code: '.$verifier.PHP_EOL;
-  
-// 3. Get Access Token
-$access_token_data = get_access_token($consumer_key, $consumer_secret, $verifier);
-$access_token = $access_token_data->access_token;
+$access_token = '';
+$access_token = null;
 
 if (!$access_token) {
-    echo "Could not get access token";
-    exit;
+
+    $verifier = $_POST['code'];
+    
+    if (!$verifier) {
+        echo 'Verifier code no good';
+        exit;
+    }
+    
+    // echo 'Verifier code: '.$verifier.PHP_EOL;
+      
+    // 3. Get Access Token
+    $access_token_data = get_access_token($consumer_key, $consumer_secret, $verifier);
+    $access_token = $access_token_data->access_token;
+
+    echo $access_token;
 }
   
-// 4. Make request using Access Token
-$base_url = 'https://fantasysports.yahooapis.com/fantasy/v2';
-$request_uri = '/league/nfl.l.74490';
-$request_url = $base_url . $request_uri;
+echo '<hr />';
 
-echo "Making request for ${request_url}\n";
+// Get team names, moves, trades
+// Get regular season matchup scores for specific week 
+// Get team roster and stats
 
-$request_data = make_signed_request($access_token, $request_url, []);
+$request_uri = '/teams';
+$teams = get_data($request_uri, $access_token);
+// var_dump($teams);
+handle_teams($teams);
 
-if( ! $request_data ) {
-    echo "Request failed\n";
-}
+echo '<hr />';
 
-$return_code = $request_data['return_code'];
-$contents = $request_data['contents'];
+// // Get standings
+// $request_uri = '/standings';
+// $standings = get_data($request_uri, $access_token);
+// // var_dump($standings);
+// handle_standings($standings);
 
-echo "Return code: ".$return_code."<br /><br />";
-echo "Contents: <br />:".$contents;
+// echo '<hr />';
+
+// $request_uri = '/scoreboard';
+// $scoreboard = get_data($request_uri, $access_token);
+// // var_dump($scoreboard);
+// handle_scoreboard($scoreboard);
+
+// echo '<hr />';
+
+
+
+
+
 
 echo "<br /><br />Successful";
 
@@ -84,51 +101,82 @@ function get_access_token($consumer_key, $consumer_secret, $verifier) {
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-//  FUNCTION _make_signed_request
-/// @brief Helper function to make a signed OAuth request. Only allows GET
-///        requests at the moment. Will add on standard OAuth params, but
-///        you may need to fill in non-generic ones ahead of time.
-///
-/// @param[in]  $token             Token (request or access token)
-/// @param[in]  $url               URL to make request to
-/// @param[in]  $params            Array of key=>val for params. Don't
-///                                urlencode ahead of time, we'll do that here.
-///////////////////////////////////////////////////////////////////////////////
-function make_signed_request($token, $url, $params = []) 
+function get_data(string $request_uri, string $token)
 {
-    $params['format'] = 'json';
-  
-    // Urlencode params and generate param string
-    $param_list = [];
-    foreach ($params as $key => $value ) {
-      $param_list[] = rawurlencode($key).'='.rawurlencode($value);
+    $base_url = 'https://fantasysports.yahooapis.com/fantasy/v2/league/nfl.l.74490';
+    $request_url = $base_url.$request_uri;
+    $final_url = $request_url.'?format=json';
+
+    $request_data = make_curl_request('GET', $final_url, '', $token);
+
+    if(!$request_data) {
+        echo "Request failed\n";
     }
-    $param_string = join('&', $param_list);
-  
-    $final_url = $url . '?' . $param_string;
+    
+    $return_code = $request_data['return_code'];
+    if ($return_code != 200) {
+        echo "Request failed with code ${return_code}\n";
+        echo "Error: ${request_data['error_str']} (${request_data['errno']})\n";
+    }
 
-    $data = make_curl_request('GET', $final_url, '', $token);
+    $contents = json_decode($request_data['contents'])->fantasy_content->league[1];
 
-    return $data;
+    return $contents;
 }
 
-function getTeam(string $input)
+
+function handle_standings(object $data)
 {
-    $teams = ['Ari', 'Atl', 'Jax', 'Mia'];
-
-    // Search the last 4 characters of $input for a team
-    $substring = substr($input, -4);
-
-    foreach ($teams as $team) {
-        // if substring contains a team, return that team
-        if (strpos($substring, $team) !== false) {
-
-            // return uppercase
-            return 
-        }
+    $standings = $data->standings;
+    foreach ($standings as $standing) {
+        do_dump($standing);
     }
+}
 
+function handle_scoreboard(object $data)
+{
+    $scoreboards = $data->scoreboard;
+    foreach ($scoreboards as $scoreboard) {
+        do_dump($scoreboard);
+    }
+}
+
+function handle_teams(object $data)
+{
+    $nicknames = [
+        'Coley Bear'    => 'Cole',
+        'James'         => 'Matt',
+        'Tweak'         => 'Justin',
+        'Tyler'         => 'Tyler',
+        'Ben'           => 'Ben',
+        'cameron'       => 'Cameron',
+        'A.J.'          => 'AJ',
+        'Everett'       => 'Everett',
+        'Gavin'         => 'Gavin',
+        'Andy'          => 'Andy'
+    ];
+
+    $teams = $data->teams;
+    foreach ($teams as $team) {
+        do_dump($team);
+        // Find team name
+        $teamName = $team->name;
+        // Find nickname
+        $teamNickname = $team->managers[0]->manager->nickname;
+        // Match them up and save/update in DB
+        $manager = $nicknames[$teamNickname];
+        $managerId = lookupManager($manager);
+
+        $query = "INSERT INTO team_names(id, manager, year, name, moves, trades) VALUES ($managerId, ) ON DUPLICATE KEY UPDATE c=VALUES(c);";
+    }
+}
+
+function lookupManager(string $managerName)
+{
+    $result = query("SELECT * FROM managers where name = '".$managerName."'");
+    while ($manager = fetch_array($result)) {
+        return $manager['id'];
+    }
 }
 
 ?>

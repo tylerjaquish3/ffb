@@ -88,7 +88,7 @@ include 'sidebar.html';
                     <div class="table-padding">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Weekly Ranks</h4>
+                                <h4>Weekly Points Rank by Points Scored</h4>
                             </div>
                             <div class="card-body" style="direction: ltr;">
                                 <div class="row">

@@ -1221,9 +1221,10 @@ function getDraftResults()
 {
     $results = [];
 
-    $result = query("SELECT * FROM draft
+    $result = query("SELECT draft.year, round, round_pick, overall_pick, position, draft.player, name, points 
+        FROM draft
         JOIN managers m ON m.id = draft.manager_id
-        JOIN (SELECT sum(points) as points, YEAR, player
+        LEFT JOIN (SELECT sum(points) as points, YEAR, player
             FROM rosters r GROUP BY r.year, r.player) AS rosters 
         ON draft.player = rosters.player and draft.year = rosters.year");
     while ($row = fetch_array($result)) {
@@ -1420,14 +1421,30 @@ function getCurrentSeasonPoints()
 {
     global $selectedSeason;
 
+    $points = [];
+    $managers = ['Tyler', 'Matt', 'Justin', 'Ben', 'AJ', 'Gavin', 'Cameron', 'Cole', 'Everett', 'Andy'];
+    foreach ($managers as $manager) {
+        $points[$manager]['BN'] = [
+            'projected' => 0,
+            'points' => 0
+        ];
+    }
+
     $result = query("SELECT manager, roster_spot, SUM(points) AS points, SUM(projected) AS projected FROM rosters r
-        WHERE YEAR = $selectedSeason AND roster_spot != 'IR'
+        WHERE YEAR = $selectedSeason
         GROUP BY manager, roster_spot");
     while ($row = fetch_array($result)) {
-        $points[$row['manager']][$row['roster_spot']] = [
-            'projected' => round($row['projected'], 1),
-            'points' => round($row['points'], 1)
-        ];
+
+        if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
+            $points[$row['manager']]['BN']['projected'] += round($row['projected'], 1);
+            $points[$row['manager']]['BN']['points'] += round($row['points'], 1);
+
+        } else {
+            $points[$row['manager']][$row['roster_spot']] = [
+                'projected' => round($row['projected'], 1),
+                'points' => round($row['points'], 1)
+            ];
+        }
     }
 
     // Arrange in order based on posOrder
@@ -1704,7 +1721,7 @@ function getCurrentSeasonTopPerformers()
 
     $result = query("SELECT manager, SUM(points) AS bench_pts
         FROM rosters
-        WHERE YEAR = $selectedSeason AND roster_spot = 'BN'
+        WHERE YEAR = $selectedSeason AND (roster_spot = 'BN' or roster_spot = 'IR')
         GROUP BY manager
         ORDER BY bench_pts DESC LIMIT 1");
     while ($row = fetch_array($result)) {

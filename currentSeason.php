@@ -150,9 +150,9 @@ include 'sidebar.html';
                                                 <i>Projected</i>
                                             </td>
                                             <?php foreach ($values as $pos => $stuff) { ?>
-                                                <td data-order="<?php echo $stuff['projected']; ?>">
-                                                    <strong><?php echo $stuff['projected']; ?></strong><br />
-                                                    <i><?php echo $stuff['points']; ?></i>
+                                                <td data-order="<?php echo $stuff['points']; ?>">
+                                                    <strong><?php echo $stuff['points']; ?></strong><br />
+                                                    <i><?php echo $stuff['projected']; ?></i>
                                                 </td>
                                             <?php } ?>
                                         

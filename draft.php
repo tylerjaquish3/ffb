@@ -40,7 +40,7 @@ include 'sidebar.html';
                                             <td><?php echo $draft['player']; ?></td>
                                             <td><?php echo $draft['name']; ?></td>
                                             <td><?php echo $draft['position']; ?></td>
-                                            <td><?php echo round($draft['points'], 1); ?></td>
+                                            <td><?php echo $draft['points'] ? round($draft['points'], 1) : 0; ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>

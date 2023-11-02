@@ -185,10 +185,10 @@ while ($row = fetch_array($result)) {
                                 <br />
                                 <strong>Vote on the following: </strong>
                                 <ol>
-                                    <li>Add an 18th roster position (BN or W/R/T?) | <a href="voteInfo#new_pos">More Info</a><strong></strong></li>
-                                    <li>Replacing toilet seat as punishment? | <a href="voteInfo#new_pos">More Info</a><strong></strong></li>
-                                    <li>Any reason to veto a trade or only obvious collusion? Push trades through right away? | <a href="voteInfo#new_pos">More Info</a><strong></strong></li>
-                                    <li>Able to trade FAB dollars? | <a href="voteInfo#new_pos">More Info</a><strong></strong></li>
+                                    <li>Add an 18th roster position (BN or W/R/T) | <a href="voteInfo.php#new_pos">More Info</a><strong></strong></li>
+                                    <li>Push trades through right away | <a href="voteInfo.php#trade_voting">More Info</a><strong></strong></li>
+                                    <li>Able to trade FAB dollars | <a href="voteInfo.php#trade_fab">More Info</a><strong></strong></li>
+                                    <li>Replacing toilet seat as punishment | <a href="voteInfo.php#punishment">More Info</a><strong></strong></li>
                                 </ol>
                                 <strong>Determine 2024 draft order</strong>
                                 <br /><br />

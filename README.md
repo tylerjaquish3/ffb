@@ -4,6 +4,7 @@
 - rosters table, lots of players don't have a team
 - fun facts current season margin doesnt update new_leader
 - aj is missing 2012 defenses for multiple weeks (NYG)
+- make constitution roster history grid more readable and accurate
 
 # Ideas
 

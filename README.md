@@ -2,7 +2,7 @@
 
 # Bugs
 - rosters table, lots of players don't have a team
-- fun facts current season margin doesnt update new_leader
+- fun facts current season margin doesnt update new_leader and is not accurate
 - aj is missing 2012 defenses for multiple weeks (NYG)
 - make constitution roster history grid more readable and accurate
 
@@ -19,6 +19,12 @@
 - rosters page,
     - add optimal lineups info on left
 - gather team game times to chart when fantasy points occurred
+- add a bunch more fun facts
+    - most weeks spent in first/last place
+    - most weeks with top/bottom 3 in points
+    - record against everyone
+    - points by position (high/low) for each position
+    - best/worst draft pick
 
 - draft order based on wives/gfs responses to something?
 

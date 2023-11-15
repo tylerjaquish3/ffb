@@ -88,7 +88,7 @@ include 'sidebar.html';
                     <div class="table-padding">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Weekly Points Rank by Points Scored</h4>
+                                <h4>Weekly Rank by Points Scored</h4>
                             </div>
                             <div class="card-body" style="direction: ltr;">
                                 <div class="row">
@@ -104,84 +104,6 @@ include 'sidebar.html';
                                         </table>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-2">
-                <div class="col-sm-12 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Wins By Season</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="card-block">
-                                <canvas id="winsChart" class="height-400"></canvas>
-                                <br />
-                                <table class="table table-responsive" id="datatable-wins">
-                                    <thead>
-                                        <th>Year</th>
-                                        <th>Ben</th>
-                                        <th>Justin</th>
-                                        <th>Gavin</th>
-                                        <th>Matt</th>
-                                        <th>AJ</th>
-                                        <th>Andy</th>
-                                        <th>Cameron</th>
-                                        <th>Tyler</th>
-                                        <th>Everett</th>
-                                        <th>Cole</th>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        foreach ($seasonWins as $year => $array) { ?>
-                                            <tr>
-                                                <td><?php echo $year; ?></td>
-                                                <td><?php echo $array['ben']; ?></td>
-                                                <td><?php echo $array['justin']; ?></td>
-                                                <td><?php echo $array['gavin']; ?></td>
-                                                <td><?php echo $array['matt']; ?></td>
-                                                <td><?php echo $array['aj']; ?></td>
-                                                <td><?php echo isset($array['andy']) ? $array['andy'] : 'N/A'; ?></td>
-                                                <td><?php echo isset($array['cameron']) ? $array['cameron'] : 'N/A'; ?></td>
-                                                <td><?php echo $array['tyler']; ?></td>
-                                                <td><?php echo $array['everett']; ?></td>
-                                                <td><?php echo $array['cole']; ?></td>
-                                            </tr>
-
-                                        <?php } ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-12 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Points For and Against</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="card-block">
-                                <canvas id="scatterChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-12 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">PF/PA vs Wins</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <div class="card-block">
-                                <canvas id="pfwinsChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -302,6 +224,85 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
+
+            <div class="row mt-2">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Wins By Season</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block">
+                                <canvas id="winsChart" class="height-400"></canvas>
+                                <br />
+                                <table class="table table-responsive" id="datatable-wins">
+                                    <thead>
+                                        <th>Year</th>
+                                        <th>Ben</th>
+                                        <th>Justin</th>
+                                        <th>Gavin</th>
+                                        <th>Matt</th>
+                                        <th>AJ</th>
+                                        <th>Andy</th>
+                                        <th>Cameron</th>
+                                        <th>Tyler</th>
+                                        <th>Everett</th>
+                                        <th>Cole</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($seasonWins as $year => $array) { ?>
+                                            <tr>
+                                                <td><?php echo $year; ?></td>
+                                                <td><?php echo $array['ben']; ?></td>
+                                                <td><?php echo $array['justin']; ?></td>
+                                                <td><?php echo $array['gavin']; ?></td>
+                                                <td><?php echo $array['matt']; ?></td>
+                                                <td><?php echo $array['aj']; ?></td>
+                                                <td><?php echo isset($array['andy']) ? $array['andy'] : 'N/A'; ?></td>
+                                                <td><?php echo isset($array['cameron']) ? $array['cameron'] : 'N/A'; ?></td>
+                                                <td><?php echo $array['tyler']; ?></td>
+                                                <td><?php echo $array['everett']; ?></td>
+                                                <td><?php echo $array['cole']; ?></td>
+                                            </tr>
+
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Points For and Against</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block">
+                                <canvas id="scatterChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">PF/PA vs Wins</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="card-block">
+                                <canvas id="pfwinsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

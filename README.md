@@ -1,4 +1,5 @@
 ### Suntown FFB website
+Playoff Calculator: https://playoffcomputer.appspot.com/
 
 # Bugs
 - rosters table, lots of players don't have a team
@@ -25,8 +26,10 @@
     - record against everyone
     - points by position (high/low) for each position
     - best/worst draft pick
+- chances of making playoffs
 
 - draft order based on wives/gfs responses to something?
+
 
 
 fun fact ideas...

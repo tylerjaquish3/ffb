@@ -10,7 +10,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 # Ideas
 
 - Profile page, line chart for points each season vs league average
-- Current season, combine players that got traded midseason
+- Current season, worst draft picks remove players that got traded midseason
 - add team logos?
 - add trophy graphic on trophy page
 - profile page, add chart for positions drafted?
@@ -19,14 +19,15 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - grab postseason matchup rosters
 - rosters page,
     - add optimal lineups info on left
-- gather team game times to chart when fantasy points occurred
+- gather team game times to chart when fantasy points occurred, show biggest comebacks on MNF
 - add a bunch more fun facts
     - most weeks spent in first/last place
     - most weeks with top/bottom 3 in points
     - record against everyone
     - points by position (high/low) for each position
     - best/worst draft pick
-- chances of making playoffs
+- chances of making playoffs, make request to playoffcomputer linked above
+- use yahoo api to get results and rosters, then it can be kicked off with a button click or automatic on tuesday morning
 
 - draft order based on wives/gfs responses to something?
 
@@ -50,6 +51,7 @@ Current season stats
 
 Fun facts
     - new leader for a long term category
+    - most points scored/wins in week 7 all-time
 
 Generic league ideas
     - no one is mathematically eliminated

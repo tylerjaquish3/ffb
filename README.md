@@ -1,5 +1,4 @@
 ### Suntown FFB website
-Playoff Calculator: https://playoffcomputer.appspot.com/
 
 # Bugs
 - rosters table, lots of players don't have a team
@@ -30,7 +29,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - use yahoo api to get results and rosters, then it can be kicked off with a button click or automatic on tuesday morning
 
 - draft order based on wives/gfs responses to something?
-
 
 
 fun fact ideas...

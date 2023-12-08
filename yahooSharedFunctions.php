@@ -2,14 +2,6 @@
 
 include 'connections.php';
 
-$consumer_data = [
-    'key'    => 'dj0yJmk9Mjc0ZUJKQmk3NHVaJmQ9WVdrOVlrSkVNRkJ6Y1ZvbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWRl',
-    'secret' => '45e85dc510dc193bfd6a0d77c0282f7d98e8055d'
-];
-
-$consumer_key = $consumer_data['key'];
-$consumer_secret = $consumer_data['secret'];
-
 
 // Make curl call
 function make_curl_request(string $method, string $final_url, string $params = '', $bearer = '')
@@ -69,14 +61,6 @@ function oauth_response_to_array(string $response) {
     }
 
     return $data;
-}
-
-function dd($text)
-{
-    echo '<pre style="direction: ltr; float: left;">';
-    var_dump($text);
-    echo '</pre>';
-    die;
 }
 
 /**

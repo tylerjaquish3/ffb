@@ -1,5 +1,7 @@
 <?php
 
+include 'connections.php';
+
 $consumer_data = [
     'key'    => 'dj0yJmk9Mjc0ZUJKQmk3NHVaJmQ9WVdrOVlrSkVNRkJ6Y1ZvbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWRl',
     'secret' => '45e85dc510dc193bfd6a0d77c0282f7d98e8055d'
@@ -69,13 +71,13 @@ function oauth_response_to_array(string $response) {
     return $data;
 }
 
-// function dd($text)
-// {
-//     echo '<pre style="direction: ltr; float: left;">';
-//     var_dump($text);
-//     echo '</pre>';
-//     die;
-// }
+function dd($text)
+{
+    echo '<pre style="direction: ltr; float: left;">';
+    var_dump($text);
+    echo '</pre>';
+    die;
+}
 
 /**
  * Better GI than print_r or var_dump -- but, unlike var_dump, you can only dump one variable.  
@@ -150,6 +152,88 @@ function do_dump(&$var, $var_name = NULL, $indent = NULL, $reference = NULL)
     }
     
     echo "</div>";
+}
+
+function query($sql)
+{
+    global $conn, $DB_TYPE;
+
+    if ($DB_TYPE == 'sqlite') {
+        $sql = str_replace("if(", "iif(", $sql);
+        $sql = str_replace("IF(", "IIF(", $sql);
+        $sql = str_replace("IF (", "IIF (", $sql);
+
+        return $conn->query($sql);
+    }
+
+    return mysqli_query($conn, $sql);
+}
+
+function fetch_array($result)
+{
+    global $DB_TYPE;
+
+    if ($DB_TYPE == 'sqlite') {
+        return $result->fetchArray();
+    } 
+        
+    return mysqli_fetch_array($result);
+}
+
+/**
+ * Look in table for rows matching params. If found, update. If not found, insert.
+ */
+function updateOrCreate(string $table, array $params, array $values)
+{
+    global $conn;
+    $query = "SELECT * FROM {$table} WHERE ";
+    foreach ($params as $key => $value) {
+        $query .= "{$key} = '{$value}' AND ";
+    }
+    $query = substr($query, 0, -5);
+    $result = query($query);
+    $row = fetch_array($result);
+    if ($row) {
+        // update
+        $query = "UPDATE {$table} SET ";
+        foreach ($values as $key => $value) {
+            $query .= "{$key} = '{$value}', ";
+        }
+        $query = substr($query, 0, -2);
+        $query .= " WHERE ";
+        foreach ($params as $key => $value) {
+            $query .= "{$key} = '{$value}' AND ";
+        }
+        $query = substr($query, 0, -5);
+        $result = query($query);
+    } else {
+        // insert
+        $query = "INSERT INTO {$table} (";
+        foreach ($params as $key => $value) {
+            $query .= "{$key}, ";
+        }
+        foreach ($values as $key => $value) {
+            $query .= "{$key}, ";
+        }
+        $query = substr($query, 0, -2);
+        $query .= ") VALUES (";
+        foreach ($params as $key => $value) {
+            $query .= "'{$value}', ";
+        }
+        foreach ($values as $key => $value) {
+            $query .= "'{$value}', ";
+        }
+        $query = substr($query, 0, -2);
+        $query .= ")";
+        $result = query($query);
+    }
+
+    // return the id of the item just inserted
+    if ($conn->lastInsertRowID()) {
+        return $conn->lastInsertRowID();
+    } else {
+        return $row['id'];
+    }
 }
 
 ?>

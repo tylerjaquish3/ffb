@@ -2,152 +2,84 @@
 
 include 'yahooSharedFunctions.php';
 
-echo '<br /><br /><a href="/yahooApi.php">Start Over</a><br /><br />';
-
-$access_token = null;
-$access_token = 'oMJB4factxyLSmtoIUseFaBgJm1Dij5D83Pc.BuGsi79BU2aW.YW9.TdhSL8OwagRYOgemTYN9J5.esit0dYfXZ89h27SKYo1t_cMZFIkLPappB6Ho3Q..OMW.Ii_hINF8aEnHz3gKZRM5eAeJsuh7TDmafdBE5sxNh_Cj8uAb8L7Dfa1m98gs4KjVfML_qjyI0gp94RQwxGiVds3nIIyFygNGMR9Exmr1RgARCr1xlGQ75vMCiaX28UPHCBiwyb5jyrf0FrXOOlTCtn13X7sxJOh3U_yPilw560_SisOjI7SX9Ui6UetogI0ZN9nZ2rhhRrwb58GOLW5i6pQ0CBqK_RFUtuo9zEVXEgglU1HZQLy5QVjvyQhT8kofz15OzosU2HS2z6TRRvUbuFRB69f87ZNHzKnn1K26kNIkGlo9HeOeDg6X.S98FhvwFlVZSlQ2c7tb1UhNryFhwsr09Gw5YOjDm5ZicDmA0WpMOhL2_ZJjjtH7UGjYOV3wd6PFvSEyjCwgGbQL70TDz2nlX9afPpbc87t0E3lZgVxzZidgi2VAX7ce9MT0AA9pS4rhoUz_H6k5xNa5x10ZrCsLIVUyvmLXEw6OOpZEkL1y9KEhq8VYurgDxB4Vz9syuuxhv937R.01lz1qtRSSy3jay4jnJ1FFnq8pCOlTP.61bnvfz7G.QljGSGiyBlhX2_FpEKB6h0rjYrIbzrfFY3T8Wi1PRxROSVN4eDHik_AOBx4MlQHmeI5tL4YBuKtDqhFMecvHJqHSl_XSLeYgUSBjwyJHo.gkUe9wHBzmExV7Bc7drZwv6PoRubjxq__wKkXyMyIvTW4H0dphcBX60_64QJ9IxqtVqVZYvGCLLFziLY_zSdE5jVxO8OGP6KrM1je4lCqA4zOtJWvWpskfbj_JdFzGN2DJtmFBbGgUzsxLj5nHA-';
-
 $year = date('Y');
 $leagueId = $_POST['league_id'];
+$access_token = $_POST['token'];
+$section = '';
+$weeks = [];
+$manager = isset($_POST['manager']) ? $_POST['manager'] : 0;
 
-if (!$access_token) {
-
-    $verifier = $_POST['code'];
-    
-    if (!$verifier) {
-        echo 'Verifier code no good';
-        exit;
-    }
-    
-    // echo 'Verifier code: '.$verifier.PHP_EOL;
-      
-    // 3. Get Access Token
-    $access_token_data = get_access_token($consumer_key, $consumer_secret, $verifier);
-    // var_dump($access_token_data);
-    $access_token = $access_token_data->access_token;
-
-    echo $access_token;
-}
-
-if (isset($_POST['sections'])) {
-    $sections = $_POST['sections'];
-} else {
-    $sections = ['team_names', 'matchups', 'rosters', 'trades', 'fun_facts'];
-}
-
+if (isset($_POST['section'])) {
+    $section = $_POST['section'];
+} 
 if (isset($_POST['weeks'])) {
     $weeks = $_POST['weeks'];
-} else {
-    $weeks = [];
-}
-
-echo '<hr />';
+} 
 
 // Check league settings
 // $request_uri = '/league/nfl.l.'.$leagueId.'/settings';
 // $teams = get_data($request_uri, $access_token);
 // do_dump($teams);die;
 
-if (in_array('yahoo_ids', $sections)) {
+if ($section == 'yahoo_ids') {
     // first need to update yahoo id (if necessary, changes each year)
     // yahoo id is used going forward with all these
     echo 'Getting manager Yahoo IDs...<br />';
-    // $request_uri = '/league/nfl.l.'.$leagueId.'/teams';
-    // $teams = get_data($request_uri, $access_token);
-    // handle_managers($teams);
-    echo '<hr />';
+    $request_uri = '/league/nfl.l.'.$leagueId.'/teams';
+    $teams = get_data($request_uri, $access_token);
+    handle_managers($teams);
+    echo '<hr />';die;
 }
 
-if (in_array('team_names', $sections)) {
+if ($section == 'team_names') {
     // Get team names, moves, trades
     echo 'Getting team names, moves, trades...<br />';
     $request_uri = '/league/nfl.l.'.$leagueId.'/teams';
-    // $teams = get_data($request_uri, $access_token);
+    $teams = get_data($request_uri, $access_token);
     // do_dump($teams);die;
-    // handle_teams($teams);
-    echo '<hr />';
+    handle_teams($teams);
+    echo '<hr />';die;
 }
 
-if (in_array('matchups', $sections)) {
+if ($section == 'matchups') {
     // Get regular season matchup scores for specific week 
     echo 'Getting scoreboard...<br />';
     for ($managerId = 1; $managerId < 11; $managerId++) {
         $request_uri = '/team/423.l.'.$leagueId.'.t.'.$managerId.'/matchups';
-        // $matchups = get_data($request_uri, $access_token);
-        // handle_team_matchups($managerId, $matchups);
+        $matchups = get_data($request_uri, $access_token);
+        handle_team_matchups($managerId, $matchups);
     }
-    echo '<hr />';
+    echo '<hr />';die;
 }
 
-if (in_array('rosters', $sections)) {
+if ($section == 'rosters') {
     // Get team roster and stats
     echo 'Getting rosters...<br />';
     if (count($weeks) == 0) {
         echo 'No weeks selected';
     } else {
-        // foreach ($weeks as $week) {
-        //     for ($managerId = 1; $managerId < 11; $managerId++) {
-        //         $request_uri = '/team/423.l.'.$leagueId.'.t.'.$managerId.'/roster;week='.$week;
-        //         $rosters = get_data($request_uri, $access_token);
-        //         handle_team_rosters($managerId, $week, $rosters);
-        //     }
-        // }
+        foreach ($weeks as $week) {
+            echo 'Manager: '.$manager.' | Week '.$week.'<br />';
+            $request_uri = '/team/423.l.'.$leagueId.'.t.'.$manager.'/roster;week='.$week;
+            $rosters = get_data($request_uri, $access_token);
+            if ($rosters) {
+                handle_team_rosters($manager, $week, $rosters);
+            }
+        }
     }
-    echo '<hr />';
+    echo '<hr />';die;
 }
 
-if (in_array('trades', $sections)) {
+if ($section == 'trades') {
     echo 'Getting trades...<br />';
 
-    echo '<hr />';
+    echo '<hr />';die;
 }
 
-if (in_array('fun_facts', $sections)) {
+if ($section == 'fun_facts') {
     echo 'Getting fun facts...<br />';
 
-    echo '<hr />';
-}
-
-echo "<br /><br />Successful";
-
-///////////////////////////////////////////////////////////////////////////////
-//  FUNCTION get_access_token
-/// @brief Get an access token for a certain user and a certain application,
-///        based on the request token and verifier
-///////////////////////////////////////////////////////////////////////////////
-function get_access_token($consumer_key, $consumer_secret, $verifier) 
-{
-
-    $url = 'https://api.login.yahoo.com/oauth2/get_token';
-
-    // Add in the oauth verifier
-    $params = [
-        'client_id' => $consumer_key,
-        'client_secret' => $consumer_secret,
-        'redirect_uri' => 'oob',  // Set OOB for ease of use -- could be a URL
-        'code' => $verifier,
-        'grant_type' => 'authorization_code'
-    ];
-
-    // Urlencode params and generate param string
-    $param_list = [];
-    foreach ($params as $key => $value ) {
-      $param_list[] = urlencode( $key ) . '=' . urlencode( $value );
-    }
-    $param_string = join( '&', $param_list );
-    
-    // var_dump($url.'?'.$param_string);die;
-    $response_data = make_curl_request('POST', $url, $param_string);
-
-    if ($response_data && $response_data['return_code'] == 200) {
-
-        $contents = $response_data['contents'];
-        $data = json_decode($contents);
-
-        return $data;
-    }
-
-    return false;
+    echo '<hr />';die;
 }
 
 
@@ -172,7 +104,6 @@ function get_data(string $request_uri, string $token)
 
     return $contents;
 }
-
 
 function handle_managers(object $data)
 {
@@ -303,7 +234,7 @@ function handle_team_rosters(int $managerId, int $week, object $data)
     global $year, $DB_TYPE;
     // do_dump($data);die;
 
-    $result = query("SELECT * FROM managers where id = $managerId");
+    $result = query("SELECT * FROM managers where yahoo_id = $managerId");
     while ($row = fetch_array($result)) {
         $manager = $row['name'];
     }
@@ -334,6 +265,10 @@ function handle_team_rosters(int $managerId, int $week, object $data)
         // Use player key to lookup stats
         $playerKey = $player[0][0]->player_key;
         $stats = get_player_stats($playerKey, $week);
+
+        if (!$stats) {
+            continue;
+        }
         
         $team = strtoupper($teamKey);
         $spot = $player[1]->selected_position[1]->position;
@@ -356,10 +291,12 @@ function handle_team_rosters(int $managerId, int $week, object $data)
             'points' => $points
         ]);
 
-        // Insert stats
-        updateOrCreate('stats', [
-            'roster_id' => $rosterId
-        ], $stats['stats']);
+        if ($spot != 'IR') {
+            // Insert stats
+            updateOrCreate('stats', [
+                'roster_id' => $rosterId
+            ], $stats['stats']);
+        }
     }
 }
 
@@ -369,6 +306,9 @@ function get_player_stats(string $playerKey, int $week)
     $request_uri = '/league/423.l.'.$leagueId.'/players;player_keys='.$playerKey.'/stats;type=week;week='.$week;
     $data = get_data($request_uri, $access_token);
 
+    if (!$data) {
+        return;
+    }
     // do_dump($data); die;
 
     $statIds = [

@@ -19,6 +19,33 @@ echo '<a href="'.$request_token_url.'" target="_blank">Verify</a><br /><br />';
 <form action="yahooApiRequest.php" method="POST">
     <input type="text" name="code">
 
+    <h3>League</h3>
+    <input type="text" name="league_id" value="74490">
+
+    <h3>Sections to Update</h3>
+    <input type="checkbox" name="sections[]" value="yahoo_ids"> Manager Yahoo IDs<br>
+    <input type="checkbox" name="sections[]" value="team_names" checked="checked"> Team Names<br>
+    <input type="checkbox" name="sections[]" value="matchups" checked="checked"> Matchups<br>
+    <input type="checkbox" name="sections[]" value="rosters" checked="checked"> Rosters<br>
+    <input type="checkbox" name="sections[]" value="trades" checked="checked"> Trades<br>
+    <input type="checkbox" name="sections[]" value="fun_facts" checked="checked"> Fun Facts<br>
+
+    <h3>Weeks</h3>
+    <input type="checkbox" name="weeks[]" value="1"> 1<br>
+    <input type="checkbox" name="weeks[]" value="2"> 2<br>
+    <input type="checkbox" name="weeks[]" value="3"> 3<br>
+    <input type="checkbox" name="weeks[]" value="4"> 4<br>
+    <input type="checkbox" name="weeks[]" value="5"> 5<br>
+    <input type="checkbox" name="weeks[]" value="6"> 6<br>
+    <input type="checkbox" name="weeks[]" value="7"> 7<br>
+    <input type="checkbox" name="weeks[]" value="8"> 8<br>
+    <input type="checkbox" name="weeks[]" value="9"> 9<br>
+    <input type="checkbox" name="weeks[]" value="10"> 10<br>
+    <input type="checkbox" name="weeks[]" value="11"> 11<br>
+    <input type="checkbox" name="weeks[]" value="12"> 12<br>
+    <input type="checkbox" name="weeks[]" value="13"> 13<br>
+    <input type="checkbox" name="weeks[]" value="14"> 14<br>
+
     <button type="submit">Submit</button>
 </form>
 

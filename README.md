@@ -1,4 +1,5 @@
 ### Suntown FFB website
+Playoff Calculator: https://playoffcomputer.appspot.com/
 
 # Bugs
 - rosters table, lots of players don't have a team
@@ -39,22 +40,26 @@ Head to Head record
         - This year, last year, all time?
     - Revenge game? 
     - how many times 1st place beat last place
+    - biggest/smallest win
     
 Current season stats
     - Major outliers
-        - (ex: only team to not have a rush TD)
-        - (ex: more int than 5 teams combined)
+        - only team to not have a rush TD
+        - more int than 5 teams combined
     - Matchup projections
-    - Play optimal lineup
+    - Played optimal lineup
 
 Fun facts
     - new leader for a long term category
     - most points scored/wins in week 7 all-time
+    - the last time Andy was in first place
 
 Generic league ideas
     - no one is mathematically eliminated
     - everyone has drafted Joe Flacco except Ben
     - odds of making playoffs
+    - spokane vs. yakima valley vs. seattle
+    - boboth brothers
 
 
 

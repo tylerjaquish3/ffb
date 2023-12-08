@@ -4,8 +4,11 @@ include 'yahooSharedFunctions.php';
 
 echo '<br /><br /><a href="/yahooApi.php">Start Over</a><br /><br />';
 
-$access_token = '';
 $access_token = null;
+$access_token = 'oMJB4factxyLSmtoIUseFaBgJm1Dij5D83Pc.BuGsi79BU2aW.YW9.TdhSL8OwagRYOgemTYN9J5.esit0dYfXZ89h27SKYo1t_cMZFIkLPappB6Ho3Q..OMW.Ii_hINF8aEnHz3gKZRM5eAeJsuh7TDmafdBE5sxNh_Cj8uAb8L7Dfa1m98gs4KjVfML_qjyI0gp94RQwxGiVds3nIIyFygNGMR9Exmr1RgARCr1xlGQ75vMCiaX28UPHCBiwyb5jyrf0FrXOOlTCtn13X7sxJOh3U_yPilw560_SisOjI7SX9Ui6UetogI0ZN9nZ2rhhRrwb58GOLW5i6pQ0CBqK_RFUtuo9zEVXEgglU1HZQLy5QVjvyQhT8kofz15OzosU2HS2z6TRRvUbuFRB69f87ZNHzKnn1K26kNIkGlo9HeOeDg6X.S98FhvwFlVZSlQ2c7tb1UhNryFhwsr09Gw5YOjDm5ZicDmA0WpMOhL2_ZJjjtH7UGjYOV3wd6PFvSEyjCwgGbQL70TDz2nlX9afPpbc87t0E3lZgVxzZidgi2VAX7ce9MT0AA9pS4rhoUz_H6k5xNa5x10ZrCsLIVUyvmLXEw6OOpZEkL1y9KEhq8VYurgDxB4Vz9syuuxhv937R.01lz1qtRSSy3jay4jnJ1FFnq8pCOlTP.61bnvfz7G.QljGSGiyBlhX2_FpEKB6h0rjYrIbzrfFY3T8Wi1PRxROSVN4eDHik_AOBx4MlQHmeI5tL4YBuKtDqhFMecvHJqHSl_XSLeYgUSBjwyJHo.gkUe9wHBzmExV7Bc7drZwv6PoRubjxq__wKkXyMyIvTW4H0dphcBX60_64QJ9IxqtVqVZYvGCLLFziLY_zSdE5jVxO8OGP6KrM1je4lCqA4zOtJWvWpskfbj_JdFzGN2DJtmFBbGgUzsxLj5nHA-';
+
+$year = date('Y');
+$leagueId = $_POST['league_id'];
 
 if (!$access_token) {
 
@@ -20,53 +23,100 @@ if (!$access_token) {
       
     // 3. Get Access Token
     $access_token_data = get_access_token($consumer_key, $consumer_secret, $verifier);
+    // var_dump($access_token_data);
     $access_token = $access_token_data->access_token;
 
     echo $access_token;
 }
-  
+
+if (isset($_POST['sections'])) {
+    $sections = $_POST['sections'];
+} else {
+    $sections = ['team_names', 'matchups', 'rosters', 'trades', 'fun_facts'];
+}
+
+if (isset($_POST['weeks'])) {
+    $weeks = $_POST['weeks'];
+} else {
+    $weeks = [];
+}
+
 echo '<hr />';
 
-// Get team names, moves, trades
-// Get regular season matchup scores for specific week 
-// Get team roster and stats
+// Check league settings
+// $request_uri = '/league/nfl.l.'.$leagueId.'/settings';
+// $teams = get_data($request_uri, $access_token);
+// do_dump($teams);die;
 
-$request_uri = '/teams';
-$teams = get_data($request_uri, $access_token);
-// var_dump($teams);
-handle_teams($teams);
+if (in_array('yahoo_ids', $sections)) {
+    // first need to update yahoo id (if necessary, changes each year)
+    // yahoo id is used going forward with all these
+    echo 'Getting manager Yahoo IDs...<br />';
+    // $request_uri = '/league/nfl.l.'.$leagueId.'/teams';
+    // $teams = get_data($request_uri, $access_token);
+    // handle_managers($teams);
+    echo '<hr />';
+}
 
-echo '<hr />';
+if (in_array('team_names', $sections)) {
+    // Get team names, moves, trades
+    echo 'Getting team names, moves, trades...<br />';
+    $request_uri = '/league/nfl.l.'.$leagueId.'/teams';
+    // $teams = get_data($request_uri, $access_token);
+    // do_dump($teams);die;
+    // handle_teams($teams);
+    echo '<hr />';
+}
 
-// // Get standings
-// $request_uri = '/standings';
-// $standings = get_data($request_uri, $access_token);
-// // var_dump($standings);
-// handle_standings($standings);
+if (in_array('matchups', $sections)) {
+    // Get regular season matchup scores for specific week 
+    echo 'Getting scoreboard...<br />';
+    for ($managerId = 1; $managerId < 11; $managerId++) {
+        $request_uri = '/team/423.l.'.$leagueId.'.t.'.$managerId.'/matchups';
+        // $matchups = get_data($request_uri, $access_token);
+        // handle_team_matchups($managerId, $matchups);
+    }
+    echo '<hr />';
+}
 
-// echo '<hr />';
+if (in_array('rosters', $sections)) {
+    // Get team roster and stats
+    echo 'Getting rosters...<br />';
+    if (count($weeks) == 0) {
+        echo 'No weeks selected';
+    } else {
+        // foreach ($weeks as $week) {
+        //     for ($managerId = 1; $managerId < 11; $managerId++) {
+        //         $request_uri = '/team/423.l.'.$leagueId.'.t.'.$managerId.'/roster;week='.$week;
+        //         $rosters = get_data($request_uri, $access_token);
+        //         handle_team_rosters($managerId, $week, $rosters);
+        //     }
+        // }
+    }
+    echo '<hr />';
+}
 
-// $request_uri = '/scoreboard';
-// $scoreboard = get_data($request_uri, $access_token);
-// // var_dump($scoreboard);
-// handle_scoreboard($scoreboard);
+if (in_array('trades', $sections)) {
+    echo 'Getting trades...<br />';
 
-// echo '<hr />';
+    echo '<hr />';
+}
 
+if (in_array('fun_facts', $sections)) {
+    echo 'Getting fun facts...<br />';
 
-
-
-
+    echo '<hr />';
+}
 
 echo "<br /><br />Successful";
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //  FUNCTION get_access_token
 /// @brief Get an access token for a certain user and a certain application,
 ///        based on the request token and verifier
 ///////////////////////////////////////////////////////////////////////////////
-function get_access_token($consumer_key, $consumer_secret, $verifier) {
+function get_access_token($consumer_key, $consumer_secret, $verifier) 
+{
 
     $url = 'https://api.login.yahoo.com/oauth2/get_token';
 
@@ -103,9 +153,8 @@ function get_access_token($consumer_key, $consumer_secret, $verifier) {
 
 function get_data(string $request_uri, string $token)
 {
-    $base_url = 'https://fantasysports.yahooapis.com/fantasy/v2/league/nfl.l.74490';
-    $request_url = $base_url.$request_uri;
-    $final_url = $request_url.'?format=json';
+    $base_url = 'https://fantasysports.yahooapis.com/fantasy/v2';
+    $final_url = $base_url.$request_uri.'?format=json';
 
     $request_data = make_curl_request('GET', $final_url, '', $token);
 
@@ -119,64 +168,250 @@ function get_data(string $request_uri, string $token)
         echo "Error: ${request_data['error_str']} (${request_data['errno']})\n";
     }
 
-    $contents = json_decode($request_data['contents'])->fantasy_content->league[1];
+    $contents = json_decode($request_data['contents'])->fantasy_content;
 
     return $contents;
 }
 
 
-function handle_standings(object $data)
+function handle_managers(object $data)
 {
-    $standings = $data->standings;
-    foreach ($standings as $standing) {
-        do_dump($standing);
-    }
-}
+    $teams = $data->league[1]->teams;
+    foreach ($teams as $team) {
+        if (gettype($team) == 'object') {
+            // do_dump($team);die;
+            $nickname = $team->team[0][19]->managers[0]->manager->nickname;
+            $yahooTeamId = (int)$team->team[0][1]->team_id;
+    
+            $nicknames = [
+                'Coley Bear'    => 'Cole',
+                'James'         => 'Matt',
+                'Tweak'         => 'Justin',
+                'Tyler'         => 'Tyler',
+                'Ben'           => 'Ben',
+                'cameron'       => 'Cameron',
+                'A.J.'          => 'AJ',
+                'Everett'       => 'Everett',
+                'Gavin'         => 'Gavin',
+                'Andy'          => 'Andy'
+            ];
 
-function handle_scoreboard(object $data)
-{
-    $scoreboards = $data->scoreboard;
-    foreach ($scoreboards as $scoreboard) {
-        do_dump($scoreboard);
+            $manager = $nicknames[$nickname];
+            $result = query("SELECT * FROM managers where name = '".$manager."'");
+            while ($manager = fetch_array($result)) {
+                $managerId = $manager['id'];
+            }
+            
+            echo 'Manager ID: '.$managerId.' = Yahoo ID: '.$yahooTeamId.'= '.$nickname.'<br>';
+            // update manager's yahoo_id
+            updateOrCreate('managers', [
+                'id' => $managerId
+            ], [
+                'yahoo_id' => $yahooTeamId,
+            ]);
+        }
     }
 }
 
 function handle_teams(object $data)
 {
-    $nicknames = [
-        'Coley Bear'    => 'Cole',
-        'James'         => 'Matt',
-        'Tweak'         => 'Justin',
-        'Tyler'         => 'Tyler',
-        'Ben'           => 'Ben',
-        'cameron'       => 'Cameron',
-        'A.J.'          => 'AJ',
-        'Everett'       => 'Everett',
-        'Gavin'         => 'Gavin',
-        'Andy'          => 'Andy'
-    ];
-
-    $teams = $data->teams;
+    global $year, $DB_TYPE;
+    
+    $teams = $data->league[1]->teams;
     foreach ($teams as $team) {
-        do_dump($team);
-        // Find team name
-        $teamName = $team->name;
-        // Find nickname
-        $teamNickname = $team->managers[0]->manager->nickname;
-        // Match them up and save/update in DB
-        $manager = $nicknames[$teamNickname];
-        $managerId = lookupManager($manager);
-
-        $query = "INSERT INTO team_names(id, manager, year, name, moves, trades) VALUES ($managerId, ) ON DUPLICATE KEY UPDATE c=VALUES(c);";
+        if (gettype($team) == 'object') {
+            // do_dump($team);die;
+            // Find team name (encode it to handle apostrophe)
+            $teamName = $DB_TYPE == 'sqlite' ? str_replace("'", "''", $team->team[0][2]->name) : $team->team[0][2]->name;
+            // Find yahoo team id
+            $yahooTeamId = (int)$team->team[0][1]->team_id;
+            $moves = (int)$team->team[0][9]->number_of_moves;
+            $trades = (int)$team->team[0][10]->number_of_trades;
+    
+            echo $teamName.' = '.$yahooTeamId.'<br>';
+            // Match up nickname to manager_id
+            $managerId = lookupManager($yahooTeamId);
+    
+            // update team names, moves, trades
+            updateOrCreate('team_names', [
+                'manager_id' => $managerId,
+                'year' => $year
+            ], [
+                'name' => $teamName,
+                'moves' => $moves,
+                'trades' => $trades
+            ]);
+        }
     }
 }
 
-function lookupManager(string $managerName)
+function lookupManager(int $yahooTeamId)
 {
-    $result = query("SELECT * FROM managers where name = '".$managerName."'");
+    $result = query("SELECT * FROM managers where yahoo_id = $yahooTeamId");
     while ($manager = fetch_array($result)) {
         return $manager['id'];
     }
+}
+
+function handle_team_matchups(int $yahooTeamId, object $data)
+{
+    global $year;
+    // do_dump($data);die;
+
+    $managerId = lookupManager($yahooTeamId);
+    echo 'Manager ID: '.$managerId.' Weeks: ';
+ 
+    // Loop through each week for this manager
+    foreach ($data->team[1]->matchups as $index => $m) {
+
+        if (gettype($m) != 'object') {
+            continue;
+        }
+        $matchup = $m->matchup;
+        // do_dump($matchup);die;
+
+        // Only insert if the matchup is over
+        if ($matchup->status == 'postevent') {
+            $week = $matchup->week;
+            echo '| '.$week.' ';
+            $managerScore = (float)$matchup->{0}->teams->{0}->team[1]->team_points->total;
+    
+            $oppYahooId = (int)$matchup->{0}->teams->{1}->team[0][1]->team_id;
+            $oppId = lookupManager($oppYahooId);
+            $oppScore = (float)$matchup->{0}->teams->{1}->team[1]->team_points->total;
+    
+            // echo $managerId.' vs '.$oppId.' in week '.$week.' ('.$managerScore.' - '.$oppScore.')<br>';
+            updateOrCreate('regular_season_matchups', [
+                'manager1_id' => $managerId,
+                'year' => $year,
+                'week_number' => $week
+            ], [
+                'manager2_id' => $oppId,
+                'manager1_score' => $managerScore,
+                'manager2_score' => $oppScore,
+                'winning_manager_id' => $managerScore > $oppScore ? $managerId : $oppId,
+                'losing_manager_id' => $managerScore > $oppScore ? $oppId : $managerId
+            ]);
+        }
+    }
+
+    echo '...done<br>';
+}
+
+function handle_team_rosters(int $managerId, int $week, object $data)
+{
+    global $year, $DB_TYPE;
+    // do_dump($data);die;
+
+    $result = query("SELECT * FROM managers where id = $managerId");
+    while ($row = fetch_array($result)) {
+        $manager = $row['name'];
+    }
+
+    $roster = $data->team[1]->roster->{0}->players;
+    // Loop through the roster
+    foreach ($roster as $index => $p) {
+
+        if (gettype($p) != 'object') {
+            continue;
+        }
+        $player = $p->player;
+        // do_dump($player);
+        $playerName = $DB_TYPE == 'sqlite' ? str_replace("'", "''", $player[0][2]->name->full) : $player[0][2]->name->full;
+
+        // Loop through the player properties to find team
+        foreach ($player[0] as $key => $value) {
+            if (gettype($value) == 'object') {
+                if (property_exists($value, 'editorial_team_abbr')) {
+                    $teamKey = $value->editorial_team_abbr;
+                }
+                if (property_exists($value, 'primary_position')) {
+                    $pos = $value->primary_position;
+                }
+            }
+        }
+
+        // Use player key to lookup stats
+        $playerKey = $player[0][0]->player_key;
+        $stats = get_player_stats($playerKey, $week);
+        
+        $team = strtoupper($teamKey);
+        $spot = $player[1]->selected_position[1]->position;
+        // Projected is not available from API
+        $projected = $stats['projected'];
+        $points = $stats['points'];
+
+        echo $manager.' - '.$playerName.' ('.$team.' - '.$pos.' - '.$spot.')<br>';
+        // Insert player into rosters
+        $rosterId = updateOrCreate('rosters', [
+            'manager' => $manager,
+            'year' => $year,
+            'week' => $week,
+            'player' => $playerName,
+            'team' => $team
+        ], [
+            'position' => $pos,
+            'roster_spot' => $spot,
+            'projected' => $projected,
+            'points' => $points
+        ]);
+
+        // Insert stats
+        updateOrCreate('stats', [
+            'roster_id' => $rosterId
+        ], $stats['stats']);
+    }
+}
+
+function get_player_stats(string $playerKey, int $week)
+{
+    global $access_token, $leagueId;
+    $request_uri = '/league/423.l.'.$leagueId.'/players;player_keys='.$playerKey.'/stats;type=week;week='.$week;
+    $data = get_data($request_uri, $access_token);
+
+    // do_dump($data); die;
+
+    $statIds = [
+        4 => 'pass_yds',
+        5 => 'pass_tds',
+        6 => 'ints',
+        9 => 'rush_yds',
+        10 => 'rush_tds',
+        11 => 'receptions',
+        12 => 'rec_yds',
+        13 => 'rec_tds',
+        18 => 'fumbles',
+        29 => 'pat_made',
+        84 => 'fg_yards',
+        85 => 'fg_made',
+        33 => 'def_int',
+        34 => 'def_fum',
+        32 => 'def_sacks'
+    ];
+
+    $player = $data->league[1]->players->{0}->player;
+
+    $values = [
+        'projected' => null, // NA in API
+        'points' => (float)$player[1]->player_points->total,
+        'stats' => []
+    ];
+    
+    // Loop through player's stats
+    $stats = $player[1]->player_stats->stats;
+    foreach ($stats as $stat) {
+        if (gettype($stat) == 'object') {
+            $statId = $stat->stat->stat_id;
+            $statValue = $stat->stat->value;
+            // use $statIds to put values in $values['stats']
+            if (array_key_exists($statId, $statIds)) {
+                $values['stats'][$statIds[$statId]] = (int)$statValue;
+            }
+        }
+    }
+    // do_dump($values);die;
+
+    return $values;
 }
 
 ?>

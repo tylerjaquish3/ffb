@@ -28,6 +28,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - best/worst draft pick
 - chances of making playoffs, make request to playoffcomputer linked above
 - use yahoo api to get results and rosters, then it can be kicked off with a button click or automatic on tuesday morning
+- add projected as a column in regular_season_matchups, and get historical values from rosters
 
 - draft order based on wives/gfs responses to something?
 

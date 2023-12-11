@@ -169,7 +169,7 @@ function fetch_array($result)
  */
 function updateOrCreate(string $table, array $params, array $values)
 {
-    global $conn;
+    $lastId = null;
     $query = "SELECT * FROM {$table} WHERE ";
     foreach ($params as $key => $value) {
         $query .= "{$key} = '{$value}' AND ";
@@ -210,11 +210,66 @@ function updateOrCreate(string $table, array $params, array $values)
         $query = substr($query, 0, -2);
         $query .= ")";
         $result = query($query);
+
+        // query for the id of the item just inserted
+        $query = "SELECT id FROM {$table} ORDER BY id DESC LIMIT 1";
+        $result = query($query);
+        $row = fetch_array($result);
+        $lastId = $row['id'];
     }
 
     // return the id of the item just inserted
-    if ($conn->lastInsertRowID()) {
-        return $conn->lastInsertRowID();
+    if ($lastId) {
+        return $lastId;
+    } else {
+        return $row['id'];
+    }
+}
+
+// Look in table for rows matching params. If found, return id. If not found, insert and return id.
+function firstOrCreate(string $table, array $params, array $values) {
+    $lastId = null;
+    $query = "SELECT * FROM {$table} WHERE ";
+    foreach ($params as $key => $value) {
+        $query .= "{$key} = '{$value}' AND ";
+    }
+    $query = substr($query, 0, -5);
+    $result = query($query);
+    $row = fetch_array($result);
+    if ($row) {
+        // return id
+        return $row['id'];
+    } else {
+        // insert
+        $query = "INSERT INTO {$table} (";
+        foreach ($params as $key => $value) {
+            $query .= "{$key}, ";
+        }
+        foreach ($values as $key => $value) {
+            $query .= "{$key}, ";
+        }
+        $query = substr($query, 0, -2);
+        $query .= ") VALUES (";
+        foreach ($params as $key => $value) {
+            $query .= "'{$value}', ";
+        }
+        foreach ($values as $key => $value) {
+            $query .= "'{$value}', ";
+        }
+        $query = substr($query, 0, -2);
+        $query .= ")";
+        $result = query($query);
+
+        // query for the id of the item just inserted
+        $query = "SELECT id FROM {$table} ORDER BY id DESC LIMIT 1";
+        $result = query($query);
+        $row = fetch_array($result);
+        $lastId = $row['id'];
+    }
+
+    // return the id of the item just inserted
+    if ($lastId) {
+        return $lastId;
     } else {
         return $row['id'];
     }

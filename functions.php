@@ -1682,7 +1682,7 @@ function getCurrentSeasonTopPerformers()
             'manager' => $row['manager'],
             'week' => $row['week'],
             'player' => $row['player'],
-            'points' => round($row['points'], 1)
+            'points' => round((int)$row['points'], 1)
         ];
     }
 
@@ -1974,7 +1974,7 @@ function getBestDraftPicks()
     $wrtMedian = getMedian('wrt');
     // Use multiplier to find sweet spot
     // Don't want to just be above average, but to be a bit better than that
-    $multiplier = 1.4;
+    $multiplier = 1.3;
 
     // Need to do different join for sqlite vs mysql
     $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
@@ -1994,7 +1994,7 @@ function getBestDraftPicks()
                 $response[] = $row;
             }
         } else {
-            if ($row['points'] > ($wrtMedian*$multiplier) && $row['overall_pick'] > 70) {
+            if ($row['points'] > ($wrtMedian*$multiplier) && $row['overall_pick'] > 60) {
                 $response[] = $row;
             }
         }

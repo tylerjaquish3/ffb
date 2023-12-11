@@ -372,8 +372,8 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
                         ];
 
                         if ($team['roster_spot'] != 'BN' && $team['roster_spot'] != 'IR') {
-                            $opponentProjected += $team['projected'];
-                            $opponentPoints += $team['points'];
+                            $opponentProjected += (float)$team['projected'];
+                            $opponentPoints += (float)$team['points'];
                         }
                     }
                 }
@@ -384,8 +384,8 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
                 ];
 
                 if ($row['roster_spot'] != 'BN' && $row['roster_spot'] != 'IR') {
-                    $projected += $row['projected'];
-                    $points += $row['points'];
+                    $projected += (float)$row['projected'];
+                    $points += (float)$row['points'];
                 }
             }
 

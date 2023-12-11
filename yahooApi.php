@@ -26,7 +26,7 @@ if( ! $request_token_url ) {
                         <div class="card-header"></div>
                         <div class="card-body info-card">
                             <!-- 2. Direct user to Yahoo! for authorization (retrieve verifier) -->
-                            <h2>Hey! Go to this URL and then come back and enter the verifier</h2>
+                            <h2>First click Verify and then come back and enter the code</h2>
                             <a class="btn btn-secondary" href="<?php echo $request_token_url; ?>" target="_blank">Verify</a>
                         </div>
                     </div>
@@ -34,9 +34,11 @@ if( ! $request_token_url ) {
             </div>
 
             <div class="row">
-                <div class="col-sm-6 table-padding">
+                <div class="col-sm-4 table-padding">
                     <div class="card">
-                        <div class="card-header">Settings</div>
+                        <div class="card-header">
+                            <h4 class="card-title">Settings</h4>
+                        </div>
                         <div class="card-body info-card">
                             <h3>Code</h3>
                             <input type="text" name="code">
@@ -72,11 +74,13 @@ if( ! $request_token_url ) {
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-6 table-padding">
+                <div class="col-sm-8 table-padding">
                     <div class="card">
-                        <div class="card-header">Output</div>
+                        <div class="card-header">
+                            <h4 class="card-title">Output</h4>
+                        </div>
                         <div class="card-body info-card" style="overflow: scroll;">
-                            <div id="output"></div>
+                            <div id="output">Output will show here...</div>
                         </div>
                     </div>
                 </div>

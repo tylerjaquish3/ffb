@@ -1,4 +1,5 @@
     <div class="footer">
+        <a href="/yahooApi.php">Admin</a> | 
         <?php echo $version.' '.$vDate; ?>
     </div>
     

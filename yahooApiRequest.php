@@ -27,7 +27,9 @@ if ($section == 'yahoo_ids') {
     echo 'Getting manager Yahoo IDs...<br />';
     $request_uri = '/league/nfl.l.'.$leagueId.'/teams';
     $teams = get_data($request_uri, $access_token);
-    handle_managers($teams);
+    if ($teams) {
+        handle_managers($teams);
+    }
     echo '<hr />';die;
 }
 
@@ -37,7 +39,9 @@ if ($section == 'team_names') {
     $request_uri = '/league/nfl.l.'.$leagueId.'/teams';
     $teams = get_data($request_uri, $access_token);
     // do_dump($teams);die;
-    handle_teams($teams);
+    if ($teams) {
+        handle_teams($teams);
+    }
     echo '<hr />';die;
 }
 
@@ -47,7 +51,9 @@ if ($section == 'matchups') {
     for ($managerId = 1; $managerId < 11; $managerId++) {
         $request_uri = '/team/423.l.'.$leagueId.'.t.'.$managerId.'/matchups';
         $matchups = get_data($request_uri, $access_token);
-        handle_team_matchups($managerId, $matchups);
+        if ($matchups) {
+            handle_team_matchups($managerId, $matchups);
+        }
     }
     echo '<hr />';die;
 }
@@ -72,6 +78,11 @@ if ($section == 'rosters') {
 
 if ($section == 'trades') {
     echo 'Getting trades...<br />';
+    $request_uri = '/league/nfl.l.'.$leagueId.'/transactions;types=trade';
+    $transactions = get_data($request_uri, $access_token);
+    if ($transactions) {
+        handle_trades($transactions);
+    }
 
     echo '<hr />';die;
 }
@@ -352,6 +363,78 @@ function get_player_stats(string $playerKey, int $week)
     // do_dump($values);die;
 
     return $values;
+}
+
+function handle_trades(object $data)
+{
+    global $year, $leagueId;
+    
+    $transactions = $data->league[1]->transactions;
+    foreach ($transactions as $trans) {
+        if (gettype($trans) == 'object') {
+            // do_dump($trans);die;
+            
+            $tradeId = $leagueId.$trans->transaction[0]->transaction_id;
+            $timestamp = $trans->transaction[0]->timestamp;
+            // make date from timestamp
+            $date = date('Y-m-d', $timestamp);
+            $currentWeek = lookup_week($date);
+            
+            foreach ($trans->transaction[1]->players as $player) {
+                // do_dump($player);die;
+                if (gettype($player) != 'object') {
+                    continue;
+                }
+
+                $manager1 = find_manager_id($player->player[1]->transaction_data[0]->source_team_key);
+                $manager2 = find_manager_id($player->player[1]->transaction_data[0]->destination_team_key);
+
+                $player = $player->player[0][2]->name->full;
+
+                echo 'Current Week: '.$currentWeek.' | Trade ID: '.$tradeId.'<br>';
+                echo $manager1.' traded '.$player.' to '.$manager2.'<br>';
+                // update trades table
+                firstOrCreate('trades', [
+                    'player' => $player,
+                    'year' => $year,
+                    'manager_from_id' => $manager1,
+                ], [
+                    'week' => $currentWeek,
+                    'manager_to_id' => $manager2,
+                    'trade_identifier' => $tradeId
+                ]);
+            }
+            
+    
+        }
+    }
+}
+
+function find_manager_id(string $teamKey)
+{
+    // get everything after the last period in the $teamKey
+    $managerId = (int)substr($teamKey, strrpos($teamKey, '.') + 1);
+
+    $query = query("SELECT * FROM managers WHERE yahoo_id = $managerId");
+    $row = fetch_array($query); 
+
+    return $row['id'];
+}
+
+function lookup_week(string $date)
+{
+    global $year;
+
+    // week 1 ends the first monday after labor day
+    $week1 = date('Y-m-d', strtotime('second monday of september '.$year));
+    // add one week until getting to $date
+    $week = 1;
+    while ($week1 < $date) {
+        $week1 = date('Y-m-d', strtotime('+1 week '.$week1));
+        $week++;
+    }
+
+    return $week;
 }
 
 ?>

@@ -138,27 +138,22 @@ include 'sidebar.html';
                                     <?php
                                     foreach ($points as $manager => $values) {
                                         $totalPoints = 0;
-                                        $totalProjected = 0;
 
                                         foreach ($values as $pos => $stuff) {
                                             $totalPoints += $stuff['points'];
-                                            $totalProjected += $stuff['projected'];
                                         } ?>
                                         <tr>
                                             <td>
                                                 <strong><?php echo $manager; ?></strong><br />
-                                                <i>Projected</i>
                                             </td>
                                             <?php foreach ($values as $pos => $stuff) { ?>
                                                 <td data-order="<?php echo $stuff['points']; ?>">
-                                                    <strong><?php echo $stuff['points']; ?></strong><br />
-                                                    <i><?php echo $stuff['projected']; ?></i>
+                                                    <?php echo $stuff['points']; ?><br />
                                                 </td>
                                             <?php } ?>
                                         
                                             <td data-order="<?php echo $totalPoints; ?>">
                                                 <strong><?php echo $totalPoints; ?></strong><br />
-                                                <i><?php echo $totalProjected; ?></i>
                                             </td>
                                         </tr>
                                     <?php } ?>

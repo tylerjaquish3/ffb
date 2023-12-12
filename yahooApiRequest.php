@@ -1,6 +1,7 @@
 <?php
 
 include 'yahooSharedFunctions.php';
+include 'updateFunFacts.php';
 
 $year = date('Y');
 $leagueId = $_POST['league_id'];
@@ -18,6 +19,11 @@ if (isset($_POST['weeks'])) {
 
 // Check league settings
 // $request_uri = '/league/nfl.l.'.$leagueId.'/settings';
+// $teams = get_data($request_uri, $access_token);
+// do_dump($teams);die;
+
+// Check user leagues
+// $request_uri = '/users;use_login=1/games;game_keys=nfl/leagues';
 // $teams = get_data($request_uri, $access_token);
 // do_dump($teams);die;
 
@@ -65,11 +71,20 @@ if ($section == 'rosters') {
         echo 'No weeks selected';
     } else {
         foreach ($weeks as $week) {
-            echo 'Manager: '.$manager.' | Week '.$week.'<br />';
-            $request_uri = '/team/423.l.'.$leagueId.'.t.'.$manager.'/roster;week='.$week;
-            $rosters = get_data($request_uri, $access_token);
-            if ($rosters) {
-                handle_team_rosters($manager, $week, $rosters);
+            try {
+                echo 'Manager: '.$manager.' | Week '.$week.'<br />';
+                $request_uri = '/team/423.l.'.$leagueId.'.t.'.$manager.'/roster;week='.$week;
+                $rosters = get_data($request_uri, $access_token);
+                if ($rosters) {
+                    handle_team_rosters($manager, $week, $rosters);
+                }
+            } catch (Exception $e) {
+                echo 'Caught exception: ',  $e->getMessage(), "\n";
+                // try again
+                $rosters = get_data($request_uri, $access_token);
+                if ($rosters) {
+                    handle_team_rosters($manager, $week, $rosters);
+                }
             }
         }
     }
@@ -89,7 +104,7 @@ if ($section == 'trades') {
 
 if ($section == 'fun_facts') {
     echo 'Getting fun facts...<br />';
-
+    handle_fun_facts();
     echo '<hr />';die;
 }
 
@@ -111,9 +126,19 @@ function get_data(string $request_uri, string $token)
         echo "Error: ${request_data['error_str']} (${request_data['errno']})\n";
     }
 
-    $contents = json_decode($request_data['contents'])->fantasy_content;
+    if ($return_code == 999) {
+        sleep(5);
+        get_data($request_uri, $token);
+    }
 
-    return $contents;
+    if ($request_data['contents'] == '') {
+        sleep(5);
+        get_data($request_uri, $token);
+    } else {
+        $contents = json_decode($request_data['contents'])->fantasy_content;
+    
+        return $contents;
+    }
 }
 
 function handle_managers(object $data)
@@ -435,6 +460,52 @@ function lookup_week(string $date)
     }
 
     return $week;
+}
+
+function handle_fun_facts()
+{
+    // 1,2,3
+    // mostPointsFor();
+    // 4,5,6
+    mostPostseasonPointsFor();
+    // // 7,8,9,89,90,91
+    // leastPointsAgainst();
+    // // 10,11
+    // mostWins();
+    // // 13,14,15
+    // leastPointsFor();
+    // // 16,17
+    // mostLosses();
+    // // 12,18,19,20,21,22,23,24,25,31,65,66
+    // postseasonRecords();
+    // // 26,27,28
+    // highestSeeds();
+    // // 29,30,67,68,69,70
+    // singleOpponent();
+    // // 32
+    // leastChampionships();
+    // // 50,51,52,53,54,55
+    // postseasonMargin();
+    // // 39,40,56,57,60,61
+    // streaks();
+    // // 62,63,71,72
+    // draft();
+    // // 73,74,75
+    // moves();
+    // // 76,77,78,79,80
+    // currentSeasonStats();
+    // // 45,46,47,48
+    // margins();
+    // // 41,42
+    // appearances();
+    // // 60,61
+    // currentPostseasonStreak();
+    // // 58,59
+    // postseasonWinPct();
+    // // 81,82,84,85,86,87
+    // currentSeasonPoints();
+    // // 83,88
+    // getOptimalLineupPoints();
 }
 
 ?>

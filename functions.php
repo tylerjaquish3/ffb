@@ -2302,7 +2302,7 @@ function getMatchupRecapNumbers()
         if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
             $recap['bench1'] += $row['points'];
         } else {
-            $recap['projected1'] += $row['projected'];
+            $recap['projected1'] += (float)$row['projected'];
             
             if ($row['points'] > $recap['top_scorer1']) {
                 $recap['top_scorer1'] = $row['points'];
@@ -2327,7 +2327,7 @@ function getMatchupRecapNumbers()
         if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
             $recap['bench2'] += $row['points'];
         } else {
-            $recap['projected2'] += $row['projected'];
+            $recap['projected2'] += (float)$row['projected'];
 
             if ($row['points'] > $recap['top_scorer2']) {
                 $recap['top_scorer2'] = $row['points'];

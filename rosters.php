@@ -186,7 +186,6 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                         <thead>
                                             <th>Position</th>
                                             <th>Player</th>
-                                            <th>Projected</th>
                                             <th>Points</th>
                                             <th>Drafted?</th>
                                             <th>Week Rk</th>
@@ -205,9 +204,6 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                                 echo '<tr>';
                                                 echo '<td data-order='.$order.'>'.$row['roster_spot'].'</td>';
                                                 echo '<td><a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a></td>';
-                                                echo '<td class="text-right"><i>'.
-                                                    number_format($row['projected'], 2)
-                                                    .'</i></td>';
                                                 echo '<td class="text-right"><strong>'.
                                                     number_format($row['points'], 2)
                                                     .'</strong></td>';
@@ -232,7 +228,6 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                         <thead>
                                             <th>Position</th>
                                             <th>Player</th>
-                                            <th>Projected</th>
                                             <th>Points</th>
                                             <th>Drafted?</th>
                                             <th>Week Rk</th>
@@ -250,9 +245,6 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                                 echo '<tr>';
                                                 echo '<td data-order='.$order.'>'.$row['roster_spot'].'</td>';
                                                 echo '<td><a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a></td>';
-                                                echo '<td class="text-right"><i>'.
-                                                    number_format($row['projected'], 2)
-                                                    .'</i></td>';
                                                 echo '<td class="text-right"><strong>'.
                                                     number_format($row['points'], 2)
                                                     .'</strong></td>';

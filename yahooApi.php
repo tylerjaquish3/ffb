@@ -71,6 +71,7 @@ if( ! $request_token_url ) {
                             <input type="checkbox" name="weeks[]" value="14"> 14<br>
 
                             <button class="btn btn-secondary" id="make_request">Submit</button>
+                            <button class="btn btn-secondary" id="show_leagues">Show Leagues</button>
                         </div>
                     </div>
                 </div>
@@ -120,6 +121,29 @@ if( ! $request_token_url ) {
         }
     });
 
+    $('#show_leagues').click(function () {
+        let info = 'Year: 2023 | League ID: 74490 <br />';
+        info += 'Year: 2022 | League ID: 84027 <br />';
+        info += 'Year: 2021 | League ID: 16064 <br />';
+        info += 'Year: 2020 | League ID: 43673 <br />';
+        info += 'Year: 2019 | League ID: 201651 <br />';
+        info += 'Year: 2018 | League ID: 224863 <br />';
+        info += 'Year: 2017 | League ID: 262191 <br />';
+        info += 'Year: 2016 | League ID: 477642 <br />';
+        info += 'Year: 2015 | League ID: 217861 <br />';
+        info += 'Year: 2014 | League ID: 53077 <br />';
+        info += 'Year: 2013 | League ID: 27577 <br />';
+        info += 'Year: 2012 | League ID: 26725 <br />';
+        info += 'Year: 2011 | League ID: 163601 <br />';
+        info += 'Year: 2010 | League ID: 35443 <br />';
+        info += 'Year: 2009 | League ID: 42150 <br />';
+        info += 'Year: 2008 | League ID: 8224 <br />';
+        info += 'Year: 2007 | League ID: 73988 <br />';
+        info += 'Year: 2006 | League ID: 48909 <br />';
+
+        $('#output').html(info);
+    });
+
     function makeRequest(league_id, weeks) {
         $('#output').html('');
 
@@ -165,7 +189,9 @@ if( ! $request_token_url ) {
             success: function(response) {
                 $('#output').append(response);
                 manager++;
-                makeRosterRequest(league_id, weeks, manager);
+                setTimeout(function () {
+                    makeRosterRequest(league_id, weeks, manager);
+                }, 5000);
             }
         });   
     }

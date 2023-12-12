@@ -5,7 +5,7 @@ include 'yahooSharedFunctions.php';
 $verifier = $_POST['code'];
     
 if (!$verifier) {
-    echo 'Verifier code no good';
+    echo 'Verifier code missing';
     exit;
 }
 
@@ -45,8 +45,7 @@ function get_access_token($consumer_key, $consumer_secret, $verifier)
 
     if ($response_data && $response_data['return_code'] == 200) {
 
-        $contents = $response_data['contents'];
-        $data = json_decode($contents);
+        $data = json_decode($response_data['contents']);
 
         echo $data->access_token;
         die;

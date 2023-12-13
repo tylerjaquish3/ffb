@@ -17,6 +17,13 @@ if (isset($_POST['weeks'])) {
     $weeks = $_POST['weeks'];
 } 
 
+// $data = [];
+// $result = query("SELECT * FROM rosters ORDER by id desc limit 20");
+// while ($row = fetch_array($result)) {
+//     $data[] = $row;
+// }
+// do_dump($data);die;
+
 // Check league settings
 // $request_uri = '/league/nfl.l.'.$leagueId.'/settings';
 // $teams = get_data($request_uri, $access_token);
@@ -267,7 +274,7 @@ function handle_team_matchups(int $yahooTeamId, object $data)
 
 function handle_team_rosters(int $managerId, int $week, object $data)
 {
-    global $year, $DB_TYPE;
+    global $year, $DB_TYPE, $conn;
     // do_dump($data);die;
 
     $result = query("SELECT * FROM managers where yahoo_id = $managerId");
@@ -284,7 +291,11 @@ function handle_team_rosters(int $managerId, int $week, object $data)
         }
         $player = $p->player;
         // do_dump($player);
-        $playerName = $DB_TYPE == 'sqlite' ? str_replace("'", "''", $player[0][2]->name->full) : $player[0][2]->name->full;
+        if ($DB_TYPE == 'sqlite') {
+            $playerName = str_replace("'", "''", $player[0][2]->name->full);
+        } else {
+            $playerName = mysqli_real_escape_string($conn, $player[0][2]->name->full);
+        }
 
         // Loop through the player properties to find team
         foreach ($player[0] as $key => $value) {
@@ -309,7 +320,7 @@ function handle_team_rosters(int $managerId, int $week, object $data)
         $team = strtoupper($teamKey);
         $spot = $player[1]->selected_position[1]->position;
         // Projected is not available from API
-        $projected = $stats['projected'];
+        $projected = 0;
         $points = $stats['points'];
 
         echo $manager.' - '.$playerName.' ('.$team.' - '.$pos.' - '.$spot.')<br>';

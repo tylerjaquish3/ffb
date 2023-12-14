@@ -391,6 +391,9 @@ foreach ($seasonNumbers as $standings) {
                                     <th>From</th>
                                     <th>To</th>
                                     <th>Player</th>
+                                    <th>Week</th>
+                                    <th>Points Before</th>
+                                    <th>Points After</th>
                                     <th></th>
                                 </thead>
                                 <tbody>
@@ -398,13 +401,16 @@ foreach ($seasonNumbers as $standings) {
                                     $lastId = null;
                                     foreach ($trades as $trade) {
                                         if ($trade['trade_identifier'] != $lastId) {
-                                            echo "<tr class='black-row'><td></td><td></td><td></td><td>".$trade['trade_identifier']."</td></tr>";
+                                            echo "<tr class='black-row'><td></td><td></td><td></td><td></td><td></td><td></td><td>".$trade['trade_identifier']."</td></tr>";
                                         }
                                         ?>
                                         <tr>
                                             <td><?php echo $trade['m1']; ?></td>
                                             <td><?php echo $trade['m2']; ?></td>
                                             <td><?php echo $trade['player']; ?></td>
+                                            <td><?php echo $trade['week']; ?></td>
+                                            <td><?php echo $trade['points_before']; ?></td>
+                                            <td><?php echo $trade['points_after']; ?></td>
                                             <td><?php echo $trade['trade_identifier']; ?></td>
                                         </tr>
                                     <?php 
@@ -483,11 +489,11 @@ foreach ($seasonNumbers as $standings) {
         
         $('#datatable-trades').DataTable({
             columnDefs: [{
-                targets: [3],
+                targets: [6],
                 visible: false,
             }],
             order: [
-                [3, "desc"]
+                [6, "desc"]
             ]
         });
     });

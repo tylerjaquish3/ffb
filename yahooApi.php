@@ -43,16 +43,16 @@ if( ! $request_token_url ) {
                             <h3>Code</h3>
                             <input type="text" name="code">
 
-                            <h3>League</h3>
-                            <input type="text" name="league_id" value="74490">
+                            <h3>Season</h3>
+                            <input type="text" name="year" value="<?php echo date('Y'); ?>">
 
                             <h3>Sections to Update</h3>
                             <input type="checkbox" name="sections[]" value="yahoo_ids"> Manager Yahoo IDs<br>
-                            <input type="checkbox" name="sections[]" value="team_names" checked="checked"> Team Names<br>
-                            <input type="checkbox" name="sections[]" value="matchups" checked="checked"> Matchups<br>
-                            <input type="checkbox" name="sections[]" value="rosters" checked="checked"> Rosters<br>
-                            <input type="checkbox" name="sections[]" value="trades" checked="checked"> Trades<br>
-                            <input type="checkbox" name="sections[]" value="fun_facts" checked="checked"> Fun Facts<br>
+                            <input type="checkbox" name="sections[]" value="team_names"> Team Names<br>
+                            <input type="checkbox" name="sections[]" value="matchups"> Matchups<br>
+                            <input type="checkbox" name="sections[]" value="rosters"> Rosters<br>
+                            <input type="checkbox" name="sections[]" value="trades"> Trades<br>
+                            <input type="checkbox" name="sections[]" value="fun_facts"> Fun Facts<br>
 
                             <h3>Weeks</h3>
                             <input type="checkbox" name="weeks[]" value="1"> 1<br>
@@ -71,7 +71,6 @@ if( ! $request_token_url ) {
                             <input type="checkbox" name="weeks[]" value="14"> 14<br>
 
                             <button class="btn btn-secondary" id="make_request">Submit</button>
-                            <button class="btn btn-secondary" id="show_leagues">Show Leagues</button>
                         </div>
                     </div>
                 </div>
@@ -97,7 +96,7 @@ if( ! $request_token_url ) {
     var access_token = null;
 
     $('#make_request').click(function () {
-        var league_id = $('input[name="league_id"]').val();
+        var year = $('input[name="year"]').val();
         var weeks = [];
         $('input[name="weeks[]"]:checked').each(function () {
             weeks.push($(this).val());
@@ -113,38 +112,15 @@ if( ! $request_token_url ) {
                 success: function(response) {
                     access_token = response;
     
-                    makeRequest(league_id, weeks);
+                    makeRequest(year, weeks);
                 }
             });
         } else {
-            makeRequest(league_id, weeks);
+            makeRequest(year, weeks);
         }
     });
 
-    $('#show_leagues').click(function () {
-        let info = 'Year: 2023 | League ID: 74490 <br />';
-        info += 'Year: 2022 | League ID: 84027 <br />';
-        info += 'Year: 2021 | League ID: 16064 <br />';
-        info += 'Year: 2020 | League ID: 43673 <br />';
-        info += 'Year: 2019 | League ID: 201651 <br />';
-        info += 'Year: 2018 | League ID: 224863 <br />';
-        info += 'Year: 2017 | League ID: 262191 <br />';
-        info += 'Year: 2016 | League ID: 477642 <br />';
-        info += 'Year: 2015 | League ID: 217861 <br />';
-        info += 'Year: 2014 | League ID: 53077 <br />';
-        info += 'Year: 2013 | League ID: 27577 <br />';
-        info += 'Year: 2012 | League ID: 26725 <br />';
-        info += 'Year: 2011 | League ID: 163601 <br />';
-        info += 'Year: 2010 | League ID: 35443 <br />';
-        info += 'Year: 2009 | League ID: 42150 <br />';
-        info += 'Year: 2008 | League ID: 8224 <br />';
-        info += 'Year: 2007 | League ID: 73988 <br />';
-        info += 'Year: 2006 | League ID: 48909 <br />';
-
-        $('#output').html(info);
-    });
-
-    function makeRequest(league_id, weeks) {
+    function makeRequest(year, weeks) {
         $('#output').html('');
 
         // For each selected section, make request
@@ -152,14 +128,14 @@ if( ! $request_token_url ) {
 
             let section = $(this).val();
             if (section == 'rosters') {
-                makeRosterRequest(league_id, weeks, 1);
+                makeRosterRequest(year, weeks, 1);
             } else {
                 $.ajax({
                     url: 'yahooApiRequest.php',
                     type: 'POST',
                     data: {
                         token: access_token,
-                        league_id: league_id,
+                        year: year,
                         section: section,
                         weeks: weeks
                     },
@@ -171,7 +147,7 @@ if( ! $request_token_url ) {
         });
     }
 
-    function makeRosterRequest(league_id, weeks, manager) 
+    function makeRosterRequest(year, weeks, manager) 
     {
         if (manager == 11) {
             return;
@@ -181,7 +157,7 @@ if( ! $request_token_url ) {
             type: 'POST',
             data: {
                 token: access_token,
-                league_id: league_id,
+                year: year,
                 section: 'rosters',
                 weeks: weeks,
                 manager: manager
@@ -190,7 +166,7 @@ if( ! $request_token_url ) {
                 $('#output').append(response);
                 manager++;
                 setTimeout(function () {
-                    makeRosterRequest(league_id, weeks, manager);
+                    makeRosterRequest(year, weeks, manager);
                 }, 5000);
             }
         });   

@@ -3,12 +3,37 @@
 include 'yahooSharedFunctions.php';
 include 'updateFunFacts.php';
 
-$year = date('Y');
-$leagueId = $_POST['league_id'];
+$year = (int)$_POST['year'];
 $access_token = $_POST['token'];
 $section = '';
 $weeks = [];
 $manager = isset($_POST['manager']) ? $_POST['manager'] : 0;
+
+$seasons = [
+    2023 => ['league_id' => 74490, 'game_code' => 423],
+    2022 => ['league_id' => 84027, 'game_code' => 414],
+    2021 => ['league_id' => 16064, 'game_code' => 406],
+    2020 => ['league_id' => 43673, 'game_code' => 399],
+    2019 => ['league_id' => 201651, 'game_code' => 390],
+    2018 => ['league_id' => 224863, 'game_code' => 380],
+    2017 => ['league_id' => 262191, 'game_code' => 371],
+    2016 => ['league_id' => 477642, 'game_code' => 359],
+    2015 => ['league_id' => 217861, 'game_code' => 348],
+    2014 => ['league_id' => 53077, 'game_code' => 331],
+    2013 => ['league_id' => 27577, 'game_code' => 314]
+];
+$archivedSeasons = [
+    2012 => ['league_id' => 26725, 'game_code' => 273],
+    2011 => ['league_id' => 163601, 'game_code' => 257],
+    2010 => ['league_id' => 35443, 'game_code' => 242],
+    2009 => ['league_id' => 42150, 'game_code' => 222],
+    2008 => ['league_id' => 8224, 'game_code' => 199],
+    2007 => ['league_id' => 73988, 'game_code' => 175],
+    2006 => ['league_id' => 48909, 'game_code' => 153],
+];
+// get league id based on year
+$leagueId = $seasons[$year]['league_id'];
+$gameCode = $seasons[$year]['game_code'];
 
 if (isset($_POST['section'])) {
     $section = $_POST['section'];
@@ -34,14 +59,24 @@ if (isset($_POST['weeks'])) {
 // $teams = get_data($request_uri, $access_token);
 // do_dump($teams);die;
 
+// Check game codes
+// $request_uri = '/games;game_codes=nfl';
+// $teams = get_data($request_uri, $access_token);
+// do_dump($teams);die;
+
 if ($section == 'yahoo_ids') {
     // first need to update yahoo id (if necessary, changes each year)
     // yahoo id is used going forward with all these
     echo 'Getting manager Yahoo IDs...<br />';
-    $request_uri = '/league/nfl.l.'.$leagueId.'/teams';
-    $teams = get_data($request_uri, $access_token);
-    if ($teams) {
-        handle_managers($teams);
+    foreach ($seasons as $year => $season) {
+        $leagueId = $season['league_id'];
+        $gameCode = $season['game_code'];
+
+        $request_uri = '/league/'.$gameCode.'.l.'.$leagueId.'/teams';
+        $teams = get_data($request_uri, $access_token);
+        if ($teams) {
+            handle_managers($teams, $year);
+        }
     }
     echo '<hr />';die;
 }
@@ -49,7 +84,7 @@ if ($section == 'yahoo_ids') {
 if ($section == 'team_names') {
     // Get team names, moves, trades
     echo 'Getting team names, moves, trades...<br />';
-    $request_uri = '/league/nfl.l.'.$leagueId.'/teams';
+    $request_uri = '/league/'.$gameCode.'.l.'.$leagueId.'/teams';
     $teams = get_data($request_uri, $access_token);
     // do_dump($teams);die;
     if ($teams) {
@@ -62,7 +97,7 @@ if ($section == 'matchups') {
     // Get regular season matchup scores for specific week 
     echo 'Getting scoreboard...<br />';
     for ($managerId = 1; $managerId < 11; $managerId++) {
-        $request_uri = '/team/423.l.'.$leagueId.'.t.'.$managerId.'/matchups';
+        $request_uri = '/team/'.$gameCode.'.l.'.$leagueId.'.t.'.$managerId.'/matchups';
         $matchups = get_data($request_uri, $access_token);
         if ($matchups) {
             handle_team_matchups($managerId, $matchups);
@@ -79,8 +114,8 @@ if ($section == 'rosters') {
     } else {
         foreach ($weeks as $week) {
             try {
-                echo 'Manager: '.$manager.' | Week '.$week.'<br />';
-                $request_uri = '/team/423.l.'.$leagueId.'.t.'.$manager.'/roster;week='.$week;
+                echo 'Yahoo ID: '.$manager.' | Week '.$week.'<br />';
+                $request_uri = '/team/'.$gameCode.'.l.'.$leagueId.'.t.'.$manager.'/roster;week='.$week;
                 $rosters = get_data($request_uri, $access_token);
                 if ($rosters) {
                     handle_team_rosters($manager, $week, $rosters);
@@ -100,7 +135,7 @@ if ($section == 'rosters') {
 
 if ($section == 'trades') {
     echo 'Getting trades...<br />';
-    $request_uri = '/league/nfl.l.'.$leagueId.'/transactions;types=trade';
+    $request_uri = '/league/'.$gameCode.'.l.'.$leagueId.'/transactions;types=trade';
     $transactions = get_data($request_uri, $access_token);
     if ($transactions) {
         handle_trades($transactions);
@@ -148,7 +183,7 @@ function get_data(string $request_uri, string $token)
     }
 }
 
-function handle_managers(object $data)
+function handle_managers(object $data, int $year)
 {
     $teams = $data->league[1]->teams;
     foreach ($teams as $team) {
@@ -178,8 +213,9 @@ function handle_managers(object $data)
             
             echo 'Manager ID: '.$managerId.' = Yahoo ID: '.$yahooTeamId.'= '.$nickname.'<br>';
             // update manager's yahoo_id
-            updateOrCreate('managers', [
-                'id' => $managerId
+            updateOrCreate('season_managers', [
+                'year' => $year,
+                'manager_id' => $managerId
             ], [
                 'yahoo_id' => $yahooTeamId,
             ]);
@@ -204,7 +240,7 @@ function handle_teams(object $data)
     
             echo $teamName.' = '.$yahooTeamId.'<br>';
             // Match up nickname to manager_id
-            $managerId = lookupManager($yahooTeamId);
+            $managerId = lookupManager($yahooTeamId, $year);
     
             // update team names, moves, trades
             updateOrCreate('team_names', [
@@ -219,9 +255,11 @@ function handle_teams(object $data)
     }
 }
 
-function lookupManager(int $yahooTeamId)
+function lookupManager(int $yahooTeamId, int $year)
 {
-    $result = query("SELECT * FROM managers where yahoo_id = $yahooTeamId");
+    $result = query("SELECT managers.id FROM season_managers 
+        JOIN managers on managers.id = season_managers.manager_id
+        WHERE yahoo_id = $yahooTeamId and year = $year");
     while ($manager = fetch_array($result)) {
         return $manager['id'];
     }
@@ -232,7 +270,7 @@ function handle_team_matchups(int $yahooTeamId, object $data)
     global $year;
     // do_dump($data);die;
 
-    $managerId = lookupManager($yahooTeamId);
+    $managerId = lookupManager($yahooTeamId, $year);
     echo 'Manager ID: '.$managerId.' Weeks: ';
  
     // Loop through each week for this manager
@@ -242,17 +280,18 @@ function handle_team_matchups(int $yahooTeamId, object $data)
             continue;
         }
         $matchup = $m->matchup;
-        // do_dump($matchup);die;
 
         // Only insert if the matchup is over
         if ($matchup->status == 'postevent') {
             $week = $matchup->week;
             echo '| '.$week.' ';
             $managerScore = (float)$matchup->{0}->teams->{0}->team[1]->team_points->total;
+            $managerProjected = (float)$matchup->{0}->teams->{0}->team[1]->team_projected_points->total;
     
             $oppYahooId = (int)$matchup->{0}->teams->{1}->team[0][1]->team_id;
-            $oppId = lookupManager($oppYahooId);
+            $oppId = lookupManager($oppYahooId, $year);
             $oppScore = (float)$matchup->{0}->teams->{1}->team[1]->team_points->total;
+            $oppProjected = (float)$matchup->{0}->teams->{1}->team[1]->team_projected_points->total;
     
             // echo $managerId.' vs '.$oppId.' in week '.$week.' ('.$managerScore.' - '.$oppScore.')<br>';
             updateOrCreate('regular_season_matchups', [
@@ -264,7 +303,9 @@ function handle_team_matchups(int $yahooTeamId, object $data)
                 'manager1_score' => $managerScore,
                 'manager2_score' => $oppScore,
                 'winning_manager_id' => $managerScore > $oppScore ? $managerId : $oppId,
-                'losing_manager_id' => $managerScore > $oppScore ? $oppId : $managerId
+                'losing_manager_id' => $managerScore > $oppScore ? $oppId : $managerId,
+                'manager1_projected' => $managerProjected,
+                'manager2_projected' => $oppProjected
             ]);
         }
     }
@@ -272,12 +313,13 @@ function handle_team_matchups(int $yahooTeamId, object $data)
     echo '...done<br>';
 }
 
-function handle_team_rosters(int $managerId, int $week, object $data)
+function handle_team_rosters(int $yahooId, int $week, object $data)
 {
     global $year, $DB_TYPE, $conn;
     // do_dump($data);die;
 
-    $result = query("SELECT * FROM managers where yahoo_id = $managerId");
+    $managerId = lookupManager($yahooId, $year);
+    $result = query("SELECT * FROM managers where id = $managerId");
     while ($row = fetch_array($result)) {
         $manager = $row['name'];
     }
@@ -448,13 +490,12 @@ function handle_trades(object $data)
 
 function find_manager_id(string $teamKey)
 {
+    global $year;
     // get everything after the last period in the $teamKey
-    $managerId = (int)substr($teamKey, strrpos($teamKey, '.') + 1);
+    $yahooId = (int)substr($teamKey, strrpos($teamKey, '.') + 1);
+    $id = lookupManager($yahooId, $year);
 
-    $query = query("SELECT * FROM managers WHERE yahoo_id = $managerId");
-    $row = fetch_array($query); 
-
-    return $row['id'];
+    return $id;
 }
 
 function lookup_week(string $date)
@@ -475,10 +516,11 @@ function lookup_week(string $date)
 
 function handle_fun_facts()
 {
+    updateProjected();
     // 1,2,3
     // mostPointsFor();
     // 4,5,6
-    mostPostseasonPointsFor();
+    // mostPostseasonPointsFor();
     // // 7,8,9,89,90,91
     // leastPointsAgainst();
     // // 10,11

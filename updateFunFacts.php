@@ -1515,3 +1515,34 @@ function checkRosterForOptimal(array $roster)
 
     return $optimal;
 }
+
+function updateProjected()
+{
+    $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
+
+    // Get each matchup from regular season
+    $result = query("SELECT * FROM regular_season_matchups ORDER BY year DESC, week_number DESC");
+    while ($row = fetch_array($result)) {
+
+        $manager = $managersInOrder[$row['manager1_id']-1];
+        $opp = $managersInOrder[$row['manager2_id']-1];
+        $year = $row['year'];
+        $week = $row['week_number'];
+
+        $managerProj = getPlayerProjectionTotal($manager, $year, $week);
+        $oppProj = getPlayerProjectionTotal($opp, $year, $week);
+
+        query("UPDATE regular_season_matchups SET manager1_projected = $managerProj, manager2_projected = $oppProj
+            WHERE manager1_id = {$row['manager1_id']} AND manager2_id = {$row['manager2_id']} AND year = $year AND week_number = $week");
+    }
+}
+
+function getPlayerProjectionTotal(string $manager, int $year, int $week)
+{
+    $query = "SELECT sum(projected) as proj FROM rosters WHERE manager = '$manager' AND year = $year AND week = $week
+        AND roster_spot != 'BN' AND roster_spot != 'IR'";
+    $result = query($query);
+    while ($row = fetch_array($result)) {
+        return $row['proj'];
+    }
+}

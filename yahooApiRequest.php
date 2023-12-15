@@ -20,9 +20,7 @@ $seasons = [
     2016 => ['league_id' => 477642, 'game_code' => 359],
     2015 => ['league_id' => 217861, 'game_code' => 348],
     2014 => ['league_id' => 53077, 'game_code' => 331],
-    2013 => ['league_id' => 27577, 'game_code' => 314]
-];
-$archivedSeasons = [
+    2013 => ['league_id' => 27577, 'game_code' => 314],
     2012 => ['league_id' => 26725, 'game_code' => 273],
     2011 => ['league_id' => 163601, 'game_code' => 257],
     2010 => ['league_id' => 35443, 'game_code' => 242],
@@ -372,9 +370,9 @@ function handle_team_rosters(int $yahooId, int $week, object $data)
             'year' => $year,
             'week' => $week,
             'player' => $playerName,
-            'team' => $team
+            'position' => $pos
         ], [
-            'position' => $pos,
+            'team' => $team,
             'roster_spot' => $spot,
             'projected' => $projected,
             'points' => $points

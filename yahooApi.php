@@ -4,6 +4,10 @@ $pageName = 'Yahoo API';
 include 'header.php';
 include 'sidebar.html';
 
+if (isset($_GET['archive'])) {
+    $consumer_key = $archive_key;
+}
+
 // 1. Get Request Token URL
 $request_token_url = get_request_token_url($consumer_key);
 
@@ -107,7 +111,8 @@ if( ! $request_token_url ) {
                 url: 'yahooApiToken.php',
                 type: 'POST',
                 data: {
-                    code: $('input[name="code"]').val()
+                    code: $('input[name="code"]').val(),
+                    year: year
                 },
                 success: function(response) {
                     access_token = response;

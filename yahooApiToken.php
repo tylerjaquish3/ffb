@@ -10,6 +10,11 @@ if (!$verifier) {
 }
 
 // echo 'Verifier code: '.$verifier.PHP_EOL;
+if ($_POST['year'] < 2012) {
+    $consumer_key = $archive_key;
+    $consumer_secret = $archive_secret;
+}
+
     
 // 3. Get Access Token
 $access_token_data = get_access_token($consumer_key, $consumer_secret, $verifier);

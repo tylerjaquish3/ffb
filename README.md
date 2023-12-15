@@ -11,7 +11,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 
 - Profile page, line chart for points each season vs league average
 - Current season, worst draft picks remove players that got traded midseason
-- add team logos?
 - add trophy graphic on trophy page
 - profile page, add chart for positions drafted?
 - make sidebar collapsible

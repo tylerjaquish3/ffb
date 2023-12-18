@@ -200,7 +200,10 @@ function handle_managers(object $data, int $year)
                 'A.J.'          => 'AJ',
                 'Everett'       => 'Everett',
                 'Gavin'         => 'Gavin',
-                'Andy'          => 'Andy'
+                'Andy'          => 'Andy',
+                'Andy Stamschror' => 'Andy',
+                '-- hidden --'    => 'Tyler',
+                '--hidden--'    => 'Andy',
             ];
 
             $manager = $nicknames[$nickname];
@@ -443,7 +446,7 @@ function get_player_stats(string $playerKey, int $week)
 
 function handle_trades(object $data)
 {
-    global $year, $leagueId;
+    global $year, $leagueId, $conn, $DB_TYPE;
     
     $transactions = $data->league[1]->transactions;
     foreach ($transactions as $trans) {
@@ -465,7 +468,11 @@ function handle_trades(object $data)
                 $manager1 = find_manager_id($player->player[1]->transaction_data[0]->source_team_key);
                 $manager2 = find_manager_id($player->player[1]->transaction_data[0]->destination_team_key);
 
-                $player = $player->player[0][2]->name->full;
+                if ($DB_TYPE == 'sqlite') {
+                    $player = str_replace("'", "''", $player->player[0][2]->name->full);
+                } else {
+                    $player = mysqli_real_escape_string($conn, $player->player[0][2]->name->full);
+                }
 
                 echo 'Current Week: '.$currentWeek.' | Trade ID: '.$tradeId.'<br>';
                 echo $manager1.' traded '.$player.' to '.$manager2.'<br>';

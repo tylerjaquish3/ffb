@@ -409,8 +409,8 @@ foreach ($seasonNumbers as $standings) {
                                             <td><?php echo $trade['m2']; ?></td>
                                             <td><?php echo $trade['player']; ?></td>
                                             <td><?php echo $trade['week']; ?></td>
-                                            <td><?php echo $trade['points_before']; ?></td>
-                                            <td><?php echo $trade['points_after']; ?></td>
+                                            <td><?php echo round($trade['points_before'], 1); ?></td>
+                                            <td><?php echo round($trade['points_after'], 1); ?></td>
                                             <td><?php echo $trade['trade_identifier']; ?></td>
                                         </tr>
                                     <?php 

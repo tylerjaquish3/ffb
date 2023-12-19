@@ -342,7 +342,7 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
         while ($manager = fetch_array($result2)) {
             $manager = $manager['manager'];
 
-            $projected = $points = 0;
+            $points = 0;
             $roster = [];
 
             $result3 = query("SELECT * FROM rosters
@@ -357,7 +357,9 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
                     $winLoss = ($row2['manager1_score'] > $row2['manager2_score']) ? 'Win' : 'Loss';
                     $manager2 = $row2['manager2_id'];
 
-                    $opponentProjected = $opponentPoints = 0;
+                    $projected = $row2['manager1_projected'];
+                    $opponentProjected = $row2['manager2_projected'];
+                    $opponentPoints = 0;
                     $opponentRoster = [];
 
                     $result5 = query("SELECT * FROM managers
@@ -372,7 +374,6 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
                         ];
 
                         if ($team['roster_spot'] != 'BN' && $team['roster_spot'] != 'IR') {
-                            $opponentProjected += (float)$team['projected'];
                             $opponentPoints += (float)$team['points'];
                         }
                     }
@@ -384,7 +385,6 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
                 ];
 
                 if ($row['roster_spot'] != 'BN' && $row['roster_spot'] != 'IR') {
-                    $projected += (float)$row['projected'];
                     $points += (float)$row['points'];
                 }
             }

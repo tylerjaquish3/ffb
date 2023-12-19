@@ -14,7 +14,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - add trophy graphic on trophy page
 - profile page, add chart for positions drafted?
 - make sidebar collapsible
-- get date/week from trades + points to see who won the trade
 - grab postseason matchup rosters
 - rosters page,
     - add optimal lineups info on left
@@ -26,7 +25,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - points by position (high/low) for each position
     - best/worst draft pick
 - chances of making playoffs, make request to playoffcomputer linked above
-- get keys from justin's account to get older data
 
 - draft order based on wives/gfs responses to something?
 
@@ -63,7 +61,3 @@ Generic league ideas
 
 
 $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
-
-Yahoo API
-Client ID: dj0yJmk9Mjc0ZUJKQmk3NHVaJmQ9WVdrOVlrSkVNRkJ6Y1ZvbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWRl
-secret: 45e85dc510dc193bfd6a0d77c0282f7d98e8055d

@@ -99,7 +99,7 @@ include 'sidebar.html';
                                         <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2020">2020 CHAMPION<br />MATT REID</a></div></div>
                                         <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2019">2019 CHAMPION<br />CAMERON BOBOTH</a></div></div>
                                         <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2018">2018 CHAMPION<br />JUSTIN DIDIER</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="currentSeason.php">2023 CHAMPION<br />TBD</a></div></div>
+                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2023">2023 CHAMPION<br />COLE BOBOTH</a></div></div>
                                         <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2022">2022 CHAMPION<br />JUSTIN DIDIER</a></div></div>
                                         <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2021">2021 CHAMPION<br />JUSTIN DIDIER</a></div></div>
                                     </div>

@@ -6,6 +6,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - fun facts current season margin doesnt update new_leader and is not accurate
 - aj is missing 2012 defenses for multiple weeks (NYG)
 - make constitution roster history grid more readable and accurate
+- profile top stats are inaccurate when determining rank. ex: justin is #1 in postseason win % rank
 
 # Ideas
 
@@ -25,6 +26,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - points by position (high/low) for each position
     - best/worst draft pick
 - chances of making playoffs, make request to playoffcomputer linked above
+- DEF include returns for TD? add to vote
 
 - draft order based on wives/gfs responses to something?
 

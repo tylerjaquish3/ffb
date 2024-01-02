@@ -25,6 +25,7 @@ include 'sidebar.html';
                                     <th>Manager</th>
                                     <th>Opponent</th>
                                     <th>Score</th>
+                                    <th>Margin</th>
                                     <th></th>
                                 </thead>
                                 <tbody>
@@ -45,6 +46,7 @@ include 'sidebar.html';
                                                 echo '<td><span class="badge badge-secondary">' . $matchup['manager2'] . '<span class="seed">' . $matchup['m2seed'] . '</span></span></td>';
                                             } ?>
                                             <td><?php echo $matchup['score']; ?></td>
+                                            <td><?php echo $matchup['margin']; ?></td>
                                             <td><?php echo $matchup['sort']; ?></td>
                                         </tr>
 
@@ -134,7 +136,7 @@ include 'sidebar.html';
 
         let postseasonTable = $('#datatable-postseason').DataTable({
             "columnDefs": [{
-                "targets": [5],
+                "targets": [6],
                 "visible": false,
                 "searchable": false
             }],
@@ -143,7 +145,7 @@ include 'sidebar.html';
             },
             "order": [
                 [0, "desc"],
-                [5, "desc"]
+                [6, "desc"]
             ]
         });
 

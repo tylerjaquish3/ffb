@@ -1137,6 +1137,7 @@ function getPostseasonMatchups()
             'manager1' => $row['m1'],
             'manager2' => $row['m2'],
             'score' => $row['manager1_score'] . ' - ' . $row['manager2_score'],
+            'margin' => abs($row['manager1_score']-$row['manager2_score']),
             'winner' => $winner,
             'm1seed' => $row['manager1_seed'],
             'm2seed' => $row['manager2_seed'],

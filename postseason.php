@@ -75,7 +75,7 @@ include 'sidebar.html';
                 </div>
             </div>
             <div class="row mt-2">
-                <div class="col-sm-12 col-lg-6 table-padding">
+                <div class="col-sm-12 col-lg-8 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Records</h4>
@@ -90,6 +90,8 @@ include 'sidebar.html';
                                     <th>Semi Losses</th>
                                     <th>Final Wins</th>
                                     <th>Final Losses</th>
+                                    <th>Total Wins</th>
+                                    <th>Total Losses</th>
                                     <th>Overall Win %</th>
                                 </thead>
                                 <tbody>
@@ -103,9 +105,10 @@ include 'sidebar.html';
                                             <td><?php echo $manager['semi_losses']; ?></td>
                                             <td><?php echo $manager['final_wins']; ?></td>
                                             <td><?php echo $manager['final_losses']; ?></td>
+                                            <td><?php echo $manager['wins']; ?></td>
+                                            <td><?php echo $manager['losses']; ?></td>
                                             <td><?php echo round($manager['win_pct'], 1); ?></td>
                                         </tr>
-
                                     <?php } ?>
                                 </tbody>
                             </table>
@@ -211,7 +214,7 @@ include 'sidebar.html';
             "paging": false,
             "info": false,
             "order": [
-                [7, "desc"]
+                [9, "desc"]
             ]
         });
 

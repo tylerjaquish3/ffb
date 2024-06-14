@@ -9,7 +9,15 @@ $section = '';
 $weeks = [];
 $manager = isset($_POST['manager']) ? $_POST['manager'] : 0;
 
+// To get new game codes, uncomment the following lines. Then go to the yahooApi.php page (Admin)
+// Click Verify button, Yahoo will give you a code to copy. Close that window and paste it into the Admin page.
+// Select any options and click Submit. All the game codes will be dumped on the screen.
+// $request_uri = '/games;game_codes=nfl';
+// $teams = get_data($request_uri, $access_token);
+// do_dump($teams);die;
+
 $seasons = [
+    2024 => ['league_id' => 98957, 'game_code' => 449],
     2023 => ['league_id' => 74490, 'game_code' => 423],
     2022 => ['league_id' => 84027, 'game_code' => 414],
     2021 => ['league_id' => 16064, 'game_code' => 406],
@@ -57,16 +65,15 @@ if (isset($_POST['weeks'])) {
 // $teams = get_data($request_uri, $access_token);
 // do_dump($teams);die;
 
-// Check game codes
-// $request_uri = '/games;game_codes=nfl';
-// $teams = get_data($request_uri, $access_token);
-// do_dump($teams);die;
-
 if ($section == 'yahoo_ids') {
     // first need to update yahoo id (if necessary, changes each year)
-    // yahoo id is used going forward with all these
+    // yahoo id is used going forward with all these other functions
     echo 'Getting manager Yahoo IDs...<br />';
-    foreach ($seasons as $year => $season) {
+    // Don't need to get older ones anymore (they don't change)
+    // foreach ($seasons as $year => $season) {
+
+        // Just update the year entered
+        $season = $seasons[$year];
         $leagueId = $season['league_id'];
         $gameCode = $season['game_code'];
 
@@ -75,7 +82,7 @@ if ($section == 'yahoo_ids') {
         if ($teams) {
             handle_managers($teams, $year);
         }
-    }
+    // }
     echo '<hr />';die;
 }
 
@@ -187,7 +194,15 @@ function handle_managers(object $data, int $year)
     foreach ($teams as $team) {
         if (gettype($team) == 'object') {
             // do_dump($team);die;
-            $nickname = $team->team[0][19]->managers[0]->manager->nickname;
+            // Search $team->team[0] for managers key
+            foreach ($team->team[0] as $key => $value) {
+                if (gettype($value) == 'object') {
+                    if (property_exists($value, 'managers')) {
+                        $managers = $value->managers;
+                    }
+                }
+            }
+            $nickname = $managers[0]->manager->nickname;
             $yahooTeamId = (int)$team->team[0][1]->team_id;
     
             $nicknames = [

@@ -249,7 +249,7 @@ function getProfileNumbers()
             $managerId = $row['id'];
         }
 
-        $result = query("SELECT name, wins, losses, total, wins/total AS win_pct
+        $result = query("SELECT name, wins, losses, total, (wins*1.0)/total AS win_pct
             FROM managers
             JOIN (
                 SELECT COUNT(manager1_id) AS wins, manager1_id FROM regular_season_matchups rsm
@@ -306,35 +306,35 @@ function getProfileNumbers()
         // Calc playoff record and rank
         $wins = $losses = 0;
         $rank = 1;
-        $result = query("SELECT name, IFNULL(winsTop, 0) as winsTop, winsBottom, lossesTop, lossesBottom, totalTop, totalBottom, (IFNULL(winsTop, 0)+winsBottom)/(totalTop+totalBottom) AS win_pct
+        $result = query("SELECT name, IFNULL(winsTop, 0) as winsTop, winsBottom, lossesTop, lossesBottom, totalTop, totalBottom, (IFNULL(winsTop, 0)+winsBottom) * 1.0/(totalTop+totalBottom) AS win_pct
             FROM managers
             LEFT JOIN (
-                SELECT COUNT(manager1_id) AS winsTop, manager1_id FROM playoff_matchups rsm
+                SELECT COUNT(manager1_id) AS winsTop, manager1_id FROM playoff_matchups
                 WHERE manager1_score > manager2_score GROUP BY manager1_id
             ) w ON w.manager1_id = managers.id
 
             LEFT JOIN (
-                SELECT COUNT(manager1_id) AS lossesTop, manager1_id FROM playoff_matchups rsm
+                SELECT COUNT(manager1_id) AS lossesTop, manager1_id FROM playoff_matchups
                 WHERE manager1_score < manager2_score GROUP BY manager1_id
             ) l ON l.manager1_id = managers.id
 
             LEFT JOIN (
-                SELECT COUNT(manager2_id) AS winsBottom, manager2_id FROM playoff_matchups rsm
+                SELECT COUNT(manager2_id) AS winsBottom, manager2_id FROM playoff_matchups
                 WHERE manager2_score > manager1_score GROUP BY manager2_id
             ) w2 ON w2.manager2_id = managers.id
 
             LEFT JOIN (
-                SELECT COUNT(manager2_id) AS lossesBottom, manager2_id FROM playoff_matchups rsm
+                SELECT COUNT(manager2_id) AS lossesBottom, manager2_id FROM playoff_matchups
                 WHERE manager2_score < manager1_score GROUP BY manager2_id
             ) l2 ON l2.manager2_id = managers.id
 
             LEFT JOIN (
-                SELECT COUNT(manager1_id) AS totalTop, manager1_id FROM playoff_matchups rsm
+                SELECT COUNT(manager1_id) AS totalTop, manager1_id FROM playoff_matchups
                 GROUP BY manager1_id
             ) t ON t.manager1_id = managers.id
 
             LEFT JOIN (
-                SELECT COUNT(manager2_id) as totalBottom, manager2_id FROM playoff_matchups rsm
+                SELECT COUNT(manager2_id) as totalBottom, manager2_id FROM playoff_matchups
                 GROUP BY manager2_id
             ) t2 ON t2.manager2_id = managers.id
             ORDER BY win_pct DESC");
@@ -1149,7 +1149,7 @@ function getPostseasonMatchups()
 }
 
 /**
- * Undocumented function
+ * Get postseason record for each manager separated by playoff round
  */
 function getPostseasonRecord()
 {
@@ -2537,18 +2537,11 @@ if(isset($_POST['sql-stmt'])) {
 /**
  * Better GI than print_r or var_dump -- but, unlike var_dump, you can only dump one variable.  
  * Added htmlentities on the var content before echo, so you see what is really there, and not the mark-up.
- * 
- * Also, now the output is encased within a div block that sets the background color, font style, and left-justifies it
- * so it is not at the mercy of ambient styles.
- *
- * Inspired from:     PHP.net Contributions
- * Stolen from:       [highstrike at gmail dot com]
- * Modified by:       stlawson *AT* JoyfulEarthTech *DOT* com 
  *
  * @param mixed $var  -- variable to dump
  * @param string $var_name  -- name of variable (optional) -- displayed in printout making it easier to sort out what variable is what in a complex output
  * @param string $indent -- used by internal recursive call (no known external value)
- * @param unknown_type $reference -- used by internal recursive call (no known external value)
+ * @param $reference -- used by internal recursive call (no known external value)
  */
 function do_dump(&$var, $var_name = NULL, $indent = NULL, $reference = NULL)
 {
@@ -2607,4 +2600,5 @@ function do_dump(&$var, $var_name = NULL, $indent = NULL, $reference = NULL)
     }
     
     echo "</div>";
+    die;
 }

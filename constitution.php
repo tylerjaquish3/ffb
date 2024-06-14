@@ -9,6 +9,7 @@ $result = query("SELECT distinct year FROM regular_season_matchups ORDER BY YEAR
 while ($row = fetch_array($result)) {
     $allYears[] = $row['year'];
 }
+
 ?>
 
 <div class="app-content content container-fluid">
@@ -144,21 +145,18 @@ while ($row = fetch_array($result)) {
                                     </thead>
                                     <tbody>
                                         <?php
-                                        $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DL', 'DB', 'BN', 'IR'];
-                                        $result = query("SELECT roster_spot, year FROM rosters
-                                            WHERE week = 2 and manager = 'AJ'
-                                            ORDER BY year asc");
+                                        
+                                        $result = query("SELECT * FROM season_positions ORDER BY sort_order ASC");
                                         while ($row = fetch_array($result)) {
-                                            $spots[$row['year']][] =  $row['roster_spot'];
+                                            $spots[$row['year']][] =  $row['position'];
                                         }
-
+// do_dump($spots);
                                         for ($i = 0; $i < 25; $i++) {
                                             echo '<tr>';
                                                 echo '<td>'.($i+1).'</td>';
                                                 foreach ($allYears as $year) {
-                                                    
                                                     if (isset($spots[$year][$i])) {
-                                                        $order = array_search($spots[$year][$i], $posOrder);
+                                                        $order = $i+1;
                                                         echo "<td data-order='".$order."'>".$spots[$year][$i]."</td>";
                                                     } else {
                                                         echo "<td data-order='99'></td>";
@@ -190,10 +188,10 @@ while ($row = fetch_array($result)) {
                                     <li>Able to trade FAB dollars | <a href="voteInfo.php#trade_fab">More Info</a><strong></strong></li>
                                     <li>Replacing toilet seat as punishment | <a href="voteInfo.php#punishment">More Info</a><strong></strong></li>
                                 </ol>
+                                <strong>Next year's draft location</strong>
                                 <strong>Determine 2024 draft order</strong>
                                 <br /><br />
-                            
-                                <strong>Draft date: TBD  | Location: Spokane, WA</strong>
+                                <strong>Draft date: 8.25.24 | Time: 3:30pm | Location: Sartin's (Spokane, WA)</strong>
                                 <br /><br />
                             </div>
                         </div>
@@ -219,7 +217,7 @@ while ($row = fetch_array($result)) {
                                 <strong>Determined 2023 draft order (bingo balls determined who picked their draft spot next)</strong>
                                 <br /><br />
                             
-                                <strong>Draft date: 8.27.23 | Time: 2pm  | Location: Pasco, WA</strong>
+                                <strong>Draft date: 8.27.23 | Time: 2pm | Location: Didier's (Pasco, WA)</strong>
                                 <br /><br />
                             </div>
                         </div>
@@ -239,13 +237,13 @@ while ($row = fetch_array($result)) {
                                 <strong>Voted on the following:</strong>
                                 <ol>
                                     <li>Change waiver settings to use FAB system. | <strong>Vote passed to change to FAB system (vote was 6-3).</strong> More info below</li>
-                                    <li>Change number of IR positions or 1 or 0 | <strong>Voted to keep as-is with 2 IR spots (vote was 5-3).</strong></li>
+                                    <li>Change number of IR positions to 1 or 0 | <strong>Voted to keep as-is with 2 IR spots (vote was 5-3).</strong></li>
                                 </ol>
                                 <strong>Determined 2022 draft order:</strong><br />
 
                                 <a href="https://www.cameo.com/recipient/62dac9a54baeecb8a4f7d7ce?from_share_sheet=1&utm_campaign=video_share_to_copy">Watch Dean Blandino Video Here</a>
                                 <br /><br />
-                                <strong>Draft date: 9.5.22 | Time: 3pm | Location: Sunnyside, WA</strong>
+                                <strong>Draft date: 9.5.22 | Time: 3pm | Location: E. Boboth's (Sunnyside, WA)</strong>
                                 <br /><br />
                                 FAB info:<br />
                                 <ul>
@@ -288,7 +286,7 @@ while ($row = fetch_array($result)) {
                                 </ol>
                                 <strong>Determined 2021 draft order</strong><br />
 
-                                <strong>Draft date: 9.6.21 | Time: 4pm | Location: Spokane Valley, WA</strong>
+                                <strong>Draft date: 9.6.21 | Time: 4pm | Location: Stamschror's (Spokane Valley, WA)</strong>
                             </div>
                         </div>
                     </div>

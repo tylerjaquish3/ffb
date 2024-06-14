@@ -1,7 +1,7 @@
 <?php
 
 /**
-* Undocumented function
+* Check if people are tied for the top spot
 */
 function checkMultiple(string $query, string $field) : array
 {
@@ -32,7 +32,7 @@ function checkMultiple(string $query, string $field) : array
 }
 
 /**
-* Undocumented function
+* Add a manager fun fact
 */
 function insertFunFact(int $ffId, string $manId, string $value, array $notes, array $tops)
 {
@@ -1427,11 +1427,8 @@ function getOptimalLineupPoints()
 }
 
 /**
-    * Check the roster for optimal lineups
-    *
-    * @param array $roster
-    * @return float
-    */
+* Check the roster for optimal lineups
+*/
 function checkRosterForOptimal(array $roster)
 {
     usort($roster, function($a, $b) {

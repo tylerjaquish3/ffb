@@ -5,8 +5,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - rosters table, lots of players don't have a team
 - fun facts current season margin doesnt update new_leader and is not accurate
 - aj is missing 2012 defenses for multiple weeks (NYG)
-- make constitution roster history grid more readable and accurate
-- profile top stats are inaccurate when determining rank. ex: justin is #1 in postseason win % rank
+- Current Season - Optimal Lineups endpoint needs optimizing (times out)
 
 # Ideas
 
@@ -27,9 +26,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - best/worst draft pick
 - chances of making playoffs, make request to playoffcomputer linked above
 - DEF include returns for TD? add to vote
-
-- draft order based on wives/gfs responses to something?
-
 
 fun fact ideas...
 
@@ -61,5 +57,19 @@ Generic league ideas
     - boboth brothers
 
 
-
 $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
+Kim, Lizzy, Kristen, Stacie, Sheri, Monique, Carrie, Oksana, Laura, Olya
+
+# Questions
+I just have 5 quick survey questions for you relating to our fantasy football league that's about to start its 19th season.
+
+1. On a scale from 1-10, how excited are you for fantasy football season approaching?
+    - Why did you pick that number?
+2. How many championships would you say "XXXX" has won?
+    - Why do you think he hasn't won more?
+3. If you could pick a draft position for "XXXX" what would you pick?
+    - Do you think he would want that position or are you sabotaging him?
+4. This may be a shot in the dark, how many points do you think "XXXX" scored last year?
+5. In a few weeks, we're going to vote on a new punishment for the league loser. Do you have any ideas?
+
+That's it. Thank you so much for participating. And please keep this confidential from "XXXX" until I share the results with him, I would appreciate it.

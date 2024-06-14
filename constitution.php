@@ -110,11 +110,11 @@ while ($row = fetch_array($result)) {
                             <div class="card-block" style="direction: ltr">
                                 <ul>
                                     <li>Waiver Time: 3 days</li>
-                                    <li>Waiver Type: FAB w/ Reverse order of standings tiebreak</li>
+                                    <li>Waiver Type: FAB w/ Reverse order of standings tie-breaker</li>
                                     <li>Weekly Waivers:	Game Time - Tuesday</li>
                                     <li>Post Draft Players:	Follow Waiver Rules</li>
                                     <li>Playoffs: Week 15, 16, and 17 (6 teams)</li>
-                                    <li>Playoff Tie-Breaker: Best regular season record vs opponent wins</li>
+                                    <li>Playoff Tie-Breaker: Best regular season record vs opponent</li>
                                     <li>Playoff Reseeding: Yes</li>
                                     <li>Divisions: No</li>
                                     <li>Roster Positions: QB, WR, WR, WR, RB, RB, TE, W/R/T, Q/W/R/T, K, DEF, BN, BN, BN, BN, BN, BN, IR, IR</li>
@@ -150,7 +150,7 @@ while ($row = fetch_array($result)) {
                                         while ($row = fetch_array($result)) {
                                             $spots[$row['year']][] =  $row['position'];
                                         }
-// do_dump($spots);
+
                                         for ($i = 0; $i < 25; $i++) {
                                             echo '<tr>';
                                                 echo '<td>'.($i+1).'</td>';
@@ -188,7 +188,7 @@ while ($row = fetch_array($result)) {
                                     <li>Able to trade FAB dollars | <a href="voteInfo.php#trade_fab">More Info</a><strong></strong></li>
                                     <li>Replacing toilet seat as punishment | <a href="voteInfo.php#punishment">More Info</a><strong></strong></li>
                                 </ol>
-                                <strong>Next year's draft location</strong>
+                                <strong>Next year's draft location</strong><br />
                                 <strong>Determine 2024 draft order</strong>
                                 <br /><br />
                                 <strong>Draft date: 8.25.24 | Time: 3:30pm | Location: Sartin's (Spokane, WA)</strong>

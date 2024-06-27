@@ -186,6 +186,7 @@ while ($row = fetch_array($result)) {
                                     <li>Add an 18th roster position (BN or W/R/T) | <a href="voteInfo.php#new_pos">More Info</a><strong></strong></li>
                                     <li>Push trades through right away | <a href="voteInfo.php#trade_voting">More Info</a><strong></strong></li>
                                     <li>Able to trade FAB dollars | <a href="voteInfo.php#trade_fab">More Info</a><strong></strong></li>
+                                    <li>Add Punt/Kick Return TDs to DEF | <a href="voteInfo.php#return_td">More Info</a><strong></strong></li>
                                     <li>Replacing toilet seat as punishment | <a href="voteInfo.php#punishment">More Info</a><strong></strong></li>
                                 </ol>
                                 <strong>Next year's draft location</strong><br />

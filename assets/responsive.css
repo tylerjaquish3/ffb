@@ -71,6 +71,10 @@
     .header-navbar .navbar-header .menu-toggle {
         top: -2px;
     }
+
+    .chart-block {
+        height: 300px !important;
+    }
 }
 
 @media only screen and (max-width: 640px) {

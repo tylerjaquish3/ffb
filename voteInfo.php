@@ -81,6 +81,28 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
+            <div class="row" id="return_td">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Add Punt/Kick Return TDs to DEF</h4>
+                        </div>
+                        <div class="card-body info-card">
+                            Years ago, we had the DST position, which is Defense + Special Teams. But in recent past, we've just had DEF, althogh we do get credit
+                            for fumbles recovered on special teams. 
+                            It could be a fun TD bonus for your defense on their return TDs (not yards). There were only 4 Kick Return TDs 
+                            and 8 Punt Return TDs in all of 2023. Also keep in mind, the NFL changed kickoff rules for 2024, so this could possibly
+                            come into play more frequently.
+                            <br />
+                            <br />
+                            The downside is that this stat is unpredictable and therefore may not be factored into rankings.
+                            <br />
+                            <br />
+                            <b>Proposal:</b> Add Kick & Punt return TDs as 6 points for DEF<br />
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row" id="punishment">
                 <div class="col-sm-12 table-padding">
                     <div class="card">

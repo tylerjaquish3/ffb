@@ -61,9 +61,9 @@ if (isset($_POST['weeks'])) {
 // do_dump($teams);die;
 
 // Check user leagues
-// $request_uri = '/users;use_login=1/games;game_keys=nfl/leagues';
-// $teams = get_data($request_uri, $access_token);
-// do_dump($teams);die;
+$request_uri = '/users;use_login=1/games;game_keys=nfl/leagues';
+$teams = get_data($request_uri, $access_token);
+do_dump($teams);die;
 
 if ($section == 'yahoo_ids') {
     // first need to update yahoo id (if necessary, changes each year)
@@ -182,7 +182,12 @@ function get_data(string $request_uri, string $token)
         sleep(5);
         get_data($request_uri, $token);
     } else {
-        $contents = json_decode($request_data['contents'])->fantasy_content;
+        $contents = json_decode($request_data['contents']);
+        if (property_exists($contents, 'fantasy_content')) {
+            return $contents->fantasy_content;
+        } else {
+            dd($request_data['contents']);
+        }
     
         return $contents;
     }
@@ -382,26 +387,27 @@ function handle_team_rosters(int $yahooId, int $week, object $data)
         $points = $stats['points'];
 
         echo $manager.' - '.$playerName.' ('.$team.' - '.$pos.' - '.$spot.')<br>';
+        echo 'Points: '.$points.' | Projected: '.$projected.'<br>';
         // Insert player into rosters
-        $rosterId = updateOrCreate('rosters', [
-            'manager' => $manager,
-            'year' => $year,
-            'week' => $week,
-            'player' => $playerName,
-            'position' => $pos
-        ], [
-            'team' => $team,
-            'roster_spot' => $spot,
-            'projected' => $projected,
-            'points' => $points
-        ]);
+        // $rosterId = updateOrCreate('rosters', [
+        //     'manager' => $manager,
+        //     'year' => $year,
+        //     'week' => $week,
+        //     'player' => $playerName,
+        //     'position' => $pos
+        // ], [
+        //     'team' => $team,
+        //     'roster_spot' => $spot,
+        //     'projected' => $projected,
+        //     'points' => $points
+        // ]);
 
-        if ($spot != 'IR') {
-            // Insert stats
-            updateOrCreate('stats', [
-                'roster_id' => $rosterId
-            ], $stats['stats']);
-        }
+        // if ($spot != 'IR') {
+        //     // Insert stats
+        //     updateOrCreate('stats', [
+        //         'roster_id' => $rosterId
+        //     ], $stats['stats']);
+        // }
     }
 }
 
@@ -443,17 +449,17 @@ function get_player_stats(string $playerKey, int $week)
     ];
     
     // Loop through player's stats
-    $stats = $player[1]->player_stats->stats;
-    foreach ($stats as $stat) {
-        if (gettype($stat) == 'object') {
-            $statId = $stat->stat->stat_id;
-            $statValue = $stat->stat->value;
-            // use $statIds to put values in $values['stats']
-            if (array_key_exists($statId, $statIds)) {
-                $values['stats'][$statIds[$statId]] = (int)$statValue;
-            }
-        }
-    }
+    // $stats = $player[1]->player_stats->stats;
+    // foreach ($stats as $stat) {
+    //     if (gettype($stat) == 'object') {
+    //         $statId = $stat->stat->stat_id;
+    //         $statValue = $stat->stat->value;
+    //         // use $statIds to put values in $values['stats']
+    //         if (array_key_exists($statId, $statIds)) {
+    //             $values['stats'][$statIds[$statId]] = (int)$statValue;
+    //         }
+    //     }
+    // }
     // do_dump($values);die;
 
     return $values;
@@ -579,6 +585,16 @@ function handle_fun_facts()
     // currentSeasonPoints();
     // // 83,88
     // getOptimalLineupPoints();
+}
+
+function dd($text)
+{
+    // Move down so its below the header
+    echo "<br /><br /><br />";
+    echo '<pre style="direction: ltr; float: left;">';
+    print_r($text);
+    echo '</pre>';
+    die;
 }
 
 ?>

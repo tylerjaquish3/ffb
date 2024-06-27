@@ -297,3 +297,7 @@ tr.color-black td {
 .navbar-nav .nav-link {
     padding-top: 0px !important;
 }
+
+.chart-block {
+    height: 500px !important;
+}

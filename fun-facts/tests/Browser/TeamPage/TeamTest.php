@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class TeamTest extends DuskTestCase
 {
     use TestHelper;
-    protected $year = 2023;
+    protected $year = 2019;
     protected $manager;
 
     // php artisan dusk --filter=testTeam
@@ -21,10 +21,7 @@ class TeamTest extends DuskTestCase
     // php artisan dusk --filter=testUpdateSqlite
 
     /**
-     * Undocumented function
-     *
-     * @group weekly
-     * @return void
+     * Go to the team page for each team and scrape the data
      */
     public function testTeam()
     {
@@ -32,14 +29,14 @@ class TeamTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($weeks) {
             // For each team in league
-            for ($t = 1; $t < 11; $t++) {
+            for ($t = 1; $t < 2; $t++) {
 
                 $this->manager = $this->getManagerName($t);
 
                 foreach ($weeks as $week) {
                     try {
                         $leagueId = config('services.yahoo_league_id');
-                        $browser->visit('https://football.fantasysports.yahoo.com/f1/'.$leagueId.'/'.$t.'/team?&week='.$week);
+                        $browser->visit('https://football.fantasysports.yahoo.com/'.$this->year.'f1/'.$leagueId.'/'.$t.'/team?&week='.$week);
 
                         if ($browser->element('#login-username')) {
                             $browser
@@ -187,19 +184,8 @@ class TeamTest extends DuskTestCase
         }
     }
 
-    // This function is not being used
-    protected function clean(string $string) {
-        $string = rtrim($string, ' ');
-    
-        return preg_replace('/[^A-Za-z.0-9\-]/', ' ', $string); // Removes special chars.
-    }
-
     /**
      * Undocumented function
-     *
-     * @param array $row
-     * @param int $week
-     * @return void
      */
     protected function insertKickerRow(array $row, int $week)
     {
@@ -287,9 +273,6 @@ class TeamTest extends DuskTestCase
 
     /**
      * Undocumented function
-     *
-     * @param integer $yahooId
-     * @return void
      */
     protected function getManagerName(int $yahooId)
     {

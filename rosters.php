@@ -106,7 +106,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
             </div>
 
             <div class="row">
-                <div class="col-sm-12 table-padding">
+                <div class="col-md-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Recap</h4>
@@ -166,6 +166,18 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                         </div>
                     </div>
                 </div>
+                <div class="col-md-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Points by Game Time</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block chart-block">
+                                <canvas id="gameTimeChart" style="direction: ltr;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="row">
@@ -186,6 +198,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                         <thead>
                                             <th>Position</th>
                                             <th>Player</th>
+                                            <th>Team</th>
                                             <th>Points</th>
                                             <th>Drafted?</th>
                                             <th>Week Rk</th>
@@ -204,6 +217,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                                 echo '<tr>';
                                                 echo '<td data-order='.$order.'>'.$row['roster_spot'].'</td>';
                                                 echo '<td><a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a></td>';
+                                                echo '<td>'.$row['team'].'</td>';
                                                 echo '<td class="text-right"><strong>'.
                                                     number_format($row['points'], 2)
                                                     .'</strong></td>';
@@ -228,6 +242,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                         <thead>
                                             <th>Position</th>
                                             <th>Player</th>
+                                            <th>Team</th>
                                             <th>Points</th>
                                             <th>Drafted?</th>
                                             <th>Week Rk</th>
@@ -245,6 +260,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                                 echo '<tr>';
                                                 echo '<td data-order='.$order.'>'.$row['roster_spot'].'</td>';
                                                 echo '<td><a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a></td>';
+                                                echo '<td>'.$row['team'].'</td>';
                                                 echo '<td class="text-right"><strong>'.
                                                     number_format($row['points'], 2)
                                                     .'</strong></td>';
@@ -272,7 +288,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                             <h4 class="card-title">Points by Position</h4>
                         </div>
                         <div class="card-body">
-                            <div class="card-block">
+                            <div class="card-block chart-block">
                                 <canvas id="posPointsChart" style="direction: ltr;"></canvas>
                             </div>
                         </div>
@@ -454,6 +470,8 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                 ]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     datalabels: {
                         formatter: function(value, context) {
@@ -462,6 +480,42 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                         align: 'center',
                         anchor: 'center',
                         // color: 'white',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+
+        var ctx = $('#gameTimeChart');
+        var stackedBar = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: <?php echo json_encode($gameTimeChart['labels']); ?>,
+                datasets: [{
+                        label: "<?php echo $managerName; ?>",
+                        data: <?php echo isset($gameTimeChart['points'][$managerName]) ? json_encode($gameTimeChart['points'][$managerName]) : "0"; ?>,
+                        backgroundColor: '#297eff'
+                    },
+                    {
+                        label: "<?php echo $versus; ?>",
+                        data: <?php echo isset($gameTimeChart['points'][$versus]) ? json_encode($gameTimeChart['points'][$versus]) : "0"; ?>,
+                        backgroundColor: '#2eb82e'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    datalabels: {
+                        formatter: function(value, context) {
+                            return Math.round(value * 10) / 10;
+                        },
+                        align: 'top',
+                        anchor: 'top',
                         font: {
                             weight: 'bold'
                         }

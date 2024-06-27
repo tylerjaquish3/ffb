@@ -4,8 +4,12 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 # Bugs
 - rosters table, lots of players don't have a team
 - fun facts current season margin doesnt update new_leader and is not accurate
-- aj is missing 2012 defenses for multiple weeks (NYG)
 - Current Season - Optimal Lineups endpoint needs optimizing (times out)
+- http://ffb.test/rosters.php?manager=Gavin&year=2009&week=1 page is broken in multiple places
+- rosters table, lots of 2020 bench players dont have proj or points
+- Rosters page, points by position chart is out of order
+- In regular_season_matchups table, lots of projections are wrong (looking at 2019)
+
 
 # Ideas
 
@@ -17,15 +21,17 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - grab postseason matchup rosters
 - rosters page,
     - add optimal lineups info on left
-- gather team game times to chart when fantasy points occurred, show biggest comebacks on MNF
 - add a bunch more fun facts
     - most weeks spent in first/last place
     - most weeks with top/bottom 3 in points
     - record against everyone
     - points by position (high/low) for each position
     - best/worst draft pick
+    - most points scored on TNF, MNF, etc.
+    - biggest comeback in matchup
+    - most #1 pos rank players in a week, season, ever
 - chances of making playoffs, make request to playoffcomputer linked above
-- DEF include returns for TD? add to vote
+
 
 fun fact ideas...
 
@@ -65,10 +71,10 @@ I just have 5 quick survey questions for you relating to our fantasy football le
 
 1. On a scale from 1-10, how excited are you for fantasy football season approaching?
     - Why did you pick that number?
-2. How many championships would you say "XXXX" has won?
-    - Why do you think he hasn't won more?
+2. How many championships would you guess "XXXX" has won?
+    - Why do you think he hasn't won more than that?
 3. If you could pick a draft position for "XXXX" what would you pick?
-    - Do you think he would want that position or are you sabotaging him?
+    - Do you think he would want that position or are you trying to sabotage him?
 4. This may be a shot in the dark, how many points do you think "XXXX" scored last year?
 5. In a few weeks, we're going to vote on a new punishment for the league loser. Do you have any ideas?
 

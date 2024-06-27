@@ -117,6 +117,7 @@ if ($pageName == 'Current Season') {
 if ($pageName == 'Rosters') {
     $recap = getMatchupRecapNumbers();
     $posPointsChart = getPositionPointsChartNumbers();
+    $gameTimeChart = getGameTimeChartNumbers();
 }
 
 function getManagerName($id) {
@@ -2454,6 +2455,105 @@ function getPositionPointsChartNumbers()
     ];
 }
 
+function getGameTimeChartNumbers()
+{
+    $managerName = 'Andy';
+    $year = 2023;
+    $week = 1;
+    if (isset($_GET['manager'])) {
+        $managerName = $_GET['manager'];
+        if (isset($_GET['year'])) {
+            $year = $_GET['year'];
+        }
+        if (isset($_GET['week'])) {
+            $week = $_GET['week'];
+        }
+    }
+
+    $man2 = null;
+    $result = query("SELECT * FROM regular_season_matchups rsm
+        JOIN managers on managers.id = rsm.manager1_id
+        WHERE year = $year and week_number = $week and managers.name = '".$managerName."'");
+    while ($row = fetch_array($result)) {
+        $man2 = $row['manager2_id'];
+    }
+    if (!$man2) {
+        return [
+            'labels' => [],
+            'points' => []
+        ];
+    }
+    $man2name = getManagerName($man2);
+
+    $labels = [
+        1 => 'Thursday',
+        2 => 'Friday',
+        3 => 'Sunday Early',
+        4 => 'Sunday Afternoon',
+        5 => 'Sunday Night',
+        6 => 'Monday',
+        7 => 'Tuesday'
+    ];
+    $totalPoints = 0;
+    foreach ($labels as $id => $label) {
+        $result = query("SELECT manager, game_slot, sum(points) as points FROM rosters
+            JOIN managers on managers.name = rosters.manager
+            WHERE rosters.year = $year and rosters.week = $week and manager = '".$managerName."'
+            AND roster_spot NOT IN ('IR', 'BN')
+            AND game_slot = $id
+            GROUP BY manager, game_slot
+            ORDER BY game_slot ASC");
+        while ($row = fetch_array($result)) {
+            $totalPoints += $row['points'];
+        }
+        $points[$managerName][$id] = $totalPoints;
+    }
+    
+    $totalPoints = 0;
+    foreach ($labels as $id => $label) {
+        $result = query("SELECT manager, game_slot, sum(points) as points FROM rosters
+            JOIN managers on managers.name = rosters.manager
+            WHERE rosters.year = $year and rosters.week = $week and manager = '".$man2name."'
+            AND roster_spot NOT IN ('IR', 'BN')
+            AND game_slot = $id
+            GROUP BY manager, game_slot
+            ORDER BY game_slot ASC");
+        while ($row = fetch_array($result)) {
+            $totalPoints += $row['points'];
+        }
+        $points[$man2name][$id] = $totalPoints;
+    }
+    // get array_values for each of the managers' points
+    $points = array_map(function($manager) {
+        return array_values($manager);
+    }, $points);
+
+    return [
+        'labels' => array_values($labels),
+        'points' => $points
+    ];
+}
+
+function lookupGameSpot($slot)
+{
+    switch ($slot) {
+        case 1:
+            return 'Thursday';
+        case 2:
+            return 'Friday';
+        case 3:
+            return 'Sunday Early';
+        case 4:
+            return 'Sunday Afternoon';
+        case 5:
+            return 'Sunday Night';
+        case 6:
+            return 'Monday';
+        case 7:
+            return 'Tuesday';
+    }
+}
+
 function getPlayerRank($player, $year, $week)
 {
     $rank = 1;
@@ -2504,7 +2604,7 @@ function dd($text)
     // Move down so its below the header
     echo "<br /><br /><br />";
     echo '<pre style="direction: ltr; float: left;">';
-    var_dump($text);
+    print_r($text);
     echo '</pre>';
     die;
 }
@@ -2550,29 +2650,25 @@ function do_dump(&$var, $var_name = NULL, $indent = NULL, $reference = NULL)
     $keyvar = 'the_do_dump_recursion_protection_scheme'; $keyname = 'referenced_object_name';
     
     // So this is always visible and always left justified and readable
-    echo "<div style='direction: ltr; text-align:left; background-color:white; font: 100% monospace; color:black;'>";
+    echo "<div style='direction: ltr; text-align:left; background-color:white; font: 100% monospace; color:black; height: 100%'>";
 
-    if (is_array($var) && isset($var[$keyvar]))
-    {
+    if (is_array($var) && isset($var[$keyvar])) {
         $real_var = &$var[$keyvar];
         $real_name = &$var[$keyname];
         $type = ucfirst(gettype($real_var));
         echo "$indent$var_name <span style='color:#666666'>$type</span> = <span style='color:#e87800;'>&amp;$real_name</span><br>";
-    }
-    else
-    {
+    } else {
         $var = array($keyvar => $var, $keyname => $reference);
         $avar = &$var[$keyvar];
 
         $type = ucfirst(gettype($avar));
-        if($type == "String") $type_color = "<span style='color:green'>";
-        elseif($type == "Integer") $type_color = "<span style='color:red'>";
-        elseif($type == "Double"){ $type_color = "<span style='color:#0099c5'>"; $type = "Float"; }
-        elseif($type == "Boolean") $type_color = "<span style='color:#92008d'>";
-        elseif($type == "NULL") $type_color = "<span style='color:black'>";
+        if ($type == "String") $type_color = "<span style='color:green'>";
+        elseif ($type == "Integer") $type_color = "<span style='color:red'>";
+        elseif ($type == "Double"){ $type_color = "<span style='color:#0099c5'>"; $type = "Float"; }
+        elseif ($type == "Boolean") $type_color = "<span style='color:#92008d'>";
+        elseif ($type == "NULL") $type_color = "<span style='color:black'>";
 
-        if(is_array($avar))
-        {
+        if (is_array($avar)) {
             $count = count($avar);
             echo "$indent" . ($var_name ? "$var_name => ":"") . "<span style='color:#666666'>$type ($count)</span><br>$indent(<br>";
             $keys = array_keys($avar);
@@ -2582,23 +2678,20 @@ function do_dump(&$var, $var_name = NULL, $indent = NULL, $reference = NULL)
                 do_dump($value, "['$name']", $indent.$do_dump_indent, $reference);
             }
             echo "$indent)<br>";
-        }
-        elseif(is_object($avar))
-        {
+        } elseif (is_object($avar)) {
             echo "$indent$var_name <span style='color:#666666'>$type</span><br>$indent(<br>";
             foreach($avar as $name=>$value) do_dump($value, "$name", $indent.$do_dump_indent, $reference);
             echo "$indent)<br>";
         }
-        elseif(is_int($avar)) echo "$indent$var_name = <span style='color:#666666'>$type(".strlen($avar).")</span> $type_color".htmlentities($avar)."</span><br>";
-        elseif(is_string($avar)) echo "$indent$var_name = <span style='color:#666666'>$type(".strlen($avar).")</span> $type_color\"".htmlentities($avar)."\"</span><br>";
-        elseif(is_float($avar)) echo "$indent$var_name = <span style='color:#666666'>$type(".strlen($avar).")</span> $type_color".htmlentities($avar)."</span><br>";
-        elseif(is_bool($avar)) echo "$indent$var_name = <span style='color:#666666'>$type(".strlen($avar).")</span> $type_color".($avar == 1 ? "TRUE":"FALSE")."</span><br>";
-        elseif(is_null($avar)) echo "$indent$var_name = <span style='color:#666666'>$type(".strlen($avar).")</span> {$type_color}NULL</span><br>";
+        elseif (is_int($avar)) echo "$indent$var_name = <span style='color:#666666'>$type(".strlen($avar).")</span> $type_color".htmlentities($avar)."</span><br>";
+        elseif (is_string($avar)) echo "$indent$var_name = <span style='color:#666666'>$type(".strlen($avar).")</span> $type_color\"".htmlentities($avar)."\"</span><br>";
+        elseif (is_float($avar)) echo "$indent$var_name = <span style='color:#666666'>$type(".strlen($avar).")</span> $type_color".htmlentities($avar)."</span><br>";
+        elseif (is_bool($avar)) echo "$indent$var_name = <span style='color:#666666'>$type(".strlen($avar).")</span> $type_color".($avar == 1 ? "TRUE":"FALSE")."</span><br>";
+        elseif (is_null($avar)) echo "$indent$var_name = <span style='color:#666666'>$type(".strlen($avar).")</span> {$type_color}NULL</span><br>";
         else echo "$indent$var_name = <span style='color:#666666'>$type(".strlen($avar).")</span> ".htmlentities($avar)."<br>";
 
         $var = $var[$keyvar];
     }
     
     echo "</div>";
-    die;
 }

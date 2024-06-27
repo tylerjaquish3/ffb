@@ -40,6 +40,10 @@ class RunQuery implements ShouldQueue
                     JOIN managers m on m.id = regular_season_matchups.manager1_id
                     WHERE year = ? and week_number = ? and m.name = ?", [$row->year, $row->week, $row->manager]);
 
+                if (empty($rsm)) {
+                    echo 'No data for '.$row->manager.' on Wk '.$row->week.' '.$row->year.PHP_EOL;
+                    die;
+                }
                 // compare $row->points to $rsm->manager1_score
                 $score1 = round($rsm[0]->manager1_score, 0);
                 $score2 = round($row->points, 0);
@@ -72,8 +76,8 @@ class RunQuery implements ShouldQueue
                         }
                     }
                     echo '=========================='.PHP_EOL;
-                    // if ($count > 10) {
-                    if ($row->year < 2018) {
+                    if ($count > 10) {
+                    // if ($row->year < 2018) {
                         die;
                     }
                 }

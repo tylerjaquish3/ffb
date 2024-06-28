@@ -86,7 +86,6 @@ if ($pageName == 'Postseason') {
 if ($pageName == 'Draft') {
     $draftResults = getDraftResults();
     $draftSpotChart = getDraftChartNumbers();
-    $posByRoundChart = getPositionsByRoundChartNumbers();
 }
 if ((strpos($pageName, 'Recap') !== false)) {
     $regSeasonMatchups = getRegularSeasonMatchups();
@@ -1273,46 +1272,6 @@ function getDraftChartNumbers()
     }
 
     return $response;
-}
-
-function getPositionsByRoundChartNumbers()
-{
-    $rounds = $qb = $rb = $wr = $te = $k = $def = [];
-    $result = query("SELECT round, position, count(position) as num 
-        FROM draft
-        WHERE position IN ('QB','RB','WR','TE','K','DEF')
-        GROUP BY round, position
-        ORDER BY round, position");
-    while ($row = fetch_array($result)) {
-
-        if (!in_array($row['round'], $rounds)) {
-            $rounds[] = $row['round'];
-        }
-        if ($row['position'] == 'QB') {
-            $qb[] = $row['num'];
-        } elseif ($row['position'] == 'RB') {
-            $rb[] = $row['num'];
-        } elseif ($row['position'] == 'WR') {
-            $wr[] = $row['num'];
-        } elseif ($row['position'] == 'TE') {
-            $te[] = $row['num'];
-        } elseif ($row['position'] == 'K') {
-            $k[] = $row['num'];
-        } elseif ($row['position'] == 'DEF') {
-            $def[] = $row['num'];
-        }
-
-    }
-
-    return [
-        'labels' => $rounds,
-        'QB' => $qb,
-        'RB' => $rb,
-        'WR' => $wr,
-        'TE' => $te,
-        'K' => $k,
-        'DEF' => $def
-    ];
 }
 
 /**

@@ -2,14 +2,18 @@
 Playoff Calculator: https://playoffcomputer.appspot.com/
 
 # Bugs
-- rosters table, lots of players don't have a team
 - fun facts current season margin doesnt update new_leader and is not accurate
 - Current Season - Optimal Lineups endpoint needs optimizing (times out)
 - http://ffb.test/rosters.php?manager=Gavin&year=2009&week=1 page is broken in multiple places
 - rosters table, lots of 2020 bench players dont have proj or points
-- Rosters page, points by position chart is out of order
 - In regular_season_matchups table, lots of projections are wrong (looking at 2019)
-
+- draft table has Los Angeles for both teams, even though they weren't LA back then
+    - isn't matching up with rosters table because of this. check Ev 2014 wk 1
+    - also look at New York and specify which team
+- need to run php artisan runQuery and fix rosters older than 2012
+    - Then run game times job
+    - then run game slots job
+    - then put in prod db
 
 # Ideas
 
@@ -32,8 +36,13 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - most #1 pos rank players in a week, season, ever
 - chances of making playoffs, make request to playoffcomputer linked above
 
+Notes:
+Rams moved to LA between 2015 & 2016
+Chargers moved to LA between 2016 & 2017
+Raiders moved to LV between 2019 & 2020
 
-fun fact ideas...
+
+# Fun Fact ideas...
 
 Head to Head record
     - Any major trends in recent years?

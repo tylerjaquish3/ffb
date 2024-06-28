@@ -232,8 +232,8 @@ include 'sidebar.html';
                             <h4 style="float: right">Wins By Season</h4>
                         </div>
                         <div class="card-body">
-                            <div class="card-block">
-                                <canvas id="winsChart" class="height-400"></canvas>
+                            <div class="card-block chart-block">
+                                <canvas id="winsChart"></canvas>
                                 <br />
                                 <table class="table table-responsive" id="datatable-wins">
                                     <thead>
@@ -281,7 +281,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Points For and Against</h4>
                         </div>
                         <div class="card-body">
-                            <div class="card-block">
+                            <div class="card-block chart-block">
                                 <canvas id="scatterChart"></canvas>
                             </div>
                         </div>
@@ -295,7 +295,7 @@ include 'sidebar.html';
                             <h4 style="float: right">PF/PA vs Wins</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <div class="card-block">
+                            <div class="card-block chart-block">
                                 <canvas id="pfwinsChart"></canvas>
                             </div>
                         </div>
@@ -405,6 +405,8 @@ include 'sidebar.html';
                 datasets: dataset
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         display: true,
@@ -449,6 +451,8 @@ include 'sidebar.html';
                 datasets: dataset2
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         display: true,
@@ -501,6 +505,8 @@ include 'sidebar.html';
                 datasets: dataset3
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         display: true,
@@ -701,7 +707,6 @@ include 'sidebar.html';
             ]
         });
 
-
         var table = $('#datatable-weeklyRanks').DataTable({
             pageLength: 10,
             ajax: {
@@ -794,6 +799,5 @@ include 'sidebar.html';
 
             return div; 
         }
-
     });
 </script>

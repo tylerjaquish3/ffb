@@ -546,4 +546,64 @@ function getAllRanks(string $manager = null, int $year = null)
     return $ranks;
 }
 
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'positions-drafted') {
+
+    $manager = $_GET['manager'];
+    $rounds = $qb = $rb = $wr = $te = $k = $def = [];
+
+    // put numbers 1-25 in rounds array
+    for ($x = 1; $x < 26; $x++) {
+        $rounds[] = $x;
+    }
+    // for $qb, $rb, $wr, $te, $k, $def, initialize 25 zeros in each array
+    for ($x = 1; $x < 26; $x++) {
+        $qb[] = 0;
+        $rb[] = 0;
+        $wr[] = 0;
+        $te[] = 0;
+        $k[] = 0;
+        $def[] = 0;
+    }
+
+    $sql = "SELECT round, position, count(position) as num 
+        FROM draft
+        WHERE position IN ('QB','RB','WR','TE','K','DEF')";
+    if ($manager != 'all') {
+        $sql .= " AND manager_id = '$manager'";
+    }
+    $sql .= "GROUP BY round, position
+        ORDER BY round, position";
+    $result = query($sql);
+    while ($row = fetch_array($result)) {
+
+        $pos = $row['position'];
+
+        // update the proper array by the round number
+        if ($pos == 'QB') {
+            $qb[$row['round']-1] = $row['num'];
+        } elseif ($pos == 'RB') {
+            $rb[$row['round']-1] = $row['num'];
+        } elseif ($pos == 'WR') {
+            $wr[$row['round']-1] = $row['num'];
+        } elseif ($pos == 'TE') {
+            $te[$row['round']-1] = $row['num'];
+        } elseif ($pos == 'K') {
+            $k[$row['round']-1] = $row['num'];
+        } elseif ($pos == 'DEF') {
+            $def[$row['round']-1] = $row['num'];
+        }
+    }
+
+    echo json_encode([
+        'labels' => $rounds,
+        'QB' => $qb,
+        'RB' => $rb,
+        'WR' => $wr,
+        'TE' => $te,
+        'K' => $k,
+        'DEF' => $def
+    ]);
+    die;
+}
+
 ?>

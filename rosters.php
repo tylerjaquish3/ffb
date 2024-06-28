@@ -33,6 +33,26 @@ while ($row = fetch_array($result)) {
 
 $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DL', 'DB', 'BN', 'IR'];
 
+function lookupGameTime(?int $id) {
+    switch ($id) {
+        case 1:
+            return 'Thursday';
+        case 2:
+            return 'Friday';
+        case 3:
+            return 'Sunday Early';
+        case 4:
+            return 'Sunday Late';
+        case 5:
+            return 'Sunday Night';
+        case 6:
+            return 'Monday';
+        case 7:
+            return 'Tuesday';
+        default:
+            return '';
+    }
+}
 ?>
 
 <div class="app-content content container-fluid">
@@ -203,12 +223,13 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                             <th>Drafted?</th>
                                             <th>Week Rk</th>
                                             <th>Week Pos Rk</th>
+                                            <th>Game Time</th>
                                         </thead>
                                         <tbody>
                                             <?php
                                             $result = query("SELECT r.player, r.*, round FROM rosters r
                                                 JOIN managers m on m.name = r.manager
-                                                LEFT JOIN draft d on d.player = r.player AND d.year = r.year and d.position = r.position and d.manager_id = m.id
+                                                LEFT JOIN draft d on d.player = r.player AND d.year = r.year and d.manager_id = m.id
                                                 WHERE r.year = $year AND week = $week AND manager = '$managerName'");
                                             while ($row = fetch_array($result)) {
                                                 $rank = getPlayerRank($row['player'], $row['year'], $row['week']);
@@ -228,6 +249,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                                 }
                                                 echo '<td>'.$rank.'</td>';
                                                 echo '<td>'.$posRank.'</td>';
+                                                echo '<td>'.lookupGameTime($row['game_slot']).'</td>';
                                             } ?>
                                         </tbody>
                                     </table>
@@ -247,11 +269,12 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                             <th>Drafted?</th>
                                             <th>Week Rk</th>
                                             <th>Week Pos Rk</th>
+                                            <th>Game Time</th>
                                         </thead>
                                         <tbody>
                                             <?php
                                             $result = query("SELECT r.player, r.*, round FROM rosters r
-                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year and draft.position = r.position
+                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
                                                 WHERE r.year = $year AND week = $week AND manager = '$versus'");
                                             while ($row = fetch_array($result)) {
                                                 $rank = getPlayerRank($row['player'], $row['year'], $row['week']);
@@ -271,6 +294,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                                                 }
                                                 echo '<td>'.$rank.'</td>';
                                                 echo '<td>'.$posRank.'</td>';
+                                                echo '<td>'.lookupGameTime($row['game_slot']).'</td>';
                                             } ?>
                                         </tbody>
                                     </table>
@@ -306,7 +330,7 @@ $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF
                             <?php
                             $grouped = [];
                             $result = query("SELECT week, player, points, roster_spot FROM rosters
-                                WHERE year = $year AND manager = '$managerName' AND player != '(Empty)'
+                                WHERE year = $year AND manager = '$managerName'
                                 AND roster_spot NOT IN ('IR','BN') ORDER BY week ASC");
                             while ($row = fetch_array($result)) {
                                 // group results by roster_spot and week

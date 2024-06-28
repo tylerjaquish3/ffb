@@ -171,7 +171,7 @@ include 'sidebar.html';
                         <div class="card-header">
                             <h4 style="float: right">Draft Spots</h4>
                         </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
+                        <div class="card-body chart-block" style="background: #fff; direction: ltr">
                             <canvas id="draftSpotsChart" style="height: 600px"></canvas>
                         </div>
                     </div>
@@ -184,7 +184,21 @@ include 'sidebar.html';
                             <h4 class="card-title">Positions Drafted by Round</h4>
                         </div>
                         <div class="card-body">
-                            <div class="card-block">
+                            <div class="card-block chart-block">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <select id="pos_manager_select" class="form-control w-50">
+                                            <option value="all" selected>All Managers</option>
+                                            <?php
+                                            $result = query("SELECT * FROM managers ORDER BY name ASC");
+                                            while ($row = fetch_array($result)) {
+                                                echo '<option value="'.$row['id'].'">'.$row['name'].'</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                
                                 <canvas id="posByRoundChart" style="direction: ltr;"></canvas>
                             </div>
                         </div>
@@ -310,6 +324,8 @@ include 'sidebar.html';
                 datasets: dataset
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         display: true,
@@ -326,79 +342,108 @@ include 'sidebar.html';
             }
         });
 
-        var ctx = $('#posByRoundChart');
-        var stackedBar = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: <?php echo json_encode($posByRoundChart['labels']); ?>,
-                datasets: [{
-                        label: "QB",
-                        data: <?php echo json_encode($posByRoundChart['QB']); ?>,
-                        backgroundColor: '#4f267f'
-                    },{
-                        label: "RB",
-                        data: <?php echo json_encode($posByRoundChart['RB']); ?>,
-                        backgroundColor: '#a6c6fa'
-                    },{
-                        label: "WR",
-                        data: <?php echo json_encode($posByRoundChart['WR']); ?>,
-                        backgroundColor: '#3cf06e'
-                    },{
-                        label: "TE",
-                        data: <?php echo json_encode($posByRoundChart['TE']); ?>,
-                        backgroundColor: '#f33c47'
-                    },{
-                        label: "K",
-                        data: <?php echo json_encode($posByRoundChart['K']); ?>,
-                        backgroundColor: '#f87598'
-                    },{
-                        label: "DEF",
-                        data: <?php echo json_encode($posByRoundChart['DEF']); ?>,
-                        backgroundColor: '#ff7f2c'
-                    }
-                ]
-            },
-            options: {
-                scales: {
-                    x: {
-                        stacked: true,
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Draft Round',
-                            font: {
-                                size: 20
-                            }
-                        }
-                    },
-                    y: {
-                        stacked: true,
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Selections',
-                            font: {
-                                size: 20
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    datalabels: {
-                        formatter: function(value, context) {
-                            return Math.round(value * 10) / 10;
-                        },
-                        align: 'center',
-                        anchor: 'center',
-                        color: 'white',
-                        font: {
-                            weight: 'bold'
-                        }
-                    }
-                }
-            },
-            plugins: [ChartDataLabels]
+        var positionsDraftedChart;
+        
+        $('#pos_manager_select').change(function () {
+            positionsDraftedChart.destroy();
+            refreshPositionsDraftedChart();
         });
+
+        function refreshPositionsDraftedChart()
+        {
+            $.ajax({
+                url: 'dataLookup.php',
+                data:  {
+                    dataType: 'positions-drafted',
+                    manager: $('#pos_manager_select').val()
+                },
+                error: function() {
+                    console.log('Error');
+                },
+                success: function(response) {
+                    data = JSON.parse(response);
+                
+                    var ctx = $('#posByRoundChart');
+                    positionsDraftedChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                    label: "QB",
+                                    data: data.QB,
+                                    backgroundColor: '#4f267f'
+                                },{
+                                    label: "RB",
+                                    data: data.RB,
+                                    backgroundColor: '#a6c6fa'
+                                },{
+                                    label: "WR",
+                                    data: data.WR,
+                                    backgroundColor: '#3cf06e'
+                                },{
+                                    label: "TE",
+                                    data: data.TE,
+                                    backgroundColor: '#f33c47'
+                                },{
+                                    label: "K",
+                                    data: data.K,
+                                    backgroundColor: '#f87598'
+                                },{
+                                    label: "DEF",
+                                    data: data.DEF,
+                                    backgroundColor: '#ff7f2c'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    stacked: true,
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Draft Round',
+                                        font: {
+                                            size: 20
+                                        }
+                                    }
+                                },
+                                y: {
+                                    stacked: true,
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Selections',
+                                        font: {
+                                            size: 20
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                datalabels: {
+                                    formatter: function(value, context) {
+                                        return Math.round(value * 10) / 10;
+                                    },
+                                    align: 'center',
+                                    anchor: 'center',
+                                    color: 'white',
+                                    font: {
+                                        weight: 'bold'
+                                    }
+                                }
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+
+                }
+            });
+        }
+
+        refreshPositionsDraftedChart();
 
         if (managerFilter && yearFilter) {
             $('#datatable-draft > thead > tr.filters > th:nth-child(6) > input[type=text]').val(managerFilter);

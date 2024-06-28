@@ -234,6 +234,8 @@ include 'sidebar.html';
                         <div class="card-body">
                             <div class="card-block chart-block">
                                 <canvas id="winsChart"></canvas>
+                            </div>
+                            <div>
                                 <br />
                                 <table class="table table-responsive" id="datatable-wins">
                                     <thead>

@@ -9,11 +9,19 @@ function query($sql)
     global $conn, $DB_TYPE;
 
     if ($DB_TYPE == 'sqlite') {
-        $sql = str_replace("if(", "iif(", $sql);
-        $sql = str_replace("IF(", "IIF(", $sql);
-        $sql = str_replace("IF (", "IIF (", $sql);
-
-        return $conn->query($sql);
+        // $sql = str_replace("if(", "iif(", $sql);
+        // $sql = str_replace("IF(", "IIF(", $sql);
+        // $sql = str_replace("IF (", "IIF (", $sql);
+        // if (strpos($sql, 'IIF') !== false) {
+        //     dd($sql);
+        // }
+        try {
+            $run = $conn->query($sql);
+        } catch (\Exception $e) {
+            dd($e);
+        }
+        
+        return $run;
     }
 
     return mysqli_query($conn, $sql);
@@ -24,9 +32,9 @@ function draft_query($sql)
     global $conn2, $DB_TYPE;
 
     if ($DB_TYPE == 'sqlite') {
-        $sql = str_replace("if(", "iif(", $sql);
-        $sql = str_replace("IF(", "IIF(", $sql);
-        $sql = str_replace("IF (", "IIF (", $sql);
+        // $sql = str_replace("if(", "iif(", $sql);
+        // $sql = str_replace("IF(", "IIF(", $sql);
+        // $sql = str_replace("IF (", "IIF (", $sql);
 
         return $conn2->query($sql);
     }
@@ -93,6 +101,7 @@ if ((strpos($pageName, 'Recap') !== false)) {
     $seasonNumbers = getAllNumbersBySeason();
     $draftResults = getDraftResults();
     $trades = getTrades();
+    $weekStandings = getSeasonStandings();
 }
 if ($pageName == 'Current Season') {
     $selectedSeason = isset($_GET['id']) ? $_GET['id'] : $season;
@@ -112,6 +121,7 @@ if ($pageName == 'Current Season') {
     $draftPerformance = getAllDraftedPlayerDetails();
     $draftRounds = getBestRoundPicks();
     $scatterChart = getPointsForScatter();
+    $weekStandings = getSeasonStandings($selectedSeason);
 }
 if ($pageName == 'Rosters') {
     $recap = getMatchupRecapNumbers();
@@ -170,7 +180,7 @@ function getDashboardNumbers()
     }
 
     $tempName = '';
-    $result = query("SELECT count(manager1_id) as championships, name FROM regular_season_matchups rsm JOIN managers on managers.id = rsm.manager1_id   WHERE manager1_score > manager2_score GROUP BY name HAVING count(manager1_id) = " . $response['most_wins_number']);
+    $result = query("SELECT count(manager1_id) as championships, name FROM regular_season_matchups rsm JOIN managers on managers.id = rsm.manager1_id WHERE manager1_score > manager2_score GROUP BY name HAVING count(manager1_id) = " . $response['most_wins_number']);
     while ($row = fetch_array($result)) {
         if ($tempName == '') {
             $tempName = $row['name'];
@@ -306,7 +316,7 @@ function getProfileNumbers()
         // Calc playoff record and rank
         $wins = $losses = 0;
         $rank = 1;
-        $result = query("SELECT name, IFNULL(winsTop, 0) as winsTop, winsBottom, lossesTop, lossesBottom, totalTop, totalBottom, (IFNULL(winsTop, 0)+winsBottom) * 1.0/(totalTop+totalBottom) AS win_pct
+        $result = query("SELECT name, coalesce(winsTop, 0) as winsTop, winsBottom, lossesTop, lossesBottom, totalTop, totalBottom, (coalesce(winsTop, 0)+winsBottom) * 1.0/(totalTop+totalBottom) AS win_pct
             FROM managers
             LEFT JOIN (
                 SELECT COUNT(manager1_id) AS winsTop, manager1_id FROM playoff_matchups
@@ -606,12 +616,12 @@ function getFoesArray()
                 AND manager2_id = $versus
             UNION
                 SELECT year, round, manager1_id AS man1, manager2_id AS man2,
-                manager1_score AS man1score, manager2_score AS man2score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
+                manager1_score AS man1score, manager2_score AS man2score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END
                 FROM playoff_matchups
                 WHERE (manager1_id = $managerId AND manager2_id = $versus)
             UNION
                 SELECT year, round, manager2_id AS man2, manager1_id AS man1,
-                manager2_score AS man1score, manager1_score AS man2score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
+                manager2_score AS man1score, manager1_score AS man2score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END
                 FROM playoff_matchups
                 WHERE (manager1_id = $versus AND manager2_id = $managerId)
             ) AS T");
@@ -1171,28 +1181,28 @@ function getPostseasonRecord()
     }
 
     $result = query("SELECT
-        SUM(if(ROUND = 'Final' and manager1_score > manager2_score, 1,0)) AS final_wins,
-        SUM(if(ROUND = 'Semifinal' and manager1_score > manager2_score, 1,0)) AS semi_wins,
-        SUM(if(ROUND = 'Quarterfinal' and manager1_score > manager2_score, 1,0)) AS quarter_wins,
-        SUM(if(ROUND = 'Final' and manager1_score < manager2_score, 1,0)) AS final_losses,
-        SUM(if(ROUND = 'Semifinal' and manager1_score < manager2_score, 1,0)) AS semi_losses,
-        SUM(if(ROUND = 'Quarterfinal' and manager1_score < manager2_score, 1,0)) AS quarter_losses,
-        SUM(if(manager1_score > manager2_score, 1,0)) AS wins,
-        SUM(if(manager1_score < manager2_score, 1,0)) AS losses,
+        SUM(CASE WHEN ROUND = 'Final' and manager1_score > manager2_score THEN 1 ELSE 0 END) AS final_wins,
+        SUM(CASE WHEN ROUND = 'Semifinal' and manager1_score > manager2_score THEN 1 ELSE 0 END) AS semi_wins,
+        SUM(CASE WHEN ROUND = 'Quarterfinal' and manager1_score > manager2_score THEN 1 ELSE 0 END) AS quarter_wins,
+        SUM(CASE WHEN ROUND = 'Final' and manager1_score < manager2_score THEN 1 ELSE 0 END) AS final_losses,
+        SUM(CASE WHEN ROUND = 'Semifinal' and manager1_score < manager2_score THEN 1 ELSE 0 END) AS semi_losses,
+        SUM(CASE WHEN ROUND = 'Quarterfinal' and manager1_score < manager2_score THEN 1 ELSE 0 END) AS quarter_losses,
+        SUM(CASE WHEN manager1_score > manager2_score THEN 1 ELSE 0 END) AS wins,
+        SUM(CASE WHEN manager1_score < manager2_score THEN 1 ELSE 0 END) AS losses,
         name
         FROM playoff_matchups
         JOIN managers ON manager1_id = managers.id
         GROUP BY name
         UNION
         SELECT
-        SUM(if(ROUND = 'Final' and manager2_score > manager1_score, 1,0)) AS final_wins,
-        SUM(if(ROUND = 'Semifinal' and manager2_score > manager1_score, 1,0)) AS semi_wins,
-        SUM(if(ROUND = 'Quarterfinal' and manager2_score > manager1_score, 1,0)) AS quarter_wins,
-        SUM(if(ROUND = 'Final' and manager2_score < manager1_score, 1,0)) AS final_losses,
-        SUM(if(ROUND = 'Semifinal' and manager2_score < manager1_score, 1,0)) AS semi_losses,
-        SUM(if(ROUND = 'Quarterfinal' and manager2_score < manager1_score, 1,0)) AS quarter_losses,
-        SUM(if(manager2_score > manager1_score, 1,0)) AS wins,
-        SUM(if(manager2_score < manager1_score, 1,0)) AS losses,
+        SUM(CASE WHEN ROUND = 'Final' and manager2_score > manager1_score THEN 1 ELSE 0 END) AS final_wins,
+        SUM(CASE WHEN ROUND = 'Semifinal' and manager2_score > manager1_score THEN 1 ELSE 0 END) AS semi_wins,
+        SUM(CASE WHEN ROUND = 'Quarterfinal' and manager2_score > manager1_score THEN 1 ELSE 0 END) AS quarter_wins,
+        SUM(CASE WHEN ROUND = 'Final' and manager2_score < manager1_score THEN 1 ELSE 0 END) AS final_losses,
+        SUM(CASE WHEN ROUND = 'Semifinal' and manager2_score < manager1_score THEN 1 ELSE 0 END) AS semi_losses,
+        SUM(CASE WHEN ROUND = 'Quarterfinal' and manager2_score < manager1_score THEN 1 ELSE 0 END) AS quarter_losses,
+        SUM(CASE WHEN manager2_score > manager1_score THEN 1 ELSE 0 END) AS wins,
+        SUM(CASE WHEN manager2_score < manager1_score THEN 1 ELSE 0 END) AS losses,
         name
         FROM playoff_matchups
         JOIN managers ON manager2_id = managers.id
@@ -1395,6 +1405,109 @@ function getTrades()
     return $results;
 }
 
+function getSeasonStandings($season = null)
+{
+    if (isset($_GET['id'])) {
+        $season = $_GET['id'];
+    } elseif (!$season) {
+        $result = query("SELECT DISTINCT year FROM finishes ORDER BY year DESC LIMIT 1");
+        while ($row = fetch_array($result)) {
+            $season = $row['year'];
+        }
+    }
+
+    $result = query("SELECT * FROM regular_season_matchups 
+        WHERE year = $season ORDER BY week_number DESC LIMIT 1");
+    while ($row = fetch_array($result)) {
+        $lastWeek = $row['week_number'];
+    }
+    $standings = [];
+    for ($week = 1; $week <= $lastWeek; $week++) {
+        $standings[] = weekStandings($season, $week);
+    }
+
+    $weeks = range(1, $lastWeek);
+    $managers = [];
+    foreach ($standings as $wk => $rankings) {
+        foreach ($rankings as $man => $rank) {
+            $managers[$man][] = $rank;
+        }
+    }
+
+    $return = [];
+    $colors = ["#4f267f","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
+    $i = 0;
+    foreach ($managers as $name => $ranks) {
+        $return[] = [
+            'label' => $name, 
+            'data' => $ranks,
+            'borderColor' => $colors[$i],
+            'backgroundColor' => $colors[$i],
+            'pointStyle' => 'circle',
+            'pointRadius' => 5,
+            'pointHoverRadius' => 7
+        ];
+        $i++;
+    }
+
+    return [
+        'weeks' => $weeks,
+        'managers' => $return
+    ];
+}
+
+function weekStandings(int $year, int $week)
+{
+    $return = [];
+    $standings = [];
+
+    for ($x = 1; $x < 11; $x++) {
+        $standings[] = [
+            'man' => $x, 'wins' => 0, 'losses' => 0, 'points' => 0, 'name' => ''
+        ];
+    }
+
+    $result = query("SELECT * FROM regular_season_matchups 
+        JOIN managers ON regular_season_matchups.manager1_id = managers.id
+        WHERE year = $year and week_number <= $week");
+    while ($row = fetch_array($result)) {
+        $week = $row['week_number']; 
+    
+        foreach ($standings as &$standing) {
+            if ($standing['man'] == $row['manager1_id']) {
+                if ($row['winning_manager_id'] == $row['manager1_id']) {
+                    $standing['wins']++;
+                } else {
+                    $standing['losses']++;
+                }
+                $standing['name'] = $row['name'];
+                $standing['points'] += $row['manager1_score'];
+            }
+        } 
+    }
+
+    // Sort by wins and points to get rank
+    usort($standings, function($b, $a) { 
+        $rdiff = $a['wins'] - $b['wins'];
+        if ($rdiff) return $rdiff; 
+
+        if ($a['points'] > $b['points']) {
+            return 1;
+        } else if ($a['points'] < $b['points']) {
+            return -1;
+        }
+        return 0; 
+    });
+
+    $rank = 1;
+    foreach ($standings as $data) {
+        $return[$data['name']] = $rank;
+        $rank++;
+    }
+
+    return $return;
+}
+
 /**
  * Undocumented function
  */
@@ -1484,19 +1597,19 @@ function getCurrentSeasonBestWeek()
 {
     global $selectedSeason;
     $bestWeek = [];
-    $result = query("SELECT week, MAX(IF(roster_spot='QB', points, NULL)) AS top_qb,
-        MAX(IF(roster_spot='RB', points, NULL)) AS top_rb,
-        MAX(IF(roster_spot='WR', points, NULL)) AS top_wr,
-        MAX(IF(roster_spot='TE', points, NULL)) AS top_te,
-        MAX(IF(roster_spot='W/R', points, NULL)) AS top_wrflex,
-        MAX(IF(roster_spot='W/T', points, NULL)) AS top_wtflex,
-        MAX(IF(roster_spot='W/R/T', points, NULL)) AS top_wrt,
-        MAX(IF(roster_spot='Q/W/R/T', points, NULL)) AS top_qwrt,
-        MAX(IF(roster_spot='K', points, NULL)) AS top_k,
-        MAX(IF(roster_spot='DEF', points, NULL)) AS top_def,
-        MAX(IF(roster_spot='DB', points, NULL)) AS top_db,
-        MAX(IF(roster_spot='D', points, NULL)) AS top_d,
-        MAX(IF(roster_spot='BN', points, NULL)) AS top_bn
+    $result = query("SELECT week, MAX(CASE WHEN roster_spot='QB' THEN points ELSE NULL END) AS top_qb,
+        MAX(CASE WHEN roster_spot='RB' THEN points ELSE NULL END) AS top_rb,
+        MAX(CASE WHEN roster_spot='WR' THEN points ELSE NULL END) AS top_wr,
+        MAX(CASE WHEN roster_spot='TE' THEN points ELSE NULL END) AS top_te,
+        MAX(CASE WHEN roster_spot='W/R' THEN points ELSE NULL END) AS top_wrflex,
+        MAX(CASE WHEN roster_spot='W/T' THEN points ELSE NULL END) AS top_wtflex,
+        MAX(CASE WHEN roster_spot='W/R/T' THEN points ELSE NULL END) AS top_wrt,
+        MAX(CASE WHEN roster_spot='Q/W/R/T' THEN points ELSE NULL END) AS top_qwrt,
+        MAX(CASE WHEN roster_spot='K' THEN points ELSE NULL END) AS top_k,
+        MAX(CASE WHEN roster_spot='DEF' THEN points ELSE NULL END) AS top_def,
+        MAX(CASE WHEN roster_spot='DB' THEN points ELSE NULL END) AS top_db,
+        MAX(CASE WHEN roster_spot='D' THEN points ELSE NULL END) AS top_d,
+        MAX(CASE WHEN roster_spot='BN' THEN points ELSE NULL END) AS top_bn
         FROM rosters
         WHERE rosters.year = $selectedSeason
         GROUP BY week");

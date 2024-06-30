@@ -40,8 +40,8 @@
     <tbody>
         <?php
         $result = query(
-            "SELECT name, IFNULL(one_seeds, 0) as one_seeds, IFNULL(two_seeds1, 0)+IFNULL(two_seeds2, 0) as two_seeds, 
-            IFNULL(one_seeds, 0)+IFNULL(two_seeds1, 0)+IFNULL(two_seeds2, 0) as total
+            "SELECT name, coalesce(one_seeds, 0) as one_seeds, coalesce(two_seeds1, 0)+coalesce(two_seeds2, 0) as two_seeds, 
+            coalesce(one_seeds, 0)+coalesce(two_seeds1, 0)+coalesce(two_seeds2, 0) as total
             FROM managers
             LEFT JOIN (SELECT COUNT(manager1_id) as one_seeds, manager1_id 
                 FROM playoff_matchups pm 

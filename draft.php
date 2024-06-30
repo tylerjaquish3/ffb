@@ -65,7 +65,7 @@ include 'sidebar.html';
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $result = query("SELECT name, IFNULL(pick1, 0) as pick1, IFNULL(pick10, 0) as pick10, adp
+                                    $result = query("SELECT name, coalesce(pick1, 0) as pick1, coalesce(pick10, 0) as pick10, adp
                                         FROM managers
                                         LEFT JOIN (
                                             SELECT COUNT(id) as pick1, manager_id FROM draft

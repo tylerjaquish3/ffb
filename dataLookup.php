@@ -357,8 +357,6 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
                     $winLoss = ($row2['manager1_score'] > $row2['manager2_score']) ? 'Win' : 'Loss';
                     $manager2 = $row2['manager2_id'];
 
-                    $projected = $row2['manager1_projected'];
-                    $opponentProjected = $row2['manager2_projected'];
                     $opponentPoints = 0;
                     $opponentRoster = [];
 
@@ -399,11 +397,9 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
                 'year' => $selectedSeason,
                 'optimal' => round($optimal, 2),
                 'points' => round($points, 2),
-                'projected' => round($projected, 2),
                 'result' => $winLoss,
                 'opponent' => $opponent,
                 'oppPoints' => round($opponentPoints, 2),
-                'oppProjected' => round($opponentProjected, 2),
                 'oppOptimal' => round($opponentOptimal, 2),
                 'margin' => abs(round($points - $opponentPoints, 2)),
                 'optimalMargin' => abs(round($optimal - $opponentOptimal, 2))

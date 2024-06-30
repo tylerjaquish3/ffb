@@ -22,11 +22,11 @@ class ScheduleTest extends DuskTestCase
 
                 if ($browser->element('#login-username')) {
                     $browser
-                        ->type('#login-username', 'tylerjaquish')
+                        ->type('#login-username', env('YAHOO_USER'))
                         ->press('Next')
                         ->pause(4000)
                         ->waitForText('Enter password')
-                        ->type('#login-passwd', 'kimberLYNN8-29')
+                        ->type('#login-passwd', env('YAHOO_PW'))
                         ->press('Next');
                 }
 

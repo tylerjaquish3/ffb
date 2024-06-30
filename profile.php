@@ -471,7 +471,7 @@ if (isset($_GET['id'])) {
                                             WHERE manager1_id = $managerId
                                             AND manager2_id = $versus
                                             UNION
-                                            SELECT year, round, manager1_id, manager2_id, manager1_score, manager2_score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
+                                            SELECT year, round, manager1_id, manager2_id, manager1_score, manager2_score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END
                                             FROM playoff_matchups
                                             WHERE (manager1_id = $managerId AND manager2_id = $versus) OR (manager1_id = $versus AND manager2_id = $managerId)
                                             ORDER BY year, week_number DESC"
@@ -549,12 +549,12 @@ if (isset($_GET['id'])) {
                                                     AND manager2_id = $versus
                                                 UNION
                                                     SELECT year, round, manager1_id AS man1, manager2_id AS man2,
-                                                    manager1_score AS man1score, manager2_score AS man2score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
+                                                    manager1_score AS man1score, manager2_score AS man2score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END
                                                     FROM playoff_matchups
                                                     WHERE (manager1_id = $managerId AND manager2_id = $versus)
                                                 UNION
                                                     SELECT year, round, manager2_id AS man2, manager1_id AS man1,
-                                                    manager2_score AS man1score, manager1_score AS man2score, IF(manager1_score > manager2_score, manager1_id, manager2_id)
+                                                    manager2_score AS man1score, manager1_score AS man2score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END
                                                     FROM playoff_matchups
                                                     WHERE (manager1_id = $versus AND manager2_id = $managerId)
                                                     ORDER BY YEAR

@@ -307,8 +307,8 @@
 		<?php
 		$result = query("SELECT managers.name, MAX(manager1_score - manager2_score) as biggest_win,
 			MAX(manager2_score - manager1_score) as biggest_loss,
-			MIN(IF (manager1_score > manager2_score, manager1_score - manager2_score, null)) as smallest_win,
-			MIN(IF (manager1_score < manager2_score, manager2_score - manager1_score, null)) as smallest_loss
+			MIN(CASE WHEN manager1_score > manager2_score THEN manager1_score - manager2_score ELSE null END) as smallest_win,
+			MIN(CASE WHEN manager1_score < manager2_score THEN manager2_score - manager1_score ELSE null END) as smallest_loss
 			FROM regular_season_matchups rsm
 			JOIN managers ON managers.id = rsm.manager1_id
 			GROUP BY manager1_id");
@@ -667,7 +667,7 @@
 	</thead>
 	<tbody>
 		<?php
-		$result = query("SELECT name, IFNULL(pick1, 0) as pick1, IFNULL(pick10, 0) as pick10, adp
+		$result = query("SELECT name, coalesce(pick1, 0) as pick1, coalesce(pick10, 0) as pick10, adp
 			FROM managers
 			LEFT JOIN (
 				SELECT COUNT(id) as pick1, manager_id FROM draft

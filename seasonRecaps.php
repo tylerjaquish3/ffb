@@ -422,6 +422,18 @@ foreach ($seasonNumbers as $standings) {
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Standings By Week</h4>
+                        </div>
+                        <div class="card-body chart-block" style="background: #fff; direction: ltr">
+                            <canvas id="standingsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -495,6 +507,45 @@ foreach ($seasonNumbers as $standings) {
             order: [
                 [6, "desc"]
             ]
+        });
+
+        let weeks = <?php echo json_encode($weekStandings['weeks']); ?>;
+        let managers = <?php echo json_encode($weekStandings['managers']); ?>;
+        
+        var ctx = $('#standingsChart');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: weeks,
+                datasets: managers
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Rank',
+                            font: {
+                                size: 20
+                            }
+                        },
+                        reverse: true
+                    },
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Week',
+                            font: {
+                                size: 20
+                            }
+                        }
+                    }
+                }
+            }
         });
     });
 </script>

@@ -25,10 +25,7 @@ class LeagueHomeTest extends DuskTestCase
     // php artisan dusk --filter=testMatchups
 
     /**
-     * Undocumented function
-     *
-     * @group weekly
-     * @return void
+     * Update the team name for each manager
      */
     public function testTeamNames()
     {
@@ -107,9 +104,6 @@ class LeagueHomeTest extends DuskTestCase
 
     /**
      * Get matchups from the league home page, based on the Schedule table
-     *
-     * @group weekly
-     * @return void
      */
     public function testMatchups()
     {
@@ -193,11 +187,6 @@ class LeagueHomeTest extends DuskTestCase
 
     /**
      * Undocumented function
-     *
-     * @param integer $manager1
-     * @param string $opponent
-     * @param array $row
-     * @return void
      */
     protected function insertRegularSeasonMatchup(int $manager1, string $opponent, array $row)
     {
@@ -222,9 +211,6 @@ class LeagueHomeTest extends DuskTestCase
 
     /**
      * Undocumented function
-     *
-     * @param string $teamName
-     * @return void
      */
     protected function getManagerId(string $teamName)
     {

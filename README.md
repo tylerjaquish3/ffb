@@ -1,4 +1,12 @@
 ### Suntown FFB website
+
+All environments now use sqlite for the database. There is an outdated version of the database in mysql on PC and Production.
+To get new data, use the admin page that will interact with the Yahoo API. 
+There is a laravel project inside the fun-facts folder so that jobs can be run. Here are the jobs:
+php artisan funFacts : update all of the manager fun facts. 
+php artisan gameTimes : get game times from the storage/app/games CSVs and update rosters table
+php artisan gameSlots : 
+
 Playoff Calculator: https://playoffcomputer.appspot.com/
 
 # Bugs

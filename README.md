@@ -14,13 +14,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - http://ffb.test/rosters.php?manager=Gavin&year=2009&week=1 page is broken in multiple places
 - rosters table, lots of 2020 bench players dont have proj or points
 - In regular_season_matchups table, lots of projections are wrong (looking at 2019)
-- draft table has Los Angeles for both teams, even though they weren't LA back then
-    - isn't matching up with rosters table because of this. check Ev 2014 wk 1
-    - also look at New York and specify which team
-- need to run php artisan runQuery and fix rosters older than 2012
-    - Then run game times job
-    - then run game slots job
-    - then put in prod db
+
 
 # Ideas
 

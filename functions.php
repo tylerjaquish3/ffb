@@ -1495,6 +1495,10 @@ function weekStandings(int $year, int $week)
         $rank++;
     }
 
+    if (isset($return[''])) {
+        unset($return['']);
+    }
+
     return $return;
 }
 

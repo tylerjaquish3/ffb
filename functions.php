@@ -9,12 +9,6 @@ function query($sql)
     global $conn, $DB_TYPE;
 
     if ($DB_TYPE == 'sqlite') {
-        // $sql = str_replace("if(", "iif(", $sql);
-        // $sql = str_replace("IF(", "IIF(", $sql);
-        // $sql = str_replace("IF (", "IIF (", $sql);
-        // if (strpos($sql, 'IIF') !== false) {
-        //     dd($sql);
-        // }
         try {
             $run = $conn->query($sql);
         } catch (\Exception $e) {
@@ -32,10 +26,6 @@ function draft_query($sql)
     global $conn2, $DB_TYPE;
 
     if ($DB_TYPE == 'sqlite') {
-        // $sql = str_replace("if(", "iif(", $sql);
-        // $sql = str_replace("IF(", "IIF(", $sql);
-        // $sql = str_replace("IF (", "IIF (", $sql);
-
         return $conn2->query($sql);
     }
 
@@ -2595,6 +2585,19 @@ function getGameTimeChartNumbers()
         }
         $points[$man2name][$id] = $totalPoints;
     }
+
+    // Check if we can remove friday and tuesday
+    if ($points[$managerName][1] == $points[$managerName][2] && $points[$man2name][1] == $points[$man2name][2]) {
+        unset($labels[2]);
+        unset($points[$managerName][2]);
+        unset($points[$man2name][2]);
+    }
+    if ($points[$managerName][6] == $points[$managerName][7] && $points[$man2name][6] == $points[$man2name][7]) {
+        unset($labels[7]);
+        unset($points[$managerName][7]);
+        unset($points[$man2name][7]);
+    }
+
     // get array_values for each of the managers' points
     $points = array_map(function($manager) {
         return array_values($manager);

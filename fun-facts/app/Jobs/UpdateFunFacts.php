@@ -78,6 +78,8 @@ class UpdateFunFacts implements ShouldQueue
             $this->currentSeasonPoints();
             // 83,88
             $this->getOptimalLineupPoints();
+            // 92,93
+            $this->weeklyRank();
 
         } catch (\Exception $e) {
             $success = false;
@@ -1591,6 +1593,21 @@ class UpdateFunFacts implements ShouldQueue
         }
 
         return $optimal;
+    }
+
+    // 92,93
+    public function weeklyRanks()
+    {
+        // $r = Roster::selectRaw('managers.id, week, sum(points) as pts')
+        //     ->join('managers', 'managers.name', '=', 'rosters.manager')
+        //     ->where('roster_spot', '!=', 'BN')
+        //     ->where('year', $this->currentSeason)
+        //     ->orderBy('pts', 'desc')
+        //     ->groupBy('week','managers.id')
+        //     ->get();
+
+        // $tops = $this->checkMultiple($r, 'pts');
+        // $this->insertFunFact(92, 'id', 'pts', ['Wk.','week'], $tops);
     }
 
 }

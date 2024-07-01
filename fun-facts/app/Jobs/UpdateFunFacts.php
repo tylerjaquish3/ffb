@@ -37,49 +37,49 @@ class UpdateFunFacts implements ShouldQueue
         try {
 
             // 1,2,3
-            $this->mostPointsFor();
-            // 4,5,6
-    $this->mostPostseasonPointsFor();
-            // 7,8,9,89,90,91
-            $this->leastPointsAgainst();
-            // 10,11
-            $this->mostWins();
-            // 13,14,15
-            $this->leastPointsFor();
-            // 16,17
-            $this->mostLosses();
-            // 12,18,19,20,21,22,23,24,25,31,65,66
-            $this->postseasonRecords();
-            // 26,27,28
-            $this->highestSeeds();
-            // 29,30,67,68,69,70
-            $this->singleOpponent();
-            // 32
-            $this->leastChampionships();
-            // 50,51,52,53,54,55
-            $this->postseasonMargin();
-            // 39,40,56,57,60,61
-            $this->streaks();
-            // 62,63,71,72
-            $this->draft();
-            // 73,74,75
-            $this->moves();
-            // 76,77,78,79,80
-            $this->currentSeasonStats();
-            // 45,46,47,48
-            $this->margins();
-            // 41,42
-            $this->appearances();
-            // 60,61
-    $this->currentPostseasonStreak();
-            // 58,59
-            $this->postseasonWinPct();
-            // 81,82,84,85,86,87
-            $this->currentSeasonPoints();
-            // 83,88
-            $this->getOptimalLineupPoints();
+    //         $this->mostPointsFor();
+    //         // 4,5,6
+    // $this->mostPostseasonPointsFor();
+    //         // 7,8,9,89,90,91
+    //         $this->leastPointsAgainst();
+    //         // 10,11
+    //         $this->mostWins();
+    //         // 13,14,15
+    //         $this->leastPointsFor();
+    //         // 16,17
+    //         $this->mostLosses();
+    //         // 12,18,19,20,21,22,23,24,25,31,65,66
+    //         $this->postseasonRecords();
+    //         // 26,27,28
+    //         $this->highestSeeds();
+    //         // 29,30,67,68,69,70
+    //         $this->singleOpponent();
+    //         // 32
+    //         $this->leastChampionships();
+    //         // 50,51,52,53,54,55
+    //         $this->postseasonMargin();
+    //         // 39,40,56,57,60,61
+    //         $this->streaks();
+    //         // 62,63,71,72
+    //         $this->draft();
+    //         // 73,74,75
+    //         $this->moves();
+    //         // 76,77,78,79,80
+    //         $this->currentSeasonStats();
+    //         // 45,46,47,48
+    //         $this->margins();
+    //         // 41,42
+    //         $this->appearances();
+    //         // 60,61
+    // $this->currentPostseasonStreak();
+    //         // 58,59
+    //         $this->postseasonWinPct();
+    //         // 81,82,84,85,86,87
+    //         $this->currentSeasonPoints();
+    //         // 83,88
+    //         $this->getOptimalLineupPoints();
             // 92,93
-            $this->weeklyRank();
+            $this->weeklyRanks();
 
         } catch (\Exception $e) {
             $success = false;
@@ -1598,16 +1598,126 @@ class UpdateFunFacts implements ShouldQueue
     // 92,93
     public function weeklyRanks()
     {
-        // $r = Roster::selectRaw('managers.id, week, sum(points) as pts')
-        //     ->join('managers', 'managers.name', '=', 'rosters.manager')
-        //     ->where('roster_spot', '!=', 'BN')
-        //     ->where('year', $this->currentSeason)
-        //     ->orderBy('pts', 'desc')
-        //     ->groupBy('week','managers.id')
-        //     ->get();
+        // initialize all managers to 0
+        for ($x = 1; $x < 11; $x++) {
+            $tops[$x] = 0;
+            $bottoms[$x] = 0;
+        }
+        $r = [];
+        // Get each season from regular season matchups
+        $seasons = RegularSeasonMatchup::selectRaw('distinct year')->get();
 
-        // $tops = $this->checkMultiple($r, 'pts');
-        // $this->insertFunFact(92, 'id', 'pts', ['Wk.','week'], $tops);
+        foreach ($seasons as $season) {
+            // Get number of weeks in that season from regular season matchups
+            $weeks = RegularSeasonMatchup::where('year', $season->year)->selectRaw('distinct week_number')->get();
+            foreach ($weeks as $week) {
+                $r[] = $this->weekStandings($season->year, $week->week_number);
+            }
+        }
+        
+        // loop through each week and add up tops and bottoms
+        foreach ($r as $week => $rankings) {
+            $last = count($rankings);
+        
+            foreach ($rankings as $man => $rank) {
+                if ($rank == 1) {
+                    $tops[$man]++;
+                } elseif ($rank == $last) {
+                    $bottoms[$man]++;
+                }
+            }
+        }
+
+        // Loop through $tops and make into associative array
+        $array = [];
+        foreach ($tops as $man => $top) {
+            $array[] = (object)['id' => $man, 'rank' => $top];
+        }
+
+        // Sort by rank desc
+        usort($array, function($a, $b) {
+            return $b->rank <=> $a->rank;
+        });
+
+        $topSpot = $this->checkMultiple(collect($array), 'rank');
+        $this->insertFunFact(93, 'id', 'rank', [], $topSpot);
+
+        // Loop through $bottoms and make into associative array
+        $array = [];
+        foreach ($bottoms as $man => $top) {
+            $array[] = (object)['id' => $man, 'rank' => $top];
+        }
+
+        // Sort by rank desc
+        usort($array, function($a, $b) {
+            return $b->rank <=> $a->rank;
+        });
+
+        $bottomSpot = $this->checkMultiple(collect($array), 'rank');
+        $this->insertFunFact(92, 'id', 'rank', [], $bottomSpot);
+    }
+
+    public function weekStandings(int $year, int $week)
+    {
+        $return = [];
+        $standings = [];
+
+        for ($x = 1; $x <= 10; $x++) {
+            $standings[] = [
+                'man' => $x, 'wins' => 0, 'losses' => 0, 'points' => 0, 'name' => ''
+            ];
+        }
+
+        if ($year < 2008) {
+            // Remove man 5 and 6 from $standings array
+            unset($standings[4]);
+            unset($standings[5]);
+        }
+    
+        $result = RegularSeasonMatchup::join('managers', 'regular_season_matchups.manager1_id', 'managers.id')
+            ->where('year', $year)
+            ->where('week_number', '<=', $week)
+            ->get();
+        foreach ($result as $row) {
+            $week = $row->week_number; 
+        
+            foreach ($standings as &$standing) {
+                if ($standing['man'] == $row->manager1_id) {
+                    if ($row->winning_manager_id == $row->manager1_id) {
+                        $standing['wins']++;
+                    } else {
+                        $standing['losses']++;
+                    }
+                    $standing['name'] = $row->name;
+                    $standing['points'] += $row->manager1_score;
+                }
+            } 
+        }
+    
+        // Sort by wins and points to get rank
+        usort($standings, function($b, $a) { 
+            $rdiff = $a['wins'] - $b['wins'];
+            if ($rdiff) return $rdiff; 
+    
+            if ($a['points'] > $b['points']) {
+                return 1;
+            } else if ($a['points'] < $b['points']) {
+                return -1;
+            }
+            return 0; 
+        });
+    
+        $rank = 1;
+        foreach ($standings as $data) {
+            $return[$data['man']] = $rank;
+            $rank++;
+        }
+
+        if (isset($return[''])) {
+            unset($return['']);
+        }
+    
+        return $return;
     }
 
 }

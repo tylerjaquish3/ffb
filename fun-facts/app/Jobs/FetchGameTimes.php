@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\NflTeam;
 use App\Models\Roster;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -88,7 +89,7 @@ class FetchGameTimes implements ShouldQueue
                     $row->game_slot = 6;
                 } elseif ($gameTime->dayOfWeek == 0) { // sunday
                     // Check if time was 10am EST
-                    if ($gameTime->hour == 13) { // sunday morning
+                    if ($gameTime->hour <= 13) { // sunday morning
                         $row->game_slot = 3;
                     } elseif ($gameTime->hour == 16) { // sunday afternoon
                         $row->game_slot = 4;

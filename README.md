@@ -11,8 +11,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 # Bugs
 - fun facts current season margin doesnt update new_leader and is not accurate
 - Current Season - Optimal Lineups endpoint needs optimizing (times out)
-- http://ffb.test/rosters.php?manager=Gavin&year=2009&week=1 page is broken in multiple places
-- rosters table, lots of 2020 bench players dont have proj or points
 - In regular_season_matchups table, lots of projections are wrong (looking at 2019)
 
 

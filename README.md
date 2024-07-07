@@ -13,7 +13,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - Current Season - Optimal Lineups endpoint needs optimizing (times out)
 - In regular_season_matchups table, lots of projections are wrong (looking at 2019)
 
-
 # Ideas
 
 - Profile page, line chart for points each season vs league average
@@ -25,12 +24,9 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - rosters page,
     - add optimal lineups info on left
 - add a bunch more fun facts
-    - most weeks spent in first/last place
     - most weeks with top/bottom 3 in points
     - record against everyone
-    - points by position (high/low) for each position
     - best/worst draft pick
-    - most points scored on TNF, MNF, etc.
     - biggest comeback in matchup
     - most #1 pos rank players in a week, season, ever
 - chances of making playoffs, make request to playoffcomputer linked above

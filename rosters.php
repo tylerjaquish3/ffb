@@ -229,7 +229,7 @@ function lookupGameTime(?int $id) {
                                             <?php
                                             $result = query("SELECT r.player, r.*, round FROM rosters r
                                                 JOIN managers m on m.name = r.manager
-                                                LEFT JOIN draft d on d.player = r.player AND d.year = r.year and d.manager_id = m.id
+                                                LEFT JOIN draft d on d.player = r.player AND d.year = r.year and d.manager_id = m.id and r.position = d.position
                                                 WHERE r.year = $year AND week = $week AND manager = '$managerName'");
                                             while ($row = fetch_array($result)) {
                                                 $rank = getPlayerRank($row['player'], $row['year'], $row['week']);
@@ -274,7 +274,7 @@ function lookupGameTime(?int $id) {
                                         <tbody>
                                             <?php
                                             $result = query("SELECT r.player, r.*, round FROM rosters r
-                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
+                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year and r.position = draft.position
                                                 WHERE r.year = $year AND week = $week AND manager = '$versus'");
                                             while ($row = fetch_array($result)) {
                                                 $rank = getPlayerRank($row['player'], $row['year'], $row['week']);

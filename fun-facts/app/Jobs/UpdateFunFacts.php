@@ -37,49 +37,55 @@ class UpdateFunFacts implements ShouldQueue
         try {
 
             // 1,2,3
-    //         $this->mostPointsFor();
-    //         // 4,5,6
-    // $this->mostPostseasonPointsFor();
-    //         // 7,8,9,89,90,91
-    //         $this->leastPointsAgainst();
-    //         // 10,11
-    //         $this->mostWins();
-    //         // 13,14,15
-    //         $this->leastPointsFor();
-    //         // 16,17
-    //         $this->mostLosses();
-    //         // 12,18,19,20,21,22,23,24,25,31,65,66
-    //         $this->postseasonRecords();
-    //         // 26,27,28
-    //         $this->highestSeeds();
-    //         // 29,30,67,68,69,70
-    //         $this->singleOpponent();
-    //         // 32
-    //         $this->leastChampionships();
-    //         // 50,51,52,53,54,55
-    //         $this->postseasonMargin();
-    //         // 39,40,56,57,60,61
-    //         $this->streaks();
-    //         // 62,63,71,72
-    //         $this->draft();
-    //         // 73,74,75
-    //         $this->moves();
-    //         // 76,77,78,79,80
-    //         $this->currentSeasonStats();
-    //         // 45,46,47,48
-    //         $this->margins();
-    //         // 41,42
-    //         $this->appearances();
-    //         // 60,61
-    // $this->currentPostseasonStreak();
-    //         // 58,59
-    //         $this->postseasonWinPct();
-    //         // 81,82,84,85,86,87
-    //         $this->currentSeasonPoints();
-    //         // 83,88
-    //         $this->getOptimalLineupPoints();
-            // 92,93
-            $this->weeklyRanks();
+            // $this->mostPointsFor();
+            // // 4,5,6
+            // $this->mostPostseasonPointsFor();
+            // // 7,8,9,89,90,91
+            // $this->leastPointsAgainst();
+            // // 10,11
+            // $this->mostWins();
+            // // 13,14,15
+            // $this->leastPointsFor();
+            // // 16,17
+            // $this->mostLosses();
+            // // 12,18,19,20,21,22,23,24,25,31,65,66
+            // $this->postseasonRecords();
+            // // 26,27,28
+            // $this->highestSeeds();
+            // // 29,30,67,68,69,70
+            // $this->singleOpponent();
+            // // 32
+            // $this->leastChampionships();
+            // // 50,51,52,53,54,55
+            // $this->postseasonMargin();
+            // // 39,40,56,57,60,61
+            // $this->streaks();
+            // // 62,63,71,72
+            // $this->draft();
+            // // 73,74,75
+            // $this->moves();
+            // // 76,77,78,79,80
+            // $this->currentSeasonStats();
+            // // 45,46,47,48
+            // $this->margins();
+            // // 41,42
+            // $this->appearances();
+            // // 60,61
+            // $this->currentPostseasonStreak();
+            // // 58,59
+            // $this->postseasonWinPct();
+            // // 81,82,84,85,86,87
+            // $this->currentSeasonPoints();
+            // // 83,88
+            // $this->getOptimalLineupPoints();
+            // // 92,93
+            // $this->weeklyRanks();
+            // // 111-128
+            // $this->positionTotals();
+            // // 95, 96, 99-106
+            // $this->pointsByGameTime();
+            // // 97,98,107,108
+            $this->draftPicks();
 
         } catch (\Exception $e) {
             $success = false;
@@ -408,10 +414,9 @@ class UpdateFunFacts implements ShouldQueue
         $this->insertFunFact(13, 'manager1_id', 'pts', [], $tops);
 
         // Least PF (Season)
-        $i = RegularSeasonMatchup::selectRaw('regular_season_matchups.manager1_id, regular_season_matchups.year, SUM(regular_season_matchups.manager1_score) as pts')
-            ->join('playoff_matchups', 'playoff_matchups.year', '=', 'regular_season_matchups.year')
+        $i = RegularSeasonMatchup::selectRaw('manager1_id, year, SUM(manager1_score) as pts')
             ->orderBy('pts', 'asc')
-            ->groupBy('regular_season_matchups.manager1_id', 'regular_season_matchups.year')
+            ->groupBy('manager1_id', 'year')
             ->get();
             
         $tops = $this->checkMultiple($i, 'pts');;
@@ -1720,4 +1725,252 @@ class UpdateFunFacts implements ShouldQueue
         return $return;
     }
 
+    public function positionTotals()
+    {
+        $all = [
+            113 => 'DEF',
+            116 => 'K',
+            119 => 'TE',
+            122 => 'WR',
+            125 => 'RB',
+            128 => 'QB'
+        ];
+
+        foreach ($all as $key => $pos) {
+            $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
+                ->join('managers', 'managers.name', '=', 'rosters.manager')
+                ->where('position', $pos)
+                ->whereNotIn('roster_spot', ['BN', 'IR'])
+                ->groupBy('managers.id')
+                ->orderBy('pts', 'desc')
+                ->limit(3)
+                ->get();
+
+            $tops = $this->checkMultiple($top, 'pts');
+
+            $this->insertFunFact($key, 'manager_id', 'pts', [], $tops);
+        }
+
+        $this->groupBySeason($all);
+        $this->groupByWeek($all);
+    }
+
+    private function groupBySeason(array $all)
+    {
+        foreach ($all as $key => $pos) {
+            $ffId = $key-1;
+            $top = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
+                ->join('managers', 'managers.name', '=', 'rosters.manager')
+                ->where('position', $pos)
+                ->whereNotIn('roster_spot', ['BN', 'IR'])
+                ->groupBy('managers.id', 'year')
+                ->orderBy('pts', 'desc')
+                ->limit(3)
+                ->get();
+
+            $tops = $this->checkMultiple($top, 'pts');
+
+            $this->insertFunFact($ffId, 'manager_id', 'pts', ['year'], $tops);
+        }
+    }
+
+    private function groupByWeek(array $all)
+    {
+        foreach ($all as $key => $pos) {
+            $ffId = $key-2;
+            $top = Roster::selectRaw('manager, managers.id as manager_id, year, week, sum(points) as pts')
+                ->join('managers', 'managers.name', '=', 'rosters.manager')
+                ->where('position', $pos)
+                ->whereNotIn('roster_spot', ['BN', 'IR'])
+                ->groupBy('managers.id', 'year', 'week')
+                ->orderBy('pts', 'desc')
+                ->limit(5)
+                ->get();
+
+            $tops = $this->checkMultiple($top, 'pts');
+
+            $this->insertFunFact($ffId, 'manager_id', 'pts', ['Wk.', 'week', 'year'], $tops);
+        }
+    }
+
+    public function pointsByGameTime()
+    {
+        $this->mostAllTime();
+        $this->mostBySeason();
+        $this->mostByWeek();
+        $this->fewestAllTime();
+        $this->fewestBySeason();
+    }
+
+    private function mostAllTime()
+    {
+        $all = [
+            96 => 1,
+            102 => 6
+        ];
+
+        foreach ($all as $key => $slot) {
+            $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
+                ->join('managers', 'managers.name', '=', 'rosters.manager')
+                ->where('game_slot', $slot)
+                ->whereNotIn('roster_spot', ['BN', 'IR'])
+                ->groupBy('managers.id')
+                ->orderBy('pts', 'desc')
+                ->limit(3)
+                ->get();
+
+            $tops = $this->checkMultiple($top, 'pts');
+            $this->insertFunFact($key, 'manager_id', 'pts', [], $tops);
+        }
+    }
+
+    private function mostBySeason()
+    {
+        $all = [
+            95 => 1,
+            103 => 6
+        ];
+
+        foreach ($all as $key => $slot) {
+            $top = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
+                ->join('managers', 'managers.name', '=', 'rosters.manager')
+                ->where('game_slot', $slot)
+                ->whereNotIn('roster_spot', ['BN', 'IR'])
+                ->groupBy('managers.id', 'year')
+                ->orderBy('pts', 'desc')
+                ->limit(3)
+                ->get();
+
+            $tops = $this->checkMultiple($top, 'pts');
+            $this->insertFunFact($key, 'manager_id', 'pts', ['year'], $tops);
+        }
+    }
+
+    private function mostByWeek()
+    {
+        $all = [
+            106 => 1,
+            101 => 6
+        ];
+
+        foreach ($all as $key => $slot) {
+            $top = Roster::selectRaw('manager, managers.id as manager_id, year, week, sum(points) as pts')
+                ->join('managers', 'managers.name', '=', 'rosters.manager')
+                ->where('game_slot', $slot)
+                ->whereNotIn('roster_spot', ['BN', 'IR'])
+                ->groupBy('managers.id', 'year', 'week')
+                ->orderBy('pts', 'desc')
+                ->limit(3)
+                ->get();
+
+            $tops = $this->checkMultiple($top, 'pts');
+            $this->insertFunFact($key, 'manager_id', 'pts', ['Wk.', 'week', 'year'], $tops);
+        }
+    }
+
+    private function fewestAllTime()
+    {
+        $all = [
+            105 => 1,
+            100 => 6
+        ];
+
+        foreach ($all as $key => $slot) {
+            $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
+                ->join('managers', 'managers.name', '=', 'rosters.manager')
+                ->where('game_slot', $slot)
+                ->whereNotIn('roster_spot', ['BN', 'IR'])
+                ->groupBy('managers.id')
+                ->orderBy('pts', 'asc')
+                ->limit(3)
+                ->get();
+
+            $tops = $this->checkMultiple($top, 'pts');
+            $this->insertFunFact($key, 'manager_id', 'pts', [], $tops);
+        }
+    }
+
+    private function fewestBySeason()
+    {
+        $all = [
+            104 => 1,
+            99 => 6
+        ];
+
+        foreach ($all as $key => $slot) {
+            $top = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
+                ->join('managers', 'managers.name', '=', 'rosters.manager')
+                ->where('game_slot', $slot)
+                ->whereNotIn('roster_spot', ['BN', 'IR'])
+                ->groupBy('managers.id', 'year')
+                ->orderBy('pts', 'asc')
+                ->limit(3)
+                ->get();
+
+            $tops = $this->checkMultiple($top, 'pts');
+            $this->insertFunFact($key, 'manager_id', 'pts', ['year'], $tops);
+        }
+    }
+
+    // 97,98,107,108
+    public function draftPicks()
+    {
+        
+        $years = range(2006, $this->currentSeason);
+        
+        $response = [];
+        foreach ($years as $year) {
+            $qbMedian = $this->getMedian($year, 'QB');
+            $wrMedian = $this->getMedian($year, 'WR');
+            $rbMedian = $this->getMedian($year, 'RB');
+            $teMedian = $this->getMedian($year, 'TE');
+            // Use multiplier to find sweet spot
+            // Don't want to just be above average, but to be a bit better than that
+            $multiplier = 1.3;
+dd($wrMedian);
+            $sql = "SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
+                JOIN managers ON rosters.manager = managers.name
+                JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
+                WHERE rosters.year = $year
+                GROUP BY manager, overall_pick, rosters.player, draft.position";
+
+            $players = DB::select($sql);
+
+            foreach ($players as $player) {
+                $row = (array) $player;
+                $row['year'] = $year;
+                if ($row['position'] == 'QB') {
+                    if ($row['points'] > ($qbMedian*$multiplier) && $row['overall_pick'] > 40) {
+                        $response[] = $row;
+                    }
+                } else {
+                    if ($row['points'] > ($wrtMedian*$multiplier) && $row['overall_pick'] > 60) {
+                        $response[] = $row;
+                    }
+                }
+            }
+        }
+
+        usort($response, function($a, $b) {
+            return $b['points'] <=> $a['points'];
+        });
+
+        $best = array_slice($response,0,5);
+        dd($best);
+    }
+
+    /**
+     * Find the average score by position
+     */
+    private function getMedian($season, string $pos)
+    {
+        $result = Roster::selectRaw('position, avg(points) AS points')
+            ->where('year', $season)
+            ->whereNotIn('roster_spot', ['BN', 'IR'])
+            ->where('position', $pos)
+            ->groupBy('position')
+            ->first();
+
+        return $result->points;
+    }
 }

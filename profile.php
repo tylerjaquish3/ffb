@@ -433,6 +433,20 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-12 col-lg-8 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Positions Drafted</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="card-block">
+                                <canvas id="posByRoundChart" height="500px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-sm-12 col-lg-8 table-padding" id="versus">
                     <div class="card">
                         <div class="card-header">
@@ -588,10 +602,8 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-            </div>
             
-            <div class="row">
-                <div class="col-sm-12 col-lg-6 table-padding">
+                <div class="col-sm-12 col-md-4 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>High/Low Foes</h4>
@@ -917,6 +929,95 @@ if (isset($_GET['id'])) {
             },
             plugins: [ChartDataLabels]
         });
+    });
 
+    $.ajax({
+        url: 'dataLookup.php',
+        data:  {
+            dataType: 'positions-drafted',
+            manager: <?php echo $managerId; ?>
+        },
+        error: function() {
+            console.log('Error');
+        },
+        success: function(response) {
+            data = JSON.parse(response);
+        
+            var ctx = $('#posByRoundChart');
+            positionsDraftedChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                            label: "QB",
+                            data: data.QB,
+                            backgroundColor: '#4f267f'
+                        },{
+                            label: "RB",
+                            data: data.RB,
+                            backgroundColor: '#a6c6fa'
+                        },{
+                            label: "WR",
+                            data: data.WR,
+                            backgroundColor: '#3cf06e'
+                        },{
+                            label: "TE",
+                            data: data.TE,
+                            backgroundColor: '#f33c47'
+                        },{
+                            label: "K",
+                            data: data.K,
+                            backgroundColor: '#f87598'
+                        },{
+                            label: "DEF",
+                            data: data.DEF,
+                            backgroundColor: '#ff7f2c'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Draft Round',
+                                font: {
+                                    size: 20
+                                }
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Selections',
+                                font: {
+                                    size: 20
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        datalabels: {
+                            formatter: function(value, context) {
+                                return Math.round(value * 10) / 10;
+                            },
+                            align: 'center',
+                            anchor: 'center',
+                            color: 'white',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
     });
 </script>

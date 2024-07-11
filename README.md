@@ -18,7 +18,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - Profile page, line chart for points each season vs league average
 - Current season, worst draft picks remove players that got traded midseason
 - add trophy graphic on trophy page
-- profile page, add chart for positions drafted?
 - make sidebar collapsible
 - grab postseason matchup rosters
 - rosters page,
@@ -27,8 +26,11 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - most weeks with top/bottom 3 in points
     - record against everyone
     - best/worst draft pick
+    - best free agent pick up
     - biggest comeback in matchup
-    - most #1 pos rank players in a week, season, ever
+    - most #1 pos rank players in a week, season, all time
+    - most/least bench points week, season, all time
+    - most/least IR players
 - chances of making playoffs, make request to playoffcomputer linked above
 
 Notes:
@@ -83,3 +85,5 @@ I just have 5 quick survey questions for you relating to our fantasy football le
 5. In a few weeks, we're going to vote on a new punishment for the league loser. Do you have any ideas?
 
 That's it. Thank you so much for participating. And please keep this confidential from "XXXX" until I share the results with him, I would appreciate it.
+
+

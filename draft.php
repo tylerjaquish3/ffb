@@ -438,7 +438,6 @@ include 'sidebar.html';
                         },
                         plugins: [ChartDataLabels]
                     });
-
                 }
             });
         }

@@ -176,7 +176,7 @@ while ($row = fetch_array($result)) {
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Meeting Agenda | TBD 2024</h4>
+                            <h4>Meeting Agenda | 7.24.24 8pm</h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">

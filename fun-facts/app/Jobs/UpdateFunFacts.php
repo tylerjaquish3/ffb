@@ -80,12 +80,12 @@ class UpdateFunFacts implements ShouldQueue
             // $this->getOptimalLineupPoints();
             // // 92,93
             // $this->weeklyRanks();
-            // // 111-128
-            // $this->positionTotals();
+            // // 111-131
+            $this->positionTotals();
             // // 95, 96, 99-106
             // $this->pointsByGameTime();
             // // 97,98,107,108
-            $this->draftPicks();
+            // $this->draftPicks();
 
         } catch (\Exception $e) {
             $success = false;
@@ -1753,6 +1753,40 @@ class UpdateFunFacts implements ShouldQueue
 
         $this->groupBySeason($all);
         $this->groupByWeek($all);
+
+        // Do the same for bench points now
+        $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->whereIn('roster_spot', ['BN', 'IR'])
+            ->groupBy('managers.id')
+            ->orderBy('pts', 'desc')
+            ->limit(3)
+            ->get();
+
+        $tops = $this->checkMultiple($top, 'pts');
+        $this->insertFunFact(129, 'manager_id', 'pts', [], $tops);
+
+        $top = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->whereIn('roster_spot', ['BN', 'IR'])
+            ->groupBy('managers.id', 'year')
+            ->orderBy('pts', 'desc')
+            ->limit(3)
+            ->get();
+
+        $tops = $this->checkMultiple($top, 'pts');
+        $this->insertFunFact(130, 'manager_id', 'pts', ['year'], $tops);
+
+        $top = Roster::selectRaw('manager, managers.id as manager_id, year, week, sum(points) as pts')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->whereIn('roster_spot', ['BN', 'IR'])
+            ->groupBy('managers.id', 'year', 'week')
+            ->orderBy('pts', 'desc')
+            ->limit(3)
+            ->get();
+
+        $tops = $this->checkMultiple($top, 'pts');
+        $this->insertFunFact(131, 'manager_id', 'pts', ['Wk.','week', 'year'], $tops);
     }
 
     private function groupBySeason(array $all)

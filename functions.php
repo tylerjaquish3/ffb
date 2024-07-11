@@ -2498,6 +2498,8 @@ function getPositionPointsChartNumbers()
     }
     $man2name = getManagerName($man2);
 
+    $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DL', 'DB', 'BN', 'IR'];
+
     $labels = [];
     $result = query("SELECT manager, roster_spot, sum(points) as points FROM rosters
         JOIN managers on managers.name = rosters.manager
@@ -2506,7 +2508,22 @@ function getPositionPointsChartNumbers()
         WHERE rosters.year = $year and rosters.week = $week and (manager = '".$managerName."' OR manager = '".$man2name."')
         AND roster_spot != 'IR'
         GROUP BY manager, roster_spot
-        ORDER BY roster_spot ASC");
+        ORDER BY CASE roster_spot 
+            WHEN 'QB' THEN 0 
+            WHEN 'RB' THEN 1
+            WHEN 'WR' THEN 2
+            WHEN 'TE' THEN 3
+            WHEN 'W/R/T' THEN 4
+            WHEN 'W/R' THEN 5
+            WHEN 'W/T' THEN 6
+            WHEN 'Q/W/R/T' THEN 7 
+            WHEN 'K' THEN 8
+            WHEN 'DEF' THEN 9
+            WHEN 'D' THEN 10
+            WHEN 'DL' THEN 11
+            WHEN 'DB' THEN 12
+            WHEN 'BN' THEN 13
+        END");  
     while ($row = fetch_array($result)) {
 
         if (!in_array($row['roster_spot'], $labels)) {
@@ -2514,6 +2531,9 @@ function getPositionPointsChartNumbers()
         }
         $points[$row['manager']][] = $row['points'];
     }
+
+    // sort labels and points based on posOrder
+    $labels = array_values(array_intersect($posOrder, $labels));
 
     return [
         'labels' => $labels,

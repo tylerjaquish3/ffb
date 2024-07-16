@@ -80,12 +80,14 @@ class UpdateFunFacts implements ShouldQueue
             // $this->getOptimalLineupPoints();
             // // 92,93
             // $this->weeklyRanks();
-            // // 111-131
-            $this->positionTotals();
+            // // 111-128
+            // $this->positionTotals();
             // // 95, 96, 99-106
             // $this->pointsByGameTime();
             // // 97,98,107,108
             // $this->draftPicks();
+            // // 129-131
+            $this->benchPoints();
 
         } catch (\Exception $e) {
             $success = false;
@@ -1948,21 +1950,25 @@ class UpdateFunFacts implements ShouldQueue
 
     // 97,98,107,108
     public function draftPicks()
-    {
-        
+    { 
         $years = range(2006, $this->currentSeason);
-        
+
         $response = [];
         foreach ($years as $year) {
             $qbMedian = $this->getMedian($year, 'QB');
-            $wrMedian = $this->getMedian($year, 'WR');
+            $qbAvgPick = $this->getAveragePick($year, 'QB');
             $rbMedian = $this->getMedian($year, 'RB');
+            $rbAvgPick = $this->getAveragePick($year, 'RB');
+            $wrMedian = $this->getMedian($year, 'WR');
+            $wrAvgPick = $this->getAveragePick($year, 'WR');
             $teMedian = $this->getMedian($year, 'TE');
-            // Use multiplier to find sweet spot
-            // Don't want to just be above average, but to be a bit better than that
-            $multiplier = 1.3;
-dd($wrMedian);
-            $sql = "SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
+            $teAvgPick = $this->getAveragePick($year, 'TE');
+            $defMedian = $this->getMedian($year, 'DEF');
+            $defAvgPick = $this->getAveragePick($year, 'DEF');
+
+            $sql = "SELECT rosters.manager, managers.id as manager_id, draft.overall_pick, draft.position, 
+                rosters.player, sum(points) AS points, draft.year
+                FROM rosters
                 JOIN managers ON rosters.manager = managers.name
                 JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
                 WHERE rosters.year = $year
@@ -1974,23 +1980,58 @@ dd($wrMedian);
                 $row = (array) $player;
                 $row['year'] = $year;
                 if ($row['position'] == 'QB') {
-                    if ($row['points'] > ($qbMedian*$multiplier) && $row['overall_pick'] > 40) {
-                        $response[] = $row;
-                    }
+                    $row['points_diff'] = $row['points'] - $qbMedian;
+                    $row['pick_diff'] = $row['overall_pick'] - $qbAvgPick;
+                } elseif ($row['position'] == 'RB') {
+                    $row['points_diff'] = $row['points'] - $rbMedian;
+                    $row['pick_diff'] = $row['overall_pick'] - $rbAvgPick;
+                } elseif ($row['position'] == 'WR') {
+                    $row['points_diff'] = $row['points'] - $wrMedian;
+                    $row['pick_diff'] = $row['overall_pick'] - $wrAvgPick;
+                } elseif ($row['position'] == 'TE') {
+                    $row['points_diff'] = $row['points'] - $teMedian;
+                    $row['pick_diff'] = $row['overall_pick'] - $teAvgPick;
+                } elseif ($row['position'] == 'DEF') {
+                    $row['points_diff'] = $row['points'] - $defMedian;
+                    $row['pick_diff'] = $row['overall_pick'] - $defAvgPick;
                 } else {
-                    if ($row['points'] > ($wrtMedian*$multiplier) && $row['overall_pick'] > 60) {
-                        $response[] = $row;
-                    }
+                    continue;
+                }
+                $row['score'] = $row['points_diff'] + $row['pick_diff'];
+                $response[] = $row;
+                if ($year == $this->currentSeason) {
+                    $yearResponse[] = $row;
                 }
             }
         }
 
         usort($response, function($a, $b) {
-            return $b['points'] <=> $a['points'];
+            return $b['score'] <=> $a['score'];
         });
 
-        $best = array_slice($response,0,5);
-        dd($best);
+        $best = (object) $response[0];
+        $this->insertFunFact(108, 'manager_id', 'points', ['year', 'player'], [$best]);
+
+        usort($response, function($a, $b) {
+            return $a['score'] <=> $b['score'];
+        });
+        
+        $worst = (object) $response[0];
+        $this->insertFunFact(98, 'manager_id', 'points', ['year', 'player'], [$worst]);
+
+        usort($yearResponse, function($a, $b) {
+            return $b['score'] <=> $a['score'];
+        });
+
+        $best = (object) $yearResponse[0];
+        $this->insertFunFact(107, 'manager_id', 'points', ['player'], [$best]);
+
+        usort($yearResponse, function($a, $b) {
+            return $a['score'] <=> $b['score'];
+        });
+        
+        $worst = (object) $yearResponse[0];
+        $this->insertFunFact(97, 'manager_id', 'points', ['player'], [$worst]);
     }
 
     /**
@@ -2006,5 +2047,89 @@ dd($wrMedian);
             ->first();
 
         return $result->points;
+    }
+
+    /**
+     * Find the average overall_pick by position
+     */
+    private function getAveragePick($season, string $pos)
+    {
+        $result = Draft::selectRaw('position, avg(overall_pick) AS overall_pick')
+            ->where('year', $season)
+            ->where('position', $pos)
+            ->groupBy('position')
+            ->first();
+
+        return $result->overall_pick;
+    }
+
+    // 129-134
+    public function benchPoints()
+    {
+        $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->where('roster_spot', 'BN')
+            ->groupBy('managers.id')
+            ->orderBy('pts', 'desc')
+            ->limit(3)
+            ->get();
+
+        $tops = $this->checkMultiple($top, 'pts');
+        $this->insertFunFact(129, 'manager_id', 'pts', [], $tops);
+        
+        $top = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->where('roster_spot', 'BN')
+            ->groupBy('managers.id', 'year')
+            ->orderBy('pts', 'desc')
+            ->limit(3)
+            ->get();
+
+        $tops = $this->checkMultiple($top, 'pts');
+        $this->insertFunFact(130, 'manager_id', 'pts', ['year'], $tops);
+        
+        $top = Roster::selectRaw('manager, managers.id as manager_id, year, week, sum(points) as pts')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->where('roster_spot', 'BN')
+            ->groupBy('managers.id', 'year', 'week')
+            ->orderBy('pts', 'desc')
+            ->limit(3)
+            ->get();
+
+        $tops = $this->checkMultiple($top, 'pts');
+        $this->insertFunFact(131, 'manager_id', 'pts', ['year', 'Wk.', 'week'], $tops);
+
+        $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->where('roster_spot', 'BN')
+            ->groupBy('managers.id')
+            ->orderBy('pts', 'asc')
+            ->limit(3)
+            ->get();
+
+        $tops = $this->checkMultiple($top, 'pts');
+        $this->insertFunFact(132, 'manager_id', 'pts', [], $tops);
+        
+        $top = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->where('roster_spot', 'BN')
+            ->groupBy('managers.id', 'year')
+            ->orderBy('pts', 'asc')
+            ->limit(3)
+            ->get();
+
+        $tops = $this->checkMultiple($top, 'pts');
+        $this->insertFunFact(133, 'manager_id', 'pts', ['year'], $tops);
+        
+        $top = Roster::selectRaw('manager, managers.id as manager_id, year, week, sum(points) as pts')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->where('roster_spot', 'BN')
+            ->groupBy('managers.id', 'year', 'week')
+            ->orderBy('pts', 'asc')
+            ->limit(3)
+            ->get();
+
+        $tops = $this->checkMultiple($top, 'pts');
+        $this->insertFunFact(134, 'manager_id', 'pts', ['year', 'Wk.', 'week'], $tops);
     }
 }

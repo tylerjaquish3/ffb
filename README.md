@@ -25,11 +25,9 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - add a bunch more fun facts
     - most weeks with top/bottom 3 in points
     - record against everyone
-    - best/worst draft pick
     - best free agent pick up
     - biggest comeback in matchup
     - most #1 pos rank players in a week, season, all time
-    - most/least bench points week, season, all time
     - most/least IR players
 - chances of making playoffs, make request to playoffcomputer linked above
 
@@ -70,20 +68,4 @@ Generic league ideas
 
 
 $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
-Kim, Lizzy, Kristen, Stacie, Sheri, Monique, Carrie, Oksana, Laura, Olya
-
-# Questions
-I just have 5 quick survey questions for you relating to our fantasy football league that's about to start its 19th season.
-
-1. On a scale from 1-10, how excited are you for fantasy football season approaching?
-    - Why did you pick that number?
-2. How many championships would you guess "XXXX" has won?
-    - Why do you think he hasn't won more than that?
-3. If you could pick a draft position for "XXXX" what would you pick?
-    - Do you think he would want that position or are you trying to sabotage him?
-4. This may be a shot in the dark, how many points do you think "XXXX" scored last year?
-5. In a few weeks, we're going to vote on a new punishment for the league loser. Do you have any ideas?
-
-That's it. Thank you so much for participating. And please keep this confidential from "XXXX" until I share the results with him, I would appreciate it.
-
 

@@ -37,57 +37,65 @@ class UpdateFunFacts implements ShouldQueue
         try {
 
             // 1,2,3
-            // $this->mostPointsFor();
-            // // 4,5,6
-            // $this->mostPostseasonPointsFor();
-            // // 7,8,9,89,90,91
-            // $this->leastPointsAgainst();
-            // // 10,11
-            // $this->mostWins();
-            // // 13,14,15
-            // $this->leastPointsFor();
-            // // 16,17
-            // $this->mostLosses();
-            // // 12,18,19,20,21,22,23,24,25,31,65,66
-            // $this->postseasonRecords();
-            // // 26,27,28
-            // $this->highestSeeds();
-            // // 29,30,67,68,69,70
-            // $this->singleOpponent();
-            // // 32
-            // $this->leastChampionships();
-            // // 50,51,52,53,54,55
-            // $this->postseasonMargin();
-            // // 39,40,56,57,60,61
-            // $this->streaks();
-            // // 62,63,71,72
-            // $this->draft();
-            // // 73,74,75
-            // $this->moves();
-            // // 76,77,78,79,80
-            // $this->currentSeasonStats();
-            // // 45,46,47,48
-            // $this->margins();
-            // // 41,42
-            // $this->appearances();
-            // // 60,61
-            // $this->currentPostseasonStreak();
-            // // 58,59
-            // $this->postseasonWinPct();
-            // // 81,82,84,85,86,87
-            // $this->currentSeasonPoints();
-            // // 83,88
-            // $this->getOptimalLineupPoints();
-            // // 92,93
-            // $this->weeklyRanks();
-            // // 111-128
-            // $this->positionTotals();
-            // // 95, 96, 99-106
-            // $this->pointsByGameTime();
-            // // 97,98,107,108
-            // $this->draftPicks();
-            // // 129-131
+            $this->mostPointsFor();
+            // 4,5,6
+            $this->mostPostseasonPointsFor();
+            // 7,8,9,89,90,91
+            $this->leastPointsAgainst();
+            // 10,11
+            $this->mostWins();
+            // 13,14,15
+            $this->leastPointsFor();
+            // 16,17
+            $this->mostLosses();
+            // 12,18,19,20,21,22,23,24,25,31,65,66
+            $this->postseasonRecords();
+            // 26,27,28
+            $this->highestSeeds();
+            // 29,30,67,68,69,70
+            $this->singleOpponent();
+            // 32
+            $this->leastChampionships();
+            // 50,51,52,53,54,55
+            $this->postseasonMargin();
+            // 39,40,56,57,60,61
+            $this->streaks();
+            // 62,63,71,72
+            $this->draft();
+            // 73,74,75
+            $this->moves();
+            // 76,77,78,79,80
+            $this->currentSeasonStats();
+            // 45,46,47,48
+            $this->margins();
+            // 41,42
+            $this->appearances();
+            // 60,61
+            $this->currentPostseasonStreak();
+            // 58,59
+            $this->postseasonWinPct();
+            // 81,82,84,85,86,87
+            $this->currentSeasonPoints();
+            // 83,88
+            $this->getOptimalLineupPoints();
+            // 92,93
+            $this->weeklyRanks();
+            // 111-128
+            $this->positionTotals();
+            // 95, 96, 99-106
+            $this->pointsByGameTime();
+            // 97,98,107,108
+            $this->draftPicks();
+            // 129-131
             $this->benchPoints();
+            // 135
+            $this->comeback();
+            // 138,139
+            $this->freeAgent();
+            // 136,137
+            $this->pointsInWinLoss();
+            // 140,141
+            $this->irPlayers();
 
         } catch (\Exception $e) {
             $success = false;
@@ -185,7 +193,11 @@ class UpdateFunFacts implements ShouldQueue
             }
             $note = '';
             foreach ($notes as $n) {
-                $note .= is_null($top->{$n}) ? $n.' ' : $top->{$n}.' ';
+                if (property_exists($top, $n)) {
+                    $note .= is_null($top->{$n}) ? $n.' ' : $top->{$n}.' ';
+                } else {
+                    $note .= $n.' ';
+                }
             }
 
             ManagerFunFact::updateOrCreate([
@@ -203,6 +215,7 @@ class UpdateFunFacts implements ShouldQueue
     // 1,2,3
     private function mostPointsFor()
     {
+        echo 'Most Points For'.PHP_EOL;
         // Most PF (All Time)
         $i = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager1_score) as pts')
             ->orderBy('pts', 'desc')
@@ -233,6 +246,7 @@ class UpdateFunFacts implements ShouldQueue
     // 4,5,6
     private function mostPostseasonPointsFor()
     {
+        echo 'Most Postseason Points For'.PHP_EOL;
         // Most PF (All Time)
         $i = DB::select('SELECT managers.id, ptsTop+ptsBottom AS pts, gamest+gamesb
             FROM managers
@@ -326,6 +340,7 @@ class UpdateFunFacts implements ShouldQueue
     // 7,8,9,89,90,91
     private function leastPointsAgainst()
     {
+        echo 'Least Points Against'.PHP_EOL;
         // Least PA (All Time)
         $i = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager2_score) as pts')
             ->orderBy('pts', 'asc')
@@ -383,6 +398,7 @@ class UpdateFunFacts implements ShouldQueue
 
     private function mostWins()
     {
+        echo 'Most Wins'.PHP_EOL;
         // Most Wins (All time)
         $i = RegularSeasonMatchup::selectRaw('manager1_id, count(id) as wins')
             ->whereRaw('manager1_score > manager2_score')
@@ -406,6 +422,7 @@ class UpdateFunFacts implements ShouldQueue
 
     private function leastPointsFor()
     {
+        echo 'Least Points For'.PHP_EOL;
         // Least PF (All Time)
         $i = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager1_score) as pts')
             ->orderBy('pts', 'asc')
@@ -435,6 +452,7 @@ class UpdateFunFacts implements ShouldQueue
 
     private function mostLosses()
     {
+        echo 'Most Losses'.PHP_EOL;
         // Most Losses (All time)
         $i = RegularSeasonMatchup::selectRaw('manager1_id, count(id) as losses')
             ->whereRaw('manager1_score < manager2_score')
@@ -459,6 +477,7 @@ class UpdateFunFacts implements ShouldQueue
 
     private function postseasonRecords()
     {
+        echo 'Postseason Records'.PHP_EOL;
         $p = PlayoffMatchup::all();
 
         $types = ['total', 'topSeedLoss', 'underdogWin'];
@@ -635,6 +654,7 @@ class UpdateFunFacts implements ShouldQueue
 
     private function highestSeeds()
     {
+        echo 'Highest Seeds'.PHP_EOL;
         $i = PlayoffMatchup::selectRaw('manager1_id, count(id) as num1')
             ->where('round', 'Semifinal')
             ->where('manager1_seed', 1)
@@ -718,6 +738,7 @@ class UpdateFunFacts implements ShouldQueue
     // 67,68,29,30,69,70
     private function singleOpponent()
     {
+        echo 'Single Opponent'.PHP_EOL;
         $i = RegularSeasonMatchup::selectRaw('name, manager2_id, SUM(manager2_score) as pts, COUNT(regular_season_matchups.id) as gms')
             ->join('managers', 'managers.id', '=', 'regular_season_matchups.manager1_id')
             ->orderBy('pts', 'desc')
@@ -763,6 +784,7 @@ class UpdateFunFacts implements ShouldQueue
     // 32
     private function leastChampionships()
     {
+        echo 'Least Championships'.PHP_EOL;
         $finishes = Finish::selectRaw('manager_id, SUM(CASE WHEN finish = 1 THEN 1 ELSE 0 END) as wins')
             ->orderBy('wins', 'asc')
             ->groupBy('manager_id')
@@ -775,6 +797,7 @@ class UpdateFunFacts implements ShouldQueue
     // 50,51,52,53,54,55
     private function postseasonMargin()
     {
+        echo 'Postseason Margin'.PHP_EOL;
         $i = PlayoffMatchup::selectRaw('manager1_id, manager2_id, year, round, ABS(manager1_score - manager2_score) as diff, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner')
             ->orderBy('diff', 'desc')
             ->get();
@@ -817,6 +840,7 @@ class UpdateFunFacts implements ShouldQueue
     // 39,40,56,57,60,61
     private function streaks()
     {
+        echo 'Streaks'.PHP_EOL;
         $longestWin = $longestLose = 0;
 
         for ($x = 1; $x < 11; $x++) {
@@ -1029,6 +1053,7 @@ class UpdateFunFacts implements ShouldQueue
     // 62,63,71,72
     private function draft()
     {
+        echo 'Draft'.PHP_EOL;
         $i = Draft::selectRaw('manager_id, AVG(round_pick) as avg_pick')
             ->where('round', 1)
             ->groupBy('manager_id')
@@ -1083,6 +1108,7 @@ class UpdateFunFacts implements ShouldQueue
     // 73,74,75
     private function moves()
     {
+        echo 'Moves'.PHP_EOL;
         $i = TeamName::selectRaw('manager_id, sum(trades) as trades')
             ->orderBy('trades', 'desc')
             ->groupBy('manager_id')
@@ -1111,6 +1137,7 @@ class UpdateFunFacts implements ShouldQueue
     // 76,77,78,79,80
     private function currentSeasonStats()
     {
+        echo 'Current Season Stats'.PHP_EOL;
         $r = Roster::selectRaw('managers.id, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->where('roster_spot', 'BN')
@@ -1199,6 +1226,7 @@ class UpdateFunFacts implements ShouldQueue
     // 45,46,47,48
     private function margins()
     {
+        echo 'Margins'.PHP_EOL;
         $i = RegularSeasonMatchup::selectRaw('year, week_number, MAX(ABS(manager1_score - manager2_score)) as diff,
             CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner, 
             CASE WHEN manager1_score > manager2_score THEN manager2_id ELSE manager1_id END as loser')
@@ -1227,6 +1255,7 @@ class UpdateFunFacts implements ShouldQueue
     // 41,42
     private function appearances()
     {
+        echo 'Appearances'.PHP_EOL;
         $i = Finish::selectRaw('manager_id, count(manager_id) as app')
             ->where('finish', '<', 7)
             ->groupBy('manager_id')
@@ -1249,6 +1278,7 @@ class UpdateFunFacts implements ShouldQueue
     // 60,61
     private function currentPostseasonStreak()
     {
+        echo 'Current Postseason Streak'.PHP_EOL;
         $streaks = [];
         for ($y = $this->lastSeason; $y > 2005; $y--) {
             $i = Finish::where('finish', '<', 7)
@@ -1328,6 +1358,7 @@ class UpdateFunFacts implements ShouldQueue
     // 58,59
     private function postseasonWinPct()
     {
+        echo 'Postseason Win Pct'.PHP_EOL;
         $p = PlayoffMatchup::all();
 
         for ($x = 1; $x < 11; $x++) {
@@ -1391,6 +1422,7 @@ class UpdateFunFacts implements ShouldQueue
     //81,82,83,84,85,86,87
     private function currentSeasonPoints()
     {
+        echo 'Current Season Points'.PHP_EOL;
         // Most points in week
         $r = Roster::selectRaw('managers.id, week, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
@@ -1448,6 +1480,7 @@ class UpdateFunFacts implements ShouldQueue
      */
     private function getOptimalLineupPoints()
     {
+        echo 'Optimal Lineup Points'.PHP_EOL;
         $response = [];
 
         $r = Roster::selectRaw('distinct week')->where('year', $this->currentSeason)->get();
@@ -1605,6 +1638,7 @@ class UpdateFunFacts implements ShouldQueue
     // 92,93
     public function weeklyRanks()
     {
+        echo 'Weekly Ranks'.PHP_EOL;
         // initialize all managers to 0
         for ($x = 1; $x < 11; $x++) {
             $tops[$x] = 0;
@@ -1729,6 +1763,7 @@ class UpdateFunFacts implements ShouldQueue
 
     public function positionTotals()
     {
+        echo 'Position Totals'.PHP_EOL;
         $all = [
             113 => 'DEF',
             116 => 'K',
@@ -1831,6 +1866,7 @@ class UpdateFunFacts implements ShouldQueue
 
     public function pointsByGameTime()
     {
+        echo 'Points By Game Time'.PHP_EOL;
         $this->mostAllTime();
         $this->mostBySeason();
         $this->mostByWeek();
@@ -1951,6 +1987,7 @@ class UpdateFunFacts implements ShouldQueue
     // 97,98,107,108
     public function draftPicks()
     { 
+        echo 'Draft Picks'.PHP_EOL;
         $years = range(2006, $this->currentSeason);
 
         $response = [];
@@ -2066,6 +2103,7 @@ class UpdateFunFacts implements ShouldQueue
     // 129-134
     public function benchPoints()
     {
+        echo 'Bench Points'.PHP_EOL;
         $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->where('roster_spot', 'BN')
@@ -2131,5 +2169,180 @@ class UpdateFunFacts implements ShouldQueue
 
         $tops = $this->checkMultiple($top, 'pts');
         $this->insertFunFact(134, 'manager_id', 'pts', ['year', 'Wk.', 'week'], $tops);
+    }
+
+    // 135
+    public function comeback()
+    {
+        echo 'Comeback'.PHP_EOL;
+        // Get points before MNF
+        $r = Roster::selectRaw('rosters.year, week, manager, managers.id, sum(points) as pts')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->whereNotIn('roster_spot', ['BN', 'IR'])
+            ->where('game_slot', '<', 6)
+            ->groupBy(['rosters.year', 'week', 'manager'])
+            ->get();
+
+        $allMatchups = RegularSeasonMatchup::all();
+
+        $response = [];
+        foreach ($r as $row) {
+            // Figure out who the manager played that week
+            $opp = $allMatchups->where('year', $row->year)
+                ->where('week_number', $row->week)
+                ->where('manager1_id', $row->id)
+                ->first();
+
+            // if opponent won (no comeback), move on
+            if ($opp->winning_manager_id == $opp->manager2_id) {
+                continue;
+            }
+
+            // Find points before MNF for that manager in the same week
+            $oppPoints = $r->where('year', $row->year)
+                ->where('week', $row->week)
+                ->where('id', $opp->manager2_id)
+                ->first()->pts;
+
+            // If manager points was higher than opp points (they were already leading), move on
+            if ($row->pts > $oppPoints) {
+                continue;
+            }
+
+            // Get diff between the two
+            $diff = $row->pts - $oppPoints;
+            $response[] = (object)[
+                'manager' => $row->id,
+                'week' => $row->week,
+                'year' => $row->year,
+                'diff' => abs($diff)
+            ];
+        }
+
+        // sort responses by comeback
+        usort($response, function($a, $b) {
+            return $b->diff <=> $a->diff;
+        });
+
+        $best = (object) $response[0];
+        $this->insertFunFact(135, 'manager', 'diff', ['Wk.', 'week', 'year'], [$best]);
+    }
+
+    public function freeAgent()
+    {
+        echo 'Free Agent'.PHP_EOL;
+        $r = Roster::selectRaw('year, manager, managers.id as manager_id, player, sum(points) as pts')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->groupBy(['player', 'year'])
+            ->orderBy('pts', 'desc')
+            ->get();
+
+        $response = [];
+        // Check if that player was drafted
+        foreach ($r as $row) {
+            $drafted = Draft::where('player', 'LIKE', $row->player . '%')
+                ->where('year', $row->year)
+                ->first();
+
+            if ($drafted) {
+                continue;
+            }
+            $response[] = $row; 
+        }
+
+        $best = (object) $response[0];
+        $this->insertFunFact(139, 'manager_id', 'pts', ['year', 'player'], [$best]);
+
+        $response = [];
+        // Check if that player was drafted
+        foreach ($r as $row) {
+            if ($row->year != $this->currentSeason) {
+                continue;
+            }
+
+            $drafted = Draft::where('player', 'LIKE', $row->player . '%')
+                ->where('year', $row->year)
+                ->first();
+
+            if ($drafted) {
+                continue;
+            }
+            $response[] = $row; 
+        }
+
+        $best = (object) $response[0];
+        $this->insertFunFact(138, 'manager_id', 'pts', ['player'], [$best]);
+    }
+
+    public function pointsInWinLoss()
+    {
+        echo 'Points In Win Loss'.PHP_EOL;
+        $r = RegularSeasonMatchup::orderBy('manager1_score', 'desc')->get();
+
+        $response = [];
+        foreach ($r as $row) {
+            if ($row->winning_manager_id == $row->manager1_id) {
+                continue;
+            }
+
+            $response[] = (object)[
+                'manager' => $row->manager1_id,
+                'week' => $row->week_number,
+                'year' => $row->year,
+                'points' => $row->manager1_score
+            ];
+            break;
+        }
+
+        $best = (object) $response[0];
+        $this->insertFunFact(136, 'manager', 'points', ['Wk.', 'week', 'year'], [$best]);
+        
+        $r = RegularSeasonMatchup::orderBy('manager1_score', 'asc')->get();
+
+        $response = [];
+        foreach ($r as $row) {
+            if ($row->losing_manager_id == $row->manager1_id) {
+                continue;
+            }
+
+            $response[] = (object)[
+                'manager' => $row->manager1_id,
+                'week' => $row->week_number,
+                'year' => $row->year,
+                'points' => $row->manager1_score
+            ];
+            break;
+        }
+
+        $best = (object) $response[0];
+        $this->insertFunFact(137, 'manager', 'points', ['Wk.', 'week', 'year'], [$best]);
+    }
+
+    public function irPlayers()
+    {
+        echo 'IR Players'.PHP_EOL;
+        $top = Roster::selectRaw('manager, managers.id as manager_id, count(rosters.id) as cnt')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->where('roster_spot', 'IR')
+            ->groupBy('managers.id')
+            ->orderBy('cnt', 'desc')
+            ->limit(5)
+            ->get();
+
+        $tops = $this->checkMultiple($top, 'cnt');
+        $this->insertFunFact(140, 'manager_id', 'cnt', [], $tops);
+        
+        $top = Roster::selectRaw('manager, managers.id as manager_id, count(rosters.id) as cnt')
+            ->join('managers', 'managers.name', '=', 'rosters.manager')
+            ->where('roster_spot', 'IR')
+            ->where('year', $this->currentSeason)
+            ->groupBy('managers.id')
+            ->orderBy('cnt', 'desc')
+            ->limit(5)
+            ->get();
+
+        $tops = $this->checkMultiple($top, 'cnt');
+        $this->insertFunFact(141, 'manager_id', 'cnt', [], $tops);
+
     }
 }

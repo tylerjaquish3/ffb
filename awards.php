@@ -65,12 +65,12 @@ if (isset($_GET['id'])) {
                                             if (isfloat($row['value']) && isDecimal($row['value'])) {
                                                 $value = number_format($row['value'], 2, '.', ',');
                                             } 
-                                            echo '<div class="col-sm-6 award good">';
+                                            echo '<div class="col-sm-4"><div class="award good">';
                                             if ($row['new_leader']) {
                                                 echo '<i class="icon-warning" style="font-size: 15px"></i>';
                                             }
                                             echo '<strong>'.$row['fact'].'</strong><br />'.$value.'<br />'.$row['note'];
-                                            echo '</div>';
+                                            echo '</div></div>';
                                         }
                                     ?>
                                 </div>
@@ -90,12 +90,12 @@ if (isset($_GET['id'])) {
                                             if (isfloat($row['value']) && isDecimal($row['value'])) {
                                                 $value = number_format($row['value'], 2, '.', ',');
                                             } 
-                                            echo '<div class="col-sm-6 award bad">';
+                                            echo '<div class="col-sm-4"><div class="award bad">';
                                             if ($row['new_leader']) {
                                                 echo '<i class="icon-warning" style="font-size: 15px"></i>';
                                             }
                                             echo '<strong>'.$row['fact'].'</strong><br />'.$value.'<br />'.$row['note'];
-                                            echo '</div>';
+                                            echo '</div></div>';
                                      } ?>
                                 </div>
                             </div>

@@ -124,9 +124,15 @@ include 'sidebar.html';
                                 <li>Loser gives PowerPoint presentation explaining why they lost.</li>
                                 <li>Giving the winner a relaxing massage.</li>
                                 <li>Polar plunge.</li>
-                                <li>Body waxing.</li>
+                                <li>Poop trophy for loser to keep displayed.</li>
                                 <li>Winner can choose a custom punishment for the loser each year.</li>
-                                <li>Other ?</li>
+                            </ul>
+                            Submitted by wives:
+                            <ul>
+                                <li>Sardine pie to the face.</li>
+                                <li>T-shirt for loser to wear each Sunday (or just to draft event)</li>
+                                <li>Eat mayonaise for a whole day.</li>
+                                <li>Beer bitch on draft day.</li>
                             </ul>
                         </div>
                     </div>

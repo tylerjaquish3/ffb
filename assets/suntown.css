@@ -206,10 +206,16 @@ span.seed {
 
 .award {
     text-align: center;
-    padding: 10px;
-    margin: 3px 0px;
-    height: 80px;
+    padding: 20px;
+    margin: 3px -5px;
+    /* height: 95px; */
     font-size: 13px;
+    border-radius: 40px;
+    border-top: #ccc 3px solid;
+    border-right: #ccc 3px solid;
+    border-bottom: #777 3px solid;
+    border-left: #777 3px solid;
+    border-style: groove;
 }
 
 .good {

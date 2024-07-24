@@ -2349,13 +2349,15 @@ function checkRosterForOptimal(array $roster)
 
 function getMatchupRecapNumbers()
 {
-    $managerName = 'Andy';
-    $year = 2023;
+    global $season;
     $week = 1;
+
+    $managerName = 'Andy';
+
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];
         if (isset($_GET['year'])) {
-            $year = $_GET['year'];
+            $season = $_GET['year'];
         }
         if (isset($_GET['week'])) {
             $week = $_GET['week'];
@@ -2375,7 +2377,7 @@ function getMatchupRecapNumbers()
         JOIN managers on managers.name = rosters.manager
         JOIN regular_season_matchups rsm on rsm.year = rosters.year and rsm.week_number = rosters.week
         and rsm.manager1_id = managers.id
-        WHERE rosters.year = $year and rosters.week = $week and manager = '".$managerName."'");
+        WHERE rosters.year = $season and rosters.week = $week and manager = '".$managerName."'");
     while ($row = fetch_array($result)) {
 
         $versusId = $row['manager2_id'];
@@ -2408,7 +2410,7 @@ function getMatchupRecapNumbers()
     
     $result = query("SELECT * FROM managers 
         JOIN rosters on managers.name = rosters.manager
-        WHERE rosters.year = $year AND rosters.week = $week AND managers.id = ".$versusId);
+        WHERE rosters.year = $season AND rosters.week = $week AND managers.id = ".$versusId);
     while ($row = fetch_array($result)) {
         $versus = $row['manager'];
         if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
@@ -2431,11 +2433,11 @@ function getMatchupRecapNumbers()
         $recap['record1before'] = '0 - 0';
         $recap['record2before'] = '0 - 0';
     } else {
-        $recap['record1before'] = getRecord($managerName, $year, $week-1);
-        $recap['record2before'] = getRecord($versus, $year, $week-1);
+        $recap['record1before'] = getRecord($managerName, $season, $week-1);
+        $recap['record2before'] = getRecord($versus, $season, $week-1);
     }
-    $recap['record1after'] = getRecord($managerName, $year, $week);
-    $recap['record2after'] = getRecord($versus, $year, $week);
+    $recap['record1after'] = getRecord($managerName, $season, $week);
+    $recap['record2after'] = getRecord($versus, $season, $week);
 
     $recap['man1'] = $managerPoints > $versusPoints ? '<span class="badge badge-primary">'.$managerName.'</span>' : '<span class="badge badge-secondary">'.$managerName.'</span>';
     $recap['man2'] = $managerPoints > $versusPoints ? '<span class="badge badge-secondary">'.$versus.'</span>' : '<span class="badge badge-primary">'.$versus.'</span>';
@@ -2470,13 +2472,15 @@ function getRecord($managerName, $year, $week)
 
 function getPositionPointsChartNumbers()
 {
-    $managerName = 'Andy';
-    $year = 2023;
+    global $season;
     $week = 1;
+
+    $managerName = 'Andy';
+
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];
         if (isset($_GET['year'])) {
-            $year = $_GET['year'];
+            $season = $_GET['year'];
         }
         if (isset($_GET['week'])) {
             $week = $_GET['week'];
@@ -2486,7 +2490,7 @@ function getPositionPointsChartNumbers()
     $man2 = null;
     $result = query("SELECT * FROM regular_season_matchups rsm
         JOIN managers on managers.id = rsm.manager1_id
-        WHERE year = $year and week_number = $week and managers.name = '".$managerName."'");
+        WHERE year = $season and week_number = $week and managers.name = '".$managerName."'");
     while ($row = fetch_array($result)) {
         $man2 = $row['manager2_id'];
     }
@@ -2505,7 +2509,7 @@ function getPositionPointsChartNumbers()
         JOIN managers on managers.name = rosters.manager
         JOIN regular_season_matchups rsm on rsm.year = rosters.year and rsm.week_number = rosters.week
         and rsm.manager1_id = managers.id
-        WHERE rosters.year = $year and rosters.week = $week and (manager = '".$managerName."' OR manager = '".$man2name."')
+        WHERE rosters.year = $season and rosters.week = $week and (manager = '".$managerName."' OR manager = '".$man2name."')
         AND roster_spot != 'IR'
         GROUP BY manager, roster_spot
         ORDER BY CASE roster_spot 
@@ -2543,13 +2547,15 @@ function getPositionPointsChartNumbers()
 
 function getGameTimeChartNumbers()
 {
-    $managerName = 'Andy';
-    $year = 2023;
+    global $season;
     $week = 1;
+
+    $managerName = 'Andy';
+
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];
         if (isset($_GET['year'])) {
-            $year = $_GET['year'];
+            $season = $_GET['year'];
         }
         if (isset($_GET['week'])) {
             $week = $_GET['week'];
@@ -2559,7 +2565,7 @@ function getGameTimeChartNumbers()
     $man2 = null;
     $result = query("SELECT * FROM regular_season_matchups rsm
         JOIN managers on managers.id = rsm.manager1_id
-        WHERE year = $year and week_number = $week and managers.name = '".$managerName."'");
+        WHERE year = $season and week_number = $week and managers.name = '".$managerName."'");
     while ($row = fetch_array($result)) {
         $man2 = $row['manager2_id'];
     }
@@ -2584,7 +2590,7 @@ function getGameTimeChartNumbers()
     foreach ($labels as $id => $label) {
         $result = query("SELECT manager, game_slot, sum(points) as points FROM rosters
             JOIN managers on managers.name = rosters.manager
-            WHERE rosters.year = $year and rosters.week = $week and manager = '".$managerName."'
+            WHERE rosters.year = $season and rosters.week = $week and manager = '".$managerName."'
             AND roster_spot NOT IN ('IR', 'BN')
             AND game_slot = $id
             GROUP BY manager, game_slot
@@ -2599,7 +2605,7 @@ function getGameTimeChartNumbers()
     foreach ($labels as $id => $label) {
         $result = query("SELECT manager, game_slot, sum(points) as points FROM rosters
             JOIN managers on managers.name = rosters.manager
-            WHERE rosters.year = $year and rosters.week = $week and manager = '".$man2name."'
+            WHERE rosters.year = $season and rosters.week = $week and manager = '".$man2name."'
             AND roster_spot NOT IN ('IR', 'BN')
             AND game_slot = $id
             GROUP BY manager, game_slot

@@ -20,16 +20,16 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - add trophy graphic on trophy page
 - make sidebar collapsible
 - grab postseason matchup rosters
+- chances of making playoffs, make request to playoffcomputer linked above
 - rosters page,
     - add optimal lineups info on left
 - add a bunch more fun facts
-    - most weeks with top/bottom 3 in points
     - record against everyone
-    - best free agent pick up
-    - biggest comeback in matchup
+    - best trade
     - most #1 pos rank players in a week, season, all time
-    - most/least IR players
-- chances of making playoffs, make request to playoffcomputer linked above
+    - fewest points by position (all time, season)
+    - most QBs/RBs/etc drafted in first round
+    - most seahawks drafted
 
 Notes:
 Rams moved to LA between 2015 & 2016

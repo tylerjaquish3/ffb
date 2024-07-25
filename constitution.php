@@ -63,7 +63,7 @@ while ($row = fetch_array($result)) {
                                 <p>The fantasy football draft is the single most important day of the fantasy football season, but the league is not won at the draft.
                                 Our draft is held on or around the end of August, generally one week before the kickoff of the NFL season.</p>
 
-                                <p>Approximately 6 weeks before the draft, the draft order is determined in a unique but random fashion. This is created by the commissioner
+                                <p>Approximately 4 weeks before the draft, the draft order is determined in a unique but random fashion. This is created by the commissioner
                                 and recorded for video evidence, with no retakes or edits in order to preserve authenticity and integrity. For instance, when the dog ran
                                 away with the tennis ball with Gavin's name on it, the video continued uncut. The draft order will always be determined with complete randomness,
                                 giving every manager an equal chance at getting the #1 pick.</p>
@@ -87,9 +87,7 @@ while ($row = fetch_array($result)) {
                                     <li>No collusion amongst teams in regards to trades or determining the outcome of a matchup. This includes intentional losing to effect the league standings.</li>
                                     <li>No trade "rentals" where the same trade is reversed.</li>
                                     <li>No trading if you're mathematically eliminated from postseason as this is considered collusion.</li>
-                                    <li>Trades have a 2 day period where they can be reviewed/vetoed by the league. Therefore, the deadline for a trade to take effect
-                                        for the current week is to be accepted by Thursday. If any trade elements play on Thursday, the deadline for the trade to be accepted is Monday.
-                                    </li>
+                                    <li>Trades have a 1 day period where they can be reviewed/vetoed by the league.</li>
                                     <li>Smack talk is encouraged, especially if it hurts feelings.</li>
                                     <li>Players added and dropped in the same day shall return to Free Agent status (not Waivers).</li>
                                     <li>Rules/settings can be changed with a majority vote. However, in-season changes require a super-majority (80% yea).</li>
@@ -181,16 +179,17 @@ while ($row = fetch_array($result)) {
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">
                                 <br />
-                                <strong>Vote on the following: </strong>
+                                <strong>Voted on the following: </strong>
                                 <ol>
-                                    <li>Add an 18th roster position (BN or W/R/T) | <a href="voteInfo.php#new_pos">More Info</a><strong></strong></li>
-                                    <li>Push trades through right away | <a href="voteInfo.php#trade_voting">More Info</a><strong></strong></li>
-                                    <li>Able to trade FAB dollars | <a href="voteInfo.php#trade_fab">More Info</a><strong></strong></li>
-                                    <li>Add Punt/Kick Return TDs to DEF | <a href="voteInfo.php#return_td">More Info</a><strong></strong></li>
-                                    <li>Replacing toilet seat as punishment | <a href="voteInfo.php#punishment">More Info</a><strong></strong></li>
+                                    <li>Add an 18th roster position (BN or W/R/T) | <strong>Voted to keep as-is (vote was 5-5).</strong></li>
+                                    <li>Push trades through right away | <strong>Voted to change to 1 day vote/veto period (vote was 9-0).</strong></li>
+                                    <li>Able to trade FAB dollars | <strong>Voted yes to trading FAB (vote was 9-0).</strong></li>
+                                    <li>Add Punt/Kick Return TDs to DEF | <strong>Voted to keep as-is (vote was 5-3).</strong></li>
+                                    <li>Replacing toilet seat as punishment | <strong>Tabled for a later date.</strong></li>
                                 </ol>
                                 <strong>Next year's draft location</strong><br />
-                                <strong>Determine 2024 draft order</strong>
+                                <strong>Determine 2024 draft order</strong><br />
+                                <a href="https://youtu.be/GswkYPesTJk" target="_blank">Watch Video Here</a>
                                 <br /><br />
                                 <strong>Draft date: 8.25.24 | Time: 3:30pm | Location: Sartin's (Spokane, WA)</strong>
                                 <br /><br />

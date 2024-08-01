@@ -192,8 +192,17 @@ class UpdateFunFacts implements ShouldQueue
                 ManagerFunFact::whereIn('id', $facts->pluck('id'))->delete();
             }
             $note = '';
+            
             foreach ($notes as $n) {
-                if (property_exists($top, $n)) {
+
+                if (gettype($top) == 'object') {
+
+                    if (property_exists($top, $n)) {
+                        $note .= is_null($top->{$n}) ? $n.' ' : $top->{$n}.' ';
+                    } else {
+                        $note .= $n.' ';
+                    }
+                } elseif (isset($top->toArray()[$n])) {
                     $note .= is_null($top->{$n}) ? $n.' ' : $top->{$n}.' ';
                 } else {
                     $note .= $n.' ';
@@ -1236,8 +1245,8 @@ class UpdateFunFacts implements ShouldQueue
             ->get();
 
         $tops = $this->checkMultiple($i, 'diff');
-        $this->insertFunFact(45, 'winner', 'diff', ['Wk.','week_number','year'], $tops);
-        $this->insertFunFact(47, 'loser', 'diff', ['Wk.','week_number','year'], $tops);
+        $this->insertFunFact(45, 'winner', 'diff', ['Wk','week_number','year'], $tops);
+        $this->insertFunFact(47, 'loser', 'diff', ['Wk','week_number','year'], $tops);
 
         $i = RegularSeasonMatchup::selectRaw('year, week_number, MAX(ABS(manager1_score - manager2_score)) as diff,
             CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner, 
@@ -1248,8 +1257,8 @@ class UpdateFunFacts implements ShouldQueue
             ->get();
 
         $tops = $this->checkMultiple($i, 'diff');
-        $this->insertFunFact(46, 'winner', 'diff', ['Wk.','week_number','year'], $tops);
-        $this->insertFunFact(48, 'loser', 'diff', ['Wk.','week_number','year'], $tops);
+        $this->insertFunFact(46, 'winner', 'diff', ['Wk','week_number','year'], $tops);
+        $this->insertFunFact(48, 'loser', 'diff', ['Wk','week_number','year'], $tops);
     }
 
     // 41,42
@@ -1433,7 +1442,7 @@ class UpdateFunFacts implements ShouldQueue
             ->get();
 
         $tops = $this->checkMultiple($r, 'pts');
-        $this->insertFunFact(81, 'id', 'pts', ['Wk.','week'], $tops);
+        $this->insertFunFact(81, 'id', 'pts', ['Wk','week'], $tops);
 
         // Fewest points in week
         $r = Roster::selectRaw('managers.id, week, sum(points) as pts')
@@ -1445,7 +1454,7 @@ class UpdateFunFacts implements ShouldQueue
             ->get();
         
         $tops = $this->checkMultiple($r, 'pts');
-        $this->insertFunFact(83, 'id', 'pts', ['Wk.','week'], $tops);
+        $this->insertFunFact(83, 'id', 'pts', ['Wk','week'], $tops);
 
         // Win/loss margins
         $i = RegularSeasonMatchup::selectRaw('year, week_number, MAX(ABS(manager1_score - manager2_score)) as diff,
@@ -1458,8 +1467,8 @@ class UpdateFunFacts implements ShouldQueue
             ->get();
 
         $tops = $this->checkMultiple($i, 'diff');
-        $this->insertFunFact(84, 'winner', 'diff', ['Wk.','week_number','year'], $tops);
-        $this->insertFunFact(86, 'loser', 'diff', ['Wk.','week_number','year'], $tops);
+        $this->insertFunFact(84, 'winner', 'diff', ['Wk','week_number','year'], $tops);
+        $this->insertFunFact(86, 'loser', 'diff', ['Wk','week_number','year'], $tops);
 
         $i = RegularSeasonMatchup::selectRaw('year, week_number, MAX(ABS(manager1_score - manager2_score)) as diff,
             CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner, 
@@ -1471,8 +1480,8 @@ class UpdateFunFacts implements ShouldQueue
             ->get();
 
         $tops = $this->checkMultiple($i, 'diff');
-        $this->insertFunFact(85, 'winner', 'diff', ['Wk.','week_number','year'], $tops);
-        $this->insertFunFact(87, 'loser', 'diff', ['Wk.','week_number','year'], $tops);
+        $this->insertFunFact(85, 'winner', 'diff', ['Wk','week_number','year'], $tops);
+        $this->insertFunFact(87, 'loser', 'diff', ['Wk','week_number','year'], $tops);
     }   
 
     /**
@@ -1823,7 +1832,7 @@ class UpdateFunFacts implements ShouldQueue
             ->get();
 
         $tops = $this->checkMultiple($top, 'pts');
-        $this->insertFunFact(131, 'manager_id', 'pts', ['Wk.','week', 'year'], $tops);
+        $this->insertFunFact(131, 'manager_id', 'pts', ['Wk','week', 'year'], $tops);
     }
 
     private function groupBySeason(array $all)
@@ -1860,7 +1869,7 @@ class UpdateFunFacts implements ShouldQueue
 
             $tops = $this->checkMultiple($top, 'pts');
 
-            $this->insertFunFact($ffId, 'manager_id', 'pts', ['Wk.', 'week', 'year'], $tops);
+            $this->insertFunFact($ffId, 'manager_id', 'pts', ['Wk', 'week', 'year'], $tops);
         }
     }
 
@@ -1936,7 +1945,7 @@ class UpdateFunFacts implements ShouldQueue
                 ->get();
 
             $tops = $this->checkMultiple($top, 'pts');
-            $this->insertFunFact($key, 'manager_id', 'pts', ['Wk.', 'week', 'year'], $tops);
+            $this->insertFunFact($key, 'manager_id', 'pts', ['Wk', 'week', 'year'], $tops);
         }
     }
 
@@ -2135,7 +2144,7 @@ class UpdateFunFacts implements ShouldQueue
             ->get();
 
         $tops = $this->checkMultiple($top, 'pts');
-        $this->insertFunFact(131, 'manager_id', 'pts', ['year', 'Wk.', 'week'], $tops);
+        $this->insertFunFact(131, 'manager_id', 'pts', ['year', 'Wk', 'week'], $tops);
 
         $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
@@ -2168,7 +2177,7 @@ class UpdateFunFacts implements ShouldQueue
             ->get();
 
         $tops = $this->checkMultiple($top, 'pts');
-        $this->insertFunFact(134, 'manager_id', 'pts', ['year', 'Wk.', 'week'], $tops);
+        $this->insertFunFact(134, 'manager_id', 'pts', ['year', 'Wk', 'week'], $tops);
     }
 
     // 135
@@ -2225,7 +2234,7 @@ class UpdateFunFacts implements ShouldQueue
         });
 
         $best = (object) $response[0];
-        $this->insertFunFact(135, 'manager', 'diff', ['Wk.', 'week', 'year'], [$best]);
+        $this->insertFunFact(135, 'manager', 'diff', ['Wk', 'week', 'year'], [$best]);
     }
 
     public function freeAgent()
@@ -2295,7 +2304,7 @@ class UpdateFunFacts implements ShouldQueue
         }
 
         $best = (object) $response[0];
-        $this->insertFunFact(136, 'manager', 'points', ['Wk.', 'week', 'year'], [$best]);
+        $this->insertFunFact(136, 'manager', 'points', ['Wk', 'week', 'year'], [$best]);
         
         $r = RegularSeasonMatchup::orderBy('manager1_score', 'asc')->get();
 
@@ -2315,7 +2324,7 @@ class UpdateFunFacts implements ShouldQueue
         }
 
         $best = (object) $response[0];
-        $this->insertFunFact(137, 'manager', 'points', ['Wk.', 'week', 'year'], [$best]);
+        $this->insertFunFact(137, 'manager', 'points', ['Wk', 'week', 'year'], [$best]);
     }
 
     public function irPlayers()

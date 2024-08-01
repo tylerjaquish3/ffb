@@ -174,7 +174,7 @@ while ($row = fetch_array($result)) {
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Meeting Agenda | 7.24.24 8pm</h4>
+                            <h4>Meeting Agenda | 7.24.24</h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">
@@ -187,7 +187,6 @@ while ($row = fetch_array($result)) {
                                     <li>Add Punt/Kick Return TDs to DEF | <strong>Voted to keep as-is (vote was 5-3).</strong></li>
                                     <li>Replacing toilet seat as punishment | <strong>Tabled for a later date.</strong></li>
                                 </ol>
-                                <strong>Next year's draft location</strong><br />
                                 <strong>Determine 2024 draft order</strong><br />
                                 <a href="https://youtu.be/GswkYPesTJk" target="_blank">Watch Video Here</a>
                                 <br /><br />

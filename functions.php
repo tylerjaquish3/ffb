@@ -1369,9 +1369,10 @@ function getTrades()
     while ($row = fetch_array($result)) {
 
         $pointsBefore = $pointsAfter = 0;
+        $player = $row['player'];
         // Look up player's points before trade week
-        $result2 = query("SELECT sum(points) as points FROM rosters
-            WHERE player = '".$row['player']."' AND year = ".$row['year']." AND week < ".$row['week']);
+        $result2 = query('SELECT sum(points) as points FROM rosters
+            WHERE player = "'.$player.'" AND year = '.$row["year"].' AND week < '.$row["week"]);
         while ($row2 = fetch_array($result2)) {
             if ($row2['points'] != null) {
                 $pointsBefore = $row2['points'];
@@ -1379,8 +1380,8 @@ function getTrades()
         }
 
         // Look up player's points after trade week
-        $result2 = query("SELECT sum(points) as points FROM rosters
-            WHERE player = '".$row['player']."' AND year = ".$row['year']." AND week >= ".$row['week']);
+        $result2 = query('SELECT sum(points) as points FROM rosters
+            WHERE player = "'.$player.'" AND year = '.$row["year"].' AND week >= '.$row["week"]);
         while ($row2 = fetch_array($result2)) {
             if ($row2['points'] != null) {
                 $pointsAfter = $row2['points'];

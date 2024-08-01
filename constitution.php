@@ -185,9 +185,9 @@ while ($row = fetch_array($result)) {
                                     <li>Push trades through right away | <strong>Voted to change to 1 day vote/veto period (vote was 9-0).</strong></li>
                                     <li>Able to trade FAB dollars | <strong>Voted yes to trading FAB (vote was 9-0).</strong></li>
                                     <li>Add Punt/Kick Return TDs to DEF | <strong>Voted to keep as-is (vote was 5-3).</strong></li>
-                                    <li>Replacing toilet seat as punishment | <strong>Tabled for a later date.</strong></li>
+                                    <li>Replacing toilet seat as punishment | <strong>Voted to add T-shirt for loser to wear to draft event (vote was 7-5).</strong></li>
                                 </ol>
-                                <strong>Determine 2024 draft order</strong><br />
+                                <strong>Determined 2024 draft order</strong><br />
                                 <a href="https://youtu.be/GswkYPesTJk" target="_blank">Watch Video Here</a>
                                 <br /><br />
                                 <strong>Draft date: 8.25.24 | Time: 3:30pm | Location: Sartin's (Spokane, WA)</strong>

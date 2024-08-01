@@ -30,6 +30,9 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - fewest points by position (all time, season)
     - most QBs/RBs/etc drafted in first round
     - most seahawks drafted
+- put page name in tab title
+- leveon bell in 2018 should be worst pick
+- profile chart for points each week with filters for start/end date range
 
 Notes:
 Rams moved to LA between 2015 & 2016

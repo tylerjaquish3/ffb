@@ -179,6 +179,7 @@ class UpdateFunFacts implements ShouldQueue
             $top = $tops[0];
             $newLeader = 1;
             $facts = ManagerFunFact::where('fun_fact_id', $ffId)->get();
+            
             foreach ($facts as $fact) {
                 if ($fact->manager_id == $top->{$manId}) {
                     $newLeader = 0;
@@ -192,11 +193,12 @@ class UpdateFunFacts implements ShouldQueue
                 ManagerFunFact::whereIn('id', $facts->pluck('id'))->delete();
             }
             $note = '';
-            
+// dd(is_subclass_of($top, 'Illuminate\Database\Eloquent\Model'));
             foreach ($notes as $n) {
-
-                if (gettype($top) == 'object') {
-
+                if (is_subclass_of($top, 'Illuminate\Database\Eloquent\Model')) {
+                    $note .= is_null($top->{$n}) ? $n.' ' : $top->{$n}.' ';
+                } elseif (gettype($top) == 'object') {
+                    // its a model instance
                     if (property_exists($top, $n)) {
                         $note .= is_null($top->{$n}) ? $n.' ' : $top->{$n}.' ';
                     } else {
@@ -226,13 +228,13 @@ class UpdateFunFacts implements ShouldQueue
     {
         echo 'Most Points For'.PHP_EOL;
         // Most PF (All Time)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager1_score) as pts')
-            ->orderBy('pts', 'desc')
-            ->groupBy('manager1_id')
-            ->get();
+        // $i = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager1_score) as pts')
+        //     ->orderBy('pts', 'desc')
+        //     ->groupBy('manager1_id')
+        //     ->get();
 
-        $tops = $this->checkMultiple($i, 'pts');
-        $this->insertFunFact(1, 'manager1_id', 'pts', [], $tops);
+        // $tops = $this->checkMultiple($i, 'pts');
+        // $this->insertFunFact(1, 'manager1_id', 'pts', [], $tops);
 
         // Most PF (Season)
         $i = RegularSeasonMatchup::selectRaw('manager1_id, year, SUM(manager1_score) as pts')
@@ -2249,7 +2251,7 @@ class UpdateFunFacts implements ShouldQueue
         $response = [];
         // Check if that player was drafted
         foreach ($r as $row) {
-            $drafted = Draft::where('player', 'LIKE', $row->player . '%')
+            $drafted = Draft::where('player', 'LIKE', $row->player.'%')
                 ->where('year', $row->year)
                 ->first();
 
@@ -2269,7 +2271,7 @@ class UpdateFunFacts implements ShouldQueue
                 continue;
             }
 
-            $drafted = Draft::where('player', 'LIKE', $row->player . '%')
+            $drafted = Draft::where('player', 'LIKE', $row->player.'%')
                 ->where('year', $row->year)
                 ->first();
 

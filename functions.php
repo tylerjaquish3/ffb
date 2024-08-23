@@ -68,6 +68,7 @@ if ((strpos($pageName, 'Profile') !== false)) {
     $foes = getFoesArray();
     $winsChart = getProfileWinsChartNumbers();
     $postseasonWinsChart = getProfilePostseasonWinsChartNumbers();
+    $allWeeks = getAllWeekOptions();
 }
 if ($pageName == 'Regular Season') {
     $regSeasonMatchups = getRegularSeasonMatchups();
@@ -798,6 +799,21 @@ function getProfilePostseasonWinsChartNumbers()
     $response['managers'] = $managers;
 
     return $response;
+}
+
+function getAllWeekOptions()
+{
+    $result = query("SELECT DISTINCT week_number || '_' || year as week_id, 'Wk. ' || week_number || ' ' || year as week_display 
+        FROM regular_season_matchups");
+    $weeks = [];
+    while ($row = fetch_array($result)) {
+        $weeks[] = [
+            'week_id' => $row['week_id'],
+            'week_display' => $row['week_display']
+        ];
+    }
+
+    return $weeks;
 }
 
 /**

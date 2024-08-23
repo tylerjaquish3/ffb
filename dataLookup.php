@@ -545,7 +545,7 @@ function getAllRanks(string $manager = null, int $year = null)
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'positions-drafted') {
 
     $manager = $_GET['manager'];
-    $rounds = $qb = $rb = $wr = $te = $k = $def = [];
+    $rounds = $qb = $rb = $wr = $te = $k = $def = $idp = [];
 
     // put numbers 1-25 in rounds array
     for ($x = 1; $x < 26; $x++) {
@@ -553,21 +553,21 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'positions-drafted') {
     }
     // for $qb, $rb, $wr, $te, $k, $def, initialize 25 zeros in each array
     for ($x = 1; $x < 26; $x++) {
-        $qb[] = 0;
-        $rb[] = 0;
-        $wr[] = 0;
-        $te[] = 0;
-        $k[] = 0;
-        $def[] = 0;
+        $qb[] = null;
+        $rb[] = null;
+        $wr[] = null;
+        $te[] = null;
+        $k[] = null;
+        $def[] = null;
+        $idp[] = 0;
     }
 
-    $sql = "SELECT round, position, count(position) as num 
-        FROM draft
-        WHERE position IN ('QB','RB','WR','TE','K','DEF')";
+    $sql = "SELECT round, CASE WHEN position IN ('QB','RB','WR','TE','K','DEF') THEN position ELSE 'IDP' END as position, count(position) as num 
+        FROM draft";
     if ($manager != 'all') {
-        $sql .= " AND manager_id = '$manager'";
+        $sql .= " WHERE manager_id = '$manager'";
     }
-    $sql .= "GROUP BY round, position
+    $sql .= " GROUP BY round, position
         ORDER BY round, position";
     $result = query($sql);
     while ($row = fetch_array($result)) {
@@ -587,6 +587,15 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'positions-drafted') {
             $k[$row['round']-1] = $row['num'];
         } elseif ($pos == 'DEF') {
             $def[$row['round']-1] = $row['num'];
+        } else {
+            $idp[$row['round']-1] += $row['num'];
+        }
+    }
+
+    // loop through each array and if value is still 0, set it to null
+    foreach ($idp as $key => $value) {
+        if ($value == 0) {
+            $idp[$key] = null;
         }
     }
 
@@ -597,7 +606,35 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'positions-drafted') {
         'WR' => $wr,
         'TE' => $te,
         'K' => $k,
-        'DEF' => $def
+        'DEF' => $def,
+        'IDP' => $idp
+    ]);
+    die;
+}
+
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-week') {
+
+    $manager = $_GET['manager'];
+    $startWeek = explode('_', $_GET['startWeek'])[0];
+    $startYear = explode('_', $_GET['startWeek'])[1];
+    $endWeek = explode('_', $_GET['endWeek'])[0];
+    $endYear = explode('_', $_GET['endWeek'])[1];
+
+    $points = [];
+    $weeks = [];
+    $result = query("SELECT week_number, year, manager1_score as points
+        FROM regular_season_matchups
+        WHERE manager1_id = '$manager' AND year >= $startYear AND year <= $endYear 
+        AND week_number >= $startWeek AND week_number <= $endWeek
+        ORDER BY year, week_number");
+    while ($row = fetch_array($result)) {
+        $points[] = $row['points'];
+        $weeks[] = 'Wk. '.$row['week_number'].' '.$row['year'];
+    }
+
+    echo json_encode([
+        'points' => $points,
+        'weeks' => $weeks
     ]);
     die;
 }

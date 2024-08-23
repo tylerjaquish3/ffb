@@ -221,14 +221,12 @@ foreach ($seasonNumbers as $standings) {
                                         <th>Quarterfinal</th>
                                         <th>Semifinal</th>
                                         <th>Final</th>
-                                        <th>Champion</th>
                                     </thead>
                                     <tbody>
                                         <tr>
                                             <td class="quarter top"><?php echo '<span class="seed">1</span>'.$bye1; ?></td>
                                             <td class="semi"></td>
                                             <td class="final"></td>
-                                            <td></td>
                                         </tr>
                                         <tr>
                                             <td class="quarter bottom">Bye</td>
@@ -236,7 +234,6 @@ foreach ($seasonNumbers as $standings) {
                                                 <?php echo explode(' - ',$s1['score'])[0]; ?>
                                             </td>
                                             <td class="final"></td>
-                                            <td></td>
                                         </tr>
                                         <tr>
                                             <td class="quarter top"><?php echo '<span class="seed">' . $q1['m1seed'] . '</span>'.$q1['manager1disp']; ?><br />
@@ -246,7 +243,6 @@ foreach ($seasonNumbers as $standings) {
                                                 <?php echo explode(' - ',$s1['score'])[1]; ?>
                                             </td>
                                             <td class="final"></td>
-                                            <td></td>
                                         </tr>
                                         <tr>
                                             <td class="quarter bottom"><?php echo '<span class="seed">' . $q1['m2seed'] . '</span>'.$q1['manager2disp']; ?><br />
@@ -256,7 +252,6 @@ foreach ($seasonNumbers as $standings) {
                                             <td class="final top"><?php echo $f['manager1disp']; ?><br />
                                                 <?php echo explode(' - ',$f['score'])[0]; ?>
                                             </td>
-                                            <td class="champ"><?php echo ($f['winner'] == 'm1') ? $f['manager1disp'] : $f['manager2disp']; ?></td>
                                         </tr>
                                         <tr>
                                             <td class="quarter top"><?php echo '<span class="seed">' . $q2['m1seed'] . '</span>'.$q2['manager1disp']; ?><br />
@@ -266,7 +261,6 @@ foreach ($seasonNumbers as $standings) {
                                             <td class="final bottom"><?php echo $f['manager2disp']; ?><br />
                                                 <?php echo explode(' - ',$f['score'])[1]; ?>
                                             </td>
-                                            <td></td>
                                         </tr>
                                         <tr>
                                             <td class="quarter bottom"><?php echo '<span class="seed">' . $q2['m2seed'] . '</span>'.$q2['manager2disp']; ?><br />
@@ -276,7 +270,6 @@ foreach ($seasonNumbers as $standings) {
                                                 <?php echo explode(' - ',$s2['score'])[0]; ?>
                                             </td>
                                             <td class="final"></td>
-                                            <td></td>
                                         </tr>
                                         <tr>
                                             <td class="quarter top">Bye</td>
@@ -284,13 +277,11 @@ foreach ($seasonNumbers as $standings) {
                                                 <?php echo explode(' - ',$s2['score'])[1]; ?>
                                             </td>
                                             <td class="final"></td>
-                                            <td></td>
                                         </tr>
                                         <tr>
                                             <td class="quarter bottom"><?php echo '<span class="seed">2</span>'.$bye2; ?></td>
                                             <td class="semi"></td>
                                             <td class="final"></td>
-                                            <td></td>
                                         </tr>
                                     </tbody>
                                 </table>

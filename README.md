@@ -32,7 +32,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - most seahawks drafted
 - put page name in tab title
 - leveon bell in 2018 should be worst pick
-- profile chart for points each week with filters for start/end date range
 
 Notes:
 Rams moved to LA between 2015 & 2016
@@ -71,30 +70,4 @@ Generic league ideas
 
 
 $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
-
-Thanks for joining
-reminder about voting to better the league
-
-items 1-4
-read desc
-make poll
-record results
-
-draft order
-mute mics
-record results
-
-vote on #5
-
-Notes from meeting
-#1
-yes bench, 5 - 5 no
-#2
-9-0 to change to 1 day veto
-#3
-9-0 yes to add fab in trades
-#4
-3-5 voted no to adding it
-
-
 

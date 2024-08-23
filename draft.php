@@ -361,6 +361,7 @@ include 'sidebar.html';
                     console.log('Error');
                 },
                 success: function(response) {
+                    console.log(response);
                     data = JSON.parse(response);
                 
                     var ctx = $('#posByRoundChart');
@@ -392,6 +393,10 @@ include 'sidebar.html';
                                     label: "DEF",
                                     data: data.DEF,
                                     backgroundColor: '#ff7f2c'
+                                },{
+                                    label: "IDP",
+                                    data: data.IDP,
+                                    backgroundColor: '#c0f6e6'
                                 }
                             ]
                         },
@@ -424,9 +429,9 @@ include 'sidebar.html';
                             },
                             plugins: {
                                 datalabels: {
-                                    formatter: function(value, context) {
-                                        return Math.round(value * 10) / 10;
-                                    },
+                                    // formatter: function(value, context) {
+                                    //     return Math.round(value * 10) / 10;
+                                    // },
                                     align: 'center',
                                     anchor: 'center',
                                     color: 'white',

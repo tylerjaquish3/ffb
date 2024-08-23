@@ -694,7 +694,54 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-                
+            </div>
+            <div class="row">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Points By Week</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="card-block">
+                                <div class="row">
+                                    <div class="col-sm-12 col-lg-6" style="display: flex">
+                                        <button class="btn btn-primary" id="allSeasons">All Seasons</button>&nbsp;&nbsp;
+                                        <button class="btn btn-primary" id="currentSeason">Current Season</button>&nbsp;&nbsp;
+                                        <button class="btn btn-primary" id="lastSeason">Last Season</button>&nbsp;&nbsp;
+                                        <button class="btn btn-primary" id="lastFiveSeasons">Last 5 Seasons</button>&nbsp;&nbsp;
+                                        <h4>Start</h4>&nbsp;&nbsp;
+                                        <select id="startWeek" class="dropdown form-control">
+                                            <?php
+                                            foreach ($allWeeks as $week) {
+                                                echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                        &nbsp;&nbsp;
+                                        <h4>End</h4>&nbsp;&nbsp;
+                                        <select id="endWeek" class="dropdown form-control">
+                                            <?php
+                                            foreach ($allWeeks as $week) {
+                                                // if last, select it
+                                                if ($week['week_id'] == $allWeeks[count($allWeeks)-1]['week_id']) {
+                                                    echo '<option selected value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
+                                                } else {
+                                                    echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
+                                                }
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12" style="height: 600px;">
+                                        <canvas id="pointsByWeekChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -972,6 +1019,10 @@ if (isset($_GET['id'])) {
                             label: "DEF",
                             data: data.DEF,
                             backgroundColor: '#ff7f2c'
+                        },{
+                            label: "IDP",
+                            data: data.IDP,
+                            backgroundColor: '#c0f6e6'
                         }
                     ]
                 },
@@ -1004,9 +1055,6 @@ if (isset($_GET['id'])) {
                     },
                     plugins: {
                         datalabels: {
-                            formatter: function(value, context) {
-                                return Math.round(value * 10) / 10;
-                            },
                             align: 'center',
                             anchor: 'center',
                             color: 'white',
@@ -1020,4 +1068,108 @@ if (isset($_GET['id'])) {
             });
         }
     });
+
+    function updatePointsChart()
+    {
+        $.ajax({
+            url: 'dataLookup.php',
+            data:  {
+                dataType: 'points-by-week',
+                manager: <?php echo $managerId; ?>,
+                startWeek: $('#startWeek').val(),
+                endWeek: $('#endWeek').val()
+            },
+            error: function() {
+                console.log('Error');
+            },
+            success: function(response) {
+                data = JSON.parse(response);
+            
+                var ctx = $('#pointsByWeekChart');
+                pointsByWeekChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.weeks,
+                        datasets: [{
+                            label: 'Points',
+                            data: data.points,
+    
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                stacked: true,
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Points',
+                                    font: {
+                                        size: 20
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            datalabels: {
+                                align: 'top',
+                                anchor: 'top',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            }
+        });
+    }
+
+    updatePointsChart();
+    let season = <?php echo $season; ?>;
+
+    $('#startWeek').change(function() {
+        pointsByWeekChart.destroy();
+        updatePointsChart();
+    });
+    $('#endWeek').change(function() {
+        pointsByWeekChart.destroy();
+        updatePointsChart();
+    });
+
+    $('#allSeasons').click(function() {
+        // change startWeek to first week of first season
+        $('#startWeek').val('1_2006');
+        $('#endWeek').val('14_'+season);
+        pointsByWeekChart.destroy();
+        updatePointsChart();
+    })
+
+    $('#currentSeason').click(function() {
+        // change startWeek to first week of current season
+        $('#startWeek').val('1_'+season);
+        $('#endWeek').val('14_'+season);
+        pointsByWeekChart.destroy();
+        updatePointsChart();
+    });
+
+    $('#lastSeason').click(function() {
+        // change startWeek to first week of last season
+        $('#startWeek').val('1_'+(season-1));
+        $('#endWeek').val('14_'+(season-1));
+        pointsByWeekChart.destroy();
+        updatePointsChart();
+    });
+
+    $('#lastFiveSeasons').click(function() {
+        // change startWeek to first week of last season
+        $('#startWeek').val('1_'+(season-5));
+        $('#endWeek').val('14_'+season);
+        pointsByWeekChart.destroy();
+        updatePointsChart();
+    });
+
 </script>

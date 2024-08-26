@@ -5,7 +5,7 @@ include 'header.php';
 include 'sidebar.html';
 
 $allYears = [];
-$result = query("SELECT distinct year FROM regular_season_matchups ORDER BY YEAR ASC");
+$result = query("SELECT distinct year FROM season_positions ORDER BY YEAR ASC");
 while ($row = fetch_array($result)) {
     $allYears[] = $row['year'];
 }

@@ -30,6 +30,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - fewest points by position (all time, season)
     - most QBs/RBs/etc drafted in first round
     - most seahawks drafted
+    - best free agent pickup (current) cannot be right. it says Dobbs (169) but Puka had way more
 - put page name in tab title
 - leveon bell in 2018 should be worst pick
 

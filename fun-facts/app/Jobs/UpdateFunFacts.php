@@ -23,8 +23,8 @@ class UpdateFunFacts implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $currentSeason = 2023;
-    protected $lastSeason = 2022;
+    protected $currentSeason = 2024;
+    protected $lastSeason = 2023;
 
     /**
      * Execute the job.
@@ -89,7 +89,7 @@ class UpdateFunFacts implements ShouldQueue
             // 129-131
             $this->benchPoints();
             // 135
-            $this->comeback();
+            // $this->comeback();
             // 138,139
             $this->freeAgent();
             // 136,137

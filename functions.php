@@ -2371,6 +2371,10 @@ function getMatchupRecapNumbers()
 
     $managerName = 'Andy';
 
+    if (in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
+        return [];
+    }
+
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];
         if (isset($_GET['year'])) {
@@ -2492,6 +2496,10 @@ function getPositionPointsChartNumbers()
     global $season;
     $week = 1;
 
+    if (in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
+        return [];
+    }
+
     $managerName = 'Andy';
 
     if (isset($_GET['manager'])) {
@@ -2521,7 +2529,7 @@ function getPositionPointsChartNumbers()
 
     $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DL', 'DB', 'BN', 'IR'];
 
-    $labels = [];
+    $labels = $points = [];
     $result = query("SELECT manager, roster_spot, sum(points) as points FROM rosters
         JOIN managers on managers.name = rosters.manager
         JOIN regular_season_matchups rsm on rsm.year = rosters.year and rsm.week_number = rosters.week
@@ -2567,6 +2575,10 @@ function getGameTimeChartNumbers()
     global $season;
     $week = 1;
 
+    if (in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
+        return [];
+    }
+    
     $managerName = 'Andy';
 
     if (isset($_GET['manager'])) {

@@ -4,32 +4,40 @@ $pageName = "Rosters";
 include 'header.php';
 include 'sidebar.html';
 
-$managerName = 'Andy';
-$versus = '';
-$year = 2023;
-$week = 1;
-if (isset($_GET['manager'])) {
-    $managerName = $_GET['manager'];
-    if (isset($_GET['year'])) {
-        $year = $_GET['year'];
+if (in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
+    echo '<h1 class="text-center">Postseason rosters are not available yet</h1>';
+    die;
+} else {
+
+    $managerName = 'Andy';
+    $versus = '';
+    $year = 2023;
+    $week = 1;
+    if (isset($_GET['manager'])) {
+        $managerName = $_GET['manager'];
+        if (isset($_GET['year'])) {
+            $year = $_GET['year'];
+        }
+        if (isset($_GET['week'])) {
+            $week = $_GET['week'];
+        }
     }
-    if (isset($_GET['week'])) {
-        $week = $_GET['week'];
+    $result = query("SELECT * FROM managers WHERE name = '" . $managerName . "'");
+    while ($row = fetch_array($result)) {
+        $managerId = $row['id'];
+    }
+    $managerPoints = $versusPoints = 0;
+    
+    $result = query("SELECT * FROM regular_season_matchups rsm
+        JOIN managers on managers.id = rsm.manager2_id
+        WHERE year = $year and week_number = $week and manager1_id = $managerId");
+    while ($row = fetch_array($result)) {
+        $versus = $row['name'];
+        $managerPoints = $row['manager1_score'];
+        $versusPoints = $row['manager2_score'];
     }
 }
-$result = query("SELECT * FROM managers WHERE name = '" . $managerName . "'");
-while ($row = fetch_array($result)) {
-    $managerId = $row['id'];
-}
-$managerPoints = $versusPoints = 0;
-$result = query("SELECT * FROM regular_season_matchups rsm
-    JOIN managers on managers.id = rsm.manager2_id
-    WHERE year = $year and week_number = $week and manager1_id = $managerId");
-while ($row = fetch_array($result)) {
-    $versus = $row['name'];
-    $managerPoints = $row['manager1_score'];
-    $versusPoints = $row['manager2_score'];
-}
+
 
 $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DL', 'LB', 'DB', 'BN', 'IR'];
 

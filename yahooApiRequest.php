@@ -61,9 +61,9 @@ if (isset($_POST['weeks'])) {
 // do_dump($teams);die;
 
 // Check user leagues
-$request_uri = '/users;use_login=1/games;game_keys=nfl/leagues';
-$teams = get_data($request_uri, $access_token);
-do_dump($teams);die;
+// $request_uri = '/users;use_login=1/games;game_keys=nfl/leagues';
+// $teams = get_data($request_uri, $access_token);
+// do_dump($teams);die;
 
 if ($section == 'yahoo_ids') {
     // first need to update yahoo id (if necessary, changes each year)
@@ -169,8 +169,8 @@ function get_data(string $request_uri, string $token)
     
     $return_code = $request_data['return_code'];
     if ($return_code != 200) {
-        echo "Request failed with code ${return_code}\n";
-        echo "Error: ${request_data['error_str']} (${request_data['errno']})\n";
+        echo "Request failed with code {$return_code}\n";
+        echo "Error: {$request_data['error_str']} ({$request_data['errno']})\n";
     }
 
     if ($return_code == 999) {

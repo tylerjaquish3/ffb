@@ -18,134 +18,134 @@ class HistoricalRostersTest extends DuskTestCase
     /**
      * Undocumented function
      */
-    public function testHistoricalTeam()
-    {
-        $seasons = $this->getSeasonsData();
+    // public function testHistoricalTeam()
+    // {
+    //     $seasons = $this->getSeasonsData();
 
-        $this->browse(function (Browser $browser) use ($seasons) {
-            // For each team in league
-            foreach ($seasons as $season) {
+    //     $this->browse(function (Browser $browser) use ($seasons) {
+    //         // For each team in league
+    //         foreach ($seasons as $season) {
                 
-                $leagueId = $season['season_id'];
-                $this->year = $season['year'];
-                foreach ($season['managers'] as $name => $yahooId) {
+    //             $leagueId = $season['season_id'];
+    //             $this->year = $season['year'];
+    //             foreach ($season['managers'] as $name => $yahooId) {
 
-                    $this->manager = $name;
+    //                 $this->manager = $name;
 
-                    for ($week = 1; $week <= $season['weeks']; $week++) {
-                        try {
-                            $browser->visit('https://football.fantasysports.yahoo.com/'.$this->year.'/f1/'.$leagueId.'/'.$yahooId.'/team?&week='.$week);
+    //                 for ($week = 1; $week <= $season['weeks']; $week++) {
+    //                     try {
+    //                         $browser->visit('https://football.fantasysports.yahoo.com/'.$this->year.'/f1/'.$leagueId.'/'.$yahooId.'/team?&week='.$week);
 
-                            if ($browser->element('#login-username')) {
-                                $browser
-                                    ->type('#login-username', env('YAHOO_USER'))
-                                    ->press('Next')
-                                    ->pause(4000)
-                                    ->waitForText('Enter password')
-                                    ->type('#login-passwd', env('YAHOO_PW'))
-                                    ->press('Next');
-                            }
+    //                         if ($browser->element('#login-username')) {
+    //                             $browser
+    //                                 ->type('#login-username', env('YAHOO_USER'))
+    //                                 ->press('Next')
+    //                                 ->pause(4000)
+    //                                 ->waitForText('Enter password')
+    //                                 ->type('#login-passwd', env('YAHOO_PW'))
+    //                                 ->press('Next');
+    //                         }
 
-                            $browser->waitForText('Yahoo Fantasy')
-                                ->scrollIntoView('#statTable0')
-                                ->pause(1000);
+    //                         $browser->waitForText('Yahoo Fantasy')
+    //                             ->scrollIntoView('#statTable0')
+    //                             ->pause(1000);
 
-                            // Position players table
-                            for ($x = 1; $x < 18; $x++) {
-                                if ($browser->element('#statTable0 tbody tr:nth-child('.$x.')')) {
-                                    $browser->with('#statTable0 tbody', function ($tr) use ($week, $x) {
+    //                         // Position players table
+    //                         for ($x = 1; $x < 18; $x++) {
+    //                             if ($browser->element('#statTable0 tbody tr:nth-child('.$x.')')) {
+    //                                 $browser->with('#statTable0 tbody', function ($tr) use ($week, $x) {
 
-                                        $row = $tr->text('tr:nth-child('.$x.')');
-                                        $stuff = preg_split('/\r\n|\r|\n/', $row);
+    //                                     $row = $tr->text('tr:nth-child('.$x.')');
+    //                                     $stuff = preg_split('/\r\n|\r|\n/', $row);
 
-                                        if (count($stuff) > 1) {
-                                            $this->insertRow($stuff, $week);
-                                        }
-                                    });
-                                }
-                            }
+    //                                     if (count($stuff) > 1) {
+    //                                         $this->insertRow($stuff, $week);
+    //                                     }
+    //                                 });
+    //                             }
+    //                         }
 
-                            // Kicker table
-                            $browser->scrollIntoView('#statTable1');
-                            for ($x = 1; $x < 3; $x++) {
-                                if ($browser->element('#statTable1 tbody tr:nth-child('.$x.')')) {
-                                    $browser->with('#statTable1 tbody', function ($tr) use ($week, $x) {
-                                        $row = $tr->text('tr:nth-child('.$x.')');
-                                        $stuff = preg_split('/\r\n|\r|\n/', $row);
-                                        if (count($stuff) > 1) {
-                                            $this->insertRow($stuff, $week);
-                                        }
-                                    });
-                                }
-                            }
+    //                         // Kicker table
+    //                         $browser->scrollIntoView('#statTable1');
+    //                         for ($x = 1; $x < 3; $x++) {
+    //                             if ($browser->element('#statTable1 tbody tr:nth-child('.$x.')')) {
+    //                                 $browser->with('#statTable1 tbody', function ($tr) use ($week, $x) {
+    //                                     $row = $tr->text('tr:nth-child('.$x.')');
+    //                                     $stuff = preg_split('/\r\n|\r|\n/', $row);
+    //                                     if (count($stuff) > 1) {
+    //                                         $this->insertRow($stuff, $week);
+    //                                     }
+    //                                 });
+    //                             }
+    //                         }
 
-                            // Defense table
-                            $browser->scrollIntoView('#statTable2');
-                            for ($x = 1; $x < 5; $x++) {
-                                if ($browser->element('#statTable2 tbody tr:nth-child('.$x.')')) {
-                                    $browser->with('#statTable2 tbody', function ($tr) use ($week, $x) {
-                                        $row = $tr->text('tr:nth-child('.$x.')');
-                                        $stuff = preg_split('/\r\n|\r|\n/', $row);
-                                        if (count($stuff) > 1) {
-                                            $this->insertRow($stuff, $week);
-                                        }
-                                    });
-                                }
-                            }
+    //                         // Defense table
+    //                         $browser->scrollIntoView('#statTable2');
+    //                         for ($x = 1; $x < 5; $x++) {
+    //                             if ($browser->element('#statTable2 tbody tr:nth-child('.$x.')')) {
+    //                                 $browser->with('#statTable2 tbody', function ($tr) use ($week, $x) {
+    //                                     $row = $tr->text('tr:nth-child('.$x.')');
+    //                                     $stuff = preg_split('/\r\n|\r|\n/', $row);
+    //                                     if (count($stuff) > 1) {
+    //                                         $this->insertRow($stuff, $week);
+    //                                     }
+    //                                 });
+    //                             }
+    //                         }
                             
-                            // IDP table
-                            $browser->scrollIntoView('#statTable3');
-                            for ($x = 1; $x < 10; $x++) {
-                                if ($browser->element('#statTable3 tbody tr:nth-child('.$x.')')) {
-                                    $browser->with('#statTable3 tbody', function ($tr) use ($week, $x) {
-                                        $row = $tr->text('tr:nth-child('.$x.')');
-                                        $stuff = preg_split('/\r\n|\r|\n/', $row);
-                                        if (count($stuff) > 1) {
-                                            $this->insertRow($stuff, $week);
-                                        }
-                                    });
-                                }
-                            }
+    //                         // IDP table
+    //                         $browser->scrollIntoView('#statTable3');
+    //                         for ($x = 1; $x < 10; $x++) {
+    //                             if ($browser->element('#statTable3 tbody tr:nth-child('.$x.')')) {
+    //                                 $browser->with('#statTable3 tbody', function ($tr) use ($week, $x) {
+    //                                     $row = $tr->text('tr:nth-child('.$x.')');
+    //                                     $stuff = preg_split('/\r\n|\r|\n/', $row);
+    //                                     if (count($stuff) > 1) {
+    //                                         $this->insertRow($stuff, $week);
+    //                                     }
+    //                                 });
+    //                             }
+    //                         }
 
-                        } catch (\Exception $e) {
-                            echo $e->getMessage();
-                        }
-                    }
-                }
-            }
-        });
-    }
+    //                     } catch (\Exception $e) {
+    //                         echo $e->getMessage();
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     });
+    // }
 
-    /**
-     * Insert row of players into rosters table
-     */
-    protected function insertRow(array $row, int $week)
-    {
-        $projectedCol = 4;
-        $pointsCol = 3;
+    // /**
+    //  * Insert row of players into rosters table
+    //  */
+    // protected function insertRow(array $row, int $week)
+    // {
+    //     $projectedCol = 4;
+    //     $pointsCol = 3;
 
-        if ($this->manager == 'Tyler') {
-            $projectedCol = 3;
-            $pointsCol = 2;
-        }
+    //     if ($this->manager == 'Tyler') {
+    //         $projectedCol = 3;
+    //         $pointsCol = 2;
+    //     }
 
-        if (str_contains($row[$projectedCol], '%')) {
-            $projectedCol--;
-            $pointsCol--; 
-        }
+    //     if (str_contains($row[$projectedCol], '%')) {
+    //         $projectedCol--;
+    //         $pointsCol--; 
+    //     }
 
-        Roster::updateOrCreate([
-            'year' => $this->year,
-            'week' => $week,
-            'player' => $row[1]
-        ],[
-            'manager' => $this->manager,
-            'position' => $row[0],
-            'roster_spot' => $row[0] == 'Q/W' ? 'Q/W/R/T' : $row[0],
-            'projected' => $row[$projectedCol] == "–" ? 0 : $row[$projectedCol],
-            'points' => $row[$pointsCol] == "–" ? 0 : $row[$pointsCol]
-        ]);
-    }
+    //     Roster::updateOrCreate([
+    //         'year' => $this->year,
+    //         'week' => $week,
+    //         'player' => $row[1]
+    //     ],[
+    //         'manager' => $this->manager,
+    //         'position' => $row[0],
+    //         'roster_spot' => $row[0] == 'Q/W' ? 'Q/W/R/T' : $row[0],
+    //         'projected' => $row[$projectedCol] == "–" ? 0 : $row[$projectedCol],
+    //         'points' => $row[$pointsCol] == "–" ? 0 : $row[$pointsCol]
+    //     ]);
+    // }
 
     protected function getSeasonsData()
     {

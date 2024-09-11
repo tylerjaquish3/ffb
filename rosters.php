@@ -4,7 +4,7 @@ $pageName = "Rosters";
 include 'header.php';
 include 'sidebar.html';
 
-if (in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
+if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
     echo '<h1 class="text-center">Postseason rosters are not available yet</h1>';
     die;
 } else {

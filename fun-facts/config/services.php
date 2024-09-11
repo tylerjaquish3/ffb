@@ -30,8 +30,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    'year' => 2019,
-    'yahoo_league_id' => 201651,
+    'year' => 2024,
+    'yahoo_league_id' => 98957,
     'weeks' => [1],
 
     // For reference

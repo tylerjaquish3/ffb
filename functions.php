@@ -2371,10 +2371,10 @@ function getMatchupRecapNumbers()
 
     $managerName = 'Andy';
 
-    if (in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
+    if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
         return [];
     }
-
+    
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];
         if (isset($_GET['year'])) {
@@ -2496,7 +2496,7 @@ function getPositionPointsChartNumbers()
     global $season;
     $week = 1;
 
-    if (in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
+    if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
         return [];
     }
 
@@ -2575,7 +2575,7 @@ function getGameTimeChartNumbers()
     global $season;
     $week = 1;
 
-    if (in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
+    if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
         return [];
     }
     

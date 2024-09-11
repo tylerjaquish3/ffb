@@ -12,7 +12,7 @@ use App\Traits\TestHelper;
 class ScheduleTest extends DuskTestCase
 {
     use TestHelper;
-    protected $year = 2021;
+    protected $year = 2024;
 
     public function testSchedules()
     {

@@ -23,16 +23,26 @@ class FetchGameTimes implements ShouldQueue
     {
         $success = true;
         $message = "";
+        $thisYear = date('Y');
 
         try {
 
+            // Use pro-football-reference website to get games
+            // https://www.pro-football-reference.com/years/2024/games.htm
+
             // Get all files in storage/app/games directory
             $files = Storage::files('games');
+
             foreach ($files as $file) {
 
                 // Get the file name without .csv
                 $year = pathinfo($file, PATHINFO_FILENAME);
 
+                // Skip all files except this year
+                if ($year != $thisYear) {
+                    continue;
+                }
+                
                 $data = $this->getDataArray($file);
 
                 $rosterPlayers = Roster::where('year', $year);

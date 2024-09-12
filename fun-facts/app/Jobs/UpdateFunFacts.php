@@ -35,6 +35,8 @@ class UpdateFunFacts implements ShouldQueue
         $message = "";
 
         try {
+            // Fetch game times after
+            FetchGameTimes::dispatch();
 
             // 1,2,3
             $this->mostPointsFor();
@@ -89,7 +91,7 @@ class UpdateFunFacts implements ShouldQueue
             // 129-131
             $this->benchPoints();
             // 135
-            // $this->comeback();
+            $this->comeback();
             // 138,139
             $this->freeAgent();
             // 136,137

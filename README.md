@@ -38,6 +38,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - all seasons fails now, current season doesnt pick an end week
     - input for week #, so i can see how they scored in a certain week all time
 - awards page, filter by new_leader
+- make deployments to master auto deploy to freehosting
 
 Notes:
 Rams moved to LA between 2015 & 2016

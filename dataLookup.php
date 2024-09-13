@@ -619,14 +619,25 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-week') {
     $startYear = explode('_', $_GET['startWeek'])[1];
     $endWeek = explode('_', $_GET['endWeek'])[0];
     $endYear = explode('_', $_GET['endWeek'])[1];
+    $onlyWeek = $_GET['onlyWeek'];
 
     $points = [];
     $weeks = [];
-    $result = query("SELECT week_number, year, manager1_score as points
+
+    $sql = "SELECT week_number, year, manager1_score as points
         FROM regular_season_matchups
-        WHERE manager1_id = '$manager' AND year >= $startYear AND year <= $endYear 
-        AND week_number >= $startWeek AND week_number <= $endWeek
-        ORDER BY year, week_number");
+        WHERE manager1_id = '$manager' 
+        AND ((year = $startYear AND week_number >= $startWeek) 
+        OR (year > $startYear AND year < $endYear) 
+        OR (year = $endYear AND week_number <= $endWeek))";
+
+    if ($onlyWeek) {
+        $sql .= " AND week_number = $onlyWeek";
+    }
+
+    $sql .= " ORDER BY year, week_number";
+
+    $result = query($sql);
     while ($row = fetch_array($result)) {
         $points[] = $row['points'];
         $weeks[] = 'Wk. '.$row['week_number'].' '.$row['year'];

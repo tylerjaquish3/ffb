@@ -15,5 +15,6 @@ jobs:
       uses: SamKirkland/FTP-Deploy-Action@4.3.0
       with:
         server: ftp.freehosting.com
-        username: myFtpUserName
+        username: ${{ secrets.ftp_username }}
         password: ${{ secrets.ftp_password }}
+        server-dir: /public_html/

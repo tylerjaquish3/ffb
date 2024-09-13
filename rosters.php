@@ -11,8 +11,7 @@ if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarte
 
     $managerName = 'Andy';
     $versus = '';
-    $year = 2023;
-    $week = 1;
+    $year = $season;
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];
         if (isset($_GET['year'])) {
@@ -37,7 +36,6 @@ if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarte
         $versusPoints = $row['manager2_score'];
     }
 }
-
 
 $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DL', 'LB', 'DB', 'BN', 'IR'];
 

@@ -21,8 +21,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - make sidebar collapsible
 - grab postseason matchup rosters
 - chances of making playoffs, make request to playoffcomputer linked above
-- rosters page,
-    - add optimal lineups info on left
 - add a bunch more fun facts
     - record against everyone
     - best trade
@@ -31,10 +29,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - most QBs/RBs/etc drafted in first round
     - most seahawks drafted
     - best free agent pickup (current) cannot be right. it says Dobbs (169) but Puka had way more
-- put page name in tab title
 - leveon bell in 2018 should be worst pick
-- awards page, filter by new_leader
-- make deployments to master auto deploy to freehosting
 
 Notes:
 Rams moved to LA between 2015 & 2016

@@ -33,10 +33,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - best free agent pickup (current) cannot be right. it says Dobbs (169) but Puka had way more
 - put page name in tab title
 - leveon bell in 2018 should be worst pick
-- make the funfacts job go look up game times from that website and insert into rosters
-- profile page - points by week chart
-    - all seasons fails now, current season doesnt pick an end week
-    - input for week #, so i can see how they scored in a certain week all time
 - awards page, filter by new_leader
 - make deployments to master auto deploy to freehosting
 

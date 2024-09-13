@@ -709,7 +709,8 @@ if (isset($_GET['id'])) {
                                         <button class="btn btn-primary" id="currentSeason">Current Season</button>&nbsp;&nbsp;
                                         <button class="btn btn-primary" id="lastSeason">Last Season</button>&nbsp;&nbsp;
                                         <button class="btn btn-primary" id="lastFiveSeasons">Last 5 Seasons</button>&nbsp;&nbsp;
-                                        <h4>Start</h4>&nbsp;&nbsp;
+                                        <h4>Start</h4>
+                                        &nbsp;&nbsp;
                                         <select id="startWeek" class="dropdown form-control">
                                             <?php
                                             foreach ($allWeeks as $week) {
@@ -718,7 +719,8 @@ if (isset($_GET['id'])) {
                                             ?>
                                         </select>
                                         &nbsp;&nbsp;
-                                        <h4>End</h4>&nbsp;&nbsp;
+                                        <h4>End</h4>
+                                        &nbsp;&nbsp;
                                         <select id="endWeek" class="dropdown form-control">
                                             <?php
                                             foreach ($allWeeks as $week) {
@@ -728,6 +730,17 @@ if (isset($_GET['id'])) {
                                                 } else {
                                                     echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
                                                 }
+                                            }
+                                            ?>
+                                        </select>
+                                        &nbsp;&nbsp;
+                                        <h4>Week</h4>
+                                        &nbsp;&nbsp;
+                                        <select id="onlyWeek" class="dropdown form-control">
+                                            <option value="0">All Weeks</option>
+                                            <?php
+                                            for ($i = 1; $i <= 14; $i++) {
+                                                echo '<option value="'.$i.'">Week '.$i.'</option>';
                                             }
                                             ?>
                                         </select>
@@ -1077,7 +1090,8 @@ if (isset($_GET['id'])) {
                 dataType: 'points-by-week',
                 manager: <?php echo $managerId; ?>,
                 startWeek: $('#startWeek').val(),
-                endWeek: $('#endWeek').val()
+                endWeek: $('#endWeek').val(),
+                onlyWeek: $('#onlyWeek').val()
             },
             error: function() {
                 console.log('Error');
@@ -1093,7 +1107,6 @@ if (isset($_GET['id'])) {
                         datasets: [{
                             label: 'Points',
                             data: data.points,
-    
                         }]
                     },
                     options: {
@@ -1113,6 +1126,9 @@ if (isset($_GET['id'])) {
                             }
                         },
                         plugins: {
+                            legend: {
+                                display: false
+                            },
                             datalabels: {
                                 align: 'top',
                                 anchor: 'top',
@@ -1139,11 +1155,17 @@ if (isset($_GET['id'])) {
         pointsByWeekChart.destroy();
         updatePointsChart();
     });
+    $('#onlyWeek').change(function() {
+        pointsByWeekChart.destroy();
+        updatePointsChart();
+    });
 
+    let allWeeks = <?php echo json_encode($allWeeks); ?>;
     $('#allSeasons').click(function() {
         // change startWeek to first week of first season
         $('#startWeek').val('1_2006');
-        $('#endWeek').val('14_'+season);
+        // get the very last item in the array
+        $('#endWeek').val(allWeeks[allWeeks.length-1]['week_id']);
         pointsByWeekChart.destroy();
         updatePointsChart();
     })
@@ -1151,7 +1173,7 @@ if (isset($_GET['id'])) {
     $('#currentSeason').click(function() {
         // change startWeek to first week of current season
         $('#startWeek').val('1_'+season);
-        $('#endWeek').val('14_'+season);
+        $('#endWeek').val(allWeeks[allWeeks.length-1]['week_id']);
         pointsByWeekChart.destroy();
         updatePointsChart();
     });
@@ -1167,7 +1189,7 @@ if (isset($_GET['id'])) {
     $('#lastFiveSeasons').click(function() {
         // change startWeek to first week of last season
         $('#startWeek').val('1_'+(season-5));
-        $('#endWeek').val('14_'+season);
+        $('#endWeek').val(allWeeks[allWeeks.length-1]['week_id']);
         pointsByWeekChart.destroy();
         updatePointsChart();
     });

@@ -18,8 +18,6 @@ class TeamTest extends DuskTestCase
     protected $manager;
 
     // php artisan dusk --filter=testTeam
-    // Run this after everything else, then commit the sqlite db in the other repo (ffb)
-    // php artisan dusk --filter=testUpdateSqlite
 
     /**
      * Go to the team page for each team and scrape the data
@@ -30,7 +28,7 @@ class TeamTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($weeks) {
             // For each team in league
-            for ($t = 2; $t < 11; $t++) {
+            for ($t = 1; $t < 11; $t++) {
 
                 $this->manager = $this->getManagerName($t);
 
@@ -295,74 +293,6 @@ class TeamTest extends DuskTestCase
         $manager = Manager::find($seasonManager->manager_id);
 
         return $manager->name;
-    }
-
-    // This should check for any ids higher than what's in the sqlite db, then insert just those
-    public function testUpdateSqlite()
-    {
-        $tables = ['rosters', 'stats', 'regular_season_matchups', 'team_names'];
-        foreach ($tables as $table) {
-            echo PHP_EOL.'Table: '.$table.PHP_EOL;
-            $this->updateTable($table);
-        }
-
-        echo 'Done.';
-    }
-
-    private function updateTable(string $table)
-    {
-        $sqliteQuery = DB::connection('sqlite')->select('select id from '.$table.' order by id desc limit 1');
-        $mysqlQuery = DB::connection('mysql')->select('select id from '.$table.' order by id desc limit 1');
-
-        $sqliteHighestId = (int)$sqliteQuery[0]->id;
-        $mysqlHighestId = (int)$mysqlQuery[0]->id;
-
-        
-        if ($sqliteHighestId != $mysqlHighestId) {
-            
-            $chunkSize = 100;
-            if ($table == 'stats' || $table == 'rosters') {
-                $chunkSize = 10;
-            }
-
-            // Do it in chunks
-            $subQuery = DB::table($table)->where('id', '>', $sqliteHighestId);
-            DB::query()->fromSub($subQuery, 'alias')->orderBy('alias.id')->chunk($chunkSize, function ($chunk) use ($table) {
-                $chunk = $chunk->toArray();
-                
-                $rows = array_map(function ($value) {
-                    return (array)$value;
-                }, $chunk);
-
-                DB::connection('sqlite')->table($table)->insert($rows);
-            });
-        } else {
-            echo $table.' table is up to date!'.PHP_EOL;
-        }
-    }
-
-    // This should only need to be run once, leaving it for future reference if needed
-    public function testStripTeamFromPlayer()
-    {
-        $teams = [
-            'Ari','Atl','Bal','Cin','Cle','Dal','SF','Sea','LAR','Oak','LV','NYG','Phi','Was',
-            'Pit','Mia','NYJ','NE','Buf','Ten','Jax','Jac','KC','SD','LAC','Ind','Hou','Chi',
-            'Min','Det','GB','Den','NO','Car','TB'
-        ];
-
-        $teams = implode('', $teams);
-
-        $players = Roster::where('year', '>', '2019')->get();
-        
-        foreach ($players as &$player) {
-
-            $name = $player->player;
-            $newName = rtrim($name, $teams);
-            $newName = rtrim($newName);
-
-            $player->player = $newName;
-            $player->save();
-        }
     }
 
 }

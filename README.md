@@ -30,6 +30,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - most seahawks drafted
     - best free agent pickup (current) cannot be right. it says Dobbs (169) but Puka had way more
 - leveon bell in 2018 should be worst pick
+- trophy is out of order on mobile
 
 Notes:
 Rams moved to LA between 2015 & 2016

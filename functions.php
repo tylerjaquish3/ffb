@@ -2367,7 +2367,10 @@ function checkRosterForOptimal(array $roster)
 function getMatchupRecapNumbers()
 {
     global $season;
-    $week = 1;
+    $result = query("SELECT week FROM rosters where year = $season ORDER BY week DESC LIMIT 1");
+    while ($row = fetch_array($result)) {
+        $week = $row['week'];
+    }
 
     $managerName = 'Andy';
 
@@ -2494,7 +2497,10 @@ function getRecord($managerName, $year, $week)
 function getPositionPointsChartNumbers()
 {
     global $season;
-    $week = 1;
+    $result = query("SELECT week FROM rosters where year = $season ORDER BY week DESC LIMIT 1");
+    while ($row = fetch_array($result)) {
+        $week = $row['week'];
+    }
 
     if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
         return [];
@@ -2573,7 +2579,10 @@ function getPositionPointsChartNumbers()
 function getGameTimeChartNumbers()
 {
     global $season;
-    $week = 1;
+    $result = query("SELECT week FROM rosters where year = $season ORDER BY week DESC LIMIT 1");
+    while ($row = fetch_array($result)) {
+        $week = $row['week'];
+    }
 
     if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
         return [];

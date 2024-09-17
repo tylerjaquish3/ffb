@@ -35,6 +35,7 @@ class UpdateFunFacts implements ShouldQueue
         $message = "";
 
         try {
+            echo 'Fetching game times';
             // Fetch game times after
             FetchGameTimes::dispatch();
 

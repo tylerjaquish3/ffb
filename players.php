@@ -37,7 +37,22 @@ include 'sidebar.html';
                 <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Top 100 Player Seasons</h4>
+                            <h4>Top Player Seasons</h4>
+                            <span id="seasons-filter-btns">
+                                <a type="button">QB</a>
+                                &nbsp;|&nbsp;
+                                <a type="button">RB</a>
+                                &nbsp;|&nbsp;
+                                <a type="button">WR</a>
+                                &nbsp;|&nbsp;
+                                <a type="button">TE</a>
+                                &nbsp;|&nbsp;
+                                <a type="button">DEF</a>
+                                &nbsp;|&nbsp;
+                                <a type="button">K</a>
+                            </span>
+                            &nbsp;|&nbsp;
+                            <a type="button" id="seasons-show-all">Show All</a>
                         </div>
                         <div class="card-body" style="direction: ltr;">
                             <div class="row">
@@ -49,16 +64,17 @@ include 'sidebar.html';
                                             <th></th>
                                             <th>Player</th>
                                             <th>Team</th>
+                                            <th>Position</th>
                                             <th>Points</th>
                                         </thead>
                                         <tbody>
                                         <?php
                                         $result = query(
-                                            "SELECT player, year, team, sum(points) as points, max(manager) as man
+                                            "SELECT player, year, team, position, sum(points) as points, max(manager) as man
                                             FROM rosters
                                             GROUP BY player, year, team
                                             ORDER BY points DESC
-                                            LIMIT 100");
+                                            LIMIT 200");
                                         while ($array = fetch_array($result)) { ?>
                                             <tr>
                                                 <td><?php echo $array['year']; ?></td>
@@ -71,6 +87,7 @@ include 'sidebar.html';
                                                 </td>
                                                 <td><?php echo '<a href="/players.php?player='.$array['player'].'">'.$array['player'].'</a>'; ?></td>
                                                 <td><?php echo $array['team']; ?></td>
+                                                <td><?php echo $array['position']; ?></td>
                                                 <td><?php echo round($array['points'], 1); ?></td>
                                             </tr>
                                         <?php } ?>
@@ -85,7 +102,22 @@ include 'sidebar.html';
                 <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Top 100 Player Weeks</h4>
+                            <h4>Top Player Weeks</h4>
+                            <span id="weeks-filter-btns">
+                                <a type="button">QB</a>
+                                &nbsp;|&nbsp;
+                                <a type="button">RB</a>
+                                &nbsp;|&nbsp;
+                                <a type="button">WR</a>
+                                &nbsp;|&nbsp;
+                                <a type="button">TE</a>
+                                &nbsp;|&nbsp;
+                                <a type="button">DEF</a>
+                                &nbsp;|&nbsp;
+                                <a type="button">K</a>
+                            </span>
+                            &nbsp;|&nbsp;
+                            <a type="button" id="weeks-show-all">Show All</a>
                         </div>
                         <div class="card-body" style="direction: ltr;">
                             <div class="row">
@@ -98,16 +130,17 @@ include 'sidebar.html';
                                             <th></th>
                                             <th>Player</th>
                                             <th>Team</th>
+                                            <th>Position</th>
                                             <th>Points</th>
                                         </thead>
                                         <tbody>
                                         <?php
                                         $result = query(
-                                            "SELECT player, team, week, year, sum(points) as points, max(manager) as man
+                                            "SELECT player, team, position, week, year, sum(points) as points, max(manager) as man
                                             FROM rosters
                                             GROUP BY player, team, year, week
                                             ORDER BY points DESC
-                                            LIMIT 100");
+                                            LIMIT 200");
                                         while ($row = fetch_array($result)) { ?>
                                             <tr>
                                                 <td><?php echo $row['year']; ?></td>
@@ -119,6 +152,7 @@ include 'sidebar.html';
                                                 </td>
                                                 <td><?php echo '<a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a>'; ?></td>
                                                 <td><?php echo $row['team']; ?></td>
+                                                <td><?php echo $row['position']; ?></td>
                                                 <td><?php echo round($row['points'], 1); ?></td>
                                             </tr>
                                         <?php } ?>
@@ -249,18 +283,36 @@ include 'sidebar.html';
             }
         });
 
-        $('#datatable-playerSeasons').DataTable({
-            pageLength: 10,
-            order: [
-                [5, "desc"]
-            ]
-        });
-        
-        $('#datatable-playerWeeks').DataTable({
+        var playerSeasons = $('#datatable-playerSeasons').DataTable({
             pageLength: 10,
             order: [
                 [6, "desc"]
             ]
+        });
+        
+        var playerWeeks = $('#datatable-playerWeeks').DataTable({
+            pageLength: 10,
+            order: [
+                [7, "desc"]
+            ]
+        });
+
+        $('#weeks-filter-btns a').click(function () {
+            let criteria = $(this)[0].outerText;
+            playerWeeks.columns([6]).search(criteria, true, true).draw();
+        });
+
+        $('#weeks-show-all').click(function () {
+            playerWeeks.columns('').search('').draw();
+        });
+
+        $('#seasons-filter-btns a').click(function () {
+            let criteria = $(this)[0].outerText;
+            playerSeasons.columns([5]).search(criteria, true, true).draw();
+        });
+
+        $('#seasons-show-all').click(function () {
+            playerSeasons.columns('').search('').draw();
         });
 
     });

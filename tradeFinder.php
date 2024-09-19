@@ -7,8 +7,7 @@ include 'sidebar.html';
 
 // Look up how many weeks of data there are
 $weeks = 0;
-$result = query("SELECT distinct week FROM rosters 
-    WHERE YEAR = $season");
+$result = query("SELECT distinct week FROM rosters WHERE year = $season");
 while ($row = fetch_array($result)) {
     $weeks++;
 }
@@ -17,7 +16,7 @@ while ($row = fetch_array($result)) {
 $posPts = [];
 $result = query("SELECT position, manager, SUM(points) as pts 
     FROM rosters 
-    WHERE YEAR = $season
+    WHERE year = $season
     GROUP BY manager, position");
 while ($row = fetch_array($result)) {
     $posPts[$row['manager']][$row['position']] = round($row['pts'], 1);
@@ -85,7 +84,7 @@ function printFinderRow($team, $targets, $pos)
                                     // Look up all the actual points
                                     $playerPts = [];
                                     $result = query("SELECT player, SUM(points) as pts FROM rosters 
-                                        WHERE YEAR = $season
+                                        WHERE year = $season
                                         GROUP BY player");
                                     while ($row = fetch_array($result)) {
                                         $name = $row['player'];
@@ -93,12 +92,14 @@ function printFinderRow($team, $targets, $pos)
                                     }
 
                                     $targets = [];
-                                    $result = draft_query("SELECT p.name as player, proj_points, m.name, positions.name as position FROM league_player_details lpd
+                                    $result = draft_query("SELECT p.name as player, proj_points, m.name, positions.name as position 
+                                        FROM league_player_details lpd
                                         JOIN players p on p.id = lpd.player_id
                                         JOIN draft_selections ds ON ds.player_id = p.id
                                         JOIN positions on positions.id = p.position_id
                                         JOIN league_managers m ON m.id = ds.manager_id
-                                        WHERE manager_id != 10 and lpd.league_id = 1 and m.league_id = 1");
+                                        WHERE manager_id != 10 and lpd.league_id = 1 and m.league_id = 1
+                                        and ds.year = $season and lpd.year = $season");
                                     while ($row = fetch_array($result)) {
 
                                         $pts = 0;
@@ -157,12 +158,14 @@ function printFinderRow($team, $targets, $pos)
                                         $playerPts[$name] = round($row['pts'], 1);
                                     }
 
-                                    $result = draft_query("SELECT p.name as player, proj_points, m.name, positions.name as position FROM league_player_details lpd
+                                    $result = draft_query("SELECT p.name as player, proj_points, m.name, positions.name as position 
+                                    FROM league_player_details lpd
                                     JOIN players p on p.id = lpd.player_id
                                     JOIN draft_selections ds ON ds.player_id = p.id
                                     JOIN positions on positions.id = p.position_id
                                     JOIN league_managers m ON m.id = ds.manager_id
-                                    WHERE manager_id = 10 and lpd.league_id = 1 and m.league_id = 1");
+                                    WHERE manager_id = 10 and lpd.league_id = 1 and m.league_id = 1 
+                                    and ds.year = $season and lpd.year = $season");
                                     while ($row = fetch_array($result)) {
 
                                         $pts = 0;

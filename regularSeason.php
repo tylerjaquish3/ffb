@@ -305,6 +305,86 @@ include 'sidebar.html';
                 </div>
             </div>
 
+            <div class="row">
+                <div class="col-sm-12 col-lg-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Top Points by Game Time</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive" id="datatable-game-time">
+                                <thead>
+                                    <th>Year</th>
+                                    <th>Week</th>
+                                    <th>Manager</th>
+                                    <th>Game Time</th>
+                                    <th>Points</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $labels = [
+                                        1 => 'Thursday',
+                                        2 => 'Friday',
+                                        3 => 'Sunday Early',
+                                        4 => 'Sunday Afternoon',
+                                        5 => 'Sunday Night',
+                                        6 => 'Monday',
+                                        7 => 'Tuesday',
+                                        8 => 'Other'
+                                    ];
+                                    $sql = "SELECT sum(points) as points, year, week, manager, game_slot
+                                        FROM rosters
+                                        WHERE game_time is not null
+                                        GROUP BY year, week, manager, game_slot";
+                                    $result = query($sql);
+                                    while ($row = fetch_array($result)) { ?>
+                                        <tr>
+                                            <td><?php echo $row['year']; ?></td>
+                                            <td><?php echo $row['week']; ?></td>
+                                            <td><?php echo $row['manager']; ?></td>
+                                            <td><?php echo isset($labels[$row['game_slot']]) ? $labels[$row['game_slot']] : null; ?></td>
+                                            <td><?php echo '<a href="/rosters.php?year='.$row["year"].'&week='.$row["week"].'&manager='.$row['manager'].'">'.$row['points'].'</a>'; ?></td>
+                                        </tr>
+
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Total Game Time Points</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive" id="datatable-game-time2">
+                                <thead>
+                                    <th>Manager</th>
+                                    <th>Game Time</th>
+                                    <th>Points</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $sql = "SELECT sum(points) as points, manager, game_slot
+                                        FROM rosters
+                                        WHERE points > 0
+                                        GROUP BY manager, game_slot";
+                                    $result = query($sql);
+                                    while ($row = fetch_array($result)) { ?>
+                                        <tr>
+                                            <td><?php echo $row['manager']; ?></td>
+                                            <td><?php echo isset($labels[$row['game_slot']]) ? $labels[$row['game_slot']] : null; ?></td>
+                                            <td><?php echo $row['points']; ?></td>
+                                        </tr>
+
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -380,6 +460,18 @@ include 'sidebar.html';
             "info": false,
             "order": [
                 [0, "desc"]
+            ]
+        });
+
+        $('#datatable-game-time').DataTable({
+            "order": [
+                [4, "desc"]
+            ]
+        });
+        
+        $('#datatable-game-time2').DataTable({
+            "order": [
+                [2, "desc"]
             ]
         });
 

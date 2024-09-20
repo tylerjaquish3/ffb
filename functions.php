@@ -2622,7 +2622,8 @@ function getGameTimeChartNumbers()
         4 => 'Sunday Afternoon',
         5 => 'Sunday Night',
         6 => 'Monday',
-        7 => 'Tuesday'
+        7 => 'Tuesday',
+        8 => 'Other'
     ];
     $totalPoints = 0;
     foreach ($labels as $id => $label) {

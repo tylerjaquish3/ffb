@@ -18,7 +18,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - Profile page, line chart for points each season vs league average
 - Current season, worst draft picks remove players that got traded midseason
 - add trophy graphic on trophy page
-- make sidebar collapsible
 - grab postseason matchup rosters
 - chances of making playoffs, make request to playoffcomputer linked above
 - add a bunch more fun facts
@@ -30,7 +29,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - most seahawks drafted
     - best free agent pickup (current) cannot be right. it says Dobbs (169) but Puka had way more
 - leveon bell in 2018 should be worst pick
-- trophy is out of order on mobile
 
 Notes:
 Rams moved to LA between 2015 & 2016

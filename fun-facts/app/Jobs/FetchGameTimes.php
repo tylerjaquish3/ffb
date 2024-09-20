@@ -92,7 +92,7 @@ class FetchGameTimes implements ShouldQueue
 
                 // Determine if the game time was a thursday
                 if ($gameTime->dayOfWeek == 4) {
-                    $row->game_slot = 1;
+                    $row->game_slot = 1; // thursday
                 } elseif ($gameTime->dayOfWeek == 5) { // friday
                     $row->game_slot = 2;
                 } elseif ($gameTime->dayOfWeek == 1) { // monday
@@ -107,7 +107,9 @@ class FetchGameTimes implements ShouldQueue
                         $row->game_slot = 5;
                     }
                 } elseif ($gameTime->dayOfWeek == 2) {
-                    $row->game_slot = 6;
+                    $row->game_slot = 7; // Tuesday
+                } else {
+                    $row->game_slot = 8;
                 }
 
                 $row->save();

@@ -79,31 +79,26 @@ include 'sidebar.html';
                         <div class="card-header">
                             <h4 class="card-title"><a href="trophy.php">Trophy</a></h4>
                         </div>
-                        <div class="card-body" style="background: #fff; direction: ltr;">
+                        <div class="card-body">
                             <div class="row">
-                                <div class="col-sm-1"></div>
-                                <div class="col-sm-10 table-padding">
-                                    <div class="row" style="direction: ltr;">
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2008">2008 CHAMPION<br />TYLER JAQUISH</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2007">2007 CHAMPION<br />JUSTIN DIDIER</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2006">2006 CHAMPION<br />AJ SARTIN</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2011">2011 CHAMPION<br />BEN BARDELL</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2010">2010 CHAMPION<br />CAMERON BOBOTH</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2009">2009 CHAMPION<br />MATT REID</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2014">2014 CHAMPION<br />JUSTIN DIDIER</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2013">2013 CHAMPION<br />ANDY STAMSCHROR</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2012">2012 CHAMPION<br />AJ SARTIN</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2017">2017 CHAMPION<br />COLE BOBOTH</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2016">2016 CHAMPION<br />COLE BOBOTH</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2015">2015 CHAMPION<br />JUSTIN DIDIER</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2020">2020 CHAMPION<br />MATT REID</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2019">2019 CHAMPION<br />CAMERON BOBOTH</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2018">2018 CHAMPION<br />JUSTIN DIDIER</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2023">2023 CHAMPION<br />COLE BOBOTH</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2022">2022 CHAMPION<br />JUSTIN DIDIER</a></div></div>
-                                        <div class="col-sm-4"><div class="plaque"><a href="seasonRecaps.php?id=2021">2021 CHAMPION<br />JUSTIN DIDIER</a></div></div>
-                                    </div>
-                                </div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2007">2007 CHAMPION<br />JUSTIN DIDIER</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2006">2006 CHAMPION<br />AJ SARTIN</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2009">2009 CHAMPION<br />MATT REID</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2008">2008 CHAMPION<br />TYLER JAQUISH</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2011">2011 CHAMPION<br />BEN BARDELL</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2010">2010 CHAMPION<br />CAMERON BOBOTH</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2013">2013 CHAMPION<br />ANDY STAMSCHROR</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2012">2012 CHAMPION<br />AJ SARTIN</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2015">2015 CHAMPION<br />JUSTIN DIDIER</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2014">2014 CHAMPION<br />JUSTIN DIDIER</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2017">2017 CHAMPION<br />COLE BOBOTH</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2016">2016 CHAMPION<br />COLE BOBOTH</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2019">2019 CHAMPION<br />CAMERON BOBOTH</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2018">2018 CHAMPION<br />JUSTIN DIDIER</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2021">2021 CHAMPION<br />JUSTIN DIDIER</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2020">2020 CHAMPION<br />MATT REID</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2023">2023 CHAMPION<br />COLE BOBOTH</a></div></div>
+                                <div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=2022">2022 CHAMPION<br />JUSTIN DIDIER</a></div></div>
                             </div>
                         </div>
                     </div>

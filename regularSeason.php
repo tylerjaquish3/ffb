@@ -335,6 +335,7 @@ include 'sidebar.html';
                                     $sql = "SELECT sum(points) as points, year, week, manager, game_slot
                                         FROM rosters
                                         WHERE game_time is not null
+                                        AND roster_spot NOT IN ('IR','BN')
                                         GROUP BY year, week, manager, game_slot";
                                     $result = query($sql);
                                     while ($row = fetch_array($result)) { ?>
@@ -369,6 +370,7 @@ include 'sidebar.html';
                                     $sql = "SELECT sum(points) as points, manager, game_slot
                                         FROM rosters
                                         WHERE points > 0
+                                        AND roster_spot NOT IN ('IR','BN')
                                         GROUP BY manager, game_slot";
                                     $result = query($sql);
                                     while ($row = fetch_array($result)) { ?>

@@ -55,6 +55,8 @@ function lookupGameTime(?int $id) {
             return 'Monday';
         case 7:
             return 'Tuesday';
+        case 8:
+            return 'Other';
         default:
             return '';
     }

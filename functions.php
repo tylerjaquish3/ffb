@@ -2655,11 +2655,16 @@ function getGameTimeChartNumbers()
         $points[$man2name][$id] = $totalPoints;
     }
 
-    // Check if we can remove friday and tuesday
+    // Check if we can remove friday and tuesday and other
     if ($points[$managerName][1] == $points[$managerName][2] && $points[$man2name][1] == $points[$man2name][2]) {
         unset($labels[2]);
         unset($points[$managerName][2]);
         unset($points[$man2name][2]);
+    }
+    if ($points[$managerName][7] == $points[$managerName][8] && $points[$man2name][7] == $points[$man2name][8]) {
+        unset($labels[8]);
+        unset($points[$managerName][8]);
+        unset($points[$man2name][8]);
     }
     if ($points[$managerName][6] == $points[$managerName][7] && $points[$man2name][6] == $points[$man2name][7]) {
         unset($labels[7]);

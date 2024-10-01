@@ -542,49 +542,10 @@ function lookup_week(string $date)
 
 function handle_fun_facts()
 {
-    updateProjected();
-    // 1,2,3
-    // mostPointsFor();
-    // 4,5,6
-    // mostPostseasonPointsFor();
-    // // 7,8,9,89,90,91
-    // leastPointsAgainst();
-    // // 10,11
-    // mostWins();
-    // // 13,14,15
-    // leastPointsFor();
-    // // 16,17
-    // mostLosses();
-    // // 12,18,19,20,21,22,23,24,25,31,65,66
-    // postseasonRecords();
-    // // 26,27,28
-    // highestSeeds();
-    // // 29,30,67,68,69,70
-    // singleOpponent();
-    // // 32
-    // leastChampionships();
-    // // 50,51,52,53,54,55
-    // postseasonMargin();
-    // // 39,40,56,57,60,61
-    // streaks();
-    // // 62,63,71,72
-    // draft();
-    // // 73,74,75
-    // moves();
-    // // 76,77,78,79,80
-    // currentSeasonStats();
-    // // 45,46,47,48
-    // margins();
-    // // 41,42
-    // appearances();
-    // // 60,61
-    // currentPostseasonStreak();
-    // // 58,59
-    // postseasonWinPct();
-    // // 81,82,84,85,86,87
-    // currentSeasonPoints();
-    // // 83,88
-    // getOptimalLineupPoints();
+    // updateProjected();
+    
+    echo 'This is not set up currently';
+    
 }
 
 function dd($text)

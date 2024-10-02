@@ -29,7 +29,9 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - most seahawks drafted
     - best free agent pickup (current) cannot be right. it says Dobbs (169) but Puka had way more
     - most QB/RB/WR/etc points current season
-- leveon bell in 2018 should be worst pick
+- start streaks on dashboard... maybe they started 4-0 3 times? put all years
+- dashboard postseason stats Appearances is broken for Best Streak (all 0)
+- fix the teamTest putting in New York or LA and not New York Jets, etc.
 
 Notes:
 Rams moved to LA between 2015 & 2016

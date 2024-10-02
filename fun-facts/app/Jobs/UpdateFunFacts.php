@@ -2090,14 +2090,20 @@ class UpdateFunFacts implements ShouldQueue
      */
     private function getMedian($season, string $pos)
     {
-        $result = Roster::selectRaw('position, avg(points) AS points')
+        $result = Roster::selectRaw('player, sum(points) AS points')
             ->where('year', $season)
             ->whereNotIn('roster_spot', ['BN', 'IR'])
             ->where('position', $pos)
-            ->groupBy('position')
-            ->first();
+            ->groupBy('player')
+            ->get();
 
-        return $result->points;
+        $total = $count = 0;
+        foreach ($result as $row) {
+            $total += $row->points;
+            $count++;
+        }
+
+        return $total / $count;
     }
 
     /**

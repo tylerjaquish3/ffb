@@ -420,12 +420,15 @@ include 'sidebar.html';
                             <h4 style="float: right">Worst Draft Picks</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive table-striped nowrap" id="datatable-worstDraft">
+                            <table class="table table-striped nowrap" id="datatable-worstDraft">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Player</th>
                                     <th>Pick</th>
                                     <th>Points</th>
+                                    <th>Avg Pick</th>
+                                    <th>Avg Points</th>
+                                    <th>Score</th>
                                 </thead>
                                 <tbody>
                                     <?php
@@ -436,6 +439,9 @@ include 'sidebar.html';
                                             <td><?php echo $row['player']; ?></td>
                                             <td><?php echo $row['overall_pick']; ?></td>
                                             <td><?php echo round($row['points'], 1); ?></td>
+                                            <td><?php echo round($row['avg_pick'], 1); ?></td>
+                                            <td><?php echo round($row['median'], 1); ?></td>
+                                            <td><?php echo round($row['score'], 1); ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -450,12 +456,15 @@ include 'sidebar.html';
                             <h4 style="float: right">Best Draft Picks</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive table-striped nowrap" id="datatable-bestDraft">
+                            <table class="table table-striped" id="datatable-bestDraft">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Player</th>
                                     <th>Pick</th>
                                     <th>Points</th>
+                                    <th>Avg Pick</th>
+                                    <th>Avg Points</th>
+                                    <th>Score</th>
                                 </thead>
                                 <tbody>
                                     <?php
@@ -466,6 +475,9 @@ include 'sidebar.html';
                                             <td><?php echo $row['player']; ?></td>
                                             <td><?php echo $row['overall_pick']; ?></td>
                                             <td><?php echo round($row['points'], 1); ?></td>
+                                            <td><?php echo round($row['avg_pick'], 1); ?></td>
+                                            <td><?php echo round($row['median'], 1); ?></td>
+                                            <td><?php echo round($row['score'], 1); ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -480,7 +492,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Record Against Everyone</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive table-striped nowrap" id="datatable-everyone">
+                            <table class="table table-striped nowrap" id="datatable-everyone">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Wins</th>
@@ -898,8 +910,12 @@ include 'sidebar.html';
             searching: false,
             paging: false,
             info: false,
+            columnDefs: [{
+                targets: [4,5,6],
+                visible: false
+            }],
             order: [
-                [3, "desc"]
+                [6, "desc"]
             ]
         });
 
@@ -907,8 +923,12 @@ include 'sidebar.html';
             searching: false,
             paging: false,
             info: false,
+            columnDefs: [{
+                targets: [4,5,6],
+                visible: false
+            }],
             order: [
-                [3, "asc"]
+                [6, "asc"]
             ]
         });
 
@@ -1079,6 +1099,6 @@ include 'sidebar.html';
         max-width: 800px;
     }
     #datatable-optimal_wrapper {
-        max-width: 1620px;
+        max-width: 1365px;
     }
 </style>

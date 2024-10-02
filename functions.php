@@ -1984,60 +1984,161 @@ function getDraftPoints()
  */
 function getWorstDraftPicks()
 {
-    global $DB_TYPE, $selectedSeason;
+    global $selectedSeason;
     $response = [];
 
-    $qbMedian = getMedian('qb');
-    $wrtMedian = getMedian('wrt');
+    $response = [];
+    $year = $selectedSeason;
+    
+    $qbMedian = getMedian($year, 'QB');
+    $qbAvgPick = getAveragePick($year, 'QB');
+    $rbMedian = getMedian($year, 'RB');
+    $rbAvgPick = getAveragePick($year, 'RB');
+    $wrMedian = getMedian($year, 'WR');
+    $wrAvgPick = getAveragePick($year, 'WR');
+    $teMedian = getMedian($year, 'TE');
+    $teAvgPick = getAveragePick($year, 'TE');
+    $defMedian = getMedian($year, 'DEF');
+    $defAvgPick = getAveragePick($year, 'DEF');
+    $kMedian = getMedian($year, 'K');
+    $kAvgPick = getAveragePick($year, 'K');
 
-    // Use multiplier to find sweet spot
-    // Don't want to just be above average, but to be a bit worse than that
-    $multiplier = .8;
-
-    $traded = [];
-    $trades = query("SELECT player FROM trades WHERE year = $selectedSeason");
-    while ($row = fetch_array($trades)) {
-        $traded[] = $row['player'];
-    }
-
-     // Need to do different join for sqlite vs mysql
-     $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
-     if ($DB_TYPE == 'mysql') {
-         $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
-     }
-
-    $result = query("SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
+    $sql = "SELECT rosters.manager, managers.id as manager_id, draft.overall_pick, draft.position, 
+        rosters.player, sum(points) AS points, draft.year
+        FROM rosters
         JOIN managers ON rosters.manager = managers.name
-        $join
-        WHERE rosters.YEAR = $selectedSeason
-        GROUP BY manager, overall_pick, rosters.player, draft.position");
+        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
+        WHERE rosters.year = $year
+        GROUP BY manager, overall_pick, rosters.player, draft.position";
+
+    $result = query($sql);
+
     while ($row = fetch_array($result)) {
+        $row['year'] = $year;
 
-        $playerName = $row['player'];
-
-        // If player was traded, skip them
-        if (in_array($playerName, $traded)) {
+        if ($row['position'] == 'QB') {
+            $row['points_diff'] = $row['points'] - $qbMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $qbAvgPick;
+            $row['median'] = $qbMedian;
+            $row['avg_pick'] = $qbAvgPick;
+        } elseif ($row['position'] == 'RB') {
+            $row['points_diff'] = $row['points'] - $rbMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $rbAvgPick;
+            $row['median'] = $rbMedian;
+            $row['avg_pick'] = $rbAvgPick;
+        } elseif ($row['position'] == 'WR') {
+            $row['points_diff'] = $row['points'] - $wrMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $wrAvgPick;
+            $row['median'] = $wrMedian;
+            $row['avg_pick'] = $wrAvgPick;
+        } elseif ($row['position'] == 'TE') {
+            $row['points_diff'] = $row['points'] - $teMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $teAvgPick;
+            $row['median'] = $teMedian;
+            $row['avg_pick'] = $teAvgPick;
+        } elseif ($row['position'] == 'DEF') {
+            $row['points_diff'] = $row['points'] - $defMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $defAvgPick;
+            $row['median'] = $defMedian;
+            $row['avg_pick'] = $defAvgPick;
+        } elseif ($row['position'] == 'K') {
+            $row['points_diff'] = $row['points'] - $kMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $kAvgPick;
+            $row['median'] = $kMedian;
+            $row['avg_pick'] = $kAvgPick;
+        } else {
             continue;
         }
 
-        if ($row['position'] == 'QB') {
-            if ($row['points'] < ($qbMedian*$multiplier) && $row['overall_pick'] < 40) {
-                $response[] = $row;
-            } elseif ($row['points'] < $qbMedian && $row['overall_pick'] < 15) {
-                // QBs drafted higher should be held to higher standard
-                $response[] = $row;
-            }
-        } else {
-            if ($row['points'] < ($wrtMedian*$multiplier) && $row['overall_pick'] < 70) {
-                $response[] = $row;
-            } elseif ($row['points'] < $wrtMedian && $row['overall_pick'] < 30) {
-                $response[] = $row;
-            }
-        }
+        $row['score'] = $row['points_diff'] + $row['pick_diff'];
+        $response[] = $row;
     }
-
+    
     usort($response, function($a, $b) {
-        return $a['points'] <=> $b['points'];
+        return $a['score'] <=> $b['score'];
+    });
+
+    return array_slice($response,0,15);
+}
+
+/**
+ * Undocumented function
+ */
+function getBestDraftPicks()
+{
+    global $selectedSeason;
+    $response = [];
+    $year = $selectedSeason;
+    
+    $qbMedian = getMedian($year, 'QB');
+    $qbAvgPick = getAveragePick($year, 'QB');
+    $rbMedian = getMedian($year, 'RB');
+    $rbAvgPick = getAveragePick($year, 'RB');
+    $wrMedian = getMedian($year, 'WR');
+    $wrAvgPick = getAveragePick($year, 'WR');
+    $teMedian = getMedian($year, 'TE');
+    $teAvgPick = getAveragePick($year, 'TE');
+    $defMedian = getMedian($year, 'DEF');
+    $defAvgPick = getAveragePick($year, 'DEF');
+    $kMedian = getMedian($year, 'K');
+    $kAvgPick = getAveragePick($year, 'K');
+
+    $sql = "SELECT rosters.manager, managers.id as manager_id, draft.overall_pick, draft.position, 
+        rosters.player, sum(points) AS points, draft.year
+        FROM rosters
+        JOIN managers ON rosters.manager = managers.name
+        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
+        WHERE rosters.year = $year
+        GROUP BY manager, overall_pick, rosters.player, draft.position";
+
+    $result = query($sql);
+
+    while ($row = fetch_array($result)) {
+        $row['year'] = $year;
+
+        if ($row['position'] == 'QB') {
+            $row['points_diff'] = $row['points'] - $qbMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $qbAvgPick;
+            $row['median'] = $qbMedian;
+            $row['avg_pick'] = $qbAvgPick;
+        } elseif ($row['position'] == 'RB') {
+            $row['points_diff'] = $row['points'] - $rbMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $rbAvgPick;
+            $row['median'] = $rbMedian;
+            $row['avg_pick'] = $rbAvgPick;
+        } elseif ($row['position'] == 'WR') {
+            $row['points_diff'] = $row['points'] - $wrMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $wrAvgPick;
+            $row['median'] = $wrMedian;
+            $row['avg_pick'] = $wrAvgPick;
+        } elseif ($row['position'] == 'TE') {
+            $row['points_diff'] = $row['points'] - $teMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $teAvgPick;
+            $row['median'] = $teMedian;
+            $row['avg_pick'] = $teAvgPick;
+        } elseif ($row['position'] == 'DEF') {
+            $row['points_diff'] = $row['points'] - $defMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $defAvgPick;
+            $row['median'] = $defMedian;
+            $row['avg_pick'] = $defAvgPick;
+        } elseif ($row['position'] == 'K') {
+            $row['points_diff'] = $row['points'] - $kMedian;
+            $row['pick_diff'] = $row['overall_pick'] - $kAvgPick;
+            $row['median'] = $kMedian;
+            $row['avg_pick'] = $kAvgPick;
+        } else {
+            continue;
+        }
+
+        if ($row['points'] <= $row['median']) {
+            continue;
+        }
+        $row['score'] = $row['points_diff'] + $row['pick_diff'];
+        $response[] = $row;
+    }
+    
+    usort($response, function($a, $b) {
+        return $b['score'] <=> $a['score'];
     });
 
     return array_slice($response,0,15);
@@ -2046,68 +2147,36 @@ function getWorstDraftPicks()
 /**
  * Find the average score by position
  */
-function getMedian($pos)
+function getMedian($season, string $pos)
 {
-    global $selectedSeason, $week;
+    $result = query("SELECT player, sum(points) AS points
+        FROM rosters
+        WHERE year = $season AND position = '$pos'
+        AND roster_spot NOT IN ('BN', 'IR')
+        GROUP BY player");
 
-    $result = query("SELECT position, avg(points) AS points 
-        FROM rosters WHERE YEAR = $selectedSeason
-        GROUP BY position");
+    $total = $count = 0;
     while ($row = fetch_array($result)) {
-        $data[$row['position']] = $row['points'];
+        $total += $row['points'];
+        $count++;
     }
-    
-    if ($pos == 'qb') {
-        return $data['QB'] * $week;
-    }
-    $avg = ($data['WR'] + $data['TE'] + $data['RB']) / 3;
 
-    return $avg * $week;
+    return $total / $count;
 }
 
 /**
- * Undocumented function
+ * Find the average overall_pick by position
  */
-function getBestDraftPicks()
+function getAveragePick($season, string $pos)
 {
-    global $selectedSeason, $DB_TYPE;
-    $response = [];
-
-    $qbMedian = getMedian('qb');
-    $wrtMedian = getMedian('wrt');
-    // Use multiplier to find sweet spot
-    // Don't want to just be above average, but to be a bit better than that
-    $multiplier = 1.3;
-
-    // Need to do different join for sqlite vs mysql
-    $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
-    if ($DB_TYPE == 'mysql') {
-        $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
-    }
-
-    $result = query("SELECT rosters.manager, draft.overall_pick, draft.position, rosters.player, sum(points) AS points FROM rosters
-        JOIN managers ON rosters.manager = managers.name
-        $join
-        WHERE rosters.year = $selectedSeason
-        GROUP BY manager, overall_pick, rosters.player, draft.position");
+    $result = query("SELECT position, avg(overall_pick) AS overall_pick
+        FROM draft
+        WHERE year = $season AND position = '$pos'
+        GROUP BY position");
+    
     while ($row = fetch_array($result)) {
-
-        if ($row['position'] == 'QB') {
-            if ($row['points'] > ($qbMedian*$multiplier) && $row['overall_pick'] > 40) {
-                $response[] = $row;
-            }
-        } else {
-            if ($row['points'] > ($wrtMedian*$multiplier) && $row['overall_pick'] > 60) {
-                $response[] = $row;
-            }
-        }
+        return $row['overall_pick'];
     }
-
-    usort($response, function($a, $b) {
-        return $b['points'] <=> $a['points'];
-    });
-
-    return array_slice($response,0,15);
 }
 
 /**
@@ -2115,18 +2184,12 @@ function getBestDraftPicks()
  */
 function getPlayersRetained()
 {
-    global $DB_TYPE, $week, $selectedSeason;
+    global $week, $selectedSeason;
     $response = [];
-
-    // Need to do different join for sqlite vs mysql
-    $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
-    if ($DB_TYPE == 'mysql') {
-        $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
-    }
 
     $result = query("SELECT manager, COUNT(rosters.player) as players FROM rosters
         JOIN managers ON rosters.manager = managers.name
-        $join
+        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
         WHERE rosters.year = $selectedSeason AND WEEK = $week
         GROUP BY manager");
     while ($row = fetch_array($result)) {
@@ -2184,19 +2247,14 @@ function getRecordAgainstEveryone()
  */
 function getAllDraftedPlayerDetails()
 {
-    global $DB_TYPE, $selectedSeason;
+    global $selectedSeason;
     $response = [];
 
-    // Need to do different join for sqlite vs mysql
-    $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
-    if ($DB_TYPE == 'mysql') {
-        $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
-    }
     $result = query("SELECT rosters.manager, draft.overall_pick, draft.position, draft.round, rosters.player,
         SUM(points) AS points, COUNT(rosters.player) AS GP
         FROM rosters
         JOIN managers ON rosters.manager = managers.name
-        $join
+        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
         WHERE rosters.year = $selectedSeason AND rosters.roster_spot NOT IN ('BN','IR')
         GROUP BY manager, overall_pick, rosters.player, draft.position, round");
     while ($row = fetch_array($result)) {

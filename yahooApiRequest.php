@@ -489,12 +489,8 @@ function handle_trades(object $data)
                 $manager1 = find_manager_id($player->player[1]->transaction_data[0]->source_team_key);
                 $manager2 = find_manager_id($player->player[1]->transaction_data[0]->destination_team_key);
 
-                if ($DB_TYPE == 'sqlite') {
-                    $player = str_replace("'", "''", $player->player[0][2]->name->full);
-                } else {
-                    $player = mysqli_real_escape_string($conn, $player->player[0][2]->name->full);
-                }
-
+                $player = str_replace("'", "''", $player->player[0][2]->name->full);
+                
                 echo 'Current Week: '.$currentWeek.' | Trade ID: '.$tradeId.'<br>';
                 echo $manager1.' traded '.$player.' to '.$manager2.'<br>';
                 // update trades table

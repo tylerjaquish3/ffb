@@ -918,7 +918,7 @@ if (isset($_GET['id'])) {
         var ctx = $('#winsChart');
         var managers = <?php echo json_encode($winsChart['managers']); ?>;
         var wins = <?php echo json_encode($winsChart['wins']); ?>;
-        let colors = ["#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
+        let colors = ["#4f267f","#a6c6fa","#3cf06e","#f33c47","#f87598","#ff7f2c","#c0f6e6","#d8fa8e","#d39025"];
         
         let obj = {};
         obj.label = 'Wins';
@@ -943,7 +943,7 @@ if (isset($_GET['id'])) {
                         formatter: function(value, context) {
                             return context.chart.data.labels[context.dataIndex]+': '+value;
                         },
-                        color: 'black',
+                        color: 'white',
                         font: {
                             weight: 'bold'
                         }

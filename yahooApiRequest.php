@@ -246,14 +246,14 @@ function handle_managers(object $data, int $year)
 
 function handle_teams(object $data)
 {
-    global $year, $DB_TYPE;
+    global $year;
     
     $teams = $data->league[1]->teams;
     foreach ($teams as $team) {
         if (gettype($team) == 'object') {
             // do_dump($team);die;
             // Find team name (encode it to handle apostrophe)
-            $teamName = $DB_TYPE == 'sqlite' ? str_replace("'", "''", $team->team[0][2]->name) : $team->team[0][2]->name;
+            $teamName = str_replace("'", "''", $team->team[0][2]->name);
             // Find yahoo team id
             $yahooTeamId = (int)$team->team[0][1]->team_id;
             $moves = (int)$team->team[0][9]->number_of_moves;
@@ -336,7 +336,7 @@ function handle_team_matchups(int $yahooTeamId, object $data)
 
 function handle_team_rosters(int $yahooId, int $week, object $data)
 {
-    global $year, $DB_TYPE, $conn;
+    global $year;
     // do_dump($data);die;
 
     $managerId = lookupManager($yahooId, $year);
@@ -354,11 +354,7 @@ function handle_team_rosters(int $yahooId, int $week, object $data)
         }
         $player = $p->player;
         // do_dump($player);
-        if ($DB_TYPE == 'sqlite') {
-            $playerName = str_replace("'", "''", $player[0][2]->name->full);
-        } else {
-            $playerName = mysqli_real_escape_string($conn, $player[0][2]->name->full);
-        }
+        $playerName = str_replace("'", "''", $player[0][2]->name->full);
 
         // Loop through the player properties to find team
         foreach ($player[0] as $key => $value) {
@@ -504,8 +500,6 @@ function handle_trades(object $data)
                     'trade_identifier' => $tradeId
                 ]);
             }
-            
-    
         }
     }
 }

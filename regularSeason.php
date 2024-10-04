@@ -527,9 +527,9 @@ include 'sidebar.html';
         for (const [key, value] of Object.entries(points)) {
 
             if (key.includes('Wins')) {
-                pointColor = '#90BE6D';
+                pointColor = '#acf0ac';
             } else {
-                pointColor = '#F3722C';
+                pointColor = '#ffbdc3';
             }
 
             let obj = {};
@@ -582,9 +582,9 @@ include 'sidebar.html';
         for (const [key, value] of Object.entries(pfpawins)) {
 
             if (key.includes('For')) {
-                pointColor = '#90BE6D';
+                pointColor = '#acf0ac';
             } else {
-                pointColor = '#F3722C';
+                pointColor = '#ffbdc3';
             }
             let obj = {};
             obj.label = key;

@@ -115,7 +115,18 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-
+                <div class="col-sm-12 col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Championships</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="card-block" style="height: 300px; max-height:450px;">
+                                <canvas id="winsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -216,6 +227,44 @@ include 'sidebar.html';
             "order": [
                 [9, "desc"]
             ]
+        });
+
+        var ctx = $('#winsChart');
+        var managers = <?php echo json_encode($winsChart['managers']); ?>;
+        var wins = <?php echo json_encode($winsChart['wins']); ?>;
+        let colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
+        
+        let obj = {};
+        obj.label = 'Wins';
+        obj.data = wins;
+        obj.backgroundColor = colors;
+        obj.datalabels = {
+            align: 'end'
+        };
+
+        var winsChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: managers,
+                datasets: [obj]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    datalabels: {
+                        formatter: function(value, context) {
+                            return context.chart.data.labels[context.dataIndex]+': '+value;
+                        },
+                        color: 'black',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
         });
 
     });

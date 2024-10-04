@@ -67,6 +67,7 @@ if ($pageName == 'Regular Season') {
 if ($pageName == 'Postseason') {
     $postseasonMatchups = getPostseasonMatchups();
     $postseasonRecord = getPostseasonRecord();
+    $winsChart = getChampChartNumbers();
 }
 if ($pageName == 'Draft') {
     $draftResults = getDraftResults();
@@ -1228,6 +1229,29 @@ function getPostseasonRecord()
     return $response;
 }
 
+function getChampChartNumbers()
+{
+    $wins = $managers = [];
+
+    $result = query("SELECT SUM(CASE WHEN finish = 1 THEN 1 ELSE 0 END) as wins, name
+        FROM finishes
+        JOIN managers ON managers.id = finishes.manager_id
+        GROUP BY name
+        ORDER BY wins DESC");
+    while ($row = fetch_array($result)) {
+        if ($row['wins'] == 0) {
+            continue;
+        }
+        $wins[] = $row['wins'];
+        $managers[] = $row['name'];
+    }
+
+    $response['managers'] = $managers;
+    $response['wins'] = $wins;
+
+    return $response;
+}
+
 /**
  * Get players drafted
  */
@@ -1439,7 +1463,7 @@ function getSeasonStandings($season = null)
     }
 
     $return = [];
-    $colors = ["#4f267f","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
+    $colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
     $i = 0;
     foreach ($managers as $name => $ranks) {
         $return[] = [

@@ -6,6 +6,11 @@ include 'header.php';
 include 'sidebar.html';
 
 $selectedSeason = 2024;
+$selectedWeek = 4;
+
+// these should be dynamic from the $_GET vars
+
+
 ?>
 
 <div class="app-content content container-fluid">
@@ -96,10 +101,18 @@ $selectedSeason = 2024;
                 <div class="col-sm-12 col-lg-8 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Recap</h4>
+                            <h4 style="float: right">Week <?php echo $selectedWeek; ?> Recap</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             This is where I would write a quick summary of what happened last week, highlighting some good/bad performances.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Week <?php echo $selectedWeek+1; ?> Preview</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            This is where I would write a quick preview of what's happening this week, highlighting some good/bad matchups.
                         </div>
                     </div>
                 </div>
@@ -109,12 +122,11 @@ $selectedSeason = 2024;
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Top Weekly Performers</h4>
+                            <h4 style="float: right">Week <?php echo $selectedWeek; ?> Top Performers</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <table class="stripe nowrap row-border order-column full-width" id="datatable-bestWeek">
                                 <thead>
-                                    <th>Week</th>
                                     <?php
                                     foreach ($bestWeek as $manager => $values) {
                                         $headers = array_keys($values);
@@ -128,9 +140,12 @@ $selectedSeason = 2024;
                                 </thead>
                                 <tbody>
                                     <?php
-                                    foreach ($bestWeek as $week => $players) { ?>
+                                    foreach ($bestWeek as $week => $players) { 
+                                        if ($week != $selectedWeek) {
+                                            continue;
+                                        }
+                                        ?>
                                         <tr>
-                                            <td><?php echo $week; ?></td>
                                             <?php foreach ($players as $pos => $stuff) {
                                                 if ($pos != 'qb') { ?>
                                                     <td data-order="<?php echo $stuff['points']; ?>">
@@ -147,13 +162,12 @@ $selectedSeason = 2024;
                         </div>
                     </div>
                 </div>
-
             </div>
             <div class="row">
                 <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Stats</h4>
+                            <h4 style="float: right">Season Stats</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <table class="stripe nowrap row-border order-column" id="datatable-currentStats">
@@ -195,13 +209,12 @@ $selectedSeason = 2024;
                 <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Stats by Week</h4>
+                            <h4 style="float: right">Week <?php echo $selectedWeek; ?> Stats</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <table class="stripe nowrap row-border order-column" id="datatable-currentWeekStats">
                                 <thead>
                                     <th>Manager</th>
-                                    <th>Week</th>
                                     <th>Total Yds</th>
                                     <th>Total TDs</th>
                                     <th>Pass Yds</th>
@@ -215,10 +228,13 @@ $selectedSeason = 2024;
                                 </thead>
                                 <tbody>
                                     <?php
-                                    while ($row = fetch_array($weekStats)) { ?>
+                                    while ($row = fetch_array($weekStats)) { 
+                                        if ($row['week'] != $selectedWeek) {
+                                            continue;
+                                        }
+                                        ?>
                                         <tr>
                                             <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo $row['week']; ?></td>
                                             <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
                                             <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
                                             <td><?php echo $row['pass_yds']; ?></td>
@@ -237,10 +253,7 @@ $selectedSeason = 2024;
                     </div>
                 </div>
             </div>
-
-
             <div class="row">
-                
                 <div class="col-sm-12 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -269,11 +282,8 @@ $selectedSeason = 2024;
                         </div>
                     </div>
                 </div>
-            </div>
-            
-
-            <div class="row">
-                <div class="col-12 table-padding">
+           
+                <div class="col-sm-12 col-lg-8 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Standings By Week</h4>
@@ -378,6 +388,9 @@ $selectedSeason = 2024;
 
         $('#datatable-currentWeekStats').DataTable({
             scrollX: "100%",
+            searching: false,
+            paging: false,
+            info: false,
             scrollCollapse: true,
             fixedColumns:   {
                 left: 1
@@ -410,17 +423,10 @@ $selectedSeason = 2024;
             searching: false,
             paging: false,
             info: false,
+            sort: false,
             scrollX: "100%",
             scrollCollapse: true,
-            fixedColumns:   {
-                left: 1
-            },
-            order: [
-                [0, "desc"]
-            ]
         });
-
-        
 
         $('#datatable-bestTeamWeek').DataTable({
             searching: false,
@@ -434,8 +440,6 @@ $selectedSeason = 2024;
                 [0, "desc"]
             ]
         });
-
-        
 
         $('#datatable-everyone').DataTable({
             searching: false,

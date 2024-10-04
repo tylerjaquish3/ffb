@@ -80,9 +80,7 @@ a {
 
 a.btn.btn-primary,
 .btn-primary:active:hover {
-    background-color: #eee;
-    /* border-color: #04015d; */
-    border-color: #297eff;
+    background-color: #9c68d9 !important;
     width: 215px;
 }
 

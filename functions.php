@@ -6,41 +6,27 @@ include 'connections.php';
 
 function query($sql)
 {
-    global $conn, $DB_TYPE;
+    global $conn;
 
-    if ($DB_TYPE == 'sqlite') {
-        try {
-            $run = $conn->query($sql);
-        } catch (\Exception $e) {
-            dd($e);
-        }
-        
-        return $run;
+    try {
+        $run = $conn->query($sql);
+    } catch (\Exception $e) {
+        dd($e);
     }
-
-    return mysqli_query($conn, $sql);
+    
+    return $run;
 }
 
 function draft_query($sql)
 {
-    global $conn2, $DB_TYPE;
+    global $conn2;
 
-    if ($DB_TYPE == 'sqlite') {
-        return $conn2->query($sql);
-    }
-
-    return mysqli_query($conn2, $sql);
+    return $conn2->query($sql);
 }
 
 function fetch_array($result)
 {
-    global $DB_TYPE;
-
-    if ($DB_TYPE == 'sqlite') {
-        return $result->fetchArray();
-    } 
-        
-    return mysqli_fetch_array($result);
+    return $result->fetchArray();
 }
 
 $result = query("SELECT year FROM rosters ORDER BY year DESC LIMIT 1");
@@ -118,6 +104,17 @@ if ($pageName == 'Rosters') {
     $recap = getMatchupRecapNumbers();
     $posPointsChart = getPositionPointsChartNumbers();
     $gameTimeChart = getGameTimeChartNumbers();
+}
+if ($pageName == 'Newsletter') {
+    $selectedSeason = isset($_GET['id']) ? $_GET['id'] : $season;
+
+    $bestWeek = getCurrentSeasonBestWeek();
+    $topPerformers = getCurrentSeasonTopPerformers();
+    $stats = getCurrentSeasonStats();
+    $weekStats = getCurrentSeasonWeekStats();
+    $everyoneRecord = getRecordAgainstEveryone();
+    $teamWeek = getCurrentSeasonBestTeamWeek();
+    $weekStandings = getSeasonStandings($selectedSeason);
 }
 
 function getManagerName($id) {
@@ -2814,31 +2811,6 @@ function dd($text)
     print_r($text);
     echo '</pre>';
     die;
-}
-
-// Do DB update with mysql inserts
-if(isset($_POST['sql-stmt'])) {
-    $sql = $_POST['sql-stmt'];
-    var_dump($sql);
-    $allStatements = explode(';', $sql);
-
-    foreach ($allStatements as $stmt) {
-
-        if ($stmt != '') {
-            $success = query($stmt);
-
-            // if (!$success) {
-            //     dd('connection error');
-            // }
-
-            while ($row = fetch_array($success)) {
-                echo '<pre>';
-                var_dump($row);
-                echo '<pre>';
-            }
-        }
-    }
-    var_dump('Done');
 }
 
 /**

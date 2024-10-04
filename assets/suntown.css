@@ -134,12 +134,11 @@ span.badge {
 }
 
 .badge-primary {
-    /* background-color: #2eff37; */
-    background-color: #2eb82e;
+    background-color: #acf0ac;
 }
 
 .badge-secondary {
-    background-color: #fb6262;
+    background-color: #fa887f;
 }
 
 span.seed {
@@ -219,11 +218,11 @@ span.seed {
 }
 
 .good {
-    background: gold;
+    background: #acf0ac;
 }
 
 .bad {
-    background: coral;
+    background: #ffbdc3;
 }
 
 .text-center {

@@ -1,5 +1,5 @@
 <!-- Win/lose streaks -->
-<table class="table table-responsive table-striped nowrap" id="datatable-misc1">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc1" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Longest Win Streak</th>
@@ -105,7 +105,7 @@
 	</tfoot>
 </table>
 <!-- Season points -->
-<table class="table table-responsive table-striped nowrap" id="datatable-misc3" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc3">
 	<thead>
 		<th>Manager</th>
 		<th>Most PF</th>
@@ -122,6 +122,7 @@
 				SUM(manager2_score) AS points_against
 				FROM regular_season_matchups rsm
 				JOIN managers ON managers.id = rsm.manager1_id
+				WHERE year < ".$season."
 				GROUP BY manager1_id, year
 			) as all_years
 			GROUP BY name");
@@ -375,48 +376,16 @@
 		$year = $week = 0;
 		$index = -1;
 		$first = true;
-		$managers = [
-			'AJ' => [
-				'top' => 0,
+
+		$men = ['AJ','Ben','Tyler','Matt','Justin','Andy','Cole','Everett','Cameron','Gavin'];
+        $managers = [];
+        foreach ($men as $man) {
+            $managers[$man] = [
+                'top' => 0,
 				'losses' => 0
-			],
-			'Ben' => [
-				'top' => 0,
-				'losses' => 0
-			],
-			'Tyler' => [
-				'top' => 0,
-				'losses' => 0
-			],
-			'Matt' => [
-				'top' => 0,
-				'losses' => 0
-			],
-			'Justin' => [
-				'top' => 0,
-				'losses' => 0
-			],
-			'Andy' => [
-				'top' => 0,
-				'losses' => 0
-			],
-			'Cole' => [
-				'top' => 0,
-				'losses' => 0
-			],
-			'Everett' => [
-				'top' => 0,
-				'losses' => 0
-			],
-			'Cameron' => [
-				'top' => 0,
-				'losses' => 0
-			],
-			'Gavin' => [
-				'top' => 0,
-				'losses' => 0
-			]
-		];
+            ];
+        }
+		
 		$result = query("SELECT * FROM regular_season_matchups rsm
 			JOIN managers ON managers.id = rsm.manager1_id
 			ORDER BY year, week_number, manager1_score DESC");
@@ -474,48 +443,16 @@
 		$year = $week = 0;
 		$index = -1;
 		$first = true;
-		$managers = [
-			'AJ' => [
-				'bottom' => 0,
+
+		$men = ['AJ','Ben','Tyler','Matt','Justin','Andy','Cole','Everett','Cameron','Gavin'];
+        $managers = [];
+        foreach ($men as $man) {
+            $managers[$man] = [
+                'bottom' => 0,
 				'wins' => 0
-			],
-			'Ben' => [
-				'bottom' => 0,
-				'wins' => 0
-			],
-			'Tyler' => [
-				'bottom' => 0,
-				'wins' => 0
-			],
-			'Matt' => [
-				'bottom' => 0,
-				'wins' => 0
-			],
-			'Justin' => [
-				'bottom' => 0,
-				'wins' => 0
-			],
-			'Andy' => [
-				'bottom' => 0,
-				'wins' => 0
-			],
-			'Cole' => [
-				'bottom' => 0,
-				'wins' => 0
-			],
-			'Everett' => [
-				'bottom' => 0,
-				'wins' => 0
-			],
-			'Cameron' => [
-				'bottom' => 0,
-				'wins' => 0
-			],
-			'Gavin' => [
-				'bottom' => 0,
-				'wins' => 0
-			]
-		];
+            ];
+        }
+		
 		$result = query("SELECT * FROM regular_season_matchups rsm
 			JOIN managers ON managers.id = rsm.manager1_id
 			ORDER BY year, week_number, manager1_score ASC");
@@ -574,48 +511,15 @@
 		$index = -1;
 		$first = true;
 
-		$managers = [
-			'AJ' => [
-				'losses' => 0,
+		$men = ['AJ','Ben','Tyler','Matt','Justin','Andy','Cole','Everett','Cameron','Gavin'];
+        $managers = [];
+        foreach ($men as $man) {
+            $managers[$man] = [
+                'losses' => 0,
 				'wins' => 0
-			],
-			'Ben' => [
-				'losses' => 0,
-				'wins' => 0
-			],
-			'Tyler' => [
-				'losses' => 0,
-				'wins' => 0
-			],
-			'Matt' => [
-				'losses' => 0,
-				'wins' => 0
-			],
-			'Justin' => [
-				'losses' => 0,
-				'wins' => 0
-			],
-			'Andy' => [
-				'losses' => 0,
-				'wins' => 0
-			],
-			'Cole' => [
-				'losses' => 0,
-				'wins' => 0
-			],
-			'Everett' => [
-				'losses' => 0,
-				'wins' => 0
-			],
-			'Cameron' => [
-				'losses' => 0,
-				'wins' => 0
-			],
-			'Gavin' => [
-				'losses' => 0,
-				'wins' => 0
-			]
-		];
+            ];
+        }
+		
 		$scores = [];
 		$result = query("SELECT year, week_number, name, manager1_score FROM regular_season_matchups rsm
 			JOIN managers ON managers.id = rsm.manager1_id

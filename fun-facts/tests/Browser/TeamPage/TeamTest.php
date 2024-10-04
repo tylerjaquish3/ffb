@@ -258,11 +258,24 @@ class TeamTest extends DuskTestCase
         //     $x = 4;
         // }
 
+        // Need to override NY & LA because Yahoo doesn't put the team name
+        $team = $this->getTeam($row[2]);
+        $player = $row[1];
+        if ($team == 'NYG') {
+            $player = 'New York Giants';
+        } elseif ($team == 'NYJ') {
+            $player = 'New York Jets';
+        } elseif ($team == 'LAC') {
+            $player = 'Los Angeles Chargers';
+        } elseif ($team == 'LAR') {
+            $player = 'Los Angeles Rams';
+        }
+
         $roster = Roster::updateOrCreate([
             'year' => $this->year,
             'week' => $week,
-            'player' => $row[1],
-            'team' => $this->getTeam($row[2])
+            'player' => $player,
+            'team' => $team
         ], [
             'manager' => $this->manager,
             'position' => 'DEF',

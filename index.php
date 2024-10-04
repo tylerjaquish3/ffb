@@ -196,9 +196,9 @@ include 'sidebar.html';
                                     </div>
                                     <div style="float: right">
                                         <select id="regMiscStats" class="dropdown form-control">
+                                            <option value="3">Season Points</option>
                                             <option value="1">Win/Lose Streaks</option>
                                             <option value="2">Total Points</option>
-                                            <option value="3">Season Points</option>
                                             <option value="4">Average PF/PA</option>
                                             <option value="5">Start Streaks</option>
                                             <option value="6">Win/Loss Margin</option>

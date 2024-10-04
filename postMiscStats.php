@@ -3,13 +3,14 @@
     <thead>
         <th>Manager</th>
         <th>Average Finish</th>
-        <th>Highest Finish</th>
-        <th>Lowest Finish</th>
+        <th>Trophies</th>
     </thead>
     <tbody>
         <?php
         $result = query("SELECT managers.name, AVG(finish) as avg_finish,
-			MIN(finish) as highest, MAX(finish) as lowest
+			SUM(CASE WHEN finish = 1 THEN 1 ELSE 0 END) as gold, 
+			SUM(CASE WHEN finish = 2 THEN 1 ELSE 0 END) as silver, 
+			SUM(CASE WHEN finish = 3 THEN 1 ELSE 0 END) as bronze
 			FROM finishes
 			JOIN managers ON managers.id = finishes.manager_id
 			GROUP BY manager_id");
@@ -17,15 +18,30 @@
             <tr>
                 <td><?php echo $row['name']; ?></td>
                 <td><?php echo number_format($row['avg_finish'], 2, '.', ','); ?></td>
-                <td><?php echo $row['highest']; ?></td>
-                <td><?php echo $row['lowest']; ?></td>
+                <td data-sort="<?php echo $row['gold']; ?>"> 
+                    <?php 
+                        if ($row['gold'] > 0) {
+                            echo '<i class="icon-trophy" style="color: gold;"></i> x'.$row['gold'].'&nbsp;&nbsp;&nbsp;';
+                        } else {
+                            echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                        }
+                        if ($row['silver'] > 0) {
+                            echo '<i class="icon-trophy" style="color: silver;"></i> x'.$row['silver'].'&nbsp;&nbsp;&nbsp;';
+                        } else {
+                            echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                        }
+                        if ($row['bronze'] > 0) {
+                            echo '<i class="icon-trophy" style="color: #cd7f32;"></i> x'.$row['bronze'];
+                        } 
+                    ?>
+                </td>
             </tr>
 
         <?php } ?>
     </tbody>
     <tfoot>
         <tr>
-            <td colspan=4>Average placing in league</td>
+            <td colspan=3>Average placing in league</td>
         </tr>
     </tfoot>
 </table>
@@ -77,84 +93,53 @@
         <th>Manager</th>
         <th>Appearances</th>
         <th>Best Streak</th>
+        <th>Current Streak</th>
     </thead>
     <tbody>
         <?php
-        $managers = [
-            'AJ' => [
+        $men = ['AJ','Ben','Tyler','Matt','Justin','Andy','Cole','Everett','Cameron','Gavin'];
+        $managers = [];
+        foreach ($men as $man) {
+            $managers[$man] = [
                 'app' => 0,
-                'streak' => 0
-            ],
-            'Ben' => [
-                'app' => 0,
-                'streak' => 0
-            ],
-            'Tyler' => [
-                'app' => 0,
-                'streak' => 0
-            ],
-            'Matt' => [
-                'app' => 0,
-                'streak' => 0
-            ],
-            'Justin' => [
-                'app' => 0,
-                'streak' => 0
-            ],
-            'Andy' => [
-                'app' => 0,
-                'streak' => 0
-            ],
-            'Cole' => [
-                'app' => 0,
-                'streak' => 0
-            ],
-            'Everett' => [
-                'app' => 0,
-                'streak' => 0
-            ],
-            'Cameron' => [
-                'app' => 0,
-                'streak' => 0
-            ],
-            'Gavin' => [
-                'app' => 0,
-                'streak' => 0
-            ]
-        ];
-        $currentName = '';
-        $name = 'dog';
-        $currentStreak = $longestStreak = $appearances = 0;
-        $result = query(
-            "SELECT * FROM finishes JOIN managers ON managers.id = finishes.manager_id"
-        );
-        while ($row = fetch_array($result)) {
-            $currentName = $row['name'];
-
-            if ($currentName != $name && $name != 'dog') {
-                $managers[$name]['streak'] = $longestStreak;
-                $longestStreak = $currentStreak = 0;
-            }
-
-            if ($row['finish'] < 7) {
-                $currentStreak++;
-                $managers[$row['name']]['app']++;
-            } else {
-                if ($currentStreak > $longestStreak) {
-                    $longestStreak = $currentStreak;
-                }
-                $currentStreak = 0;
-            }
-
-            $name = $currentName;
+                'streak' => 0,
+                'current' => 0
+            ];
         }
-        $managers[$name]['streak'] = $longestStreak;
+        
+        foreach ($managers as $name => $array) {
+
+            $currentStreak = $thisStreak = $longestStreak = $appearances = 0;
+            $currentStreakOver = false;
+            $result = query("SELECT * FROM finishes 
+                JOIN managers ON managers.id = finishes.manager_id
+                WHERE managers.name = '$name'
+                ORDER BY year DESC");
+            while ($row = fetch_array($result)) {
+                // increment appearances if finish is less than 7
+                if ($row['finish'] < 7) {
+                    $appearances++;
+                    if (!$currentStreakOver) {
+                        $currentStreak++;
+                    }
+                    $thisStreak++;
+                    $longestStreak = $thisStreak > $longestStreak ? $thisStreak : $longestStreak;
+                } else {
+                    $thisStreak = 0;
+                    $currentStreakOver = true;
+                }
+            }
+            $managers[$name]['app'] = $appearances;
+            $managers[$name]['streak'] = $longestStreak;
+            $managers[$name]['current'] = $currentStreak;
+        }
 
         foreach ($managers as $manager => $array) { ?>
             <tr>
                 <td><?php echo $manager; ?></td>
                 <td><?php echo $array['app']; ?></td>
                 <td><?php echo $array['streak']; ?></td>
+                <td><?php echo $array['current']; ?></td>
             </tr>
 
         <?php } ?>
@@ -176,68 +161,16 @@
     </thead>
     <tbody>
         <?php
-        $managers = [
-            'AJ' => [
+        $men = ['AJ','Ben','Tyler','Matt','Justin','Andy','Cole','Everett','Cameron','Gavin'];
+        $managers = [];
+        foreach ($men as $man) {
+            $managers[$man] = [
                 'quarter' => 0,
                 'semi' => 0,
                 'final' => 0,
                 'total' => 0
-            ],
-            'Ben' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Tyler' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Matt' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Justin' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Andy' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Cole' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Everett' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Cameron' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Gavin' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ]
-        ];
+            ];
+        }
         $result = query("SELECT name, round, COUNT(name) as num
             FROM (
             SELECT year, round, managers.name, manager1_seed, manager2_seed, manager1_score, manager2_score
@@ -293,68 +226,16 @@
     </thead>
     <tbody>
         <?php
-        $managers = [
-            'AJ' => [
+        $men = ['AJ','Ben','Tyler','Matt','Justin','Andy','Cole','Everett','Cameron','Gavin'];
+        $managers = [];
+        foreach ($men as $man) {
+            $managers[$man] = [
                 'quarter' => 0,
                 'semi' => 0,
                 'final' => 0,
                 'total' => 0
-            ],
-            'Ben' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Tyler' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Matt' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Justin' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Andy' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Cole' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Everett' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Cameron' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ],
-            'Gavin' => [
-                'quarter' => 0,
-                'semi' => 0,
-                'final' => 0,
-                'total' => 0
-            ]
-        ];
+            ];
+        }
         $result = query("SELECT name, round, COUNT(name) as num
             FROM (
             SELECT year, round, managers.name, manager1_seed, manager2_seed, manager1_score, manager2_score
@@ -454,68 +335,17 @@
 	</thead>
 	<tbody>
 		<?php
-		$managers = [
-			'AJ' => [
-				'biggestWin' => 0,
+        $men = ['AJ','Ben','Tyler','Matt','Justin','Andy','Cole','Everett','Cameron','Gavin'];
+        $managers = [];
+        foreach ($men as $man) {
+            $managers[$man] = [
+                'biggestWin' => 0,
 				'smallestWin' => 999,
 				'biggestLoss' => 0,
 				'smallestLoss' => 999
-			],
-			'Ben' => [
-				'biggestWin' => 0,
-				'smallestWin' => 999,
-				'biggestLoss' => 0,
-				'smallestLoss' => 999
-			],
-			'Tyler' => [
-				'biggestWin' => 0,
-				'smallestWin' => 999,
-				'biggestLoss' => 0,
-				'smallestLoss' => 999
-			],
-			'Matt' => [
-				'biggestWin' => 0,
-				'smallestWin' => 999,
-				'biggestLoss' => 0,
-				'smallestLoss' => 999
-			],
-			'Justin' => [
-				'biggestWin' => 0,
-				'smallestWin' => 999,
-				'biggestLoss' => 0,
-				'smallestLoss' => 999
-			],
-			'Andy' => [
-				'biggestWin' => 0,
-				'smallestWin' => 999,
-				'biggestLoss' => 0,
-				'smallestLoss' => 999
-			],
-			'Cole' => [
-				'biggestWin' => 0,
-				'smallestWin' => 999,
-				'biggestLoss' => 0,
-				'smallestLoss' => 999
-			],
-			'Everett' => [
-				'biggestWin' => 0,
-				'smallestWin' => 999,
-				'biggestLoss' => 0,
-				'smallestLoss' => 999
-			],
-			'Cameron' => [
-				'biggestWin' => 0,
-				'smallestWin' => 999,
-				'biggestLoss' => 0,
-				'smallestLoss' => 999
-			],
-			'Gavin' => [
-				'biggestWin' => 0,
-				'smallestWin' => 999,
-				'biggestLoss' => 0,
-				'smallestLoss' => 999
-			]
-		];
+            ];
+        }
+	
 		$result = query("SELECT * FROM playoff_matchups JOIN managers ON manager1_id = managers.id");
 		while ($row = fetch_array($result)) { 
 			$diff = abs($row['manager1_score'] - $row['manager2_score']);

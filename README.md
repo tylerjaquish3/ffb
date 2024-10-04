@@ -9,8 +9,6 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 Playoff Calculator: https://playoffcomputer.appspot.com/
 
 # Bugs
-- fun facts current season margin doesnt update new_leader and is not accurate
-- Current Season - Optimal Lineups endpoint needs optimizing (times out)
 - In regular_season_matchups table, lots of projections are wrong (looking at 2019)
 
 # Ideas
@@ -30,8 +28,8 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - best free agent pickup (current) cannot be right. it says Dobbs (169) but Puka had way more
     - most QB/RB/WR/etc points current season
 - start streaks on dashboard... maybe they started 4-0 3 times? put all years
-- dashboard postseason stats Appearances is broken for Best Streak (all 0)
-- fix the teamTest putting in New York or LA and not New York Jets, etc.
+- add page for Newsletter ?
+- pie chart for season finishes 1-3, 4-6, 7-10
 
 Notes:
 Rams moved to LA between 2015 & 2016

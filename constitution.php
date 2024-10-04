@@ -90,6 +90,8 @@ while ($row = fetch_array($result)) {
                                     <li>Trades have a 1 day period where they can be reviewed/vetoed by the league.</li>
                                     <li>Smack talk is encouraged, especially if it hurts feelings.</li>
                                     <li>Players added and dropped in the same day shall return to Free Agent status (not Waivers).</li>
+                                    <li>Waivers are decided using FAB system and each team starts the year with $200.</li>
+                                    <li>Managers are allowed to include FAB dollars in trades, but they must report the agreed upon value to the commissioner to make the appropriate adjustments.</li> 
                                     <li>Rules/settings can be changed with a majority vote. However, in-season changes require a super-majority (80% yea).</li>
                                 </ul>
                             </div>

@@ -303,7 +303,7 @@ include 'sidebar.html';
         var years = <?php echo json_encode($draftSpotChart['years']); ?>;
         var yearLabels = years.split(",");
         var teams = <?php echo json_encode($draftSpotChart['spot']); ?>;
-        let colors = ["#4f267f","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
+        let colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
         let x = 0;
         let dataset = [];
         for (const [key, value] of Object.entries(teams)) {
@@ -372,7 +372,7 @@ include 'sidebar.html';
                             datasets: [{
                                     label: "QB",
                                     data: data.QB,
-                                    backgroundColor: '#4f267f'
+                                    backgroundColor: '#9c68d9'
                                 },{
                                     label: "RB",
                                     data: data.RB,

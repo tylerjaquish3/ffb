@@ -248,7 +248,7 @@ function lookupGameTime(?int $id) {
                                                 echo '<td><a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a></td>';
                                                 echo '<td>'.$row['team'].'</td>';
                                                 echo '<td class="text-right"><strong>'.
-                                                    number_format($row['points'], 2)
+                                                    number_format((float)$row['points'], 2)
                                                     .'</strong></td>';
                                                 if ($row['round']) {
                                                     echo '<td><i class="icon-table"></i></td>';

@@ -1,7 +1,6 @@
 <?php
 
 include 'yahooSharedFunctions.php';
-include 'updateFunFacts.php';
 
 $year = (int)$_POST['year'];
 $access_token = $_POST['token'];

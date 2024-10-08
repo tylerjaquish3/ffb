@@ -1681,7 +1681,7 @@ function queryBestWeekPlayer($week, $pts, $pos)
 {
     global $selectedSeason;
     $response = [];
-    if (!$pts) {
+    if (!$pts || $pts == 'Bye') {
         return ['manager' => '', 'player' => '', 'points' => ''];
     }
 
@@ -2491,7 +2491,7 @@ function getMatchupRecapNumbers()
         $margin2 = $versusPoints - $managerPoints;
 
         if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
-            $recap['bench1'] += $row['points'];
+            $recap['bench1'] += (float)$row['points'];
         } else {
             $recap['projected1'] = (float)$row['manager1_projected'];
             $recap['projected2'] = (float)$row['manager2_projected'];

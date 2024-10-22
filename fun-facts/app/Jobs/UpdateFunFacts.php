@@ -99,6 +99,8 @@ class UpdateFunFacts implements ShouldQueue
             $this->pointsInWinLoss();
             // 140,141
             $this->irPlayers();
+            // 142,143,144
+            // $this->weeklyPositionPlayers();
 
         } catch (\Exception $e) {
             $success = false;
@@ -231,13 +233,13 @@ class UpdateFunFacts implements ShouldQueue
     {
         echo 'Most Points For'.PHP_EOL;
         // Most PF (All Time)
-        // $i = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager1_score) as pts')
-        //     ->orderBy('pts', 'desc')
-        //     ->groupBy('manager1_id')
-        //     ->get();
+        $i = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager1_score) as pts')
+            ->orderBy('pts', 'desc')
+            ->groupBy('manager1_id')
+            ->get();
 
-        // $tops = $this->checkMultiple($i, 'pts');
-        // $this->insertFunFact(1, 'manager1_id', 'pts', [], $tops);
+        $tops = $this->checkMultiple($i, 'pts');
+        $this->insertFunFact(1, 'manager1_id', 'pts', [], $tops);
 
         // Most PF (Season)
         $i = RegularSeasonMatchup::selectRaw('manager1_id, year, SUM(manager1_score) as pts')
@@ -2363,6 +2365,46 @@ class UpdateFunFacts implements ShouldQueue
 
         $tops = $this->checkMultiple($top, 'cnt');
         $this->insertFunFact(141, 'manager_id', 'cnt', [], $tops);
+    }
 
+    public function weeklyPositionPlayers()
+    {
+        $tops = [];
+        $managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
+        foreach ($managers as $manager) {
+            $tops[$manager] = 0;
+        }
+        
+        $players = Roster::all();
+        
+        foreach ($players as $player) {
+            $rank = $this->getPlayerPositionRank($player->player, $player->roster_spot, $player->position, $player->year, $player->week);
+// var_dump($rank);
+            if ($rank == 1) {
+                // dd($player->player, $player->points);
+                $tops[$player->manager]++;
+            }
+        }
+
+        // this takes too long!!!
+        dd($tops);
+
+    }
+
+    private function getPlayerPositionRank($player, $rosterSpot, $position, $year, $week)
+    {
+        if ($rosterSpot == 'IR') {
+            return 'N/A';
+        }
+        $rows = Roster::where('year', $year)->where('week', $week)->where('position', $position)
+            ->orderBy('points', 'desc')->get();
+        
+        $rank = 1;
+        foreach ($rows as $row) {
+            if ($row->player == $player) {
+                return $rank;
+            }
+            $rank++;
+        }
     }
 }

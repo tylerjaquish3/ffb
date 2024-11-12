@@ -32,7 +32,7 @@ return [
 
     'year' => 2024,
     'yahoo_league_id' => 98957,
-    'weeks' => [9],
+    'weeks' => [10],
 
     // For reference
     // 'seasons' => [

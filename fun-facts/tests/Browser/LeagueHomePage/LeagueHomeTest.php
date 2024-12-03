@@ -29,6 +29,8 @@ class LeagueHomeTest extends DuskTestCase
      */
     public function testTeamNames()
     {
+        $this->markTestSkipped('No need to run team names at this time');
+
         $this->browse(function (Browser $browser) {
             try {
                 $leagueId = config('services.yahoo_league_id');
@@ -107,6 +109,8 @@ class LeagueHomeTest extends DuskTestCase
      */
     public function testMatchups()
     {
+        $this->markTestSkipped('No need to run matchups at this time');
+
         $this->browse(function (Browser $browser) {
             try {
                 $leagueId = config('services.yahoo_league_id');

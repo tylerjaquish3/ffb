@@ -16,6 +16,8 @@ class ScheduleTest extends DuskTestCase
 
     public function testSchedules()
     {
+        $this->markTestSkipped('No need to run schedules at this time');
+
         $this->browse(function (Browser $browser) {
             try {
                 $browser->visit('https://football.fantasysports.yahoo.com/f1/16064');

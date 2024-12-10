@@ -117,7 +117,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Points</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-striped nowrap row-border order-column full-width" id="datatable-currentPoints">
+                            <table class="stripe nowrap row-border order-column full-width" id="datatable-currentPoints">
                                 <thead>
                                     <tr>
                                         <th>Manager</th>
@@ -393,7 +393,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Optimal Lineups</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-optimal">
+                            <table class="stripe nowrap row-border order-column full-width" id="datatable-optimal">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Opponent</th>
@@ -406,6 +406,7 @@ include 'sidebar.html';
                                     <th>Opponent Optimal</th>
                                     <th>Actual Margin</th>
                                     <th>Optimal Margin</th>
+                                    <th>Accuracy</th>
                                 </thead>
                                 <tbody></tbody>
                             </table>
@@ -420,7 +421,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Worst Draft Picks</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-striped nowrap" id="datatable-worstDraft">
+                            <table class="stripe nowrap row-border order-column full-width" id="datatable-worstDraft">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Player</th>
@@ -456,7 +457,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Best Draft Picks</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-striped" id="datatable-bestDraft">
+                            <table class="stripe nowrap row-border order-column full-width" id="datatable-bestDraft">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Player</th>
@@ -492,7 +493,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Record Against Everyone</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-striped nowrap" id="datatable-everyone">
+                            <table class="stripe nowrap row-border order-column full-width" id="datatable-everyone">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Wins</th>
@@ -517,13 +518,31 @@ include 'sidebar.html';
             </div>
             <div class="row">
 
-                <div class="col-sm-12 col-lg-7 table-padding">
+                <div class="col-sm-12 col-lg-4 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Lineup Accuracy</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="stripe nowrap row-border order-column full-width" id="datatable-lineupAccuracy">
+                                <thead>
+                                    <th>Manager</th>
+                                    <th>Points</th>
+                                    <th>Optimal Points</th>
+                                    <th>Accuracy</th>
+                                </thead>
+                                <tbody> </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Points From Draft</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column" id="datatable-drafted">
+                            <table class="stripe nowrap row-border order-column full-width" id="datatable-drafted">
                                 <thead>
                                     <th>Manager</th>
                                     <th>All Drafted</th>
@@ -551,13 +570,13 @@ include 'sidebar.html';
                     </div>
                 </div>
                 
-                <div class="col-sm-12 col-lg-5 table-padding">
+                <div class="col-sm-12 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Performance</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive table-striped nowrap" id="datatable-draftPerformance">
+                            <table class="stripe nowrap row-border order-column full-width" id="datatable-draftPerformance">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Pick #</th>
@@ -581,7 +600,6 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="row">
@@ -590,10 +608,8 @@ include 'sidebar.html';
                         <div class="card-header">
                             <h4 style="float: right">Points For and Against</h4>
                         </div>
-                        <div class="card-body" style="direction: ltr;">
-                            <div class="card-block">
-                                <canvas id="scatterChart"></canvas>
-                            </div>
+                        <div class="card-body chart-block" style="direction: ltr;">
+                            <canvas id="scatterChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -847,7 +863,8 @@ include 'sidebar.html';
                 { data: 'optimal' },
                 { data: 'oppOptimal' },
                 { data: 'margin' },
-                { data: 'optimalMargin' }
+                { data: 'optimalMargin' },
+                { data: 'accuracy' }
             ],
             order: [
                 [4, "desc"]
@@ -871,6 +888,30 @@ include 'sidebar.html';
                     });
                 });
             }
+        });
+
+        $('#datatable-lineupAccuracy').DataTable({
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                leftColumns: 1
+            },
+            ajax: {
+                url: 'dataLookup.php',
+                data: function (d) {
+                    d.dataType = 'lineup-accuracy';
+                    d.season = $('#year-select').val();
+                }
+            },
+            columns: [
+                { data: 'manager' },
+                { data: 'points' },
+                { data: 'optimal' },
+                { data: 'accuracy' }
+            ],
+            order: [
+                [3, "desc"]
+            ]
         });
 
         $('#datatable-drafted').DataTable({
@@ -907,6 +948,11 @@ include 'sidebar.html';
         });
 
         $('#datatable-bestDraft').DataTable({
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                leftColumns: 1
+            },
             searching: false,
             paging: false,
             info: false,
@@ -920,6 +966,11 @@ include 'sidebar.html';
         });
 
         $('#datatable-worstDraft').DataTable({
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                leftColumns: 1
+            },
             searching: false,
             paging: false,
             info: false,
@@ -933,6 +984,11 @@ include 'sidebar.html';
         });
 
         $('#datatable-everyone').DataTable({
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                leftColumns: 1
+            },
             searching: false,
             paging: false,
             info: false,
@@ -942,6 +998,11 @@ include 'sidebar.html';
         });
 
         $('#datatable-draftPerformance').DataTable({
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                left: 1
+            },
             order: [
                 [1, "asc"]
             ]
@@ -1099,6 +1160,6 @@ include 'sidebar.html';
         max-width: 800px;
     }
     #datatable-optimal_wrapper {
-        max-width: 1365px;
+        max-width: 1465px;
     }
 </style>

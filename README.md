@@ -10,6 +10,9 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 
 # Bugs
 - In regular_season_matchups table, lots of projections are wrong (looking at 2019)
+- start streaks on dashboard... maybe they started 4-0 3 times? put all years
+- current season, draft performance table is leaving out certain players, may need to be left join with rosters?
+- dashboard longest win streak is wrong because gavin has 9 and it still shows 8
 
 # Ideas
 
@@ -27,7 +30,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - most seahawks drafted
     - best free agent pickup (current) cannot be right. it says Dobbs (169) but Puka had way more
     - most QB/RB/WR/etc points current season
-- start streaks on dashboard... maybe they started 4-0 3 times? put all years
+
 - Newsletter page
     - Bring in schedule so it knows next week's matchup
     - fix top performers & stats by week to be based on last week only

@@ -124,6 +124,12 @@ function getManagerName($id) {
     return $managers[$id-1];
 }
 
+function getManagerId($name) {
+    $managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
+
+    return array_search($name, $managers) + 1;
+}
+
 /**
  * Undocumented function
  */
@@ -2452,13 +2458,10 @@ function getMatchupRecapNumbers()
     }
 
     $managerName = 'Andy';
-
-    if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
-        return [];
-    }
     
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];
+        $managerId = getManagerId($managerName);
         if (isset($_GET['year'])) {
             $season = $_GET['year'];
         }
@@ -2476,25 +2479,53 @@ function getMatchupRecapNumbers()
 
     $versus = '';
     $versusId = null;
-    $result = query("SELECT * FROM rosters
-        JOIN managers on managers.name = rosters.manager
-        JOIN regular_season_matchups rsm on rsm.year = rosters.year and rsm.week_number = rosters.week
-        and rsm.manager1_id = managers.id
-        WHERE rosters.year = $season and rosters.week = $week and manager = '".$managerName."'");
-    while ($row = fetch_array($result)) {
 
-        $versusId = $row['manager2_id'];
-        $managerPoints = $row['manager1_score'];
-        $versusPoints = $row['manager2_score'];
-        
+    $result = query("SELECT distinct week_number FROM regular_season_matchups WHERE year = $season ORDER BY week_number ASC");
+    $lastWeek = 0;
+    while ($row = fetch_array($result)) {
+        $lastWeek++;
+    }
+
+     // Find round based on week
+     if ($week == $lastWeek+1) {
+        $round = 'Quarterfinal';
+    } else if ($week == $lastWeek+2) {
+        $round = 'Semifinal';
+    } else if ($week == $lastWeek+3) {
+        $round = 'Final';
+    }
+
+    if ($week > $lastWeek) {
+        $result = query("SELECT * FROM playoff_rosters pr
+            JOIN managers ON managers.name = pr.manager
+            JOIN playoff_matchups pm on pm.year = pr.year and pm.round = pr.round and (manager1_id = $managerId or manager2_id = $managerId)
+            WHERE pr.year = $season and pr.round = '$round' and managers.name = '$managerName'");
+    } else {
+        $result = query("SELECT * FROM rosters
+            JOIN managers on managers.name = rosters.manager
+            JOIN regular_season_matchups rsm on rsm.year = rosters.year and rsm.week_number = rosters.week
+            and rsm.manager1_id = managers.id
+            WHERE rosters.year = $season and rosters.week = $week and manager = '".$managerName."'");
+    }
+
+    while ($row = fetch_array($result)) {
+        if ($row['manager1_id'] == $managerId) {
+            $versusId = $row['manager2_id'];
+            $managerPoints = $row['manager1_score'];
+            $versusPoints = $row['manager2_score'];
+        } else {
+            $versusId = $row['manager1_id'];
+            $managerPoints = $row['manager2_score'];
+            $versusPoints = $row['manager1_score'];
+        }
         $margin1 = $managerPoints - $versusPoints;
         $margin2 = $versusPoints - $managerPoints;
 
         if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
             $recap['bench1'] += (float)$row['points'];
         } else {
-            $recap['projected1'] = (float)$row['manager1_projected'];
-            $recap['projected2'] = (float)$row['manager2_projected'];
+            $recap['projected1'] = isset($row['manager1_projected']) ? (float)$row['manager1_projected'] : 'N/A';
+            $recap['projected2'] = isset($row['manager2_projected']) ? (float)$row['manager2_projected'] : 'N/A';
             
             if ($row['points'] > $recap['top_scorer1']) {
                 $recap['top_scorer1'] = $row['points'];
@@ -2511,9 +2542,15 @@ function getMatchupRecapNumbers()
         return $recap;
     }
     
-    $result = query("SELECT * FROM managers 
-        JOIN rosters on managers.name = rosters.manager
-        WHERE rosters.year = $season AND rosters.week = $week AND managers.id = ".$versusId);
+    if ($week > $lastWeek) {
+        $result = query("SELECT * FROM playoff_rosters
+            JOIN managers ON managers.name = playoff_rosters.manager
+            WHERE playoff_rosters.year = $season and round = '$round' and managers.id = '".$versusId."'");
+    } else {
+        $result = query("SELECT * FROM managers 
+            JOIN rosters on managers.name = rosters.manager
+            WHERE rosters.year = $season AND rosters.week = $week AND managers.id = ".$versusId);
+    }
     while ($row = fetch_array($result)) {
         $versus = $row['manager'];
         if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
@@ -2580,15 +2617,13 @@ function getPositionPointsChartNumbers()
     while ($row = fetch_array($result)) {
         $week = $row['week'];
     }
-
-    if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
-        return [];
-    }
+    $lastWeek = $week;
 
     $managerName = 'Andy';
 
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];
+        $managerId = getManagerId($managerName);
         if (isset($_GET['year'])) {
             $season = $_GET['year'];
         }
@@ -2597,47 +2632,91 @@ function getPositionPointsChartNumbers()
         }
     }
 
-    $man2 = null;
-    $result = query("SELECT * FROM regular_season_matchups rsm
-        JOIN managers on managers.id = rsm.manager1_id
-        WHERE year = $season and week_number = $week and managers.name = '".$managerName."'");
-    while ($row = fetch_array($result)) {
-        $man2 = $row['manager2_id'];
+    if ($week == $lastWeek+1) {
+        $round = 'Quarterfinal';
+    } else if ($week == $lastWeek+2) {
+        $round = 'Semifinal';
+    } else if ($week == $lastWeek+3) {
+        $round = 'Final';
     }
-    if (!$man2) {
+
+    $versus = null;
+    if ($week > $lastWeek) {
+        $result = query("SELECT * FROM playoff_rosters pr
+            JOIN managers ON managers.name = pr.manager
+            JOIN playoff_matchups pm on pm.year = pr.year and pm.round = pr.round and (manager1_id = $managerId or manager2_id = $managerId)
+            WHERE pr.year = $season and pr.round = '$round' and managers.name = '$managerName'");
+    } else {
+        $result = query("SELECT * FROM regular_season_matchups rsm
+            JOIN managers on managers.id = rsm.manager1_id
+            WHERE year = $season and week_number = $week and managers.name = '$managerName'");
+    }
+
+    $versus = null;
+    
+    while ($row = fetch_array($result)) {
+        $versus = $row['manager1_id'] == $managerId ? $row['manager2_id'] : $row['manager1_id'];
+    }
+    if (!$versus) {
         return [
             'labels' => [],
             'points' => []
         ];
     }
-    $man2name = getManagerName($man2);
+    $versusName = getManagerName($versus);
 
     $posOrder = ['QB', 'RB', 'WR', 'TE', 'W/R/T', 'W/R', 'W/T', 'Q/W/R/T', 'K', 'DEF', 'D', 'DL', 'DB', 'BN', 'IR'];
 
     $labels = $points = [];
-    $result = query("SELECT manager, roster_spot, sum(points) as points FROM rosters
-        JOIN managers on managers.name = rosters.manager
-        JOIN regular_season_matchups rsm on rsm.year = rosters.year and rsm.week_number = rosters.week
-        and rsm.manager1_id = managers.id
-        WHERE rosters.year = $season and rosters.week = $week and (manager = '".$managerName."' OR manager = '".$man2name."')
-        AND roster_spot != 'IR'
-        GROUP BY manager, roster_spot
-        ORDER BY CASE roster_spot 
-            WHEN 'QB' THEN 0 
-            WHEN 'RB' THEN 1
-            WHEN 'WR' THEN 2
-            WHEN 'TE' THEN 3
-            WHEN 'W/R/T' THEN 4
-            WHEN 'W/R' THEN 5
-            WHEN 'W/T' THEN 6
-            WHEN 'Q/W/R/T' THEN 7 
-            WHEN 'K' THEN 8
-            WHEN 'DEF' THEN 9
-            WHEN 'D' THEN 10
-            WHEN 'DL' THEN 11
-            WHEN 'DB' THEN 12
-            WHEN 'BN' THEN 13
-        END");  
+    if ($week > $lastWeek) {
+        $result = query("SELECT manager, roster_spot, sum(points) as points FROM playoff_rosters
+            JOIN managers on managers.name = playoff_rosters.manager
+            JOIN playoff_matchups pm on pm.year = playoff_rosters.year and pm.round = playoff_rosters.round
+            and (pm.manager1_id = managers.id OR pm.manager2_id = managers.id)
+            WHERE playoff_rosters.year = $season and playoff_rosters.week = $week and (manager = '$managerName' OR manager = '$versusName')
+            AND roster_spot != 'IR'
+            GROUP BY manager, roster_spot
+            ORDER BY CASE roster_spot 
+                WHEN 'QB' THEN 0 
+                WHEN 'RB' THEN 1
+                WHEN 'WR' THEN 2
+                WHEN 'TE' THEN 3
+                WHEN 'W/R/T' THEN 4
+                WHEN 'W/R' THEN 5
+                WHEN 'W/T' THEN 6
+                WHEN 'Q/W/R/T' THEN 7 
+                WHEN 'K' THEN 8
+                WHEN 'DEF' THEN 9
+                WHEN 'D' THEN 10
+                WHEN 'DL' THEN 11
+                WHEN 'DB' THEN 12
+                WHEN 'BN' THEN 13
+            END");  
+    } else {
+        $result = query("SELECT manager, roster_spot, sum(points) as points FROM rosters
+            JOIN managers on managers.name = rosters.manager
+            JOIN regular_season_matchups rsm on rsm.year = rosters.year and rsm.week_number = rosters.week
+            and rsm.manager1_id = managers.id
+            WHERE rosters.year = $season and rosters.week = $week and (manager = '".$managerName."' OR manager = '".$versusName."')
+            AND roster_spot != 'IR'
+            GROUP BY manager, roster_spot
+            ORDER BY CASE roster_spot 
+                WHEN 'QB' THEN 0 
+                WHEN 'RB' THEN 1
+                WHEN 'WR' THEN 2
+                WHEN 'TE' THEN 3
+                WHEN 'W/R/T' THEN 4
+                WHEN 'W/R' THEN 5
+                WHEN 'W/T' THEN 6
+                WHEN 'Q/W/R/T' THEN 7 
+                WHEN 'K' THEN 8
+                WHEN 'DEF' THEN 9
+                WHEN 'D' THEN 10
+                WHEN 'DL' THEN 11
+                WHEN 'DB' THEN 12
+                WHEN 'BN' THEN 13
+            END");  
+    }
     while ($row = fetch_array($result)) {
 
         if (!in_array($row['roster_spot'], $labels)) {
@@ -2660,17 +2739,14 @@ function getGameTimeChartNumbers()
     global $season;
     $result = query("SELECT week FROM rosters where year = $season ORDER BY week DESC LIMIT 1");
     while ($row = fetch_array($result)) {
-        $week = $row['week'];
+        $lastWeek = $row['week'];
     }
-
-    if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
-        return [];
-    }
-    
+    $week = $lastWeek;
     $managerName = 'Andy';
 
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];
+        $managerId = getManagerId($managerName);
         if (isset($_GET['year'])) {
             $season = $_GET['year'];
         }
@@ -2679,20 +2755,38 @@ function getGameTimeChartNumbers()
         }
     }
 
-    $man2 = null;
-    $result = query("SELECT * FROM regular_season_matchups rsm
-        JOIN managers on managers.id = rsm.manager1_id
-        WHERE year = $season and week_number = $week and managers.name = '".$managerName."'");
-    while ($row = fetch_array($result)) {
-        $man2 = $row['manager2_id'];
+    // Find round based on week
+    if ($week == $lastWeek+1) {
+        $round = 'Quarterfinal';
+    } else if ($week == $lastWeek+2) {
+        $round = 'Semifinal';
+    } else if ($week == $lastWeek+3) {
+        $round = 'Final';
     }
-    if (!$man2) {
+
+    if ($week > $lastWeek) {
+        $result = query("SELECT * FROM playoff_rosters pr
+            JOIN managers ON managers.name = pr.manager
+            JOIN playoff_matchups pm on pm.year = pr.year and pm.round = pr.round and (manager1_id = $managerId or manager2_id = $managerId)
+            WHERE pr.year = $season and pr.round = '$round' and managers.name = '$managerName'");
+    } else {
+        $result = query("SELECT * FROM regular_season_matchups rsm
+            JOIN managers on managers.id = rsm.manager1_id
+            WHERE year = $season and week_number = $week and managers.name = '$managerName'");
+    }
+
+    $versus = null;
+    
+    while ($row = fetch_array($result)) {
+        $versus = $row['manager1_id'] == $managerId ? $row['manager2_id'] : $row['manager1_id'];
+    }
+    if (!$versus) {
         return [
             'labels' => [],
             'points' => []
         ];
     }
-    $man2name = getManagerName($man2);
+    $versusName = getManagerName($versus);
 
     $labels = [
         1 => 'Thursday',
@@ -2706,13 +2800,24 @@ function getGameTimeChartNumbers()
     ];
     $totalPoints = 0;
     foreach ($labels as $id => $label) {
-        $result = query("SELECT manager, game_slot, sum(points) as points FROM rosters
-            JOIN managers on managers.name = rosters.manager
-            WHERE rosters.year = $season and rosters.week = $week and manager = '".$managerName."'
-            AND roster_spot NOT IN ('IR', 'BN')
-            AND game_slot = $id
-            GROUP BY manager, game_slot
-            ORDER BY game_slot ASC");
+        if ($week > $lastWeek) {
+            $result = query("SELECT manager, game_slot, sum(points) as points FROM playoff_rosters
+                JOIN managers on managers.name = playoff_rosters.manager
+                WHERE playoff_rosters.year = $season and playoff_rosters.week = $week and manager = '$managerName'
+                AND roster_spot NOT IN ('IR', 'BN')
+                AND game_slot = $id
+                GROUP BY manager, game_slot
+                ORDER BY game_slot ASC");
+        } else {
+
+            $result = query("SELECT manager, game_slot, sum(points) as points FROM rosters
+                JOIN managers on managers.name = rosters.manager
+                WHERE rosters.year = $season and rosters.week = $week and manager = '$managerName'
+                AND roster_spot NOT IN ('IR', 'BN')
+                AND game_slot = $id
+                GROUP BY manager, game_slot
+                ORDER BY game_slot ASC");
+        }
         while ($row = fetch_array($result)) {
             $totalPoints += $row['points'];
         }
@@ -2721,34 +2826,44 @@ function getGameTimeChartNumbers()
     
     $totalPoints = 0;
     foreach ($labels as $id => $label) {
-        $result = query("SELECT manager, game_slot, sum(points) as points FROM rosters
-            JOIN managers on managers.name = rosters.manager
-            WHERE rosters.year = $season and rosters.week = $week and manager = '".$man2name."'
-            AND roster_spot NOT IN ('IR', 'BN')
-            AND game_slot = $id
-            GROUP BY manager, game_slot
-            ORDER BY game_slot ASC");
+        if ($week > $lastWeek) {
+            $result = query("SELECT manager, game_slot, sum(points) as points FROM playoff_rosters
+                JOIN managers on managers.name = playoff_rosters.manager
+                WHERE playoff_rosters.year = $season and playoff_rosters.week = $week and manager = '$versusName'
+                AND roster_spot NOT IN ('IR', 'BN')
+                AND game_slot = $id
+                GROUP BY manager, game_slot
+                ORDER BY game_slot ASC");
+        } else {
+            $result = query("SELECT manager, game_slot, sum(points) as points FROM rosters
+                JOIN managers on managers.name = rosters.manager
+                WHERE rosters.year = $season and rosters.week = $week and manager = '$versusName'
+                AND roster_spot NOT IN ('IR', 'BN')
+                AND game_slot = $id
+                GROUP BY manager, game_slot
+                ORDER BY game_slot ASC");
+        }
         while ($row = fetch_array($result)) {
             $totalPoints += $row['points'];
         }
-        $points[$man2name][$id] = $totalPoints;
+        $points[$versusName][$id] = $totalPoints;
     }
 
     // Check if we can remove friday and tuesday and other
-    if ($points[$managerName][1] == $points[$managerName][2] && $points[$man2name][1] == $points[$man2name][2]) {
+    if ($points[$managerName][1] == $points[$managerName][2] && $points[$versusName][1] == $points[$versusName][2]) {
         unset($labels[2]);
         unset($points[$managerName][2]);
-        unset($points[$man2name][2]);
+        unset($points[$versusName][2]);
     }
-    if ($points[$managerName][7] == $points[$managerName][8] && $points[$man2name][7] == $points[$man2name][8]) {
+    if ($points[$managerName][7] == $points[$managerName][8] && $points[$versusName][7] == $points[$versusName][8]) {
         unset($labels[8]);
         unset($points[$managerName][8]);
-        unset($points[$man2name][8]);
+        unset($points[$versusName][8]);
     }
-    if ($points[$managerName][6] == $points[$managerName][7] && $points[$man2name][6] == $points[$man2name][7]) {
+    if ($points[$managerName][6] == $points[$managerName][7] && $points[$versusName][6] == $points[$versusName][7]) {
         unset($labels[7]);
         unset($points[$managerName][7]);
-        unset($points[$man2name][7]);
+        unset($points[$versusName][7]);
     }
 
     // get array_values for each of the managers' points
@@ -2784,10 +2899,22 @@ function lookupGameSpot($slot)
 
 function getPlayerRank($player, $year, $week)
 {
+    // Determine if its playoff week or not
+    $result = query("SELECT week FROM rosters where year = $year ORDER BY week DESC LIMIT 1");
+    while ($row = fetch_array($result)) {
+        $lastWeek = $row['week'];
+    }
+
+    if ($week > $lastWeek) {
+        $result = query("SELECT * FROM playoff_rosters
+            WHERE year = $year and week = $week
+            ORDER BY points desc");
+    } else {
+        $result = query("SELECT * FROM rosters
+            WHERE year = $year and week = $week
+            ORDER BY points desc");
+    }
     $rank = 1;
-    $result = query("SELECT * FROM rosters
-        WHERE year = $year and week = $week
-        ORDER BY points desc");
     while ($row = fetch_array($result)) {
         
         if ($row['player'] == $player) {
@@ -2805,10 +2932,24 @@ function getPlayerPositionRank($player, $rosterSpot, $position, $year, $week)
     if ($rosterSpot == 'IR') {
         return 'N/A';
     }
+
+    // Determine if its playoff week or not
+    $result = query("SELECT week FROM rosters where year = $year ORDER BY week DESC LIMIT 1");
+    while ($row = fetch_array($result)) {
+        $lastWeek = $row['week'];
+    }
+
+    if ($week > $lastWeek) {
+        $result = query("SELECT * FROM playoff_rosters
+            WHERE year = $year and week = $week and position = '".$position."'
+            ORDER BY points desc");
+    } else {
+        $result = query("SELECT * FROM rosters
+            WHERE year = $year and week = $week and position = '".$position."'
+            ORDER BY points desc");
+    }
+
     $rank = 1;
-    $result = query("SELECT * FROM rosters
-        WHERE year = $year and week = $week and position = '".$position."'
-        ORDER BY points desc");
     while ($row = fetch_array($result)) {
         if ($row['player'] == $player) {
             return $rank;

@@ -20,6 +20,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - Current season, worst draft picks remove players that got traded midseason
 - add trophy graphic on trophy page
 - grab postseason matchup rosters
+- run some "what if" scenarios
 - chances of making playoffs, make request to playoffcomputer linked above
 - add a bunch more fun facts
     - record against everyone

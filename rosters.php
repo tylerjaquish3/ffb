@@ -4,36 +4,74 @@ $pageName = "Rosters";
 include 'header.php';
 include 'sidebar.html';
 
-if (isset($_GET['week']) && in_array($_GET['week'], ['Final','Semifinal','Quarterfinal'])) {
-    echo '<h1 class="text-center">Postseason rosters are not available yet</h1>';
-    die;
-} else {
+$playoffRoster = false;
+$managerName = 'Andy';
+$versus = '';
+$year = $season;
+if (isset($_GET['manager'])) {
+    $managerName = $_GET['manager'];
+    if (isset($_GET['year'])) {
+        $year = $_GET['year'];
+    }
+    if (isset($_GET['week'])) {
+        $week = $_GET['week'];
+    }
+}
+$result = query("SELECT * FROM managers WHERE name = '" . $managerName . "'");
+while ($row = fetch_array($result)) {
+    $managerId = $row['id'];
+}
+$managerPoints = $versusPoints = 0;
 
-    $managerName = 'Andy';
-    $versus = '';
-    $year = $season;
-    if (isset($_GET['manager'])) {
-        $managerName = $_GET['manager'];
-        if (isset($_GET['year'])) {
-            $year = $_GET['year'];
-        }
-        if (isset($_GET['week'])) {
-            $week = $_GET['week'];
-        }
-    }
-    $result = query("SELECT * FROM managers WHERE name = '" . $managerName . "'");
+$result = query("SELECT * FROM regular_season_matchups rsm
+    JOIN managers on managers.id = rsm.manager2_id
+    WHERE year = $year and week_number = $week and manager1_id = $managerId");
+while ($row = fetch_array($result)) {
+    $versus = $row['name'];
+    $managerPoints = $row['manager1_score'];
+    $versusPoints = $row['manager2_score'];
+}
+
+if ($managerPoints == 0) {
+    $playoffRoster = true;
+    $result = query("SELECT distinct week_number FROM regular_season_matchups WHERE year = $year ORDER BY week_number ASC");
+    $lastWeek = 0;
     while ($row = fetch_array($result)) {
-        $managerId = $row['id'];
+        $lastWeek++;
     }
-    $managerPoints = $versusPoints = 0;
-    
-    $result = query("SELECT * FROM regular_season_matchups rsm
-        JOIN managers on managers.id = rsm.manager2_id
-        WHERE year = $year and week_number = $week and manager1_id = $managerId");
+
+    // Find round based on week
+    if ($week == $lastWeek+1) {
+        $round = 'Quarterfinal';
+    } else if ($week == $lastWeek+2) {
+        $round = 'Semifinal';
+    } else if ($week == $lastWeek+3) {
+        $round = 'Final';
+    }
+
+    $versus = null;
+    // Has to be a playoff matchup, so look in playoff_matchups table
+    $result = query("SELECT m.name as m1, l.name as m2, pm.manager1_id, pm.manager2_id, pm.year, pm.round, pm.manager1_seed, pm.manager2_seed, pm.manager1_score, pm.manager2_score
+        FROM managers m
+        JOIN playoff_matchups pm ON pm.manager1_id = m.id
+        LEFT JOIN (
+        SELECT name, manager2_id, year, round, manager2_score FROM playoff_matchups pm2
+            JOIN managers ON managers.id = pm2.manager2_id
+        ) l ON l.manager2_id = pm.manager2_id AND l.year = pm.year AND l.round = pm.round
+        WHERE pm.year = $year and pm.round = '$round' and (m.name = '$managerName' OR l.name = '$managerName')");
     while ($row = fetch_array($result)) {
-        $versus = $row['name'];
-        $managerPoints = $row['manager1_score'];
-        $versusPoints = $row['manager2_score'];
+
+        if ($row['m1'] == $managerName) {
+            $versus = $row['m2'];
+            $versusId = $row['manager2_id'];
+            $managerPoints = $row['manager1_score'];
+            $versusPoints = $row['manager2_score'];
+        } else {
+            $versus = $row['m1'];
+            $versusId = $row['manager1_id'];
+            $managerPoints = $row['manager2_score'];
+            $versusPoints = $row['manager1_score'];
+        }
     }
 }
 
@@ -99,12 +137,29 @@ function lookupGameTime(?int $id) {
                                         <select id="week-select" class="form-control w-50">
                                             <?php
                                             $result = query("SELECT distinct week_number FROM regular_season_matchups ORDER BY week_number ASC");
+                                            $lastWeek = 0;
                                             while ($row = fetch_array($result)) {
+                                                $lastWeek++;
                                                 if ($row['week_number'] == $week) {
                                                     echo '<option selected value="'.$row['week_number'].'">'.$row['week_number'].'</option>';
                                                 } else {
                                                     echo '<option value="'.$row['week_number'].'">'.$row['week_number'].'</option>';
                                                 }
+                                            }
+                                            if ($week == $lastWeek+1) {
+                                                echo '<option selected value="'.($lastWeek+1).'">Quarterfinal</option>';
+                                            } else {
+                                                echo '<option value="'.($lastWeek+1).'">Quarterfinal</option>';
+                                            }
+                                            if ($week == $lastWeek+2) {
+                                                echo '<option selected value="'.($lastWeek+2).'">Semifinal</option>';
+                                            } else {
+                                                echo '<option value="'.($lastWeek+2).'">Semifinal</option>';
+                                            }
+                                            if ($week == $lastWeek+3) {
+                                                echo '<option selected value="'.($lastWeek+3).'">Final</option>';
+                                            } else {
+                                                echo '<option value="'.($lastWeek+3).'">Final</option>';
                                             }
                                             ?>
                                         </select>
@@ -132,6 +187,12 @@ function lookupGameTime(?int $id) {
                     </div>
                 </div>
             </div>
+
+            <?php
+            if (!$versus) {
+                echo '<h1 class="text-center">No playoff matchup found for '.$managerName.' in '.$year.' '.$round.'</h1>';
+            } else {
+            ?>
 
             <div class="row">
                 <div class="col-md-6 table-padding">
@@ -235,10 +296,17 @@ function lookupGameTime(?int $id) {
                                         </thead>
                                         <tbody>
                                             <?php
-                                            $result = query("SELECT r.player, r.*, round FROM rosters r
-                                                JOIN managers m on m.name = r.manager
-                                                LEFT JOIN draft d on d.player = r.player AND d.year = r.year and d.manager_id = m.id
-                                                WHERE r.year = $year AND week = $week AND manager = '$managerName'");
+                                            if ($playoffRoster) {
+                                                $result = query("SELECT r.player, r.*, d.round FROM playoff_rosters r
+                                                    JOIN managers m on m.name = r.manager
+                                                    LEFT JOIN draft d on d.player = r.player AND d.year = r.year and d.manager_id = m.id
+                                                    WHERE r.year = $year AND week = $week AND manager = '$managerName'");
+                                            } else {
+                                                $result = query("SELECT r.player, r.*, round FROM rosters r
+                                                    JOIN managers m on m.name = r.manager
+                                                    LEFT JOIN draft d on d.player = r.player AND d.year = r.year and d.manager_id = m.id
+                                                    WHERE r.year = $year AND week = $week AND manager = '$managerName'");
+                                            }
                                             while ($row = fetch_array($result)) {
                                                 $rank = getPlayerRank($row['player'], $row['year'], $row['week']);
                                                 $posRank = getPlayerPositionRank($row['player'], $row['roster_spot'], $row['position'], $row['year'], $row['week']);
@@ -281,9 +349,15 @@ function lookupGameTime(?int $id) {
                                         </thead>
                                         <tbody>
                                             <?php
-                                            $result = query("SELECT r.player, r.*, round FROM rosters r
-                                                LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
-                                                WHERE r.year = $year AND week = $week AND manager = '$versus'");
+                                            if ($playoffRoster) {
+                                                $result = query("SELECT r.player, r.*, draft.round FROM playoff_rosters r
+                                                    LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
+                                                    WHERE r.year = $year AND week = $week AND manager = '$versus'");
+                                            } else {
+                                                $result = query("SELECT r.player, r.*, round FROM rosters r
+                                                    LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
+                                                    WHERE r.year = $year AND week = $week AND manager = '$versus'");
+                                            }
                                             while ($row = fetch_array($result)) {
                                                 $rank = getPlayerRank($row['player'], $row['year'], $row['week']);
                                                 $posRank = getPlayerPositionRank($row['player'], $row['roster_spot'], $row['position'], $row['year'], $row['week']);
@@ -403,6 +477,8 @@ function lookupGameTime(?int $id) {
                     </div>
                 </div>
             </div>
+
+            <?php } ?>
         </div>
     </div>
 </div>
@@ -411,7 +487,6 @@ function lookupGameTime(?int $id) {
 
 <script type="text/javascript">
     $(document).ready(function() {
-
 
         let managerName = "<?php echo $managerName; ?>";
         let baseUrl = "<?php echo $BASE_URL; ?>";

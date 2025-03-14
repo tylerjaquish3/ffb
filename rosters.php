@@ -45,9 +45,10 @@ if ($managerPoints == 0) {
         $round = 'Quarterfinal';
     } else if ($week == $lastWeek+2) {
         $round = 'Semifinal';
-    } else if ($week == $lastWeek+3) {
+    } else if ($week >= $lastWeek+3) {
         $round = 'Final';
     }
+
 
     $versus = null;
     // Has to be a playoff matchup, so look in playoff_matchups table
@@ -136,7 +137,7 @@ function lookupGameTime(?int $id) {
                                         Week
                                         <select id="week-select" class="form-control w-50">
                                             <?php
-                                            $result = query("SELECT distinct week_number FROM regular_season_matchups ORDER BY week_number ASC");
+                                            $result = query("SELECT distinct week_number FROM regular_season_matchups where year = $season ORDER BY week_number ASC");
                                             $lastWeek = 0;
                                             while ($row = fetch_array($result)) {
                                                 $lastWeek++;

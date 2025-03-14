@@ -2491,7 +2491,7 @@ function getMatchupRecapNumbers()
         $round = 'Quarterfinal';
     } else if ($week == $lastWeek+2) {
         $round = 'Semifinal';
-    } else if ($week == $lastWeek+3) {
+    } else if ($week >= $lastWeek+3) {
         $round = 'Final';
     }
 
@@ -2636,7 +2636,7 @@ function getPositionPointsChartNumbers()
         $round = 'Quarterfinal';
     } else if ($week == $lastWeek+2) {
         $round = 'Semifinal';
-    } else if ($week == $lastWeek+3) {
+    } else if ($week >= $lastWeek+3) {
         $round = 'Final';
     }
 
@@ -2760,7 +2760,7 @@ function getGameTimeChartNumbers()
         $round = 'Quarterfinal';
     } else if ($week == $lastWeek+2) {
         $round = 'Semifinal';
-    } else if ($week == $lastWeek+3) {
+    } else if ($week >= $lastWeek+3) {
         $round = 'Final';
     }
 

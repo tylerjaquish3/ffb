@@ -12,6 +12,7 @@
 		while ($manager = fetch_array($result2)) {
 
 			$managerId = $manager['id'];
+			$managerName = $manager['name'];
 
 			$winStreak = $loseStreak = $longestWinStreak = $longestLoseStreak = 0;
 			$result = query("SELECT name, w.year, w.week_number, win, lose
@@ -34,25 +35,24 @@
 	                FROM regular_season_matchups
 	                GROUP BY year, week_number
 	            ) w2 ON w2.year = rsm.year AND w2.week_number = rsm.week_number
-	            WHERE name = '" . $manager['name'] . "'");
+	            WHERE name = '$managerName'");
 			while ($row = fetch_array($result)) {
 				if ($row['win'] == 1) {
 					$winStreak++;
+					$longestLoseStreak = ($loseStreak > $longestLoseStreak) ? $loseStreak : $longestLoseStreak;
+					$loseStreak = 0;
 				} else {
 					$longestWinStreak = ($winStreak > $longestWinStreak) ? $winStreak : $longestWinStreak;
 					$winStreak = 0;
-				}
-
-				if ($row['lose'] == 1) {
 					$loseStreak++;
-				} else {
-					$longestLoseStreak = ($loseStreak > $longestLoseStreak) ? $loseStreak : $longestLoseStreak;
-					$loseStreak = 0;
 				}
 			}
 
+			$longestLoseStreak = ($loseStreak > $longestLoseStreak) ? $loseStreak : $longestLoseStreak;
+			$longestWinStreak = ($winStreak > $longestWinStreak) ? $winStreak : $longestWinStreak;
+
 			$response[] = [
-				'manager' => $manager['name'],
+				'manager' => $managerName,
 				'winStreak' => $longestWinStreak,
 				'loseStreak' => $longestLoseStreak
 			];

@@ -2277,12 +2277,12 @@ function getAllDraftedPlayerDetails()
     global $selectedSeason;
     $response = [];
 
-    $result = query("SELECT rosters.manager, draft.overall_pick, draft.position, draft.round, rosters.player,
-        SUM(points) AS points, COUNT(rosters.player) AS GP
-        FROM rosters
-        JOIN managers ON rosters.manager = managers.name
-        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
-        WHERE rosters.year = $selectedSeason AND rosters.roster_spot NOT IN ('BN','IR')
+    $result = query("SELECT managers.name as manager, draft.overall_pick, draft.position, draft.round, draft.player,
+        SUM(points) AS points, SUM(IIF(roster_spot NOT IN ('BN','IR'), 1, 0)) AS GP
+        FROM draft
+        JOIN managers ON draft.manager_id = managers.id 
+        LEFT JOIN rosters ON rosters.player LIKE draft.player || '%' AND rosters.year = draft.year AND rosters.manager = managers.name
+        WHERE draft.year = $selectedSeason
         GROUP BY manager, overall_pick, rosters.player, draft.position, round");
     while ($row = fetch_array($result)) {
         $response[] = $row;
@@ -2458,6 +2458,7 @@ function getMatchupRecapNumbers()
     }
 
     $managerName = 'Andy';
+    $managerId = getManagerId($managerName);
     
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];
@@ -2620,6 +2621,7 @@ function getPositionPointsChartNumbers()
     $lastWeek = $week;
 
     $managerName = 'Andy';
+    $managerId = getManagerId($managerName);
 
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];
@@ -2743,6 +2745,7 @@ function getGameTimeChartNumbers()
     }
     $week = $lastWeek;
     $managerName = 'Andy';
+    $managerId = getManagerId($managerName);
 
     if (isset($_GET['manager'])) {
         $managerName = $_GET['manager'];

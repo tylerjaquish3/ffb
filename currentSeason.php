@@ -592,7 +592,7 @@ include 'sidebar.html';
                                             <td><?php echo $row['overall_pick']; ?></td>
                                             <td><?php echo $row['player']; ?></td>
                                             <td><?php echo $row['GP']; ?></td>
-                                            <td><?php echo round($row['points'], 1); ?></td>
+                                            <td><?php echo $row['points'] ? round($row['points'], 1) : 0; ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>

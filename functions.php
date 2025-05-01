@@ -2270,7 +2270,7 @@ function getRecordAgainstEveryone()
 }
 
 /**
- * Undocumented function
+ * Get the details of drafted players in a specific season
  */
 function getAllDraftedPlayerDetails()
 {

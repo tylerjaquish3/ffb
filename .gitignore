@@ -1,3 +1,4 @@
 connections.php
 /fun-facts/vendor
 /fun-facts/.env
+.DS_Store

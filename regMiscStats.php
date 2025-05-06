@@ -636,3 +636,96 @@
 		</tr>
 	</tfoot>
 </table>
+
+<!-- Lineup Accuracy -->
+<table class="table table-responsive table-striped nowrap" id="datatable-misc13" style="display:none;">
+	<thead>
+		<th>Manager</th>
+		<th>Points</th>
+		<th>Optimal Points</th>
+		<th>Accuracy</th>
+	</thead>
+	<tbody>
+		<?php
+		// Get all manager data in a single query
+		$managers = [];
+		$result = query("SELECT DISTINCT manager FROM rosters ORDER BY manager");
+		while ($row = fetch_array($result)) {
+			$managers[$row['manager']] = [
+				'points' => 0,
+				'optimal' => 0
+			];
+		}
+		
+		// Get all roster data in a single query instead of multiple nested queries
+		$query = "SELECT manager, year, week, roster_spot, position, points 
+				FROM rosters 
+				ORDER BY manager, year, week";
+		
+		$result = query($query);
+		
+		// Process all data in a more efficient manner
+		$managerWeekData = [];
+		while ($row = fetch_array($result)) {
+			$manager = $row['manager'];
+			$year = $row['year'];
+			$week = $row['week'];
+			
+			// Create manager/year/week structure if it doesn't exist
+			if (!isset($managerWeekData[$manager][$year][$week])) {
+				$managerWeekData[$manager][$year][$week] = [
+					'actual' => 0,
+					'roster' => []
+				];
+			}
+			
+			// Add to roster array for optimal calculation
+			$managerWeekData[$manager][$year][$week]['roster'][] = [
+				'pos' => $row['position'],
+					'roster_spot' => $row['roster_spot'],
+				'points' => (float)$row['points']
+			];
+			
+			// Calculate actual points (excluding bench and IR)
+			if ($row['roster_spot'] != 'BN' && $row['roster_spot'] != 'IR') {
+				$managerWeekData[$manager][$year][$week]['actual'] += (float)$row['points'];
+			}
+		}
+		
+		// Calculate optimal lineup for each manager/week
+		foreach ($managerWeekData as $manager => $yearData) {
+			$totalActual = 0;
+			$totalOptimal = 0;
+			
+			foreach ($yearData as $year => $weekData) {
+				foreach ($weekData as $week => $data) {
+					$actual = $data['actual'];
+					$totalActual += $actual;
+					
+					// Calculate optimal lineup using the checkRosterForOptimal function
+					$optimal = checkRosterForOptimal($data['roster'], $year);
+					
+					// Ensure optimal is at least equal to actual
+					$optimal = max($optimal, $actual);
+					
+					$totalOptimal += $optimal;
+				}
+			}
+			
+			$managers[$manager]['points'] = $totalActual;
+			$managers[$manager]['optimal'] = $totalOptimal;
+		}
+		
+		// Display results in table
+		foreach ($managers as $manager => $data) {
+			$accuracy = $data['optimal'] > 0 ? round(($data['points'] / $data['optimal']) * 100, 1) : 0;
+			?>
+			<tr>
+				<td><?php echo $manager; ?></td>
+				<td><?php echo round($data['points'], 1); ?></td>
+				<td><?php echo round($data['optimal'], 1); ?></td>
+				<td><?php echo $accuracy; ?>%</td>
+			</tr>
+		<?php } ?>
+	</tbody>
+</table>

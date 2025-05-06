@@ -2353,100 +2353,202 @@ function getPointsForScatter()
 }
 
 /**
- * Undocumented function
+ * Check a roster for the optimal lineup configuration
  */
-function checkRosterForOptimal(array $roster)
+function checkRosterForOptimal(array $roster, int $season = null)
 {
+    global $selectedSeason;
+    
+    if (!$season) {
+        $season = $selectedSeason;
+    }
+
     usort($roster, function($a, $b) {
         return $b['points'] <=> $a['points'];
     });
 
-     $optimalRoster = [
-        'qb' => 0,
-        'rb1' => 0,
-        'rb2' => 0,
-        'wr1' => 0,
-        'wr2' => 0,
-        'wr3' => 0,
-        'te' => 0,
-        'wrt' => 0,
-        'qwrt' => 0,
-        'k' => 0,
-        'def' => 0
-    ];
+    // Get season positions dynamically
+    $seasonPositions = getSeasonPositions($season);
+    $optimalRoster = [];
+
+    // Initialize optimal roster positions with 0 values
+    foreach ($seasonPositions['positions'] as $position) {
+        // For positions that have multiple slots (like RB1, RB2), create separate entries
+        if (isset($seasonPositions['counts'][$position]) && $seasonPositions['counts'][$position] > 1) {
+            for ($i = 1; $i <= $seasonPositions['counts'][$position]; $i++) {
+                $optimalRoster[strtolower($position) . $i] = 0;
+            }
+        } else {
+            $optimalRoster[strtolower($position)] = 0;
+        }
+    }
+
+    // Flex positions need special handling
+    $flexKey = null;
+    if (array_key_exists('wrt', $optimalRoster)) {
+        $flexKey = 'wrt';
+    } elseif (array_key_exists('w/r/t', $optimalRoster)) {
+        $flexKey = 'w/r/t';
+    } elseif (array_key_exists('w/r', $optimalRoster)) {
+        $flexKey = 'w/r';
+    } elseif (array_key_exists('w/t', $optimalRoster)) {
+        $flexKey = 'w/t';
+    }
+    
+    $superFlexKey = null;
+    if (array_key_exists('qwrt', $optimalRoster)) {
+        $superFlexKey = 'qwrt';
+    } elseif (array_key_exists('q/w/r/t', $optimalRoster)) {
+        $superFlexKey = 'q/w/r/t';
+    }
 
     $fullRoster = 0;
+    $maxRosterSize = $seasonPositions['total'];
+
     foreach ($roster as $player) {
-        if ($fullRoster < 11) {
+        if ($fullRoster < $maxRosterSize) {
             if ($player['pos'] == 'QB') {
-                if ($optimalRoster['qb'] == 0) {
+                if (isset($optimalRoster['qb1']) && $optimalRoster['qb1'] == 0) {
+                    $optimalRoster['qb1'] = $player['points'];
+                    $fullRoster++;
+                } elseif (isset($optimalRoster['qb2']) && $optimalRoster['qb2'] == 0) {
+                    $optimalRoster['qb2'] = $player['points'];
+                    $fullRoster++;
+                } elseif (isset($optimalRoster['qb']) && $optimalRoster['qb'] == 0) {
                     $optimalRoster['qb'] = $player['points'];
                     $fullRoster++;
-                } elseif ($optimalRoster['qwrt'] == 0) {
-                    $optimalRoster['qwrt'] = $player['points'];
+                } elseif ($superFlexKey && isset($optimalRoster[$superFlexKey]) && $optimalRoster[$superFlexKey] == 0) {
+                    $optimalRoster[$superFlexKey] = $player['points'];
                     $fullRoster++;
                 }
             } elseif ($player['pos'] == 'RB') {
-                if ($optimalRoster['rb1'] == 0) {
+                if (isset($optimalRoster['rb1']) && $optimalRoster['rb1'] == 0) {
                     $optimalRoster['rb1'] = $player['points'];
                     $fullRoster++;
-                } elseif ($optimalRoster['rb2'] == 0) {
+                } elseif (isset($optimalRoster['rb2']) && $optimalRoster['rb2'] == 0) {
                     $optimalRoster['rb2'] = $player['points'];
                     $fullRoster++;
-                } elseif ($optimalRoster['wrt'] == 0) {
-                    $optimalRoster['wrt'] = $player['points'];
+                } elseif ($flexKey && isset($optimalRoster[$flexKey]) && $optimalRoster[$flexKey] == 0) {
+                    $optimalRoster[$flexKey] = $player['points'];
                     $fullRoster++;
-                } elseif ($optimalRoster['qwrt'] == 0) {
-                    $optimalRoster['qwrt'] = $player['points'];
+                } elseif ($superFlexKey && isset($optimalRoster[$superFlexKey]) && $optimalRoster[$superFlexKey] == 0) {
+                    $optimalRoster[$superFlexKey] = $player['points'];
                     $fullRoster++;
                 }
             } elseif ($player['pos'] == 'WR') {
-                if ($optimalRoster['wr1'] == 0) {
+                if (isset($optimalRoster['wr1']) && $optimalRoster['wr1'] == 0) {
                     $optimalRoster['wr1'] = $player['points'];
                     $fullRoster++;
-                } elseif ($optimalRoster['wr2'] == 0) {
+                } elseif (isset($optimalRoster['wr2']) && $optimalRoster['wr2'] == 0) {
                     $optimalRoster['wr2'] = $player['points'];
                     $fullRoster++;
-                } elseif ($optimalRoster['wr3'] == 0) {
+                } elseif (isset($optimalRoster['wr3']) && $optimalRoster['wr3'] == 0) {
                     $optimalRoster['wr3'] = $player['points'];
                     $fullRoster++;
-                } elseif ($optimalRoster['wrt'] == 0) {
-                    $optimalRoster['wrt'] = $player['points'];
+                } elseif (isset($optimalRoster['wr4']) && $optimalRoster['wr4'] == 0) {
+                    $optimalRoster['wr4'] = $player['points'];
                     $fullRoster++;
-                } elseif ($optimalRoster['qwrt'] == 0) {
-                    $optimalRoster['qwrt'] = $player['points'];
+                } elseif ($flexKey && isset($optimalRoster[$flexKey]) && $optimalRoster[$flexKey] == 0) {
+                    $optimalRoster[$flexKey] = $player['points'];
+                    $fullRoster++;
+                } elseif ($superFlexKey && isset($optimalRoster[$superFlexKey]) && $optimalRoster[$superFlexKey] == 0) {
+                    $optimalRoster[$superFlexKey] = $player['points'];
                     $fullRoster++;
                 }
             } elseif ($player['pos'] == 'TE') {
-                if ($optimalRoster['te'] == 0) {
+                if (isset($optimalRoster['te']) && $optimalRoster['te'] == 0) {
                     $optimalRoster['te'] = $player['points'];
                     $fullRoster++;
-                } elseif ($optimalRoster['wrt'] == 0) {
-                    $optimalRoster['wrt'] = $player['points'];
+                } elseif ($flexKey && isset($optimalRoster[$flexKey]) && $optimalRoster[$flexKey] == 0) {
+                    $optimalRoster[$flexKey] = $player['points'];
                     $fullRoster++;
-                } elseif ($optimalRoster['qwrt'] == 0) {
-                    $optimalRoster['qwrt'] = $player['points'];
+                } elseif ($superFlexKey && isset($optimalRoster[$superFlexKey]) && $optimalRoster[$superFlexKey] == 0) {
+                    $optimalRoster[$superFlexKey] = $player['points'];
                     $fullRoster++;
                 }
             } elseif ($player['pos'] == 'K') {
-                if ($optimalRoster['k'] == 0) {
+                if (isset($optimalRoster['k']) && $optimalRoster['k'] == 0) {
                     $optimalRoster['k'] = $player['points'];
                     $fullRoster++;
                 }
             } elseif ($player['pos'] == 'DEF') {
-                if ($optimalRoster['def'] == 0) {
+                if (isset($optimalRoster['def1']) && $optimalRoster['def1'] == 0) {
+                    $optimalRoster['def1'] = $player['points'];
+                    $fullRoster++;
+                } elseif (isset($optimalRoster['def2']) && $optimalRoster['def2'] == 0) {
+                    $optimalRoster['def2'] = $player['points'];
+                    $fullRoster++;
+                } elseif (isset($optimalRoster['def']) && $optimalRoster['def'] == 0) {
                     $optimalRoster['def'] = $player['points'];
+                    $fullRoster++;
+                }
+            } elseif (in_array($player['pos'], ['D', 'DL', 'LB', 'DB'])) {
+                // Handle individual defensive positions
+                $posLower = strtolower($player['pos']);
+                
+                if (isset($optimalRoster[$posLower.'1']) && $optimalRoster[$posLower.'1'] == 0) {
+                    $optimalRoster[$posLower.'1'] = $player['points'];
+                    $fullRoster++;
+                } elseif (isset($optimalRoster[$posLower.'2']) && $optimalRoster[$posLower.'2'] == 0) {
+                    $optimalRoster[$posLower.'2'] = $player['points'];
+                    $fullRoster++;
+                } elseif (isset($optimalRoster[$posLower]) && $optimalRoster[$posLower] == 0) {
+                    $optimalRoster[$posLower] = $player['points'];
+                    $fullRoster++;
+                } elseif (isset($optimalRoster['d']) && $optimalRoster['d'] == 0 && $player['pos'] != 'DEF') {
+                    // If there's a generic 'D' slot available, use it for any defensive player
+                    $optimalRoster['d'] = $player['points'];
+                    $fullRoster++;
+                } elseif (isset($optimalRoster['d1']) && $optimalRoster['d1'] == 0 && $player['pos'] != 'DEF') {
+                    $optimalRoster['d1'] = $player['points'];
+                    $fullRoster++;
+                } elseif (isset($optimalRoster['d2']) && $optimalRoster['d2'] == 0 && $player['pos'] != 'DEF') {
+                    $optimalRoster['d2'] = $player['points'];
                     $fullRoster++;
                 }
             }
         }
     }
+
     $optimal = 0;
     foreach ($optimalRoster as $pos => $score) {
         $optimal += $score;
     }
 
     return $optimal;
+}
+
+/**
+ * Get roster positions for a specific season from season_positions table
+ */
+function getSeasonPositions($season = null)
+{
+    global $selectedSeason;
+    
+    if (!$season) {
+        $season = $selectedSeason;
+    }
+    
+    $positions = [];
+    $positionCounts = [];
+    
+    $result = query("SELECT * FROM season_positions WHERE year = $season AND position not in ('BN', 'IR') ORDER BY sort_order ASC");
+    while ($row = fetch_array($result)) {
+        $position = strtolower($row['position']);
+        $positions[] = $position;
+        $positionCounts[$position] = isset($positionCounts[$position]) ? $positionCounts[$position] + 1 : 1;
+    }
+    
+    // Filter out bench and IR positions as they're not part of the optimal lineup
+    $positions = array_filter($positions, function($pos) {
+        return $pos != 'BN' && $pos != 'IR';
+    });
+    
+    return [
+        'positions' => $positions,
+        'counts' => $positionCounts,
+        'total' => count($positions)
+    ];
 }
 
 function getMatchupRecapNumbers()

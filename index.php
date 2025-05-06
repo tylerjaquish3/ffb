@@ -209,6 +209,7 @@ include 'sidebar.html';
                                             <option value="10">Record Against Everyone</option>
                                             <option value="11">Draft Positions</option>
                                             <option value="12">Moves/Trades</option>
+                                            <option value="13">Lineup Accuracy</option>
                                         </select>
                                     </div>
                                     <?php include 'regMiscStats.php'; ?>
@@ -334,6 +335,14 @@ include 'sidebar.html';
             ]
         });
         $('#datatable-misc12').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [3, "desc"]
+            ]
+        });
+        $('#datatable-misc13').DataTable({
             "searching": false,
             "paging": false,
             "info": false,

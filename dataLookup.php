@@ -284,8 +284,8 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
                 }
             }
 
-            $optimal = checkRosterForOptimal($roster);
-            $opponentOptimal = checkRosterForOptimal($opponentRoster);
+            $optimal = checkRosterForOptimal($roster, $selectedSeason);
+            $opponentOptimal = checkRosterForOptimal($opponentRoster, $selectedSeason);
 
             $response[] = [
                 'manager' => $manager,
@@ -315,55 +315,67 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'lineup-accuracy') {
     $selectedSeason = $_GET['season'];
     $response = [];
-
-    $result1 = query("SELECT distinct week FROM rosters WHERE YEAR = $selectedSeason");
-    while ($week = fetch_array($result1)) {
-        $week = $week['week'];
-
-        $result2 = query("SELECT distinct manager FROM rosters
-            WHERE YEAR = $selectedSeason AND week = $week");
-        while ($manager = fetch_array($result2)) {
-            $manager = $manager['manager'];
-
-            if (!isset($data[$manager])) {
-                $data[$manager] = [
-                    'points' => 0,
-                    'optimal' => 0,
-                    'accuracy' => 0
-                ];
-            }
-
-            $points = 0;
-            $roster = [];
-
-            $result3 = query("SELECT * FROM rosters
-                WHERE YEAR = $selectedSeason AND week = $week and manager = '".$manager."'");
-            while ($row = fetch_array($result3)) {
-
-                $roster[] = [
-                    'pos' => $row['position'],
-                    'points' => (float)$row['points']
-                ];
-
-                if ($row['roster_spot'] != 'BN' && $row['roster_spot'] != 'IR') {
-                    $points += (float)$row['points'];
-                }
-            }
-
-            $optimal = checkRosterForOptimal($roster);
-
-            $data[$manager]['points'] += $points;
-            $data[$manager]['optimal'] += $optimal;
+    $data = [];
+    
+    // Get all roster data for the season in a single query instead of multiple queries per week/manager
+    $query = "SELECT manager, week, roster_spot, position, points 
+              FROM rosters 
+              WHERE YEAR = $selectedSeason 
+              ORDER BY manager, week";
+    
+    $result = query($query);
+    
+    // Organize data by manager and week
+    $managerWeekData = [];
+    while ($row = fetch_array($result)) {
+        $manager = $row['manager'];
+        $week = $row['week'];
+        
+        if (!isset($managerWeekData[$manager])) {
+            $managerWeekData[$manager] = [];
+        }
+        
+        if (!isset($managerWeekData[$manager][$week])) {
+            $managerWeekData[$manager][$week] = [
+                'actual' => 0,
+                'roster' => []
+            ];
+        }
+        
+        // Add to roster array for optimal calculation
+        $managerWeekData[$manager][$week]['roster'][] = [
+            'pos' => $row['position'],
+            'points' => (float)$row['points']
+        ];
+        
+        // Calculate actual points (excluding bench and IR)
+        if ($row['roster_spot'] != 'BN' && $row['roster_spot'] != 'IR') {
+            $managerWeekData[$manager][$week]['actual'] += (float)$row['points'];
         }
     }
 
-    foreach ($data as $manager => $data) {
-        $response[] = [
-            'manager' => $manager,
-            'points' => round($data['points'], 2),
-            'optimal' => round($data['optimal'], 2),
-            'accuracy' => round($data['points'] * 100 / $data['optimal'], 2).'%'
-        ];
+    // Calculate optimal and accuracy for each manager
+    foreach ($managerWeekData as $manager => $weeks) {
+        $totalActual = 0;
+        $totalOptimal = 0;
+        
+        foreach ($weeks as $weekData) {
+            $totalActual += $weekData['actual'];
+
+            // Calculate optimal lineup once per week
+            $optimal = checkRosterForOptimal($weekData['roster'], $selectedSeason);
+            $totalOptimal += $optimal;
+        }
+        
+        // Only add to response if we have valid data
+        if ($totalOptimal > 0) {
+            $response[] = [
+                'manager' => $manager,
+                'points' => round($totalActual, 2),
+                'optimal' => round($totalOptimal, 2),
+                'accuracy' => round($totalActual * 100 / $totalOptimal, 2).'%'
+            ];
+        }
     }
 
     $content = new \stdClass();
@@ -371,7 +383,6 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'lineup-accuracy') {
 
     echo json_encode($content);
     die;
-
 }
 
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'player-info') {

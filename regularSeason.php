@@ -387,6 +387,40 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="col-sm-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Regular Season Champions</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive" id="datatable-reg-season-winners">
+                                <thead>
+                                    <th>Year</th>
+                                    <th>Champion</th>
+                                    <th>Record</th>
+                                    <th>Points</th>
+                                    <th>Runner Up</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $regSeasonWinners = getRegularSeasonWinners();
+                                    foreach ($regSeasonWinners as $winner) { ?>
+                                        <tr>
+                                            <td><?php echo $winner['year']; ?></td>
+                                            <td><?php echo $winner['champion']; ?></td>
+                                            <td><?php echo $winner['record']; ?></td>
+                                            <td><?php echo $winner['points']; ?></td>
+                                            <td><?php echo $winner['runner_up']; ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -396,6 +430,8 @@ include 'sidebar.html';
         width: 100%;
     }
 </style>
+
+
 
 <?php include 'footer.php'; ?>
 
@@ -474,6 +510,12 @@ include 'sidebar.html';
         $('#datatable-game-time2').DataTable({
             "order": [
                 [2, "desc"]
+            ]
+        });
+        
+        $('#datatable-reg-season-winners').DataTable({
+            "order": [
+                [0, "asc"]
             ]
         });
 

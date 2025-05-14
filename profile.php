@@ -704,7 +704,7 @@ if (isset($_GET['id'])) {
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <div class="card-block">
                                 <div class="row">
-                                    <div class="col-sm-12 col-lg-6" style="display: flex">
+                                    <div class="col-sm-12" style="display: flex">
                                         <button class="btn btn-primary" id="allSeasons">All Seasons</button>&nbsp;&nbsp;
                                         <button class="btn btn-primary" id="currentSeason">Current Season</button>&nbsp;&nbsp;
                                         <button class="btn btn-primary" id="lastSeason">Last Season</button>&nbsp;&nbsp;
@@ -746,7 +746,7 @@ if (isset($_GET['id'])) {
                                         </select>
                                     </div>
                                 </div>
-                                <div class="row">
+                                <div class="row mt-2">
                                     <div class="col-sm-12" style="height: 600px;">
                                         <canvas id="pointsByWeekChart"></canvas>
                                     </div>

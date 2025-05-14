@@ -3144,3 +3144,51 @@ function do_dump(&$var, $var_name = NULL, $indent = NULL, $reference = NULL)
     
     echo "</div>";
 }
+
+/**
+ * Get regular season champions data
+ * Returns an array of regular season winners with year, champion, record, points, and runner up
+ */
+function getRegularSeasonWinners()
+{
+    $winners = [];
+    
+    $result = query("SELECT DISTINCT year FROM finishes ORDER BY year DESC");
+    while ($row = fetch_array($result)) {
+        $year = $row['year'];
+        
+        // Get all manager records for this year
+        $standings = [];
+        $result2 = query("SELECT managers.name, COUNT(CASE WHEN manager1_score > manager2_score THEN 1 END) as wins, 
+                        COUNT(CASE WHEN manager1_score < manager2_score THEN 1 END) as losses,
+                        SUM(manager1_score) as points
+                        FROM regular_season_matchups
+                        JOIN managers ON managers.id = regular_season_matchups.manager1_id
+                        WHERE year = $year
+                        GROUP BY managers.name
+                        ORDER BY wins DESC, points DESC");
+        
+        while ($row2 = fetch_array($result2)) {
+            $standings[] = [
+                'name' => $row2['name'],
+                'wins' => $row2['wins'],
+                'losses' => $row2['losses'],
+                'points' => $row2['points']
+            ];
+        }
+        
+        // Make sure we have at least 2 managers for each year
+        if (count($standings) >= 2) {
+            $winners[] = [
+                'year' => $year,
+                'champion' => $standings[0]['name'],
+                'record' => $standings[0]['wins'] . '-' . $standings[0]['losses'],
+                'points' => $standings[0]['points'],
+                'runner_up' => $standings[1]['name']
+            ];
+        }
+    }
+    
+    return $winners;
+}
+

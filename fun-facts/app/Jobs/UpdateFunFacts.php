@@ -35,72 +35,76 @@ class UpdateFunFacts implements ShouldQueue
         $message = "";
 
         try {
-            echo 'Fetching game times';
-            // Fetch game times after
-            FetchGameTimes::dispatch();
+            // echo 'Fetching game times';
+            // // Fetch game times after
+            // FetchGameTimes::dispatch();
 
             // 1,2,3
-            $this->mostPointsFor();
-            // 4,5,6
-            $this->mostPostseasonPointsFor();
-            // 7,8,9,89,90,91
-            $this->leastPointsAgainst();
-            // 10,11
-            $this->mostWins();
-            // 13,14,15
-            $this->leastPointsFor();
-            // 16,17
-            $this->mostLosses();
-            // 12,18,19,20,21,22,23,24,25,31,65,66
-            $this->postseasonRecords();
-            // 26,27,28
-            $this->highestSeeds();
-            // 29,30,67,68,69,70
-            $this->singleOpponent();
-            // 32
-            $this->leastChampionships();
-            // 50,51,52,53,54,55
-            $this->postseasonMargin();
-            // 39,40,56,57,60,61
-            $this->streaks();
-            // 62,63,71,72
-            $this->draft();
-            // 73,74,75
-            $this->moves();
-            // 76,77,78,79,80
-            $this->currentSeasonStats();
-            // 45,46,47,48
-            $this->margins();
-            // 41,42
-            $this->appearances();
-            // 60,61
-            $this->currentPostseasonStreak();
-            // 58,59
-            $this->postseasonWinPct();
-            // 81,82,84,85,86,87
-            $this->currentSeasonPoints();
-            // 83,88
-            $this->getOptimalLineupPoints();
-            // 92,93
-            $this->weeklyRanks();
-            // 111-128
-            $this->positionTotals();
-            // 95, 96, 99-106
-            $this->pointsByGameTime();
-            // 97,98,107,108
-            $this->draftPicks();
-            // 129-131
-            $this->benchPoints();
-            // 135
-            $this->comeback();
-            // 138,139
-            $this->freeAgent();
-            // 136,137
-            $this->pointsInWinLoss();
-            // 140,141
-            $this->irPlayers();
-            // 142,143,144
+            // $this->mostPointsFor();
+            // // 4,5,6
+            // $this->mostPostseasonPointsFor();
+            // // 7,8,9,89,90,91
+            // $this->leastPointsAgainst();
+            // // 10,11
+            // $this->mostWins();
+            // // 13,14,15
+            // $this->leastPointsFor();
+            // // 16,17
+            // $this->mostLosses();
+            // // 12,18,19,20,21,22,23,24,25,31,65,66
+            // $this->postseasonRecords();
+            // // 26,27,28
+            // $this->highestSeeds();
+            // // 29,30,67,68,69,70
+            // $this->singleOpponent();
+            // // 32
+            // $this->leastChampionships();
+            // // 50,51,52,53,54,55
+            // $this->postseasonMargin();
+            // // 39,40,56,57,60,61
+            // $this->streaks();
+            // // 62,63,71,72
+            // $this->draft();
+            // // 73,74,75
+            // $this->moves();
+            // // 76,77,78,79,80
+            // $this->currentSeasonStats();
+            // // 45,46,47,48
+            // $this->margins();
+            // // 41,42
+            // $this->appearances();
+            // // 60,61
+            // $this->currentPostseasonStreak();
+            // // 58,59
+            // $this->postseasonWinPct();
+            // // 81,82,84,85,86,87
+            // $this->currentSeasonPoints();
+            // // 83,88
+            // $this->getOptimalLineupPoints();
+            // // 92,93
+            // $this->weeklyRanks();
+            // // 111-128
+            // $this->positionTotals();
+            // // 95, 96, 99-106
+            // $this->pointsByGameTime();
+            // // 97,98,107,108
+            // $this->draftPicks();
+            // // 129-131
+            // $this->benchPoints();
+            // // 135
+            // $this->comeback();
+            // // 138,139
+            // $this->freeAgent();
+            // // 136,137
+            // $this->pointsInWinLoss();
+            // // 140,141
+            // $this->irPlayers();
+            // // 142,143,144
             // $this->weeklyPositionPlayers();
+            // 147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164
+            // $this->trackTopPositionPerformances();
+            // 33,34,35,36
+            $this->averagePoints();
 
         } catch (\Exception $e) {
             $success = false;
@@ -198,7 +202,7 @@ class UpdateFunFacts implements ShouldQueue
                 ManagerFunFact::whereIn('id', $facts->pluck('id'))->delete();
             }
             $note = '';
-// dd(is_subclass_of($top, 'Illuminate\Database\Eloquent\Model'));
+
             foreach ($notes as $n) {
                 if (is_subclass_of($top, 'Illuminate\Database\Eloquent\Model')) {
                     $note .= is_null($top->{$n}) ? $n.' ' : $top->{$n}.' ';
@@ -558,7 +562,7 @@ class UpdateFunFacts implements ShouldQueue
                 if ($round == 'Total' && $val > $mostTopLoss) {
                     $mostTopLoss = $val;
                 } elseif ($round == 'Quarterfinal' && $val > $mostTopLossQ) {
-                    $mostTopLossQ = $val;
+                    $mostTopLossQa = $val;
                 } elseif ($round == 'Semifinal' && $val > $mostTopLossS) {
                     $mostTopLossS = $val;
                 } elseif ($round == 'Final' && $val > $mostTopLossF) {
@@ -569,7 +573,7 @@ class UpdateFunFacts implements ShouldQueue
                 if ($round == 'Total' && $val > $mostUnderWins) {
                     $mostUnderWins = $val;
                 } elseif ($round == 'Quarterfinal' && $val > $mostUnderWinsQ) {
-                    $mostUnderWinsQ = $val;
+                    $mostUnderWinsQa = $val;
                 } elseif ($round == 'Semifinal' && $val > $mostUnderWinsS) {
                     $mostUnderWinsS = $val;
                 } elseif ($round == 'Final' && $val > $mostUnderWinsF) {
@@ -2340,6 +2344,7 @@ class UpdateFunFacts implements ShouldQueue
         $this->insertFunFact(137, 'manager', 'points', ['Wk', 'week', 'year'], [$best]);
     }
 
+    // 140,141
     public function irPlayers()
     {
         echo 'IR Players'.PHP_EOL;
@@ -2367,44 +2372,310 @@ class UpdateFunFacts implements ShouldQueue
         $this->insertFunFact(141, 'manager_id', 'cnt', [], $tops);
     }
 
+    // 142,143,144
     public function weeklyPositionPlayers()
     {
+        echo 'Weekly Position Players'.PHP_EOL;
+        
+        // Process each position to find top performers by position per week
+        $positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF', 'D', 'DL', 'DB', 'LB'];
+        
+        // ALL SEASONS COMBINED - Fun fact ID 144
+        $this->trackTopPerformanceByPosition($positions, null, 144);
+        
+        // CURRENT SEASON ONLY - Fun fact ID 142
+        $this->trackTopPerformanceByPosition($positions, $this->currentSeason, 142);
+        
+        // BEST SEASON for each manager - Fun fact ID 143
+        $this->trackBestSeasonByPosition($positions, 143);
+    }
+    
+    /**
+     * Helper function to track top performances by position
+     * Uses a more efficient GROUP BY query to find top performers for all positions at once
+     * 
+     * @param array $positions Array of positions to track
+     * @param int|null $year Specific year to track (null for all years)
+     * @param int $funFactId The fun fact ID to store results in
+     */
+    private function trackTopPerformanceByPosition(array $positions, ?int $year, int $funFactId)
+    {
+        // Initialize counts for each manager
         $tops = [];
-        $managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
-        foreach ($managers as $manager) {
-            $tops[$manager] = 0;
+        $managers = Manager::pluck('name', 'id')->toArray();
+        foreach ($managers as $managerId => $managerName) {
+            $tops[$managerName] = 0;
         }
         
-        $players = Roster::all();
+        // Build position filter
+        $positionFilter = implode("','", $positions);
         
-        foreach ($players as $player) {
-            $rank = $this->getPlayerPositionRank($player->player, $player->roster_spot, $player->position, $player->year, $player->week);
-// var_dump($rank);
-            if ($rank == 1) {
-                // dd($player->player, $player->points);
-                $tops[$player->manager]++;
+        // Get years to process
+        $yearsQuery = Roster::whereIn('position', $positions);
+        if ($year !== null) {
+            $yearsQuery->where('year', $year);
+        }
+        $years = $yearsQuery->distinct()->pluck('year');
+        
+        foreach ($years as $yearValue) {
+            // Find top performers by position for all weeks using a single efficient query
+            // Get the max points per position per week and find all players who scored those points
+            $query = "
+                WITH MaxPoints AS (
+                    SELECT 
+                        position,
+                        week, 
+                        MAX(points) as max_points
+                    FROM rosters
+                    WHERE year = ? 
+                      AND position IN ('$positionFilter')
+                      AND roster_spot NOT IN ('BN', 'IR')
+                    GROUP BY position, week
+                )
+                SELECT 
+                    r.manager,
+                    r.position,
+                    r.week,
+                    r.points
+                FROM rosters r
+                JOIN MaxPoints mp ON r.position = mp.position 
+                                  AND r.week = mp.week 
+                                  AND r.points = mp.max_points
+                WHERE r.year = ?
+                  AND r.roster_spot NOT IN ('BN', 'IR')
+            ";
+            
+            $topPerformers = DB::select($query, [$yearValue, $yearValue]);
+            
+            // Increment count for each manager with a top performer
+            foreach ($topPerformers as $performer) {
+                if (isset($tops[$performer->manager])) {
+                    $tops[$performer->manager]++;
+                }
             }
         }
-
-        // this takes too long!!!
-        dd($tops);
-
+        
+        // Convert to objects array for the insertFunFact function
+        $topsArray = [];
+        foreach ($tops as $managerName => $count) {
+            $managerId = array_search($managerName, Manager::pluck('name', 'id')->toArray());
+            $topsArray[] = (object)[
+                'manager_id' => $managerId,
+                'count' => $count
+            ];
+        }
+        
+        // Sort by count in descending order
+        usort($topsArray, function($a, $b) {
+            return $b->count <=> $a->count;
+        });
+        
+        // Convert to collection
+        $topsCollection = collect($topsArray);
+        
+        // Get top performers and insert fun facts
+        $topPerformers = $this->checkMultiple($topsCollection, 'count');
+        $this->insertFunFact($funFactId, 'manager_id', 'count', [], $topPerformers);
+    }
+    
+    /**
+     * Helper function to track best season by position for each manager
+     * Uses efficient GROUP BY queries to find top performers by season
+     * 
+     * @param array $positions Array of positions to track
+     * @param int $funFactId The fun fact ID to store results in
+     */
+    private function trackBestSeasonByPosition(array $positions, int $funFactId)
+    {
+        $bestSeasonCounts = [];
+        $managers = Manager::pluck('name', 'id')->toArray();
+        
+        // Get all seasons
+        $allSeasons = Roster::select('year')->distinct()->pluck('year')->toArray();
+        
+        // For each season, calculate the counts
+        foreach ($allSeasons as $season) {
+            $seasonCounts = [];
+            
+            // Initialize counts for all managers
+            foreach ($managers as $managerId => $managerName) {
+                $seasonCounts[$managerName] = 0;
+            }
+            
+            // Use a single query to find top performers for each position and week in this season
+            foreach ($positions as $position) {
+                // First, get the max points for each week for this position
+                $maxPointsPerWeekQuery = "
+                    SELECT 
+                        week, 
+                        MAX(points) as max_points
+                    FROM rosters
+                    WHERE year = ? AND position = ? AND roster_spot NOT IN ('BN', 'IR')
+                    GROUP BY week
+                ";
+                
+                $maxPointsPerWeek = DB::select($maxPointsPerWeekQuery, [$season, $position]);
+                
+                // For each week, find all players who scored the maximum points (to handle ties)
+                foreach ($maxPointsPerWeek as $weekData) {
+                    $week = $weekData->week;
+                    $maxPoints = $weekData->max_points;
+                    
+                    $topPerformersQuery = "
+                        SELECT 
+                            manager,
+                            player,
+                            points
+                        FROM rosters
+                        WHERE year = ? 
+                          AND position = ? 
+                          AND week = ? 
+                          AND points = ? 
+                          AND roster_spot NOT IN ('BN', 'IR')
+                    ";
+                    
+                    $topPerformers = DB::select($topPerformersQuery, [$season, $position, $week, $maxPoints]);
+                    
+                    // Increment count for each manager with a top performer
+                    foreach ($topPerformers as $performer) {
+                        if (isset($seasonCounts[$performer->manager])) {
+                            $seasonCounts[$performer->manager]++;
+                        }
+                    }
+                }
+            }
+            
+            // Update best season counts
+            foreach ($managers as $managerId => $managerName) {
+                if (!isset($bestSeasonCounts[$managerName]) || 
+                    $seasonCounts[$managerName] > $bestSeasonCounts[$managerName]['count']) {
+                    $bestSeasonCounts[$managerName] = [
+                        'count' => $seasonCounts[$managerName],
+                        'year' => $season,
+                        'id' => $managerId
+                    ];
+                }
+            }
+        }
+        
+        // Convert to objects array
+        $bestSeasonArray = [];
+        foreach ($bestSeasonCounts as $managerName => $data) {
+            $bestSeasonArray[] = (object)[
+                'manager_id' => $data['id'],
+                'count' => $data['count'],
+                'year' => $data['year']
+            ];
+        }
+        
+        // Sort by count in descending order
+        usort($bestSeasonArray, function($a, $b) {
+            return $b->count <=> $a->count;
+        });
+        
+        // Convert to collection
+        $bestSeasonCollection = collect($bestSeasonArray);
+        
+        // Get top performers and insert fun facts
+        $bestSeasonPerformers = $this->checkMultiple($bestSeasonCollection, 'count');
+        $this->insertFunFact($funFactId, 'manager_id', 'count', ['year'], $bestSeasonPerformers);
     }
 
-    private function getPlayerPositionRank($player, $rosterSpot, $position, $year, $week)
+    /**
+     * Tracks which managers have had the top QB performance each week
+     * Updated to use the trackTopPerformanceByPosition helper function
+     * 147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164
+     */
+    public function trackTopPositionPerformances()
     {
-        if ($rosterSpot == 'IR') {
-            return 'N/A';
-        }
-        $rows = Roster::where('year', $year)->where('week', $week)->where('position', $position)
-            ->orderBy('points', 'desc')->get();
+        echo 'Top QB Performances'.PHP_EOL;
+        // Use the helper function to track QB performance across current season
+        $this->trackTopPerformanceByPosition(['QB'], $this->currentSeason, 149);
+        // get best season
+        $this->trackBestSeasonByPosition(['QB'], 148);
+        // get all seasons
+        $this->trackTopPerformanceByPosition(['QB'], null, 147);
+
+        echo 'Top RB Performances'.PHP_EOL;
+        // Use the helper function to track RB performance across current season
+        $this->trackTopPerformanceByPosition(['RB'], $this->currentSeason, 152);
+        // get best season
+        $this->trackBestSeasonByPosition(['RB'], 151);
+        // get all seasons
+        $this->trackTopPerformanceByPosition(['RB'], null, 150);
+
+        echo 'Top WR Performances'.PHP_EOL;
+        // Use the helper function to track WR performance across current season
+        $this->trackTopPerformanceByPosition(['WR'], $this->currentSeason, 155);
+        // get best season
+        $this->trackBestSeasonByPosition(['WR'], 154);
+        // get all seasons
+        $this->trackTopPerformanceByPosition(['WR'], null, 153);
+
+        echo 'Top TE Performances'.PHP_EOL;
+        // Use the helper function to track TE performance across current season
+        $this->trackTopPerformanceByPosition(['TE'], $this->currentSeason, 158);
+        // get best season
+        $this->trackBestSeasonByPosition(['TE'], 157);
+        // get all seasons
+        $this->trackTopPerformanceByPosition(['TE'], null, 156);
+
+        echo 'Top K Performances'.PHP_EOL;
+        // Use the helper function to track K performance across current season
+        $this->trackTopPerformanceByPosition(['K'], $this->currentSeason, 161);
+        // get best season
+        $this->trackBestSeasonByPosition(['K'], 160);
+        // get all seasons
+        $this->trackTopPerformanceByPosition(['K'], null, 159);
+
+        echo 'Top DEF Performances'.PHP_EOL;
+        // Use the helper function to track DEF performance across current season
+        $this->trackTopPerformanceByPosition(['DEF'], $this->currentSeason, 164);
+        // get best season
+        $this->trackBestSeasonByPosition(['DEF'], 163);
+        // get all seasons
+        $this->trackTopPerformanceByPosition(['DEF'], null, 162);
+    }
+
+    // 33,34,35,36
+    public function averagePoints()
+    {
+        echo 'Average Points'.PHP_EOL;
         
-        $rank = 1;
-        foreach ($rows as $row) {
-            if ($row->player == $player) {
-                return $rank;
-            }
-            $rank++;
-        }
+        // Most average weekly points in a single season (33)
+        $i = RegularSeasonMatchup::selectRaw('manager1_id, year, AVG(manager1_score) as avg_pts')
+            ->groupBy('manager1_id', 'year')
+            ->orderBy('avg_pts', 'desc')
+            ->get();
+
+        $tops = $this->checkMultiple($i, 'avg_pts');
+        $this->insertFunFact(33, 'manager1_id', 'avg_pts', ['year'], $tops);
+
+        // Most average weekly points all time (34)
+        $i = RegularSeasonMatchup::selectRaw('manager1_id, AVG(manager1_score) as avg_pts')
+            ->groupBy('manager1_id')
+            ->orderBy('avg_pts', 'desc')
+            ->get();
+
+        $tops = $this->checkMultiple($i, 'avg_pts');
+        $this->insertFunFact(34, 'manager1_id', 'avg_pts', [], $tops);
+
+        // Least average weekly points in a single season (35)
+        $i = RegularSeasonMatchup::selectRaw('manager1_id, year, AVG(manager1_score) as avg_pts')
+            ->groupBy('manager1_id', 'year')
+            ->orderBy('avg_pts', 'asc')
+            ->get();
+
+        $tops = $this->checkMultiple($i, 'avg_pts');
+        $this->insertFunFact(35, 'manager1_id', 'avg_pts', ['year'], $tops);
+
+        // Least average weekly points all time (36)
+        $i = RegularSeasonMatchup::selectRaw('manager1_id, AVG(manager1_score) as avg_pts')
+            ->groupBy('manager1_id')
+            ->orderBy('avg_pts', 'asc')
+            ->get();
+
+        $tops = $this->checkMultiple($i, 'avg_pts');
+        $this->insertFunFact(36, 'manager1_id', 'avg_pts', [], $tops);
     }
 }

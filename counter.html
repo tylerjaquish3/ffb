@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Justin Didier Sucks Club</title>
+
+    <meta property="og:title" content="Justin Didier Sucks Club" />
+    <meta property="og:description" content="All of the members that hate Justin Didier because of his success in fantasy football." />
+    <meta property="og:url" content="http://justindidiersucks.club" />
+    <meta property="og:image" content="http://justindidiersucks.club/images/football.ico" />
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .counter {
+            font-size: 2rem;
+            margin-top: 20px;
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            .counter {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Time Passed Since Justin Didier Has Won The Suntown FFB Championship</h1>
+    <div class="counter" id="counter">Calculating...</div>
+
+    <script>
+        function updateCounter() {
+            // Championship date: January 3, 2023 at 5:00 PM
+            const championshipDate = new Date('2023-01-01T19:30:00');
+            const currentDate = new Date();
+            
+            // Calculate time difference in milliseconds
+            const timeDifference = currentDate - championshipDate;
+            
+            // Calculate days, hours, minutes, and seconds
+            const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+            
+            // Update the counter display
+            document.getElementById('counter').innerHTML = 
+                `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+        }
+        
+        // Update the counter immediately and then every second
+        updateCounter();
+        setInterval(updateCounter, 1000);
+    </script>
+</body>
+</html>

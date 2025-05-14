@@ -22,7 +22,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - add a bunch more fun facts
     - record against everyone
     - best trade
-    - most #1 pos rank players in a week, season, all time
     - fewest points by position (all time, season)
     - most QBs/RBs/etc drafted in first round
     - most seahawks drafted

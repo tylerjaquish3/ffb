@@ -26,6 +26,12 @@ function draft_query($sql)
 
 function fetch_array($result)
 {
+    // Check if $result is a valid database result resource
+    if ($result === false || $result === null) {
+        // Return false instead of throwing an error
+        return false;
+    }
+
     return $result->fetchArray();
 }
 
@@ -2278,7 +2284,7 @@ function getAllDraftedPlayerDetails()
     $response = [];
 
     $result = query("SELECT managers.name as manager, draft.overall_pick, draft.position, draft.round, draft.player,
-        SUM(points) AS points, SUM(IIF(roster_spot NOT IN ('BN','IR'), 1, 0)) AS GP
+        SUM(points) AS points, SUM(IF(roster_spot NOT IN ('BN','IR'), 1, 0)) AS GP
         FROM draft
         JOIN managers ON draft.manager_id = managers.id 
         LEFT JOIN rosters ON rosters.player LIKE draft.player || '%' AND rosters.year = draft.year AND rosters.manager = managers.name

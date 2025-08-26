@@ -26,9 +26,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - most QB/RB/WR/etc points current season
 
 - Newsletter page
-    - Bring in schedule so it knows next week's matchup
-    - fix top performers & stats by week to be based on last week only
-    - section for this week's preview
+    - fix the schedule table in db. it isn't accurate for 2025. make it easy to update each season based on a csv. 
 
 - fix navigation on tablet
 

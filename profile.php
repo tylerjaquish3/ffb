@@ -278,15 +278,25 @@ if (isset($_GET['id'])) {
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <div class="card-block">
-                                <canvas id="winsChart" height="250px;"></canvas>
-                                <canvas id="postseasonWinsChart" height="250px;" style="display: none;"></canvas>
+                                <canvas id="winsChart" height="200px;"></canvas>
+                                <canvas id="postseasonWinsChart" height="200px;" style="display: none;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Finishes</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="card-block">
+                                <canvas id="finishPieChart" height="200px;"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-12 col-md-9 table-padding">
                     <div class="card">
-                    <div class="card-header">
+                        <div class="card-header">
                             <h3>Seasons</h3>
                         </div>
                         <div class="card-body">
@@ -1192,6 +1202,61 @@ if (isset($_GET['id'])) {
         $('#endWeek').val(allWeeks[allWeeks.length-1]['week_id']);
         pointsByWeekChart.destroy();
         updatePointsChart();
+    });
+
+    // Finishes Chart
+    var seasonNumbers = <?php echo json_encode($seasonNumbers); ?>;
+    var finishesData = { '1-3': 0, '4-7': 0, '8-10': 0 };
+    
+    // Process season numbers to group finishes
+    for (var year in seasonNumbers) {
+        var finish = parseInt(seasonNumbers[year].finish);
+        if (finish >= 1 && finish <= 3) {
+            finishesData['1-3']++;
+        } else if (finish >= 4 && finish <= 7) {
+            finishesData['4-7']++;
+        } else if (finish >= 8 && finish <= 10) {
+            finishesData['8-10']++;
+        }
+    }
+    
+    var finishesCtx = $('#finishPieChart');
+    var finishesLabels = ['1st-3rd Place', '4th-7th Place', '8th-10th Place'];
+    var finishesValues = [finishesData['1-3'], finishesData['4-7'], finishesData['8-10']];
+    var finishesColors = ["#3cf06e", "#ff7f2c", "#f33c47"]; // Green for top, orange for middle, red for bottom
+    
+    let finishesObj = {};
+    finishesObj.label = 'Finishes';
+    finishesObj.data = finishesValues;
+    finishesObj.backgroundColor = finishesColors;
+    finishesObj.datalabels = {
+        align: 'end'
+    };
+
+    var finishesChart = new Chart(finishesCtx, {
+        type: 'pie',
+        data: {
+            labels: finishesLabels,
+            datasets: [finishesObj]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    display: false,
+                },
+                datalabels: {
+                    formatter: function(value, context) {
+                        if (value === 0) return ''; // Don't show label for 0 values
+                        return context.chart.data.labels[context.dataIndex]+': '+value;
+                    },
+                    color: 'black',
+                    font: {
+                        weight: 'bold'
+                    }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
     });
 
 </script>

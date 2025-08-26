@@ -103,8 +103,12 @@ class UpdateFunFacts implements ShouldQueue
             // $this->weeklyPositionPlayers();
             // 147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164
             // $this->trackTopPositionPerformances();
-            // 33,34,35,36
-            $this->averagePoints();
+            // // 33,34,35,36
+            // $this->averagePoints();
+            // // 163,164,165,166
+            // $this->mostPicksByPosition();
+            // 169,170
+            $this->seahawksDrafted();
 
         } catch (\Exception $e) {
             $success = false;
@@ -184,6 +188,12 @@ class UpdateFunFacts implements ShouldQueue
             }
             
         } else {
+
+            // if $tops array doesnt have element 0, dd() it
+            if (!isset($tops[0])) {
+                dd($tops);
+            }
+
             // One manager has the top spot on their own
             $top = $tops[0];
             $newLeader = 1;
@@ -562,7 +572,7 @@ class UpdateFunFacts implements ShouldQueue
                 if ($round == 'Total' && $val > $mostTopLoss) {
                     $mostTopLoss = $val;
                 } elseif ($round == 'Quarterfinal' && $val > $mostTopLossQ) {
-                    $mostTopLossQa = $val;
+                    $mostTopLossQ = $val;
                 } elseif ($round == 'Semifinal' && $val > $mostTopLossS) {
                     $mostTopLossS = $val;
                 } elseif ($round == 'Final' && $val > $mostTopLossF) {
@@ -573,7 +583,7 @@ class UpdateFunFacts implements ShouldQueue
                 if ($round == 'Total' && $val > $mostUnderWins) {
                     $mostUnderWins = $val;
                 } elseif ($round == 'Quarterfinal' && $val > $mostUnderWinsQ) {
-                    $mostUnderWinsQa = $val;
+                    $mostUnderWinsQ = $val;
                 } elseif ($round == 'Semifinal' && $val > $mostUnderWinsS) {
                     $mostUnderWinsS = $val;
                 } elseif ($round == 'Final' && $val > $mostUnderWinsF) {
@@ -2677,5 +2687,96 @@ class UpdateFunFacts implements ShouldQueue
 
         $tops = $this->checkMultiple($i, 'avg_pts');
         $this->insertFunFact(36, 'manager1_id', 'avg_pts', [], $tops);
+    }
+
+    // 165, 166, 167, 168
+    // Count up who drafted the most TE (163), WR (164), RB (165), QB (166) in the first round of the draft
+    public function mostPicksByPosition()
+    {
+        echo 'Most Picks By Position'.PHP_EOL;
+
+        // Most TE picks in the first round (165)
+        $i = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
+            ->where('position', 'TE')
+            ->where('round', 1)
+            ->groupBy('manager_id')
+            ->orderBy('pick_count', 'desc')
+            ->get();
+
+        $tops = $this->checkMultiple($i, 'pick_count');
+        $this->insertFunFact(165, 'manager_id', 'pick_count', [], $tops);
+
+        // Most WR picks in the first round (166)
+        $i = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
+            ->where('position', 'WR')
+            ->where('round', 1)
+            ->groupBy('manager_id')
+            ->orderBy('pick_count', 'desc')
+            ->get();
+
+        $tops = $this->checkMultiple($i, 'pick_count');
+        $this->insertFunFact(166, 'manager_id', 'pick_count', [], $tops);
+
+        // Most RB picks in the first round (167)
+        $i = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
+            ->where('position', 'RB')
+            ->where('round', 1)
+            ->groupBy('manager_id')
+            ->orderBy('pick_count', 'desc')
+            ->get();
+
+        $tops = $this->checkMultiple($i, 'pick_count');
+        $this->insertFunFact(167, 'manager_id', 'pick_count', [], $tops);
+
+        // Most QB picks in the first round (168)
+        $i = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
+            ->where('position', 'QB')
+            ->where('round', 1)
+            ->groupBy('manager_id')
+            ->orderBy('pick_count', 'desc')
+            ->get();
+
+        $tops = $this->checkMultiple($i, 'pick_count');
+        $this->insertFunFact(168, 'manager_id', 'pick_count', [], $tops);
+    }
+
+    // 169, 170
+    public function seahawksDrafted()
+    {
+        echo 'Seahawks Drafted'.PHP_EOL;
+
+        // Fewest Seahawks drafted all time (169)
+        $i = Draft::selectRaw('draft.manager_id, COUNT(*) as pick_count')
+            ->join('managers', 'managers.id', '=', 'draft.manager_id')
+            ->join('rosters', function($join) {
+                $join->on('rosters.player', 'LIKE', DB::raw("CONCAT(draft.player, '%')"))
+                     ->on('rosters.year', '=', 'draft.year')
+                     ->on('rosters.manager', '=', 'managers.name');
+            })
+            ->where('rosters.week', 1)
+            ->where('rosters.team', 'SEA')
+            ->groupBy('draft.manager_id')
+            ->orderBy('pick_count', 'asc')
+            ->get();
+
+        $tops = $this->checkMultiple($i, 'pick_count');
+        $this->insertFunFact(169, 'manager_id', 'pick_count', [], $tops);
+
+        // Most Seahawks drafted all time (170)
+        $i = Draft::selectRaw('draft.manager_id, COUNT(*) as pick_count')
+            ->join('managers', 'managers.id', '=', 'draft.manager_id')
+            ->join('rosters', function($join) {
+                $join->on('rosters.player', 'LIKE', DB::raw("CONCAT(draft.player, '%')"))
+                     ->on('rosters.year', '=', 'draft.year')
+                     ->on('rosters.manager', '=', 'managers.name');
+            })
+            ->where('rosters.week', 1)
+            ->where('rosters.team', 'SEA')
+            ->groupBy('draft.manager_id')
+            ->orderBy('pick_count', 'desc')
+            ->get();
+
+        $tops = $this->checkMultiple($i, 'pick_count');
+        $this->insertFunFact(170, 'manager_id', 'pick_count', [], $tops);
     }
 }

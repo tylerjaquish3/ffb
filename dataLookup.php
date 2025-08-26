@@ -1,6 +1,6 @@
 <?php
 
-include 'functions.php';
+include_once 'functions.php';
 
 // var_dump($_POST);die;
 
@@ -484,7 +484,7 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'get-season-ranks') {
     die;
 }
 
-function getAllRanks(string $manager = null, int $year = null)
+function getAllRanks(?string $manager = null, ?int $year = null)
 {
     $ranks = [];
     $rank = 1;
@@ -618,6 +618,31 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-week') {
         'points' => $points,
         'weeks' => $weeks
     ]);
+    die;
+}
+
+// Get weeks by year for newsletter dropdowns
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'weeks-by-year') {
+    $year = $_GET['year'];
+    $weeks = [];
+    
+    $result = query("SELECT DISTINCT week FROM rosters WHERE year = $year ORDER BY week ASC");
+    while ($row = fetch_array($result)) {
+        $weeks[] = [
+            'value' => $row['week'],
+            'text' => 'Week ' . $row['week']
+        ];
+    }
+    
+    // If no weeks found and this is the current year, default to Week 1
+    if (empty($weeks) && $year == date('Y')) {
+        $weeks[] = [
+            'value' => 1,
+            'text' => 'Week 1'
+        ];
+    }
+    
+    echo json_encode($weeks);
     die;
 }
 

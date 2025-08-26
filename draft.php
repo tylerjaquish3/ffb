@@ -361,7 +361,6 @@ include 'sidebar.html';
                     console.log('Error');
                 },
                 success: function(response) {
-                    console.log(response);
                     data = JSON.parse(response);
                 
                     var ctx = $('#posByRoundChart');

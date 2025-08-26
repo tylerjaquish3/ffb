@@ -113,15 +113,49 @@ if ($pageName == 'Rosters') {
     $gameTimeChart = getGameTimeChartNumbers();
 }
 if ($pageName == 'Newsletter') {
-    $selectedSeason = isset($_GET['id']) ? $_GET['id'] : $season;
+    global $selectedSeason, $selectedWeek;
+    $selectedSeason = isset($_GET['year']) ? $_GET['year'] : $season;
+    $selectedWeek = isset($_GET['week']) ? $_GET['week'] : $week;
+    
+    // Validate that the selected season exists
+    $seasonCheck = query("SELECT COUNT(*) as count FROM rosters WHERE year = $selectedSeason");
+    $seasonRow = fetch_array($seasonCheck);
+    if ($seasonRow['count'] == 0) {
+        // If it's the current year and has no data, that's okay - keep it and default to week 1
+        if ($selectedSeason == date('Y')) {
+            $selectedWeek = 1;
+        } else {
+            // For other years with no data, fall back to the latest season
+            $selectedSeason = $season;
+        }
+    }
+    
+    // Only validate week if we have roster data for this season
+    if ($seasonRow['count'] > 0) {
+        // Validate that the selected week exists for the selected season
+        $weekCheck = query("SELECT COUNT(*) as count FROM rosters WHERE year = $selectedSeason AND week = $selectedWeek");
+        $weekRow = fetch_array($weekCheck);
+        if ($weekRow['count'] == 0) {
+            // Get the latest week for this season
+            $latestWeekResult = query("SELECT MAX(week) as max_week FROM rosters WHERE year = $selectedSeason");
+            $latestWeekRow = fetch_array($latestWeekResult);
+            $selectedWeek = $latestWeekRow['max_week'] ? $latestWeekRow['max_week'] : 1;
+        }
+    }
 
-    $bestWeek = getCurrentSeasonBestWeek();
-    $topPerformers = getCurrentSeasonTopPerformers();
-    $stats = getCurrentSeasonStats();
-    $weekStats = getCurrentSeasonWeekStats();
-    $everyoneRecord = getRecordAgainstEveryone();
-    $teamWeek = getCurrentSeasonBestTeamWeek();
-    $weekStandings = getSeasonStandings($selectedSeason);
+    // Only load data if we're not in week 1 and have sufficient data
+    if ($selectedWeek > 1) {
+        $bestWeek = getCurrentSeasonBestWeek();
+        $topPerformers = getCurrentSeasonTopPerformers();
+        $stats = getCurrentSeasonStats();
+        $weekStats = getCurrentSeasonWeekStats();
+        $everyoneRecord = getRecordAgainstEveryone();
+        $teamWeek = getCurrentSeasonBestTeamWeek();
+        $weekStandings = getSeasonStandings($selectedSeason);
+    }
+    
+    // Load schedule info for all weeks
+    $scheduleInfo = getScheduleInfo($selectedSeason, $selectedWeek);
 }
 
 function getManagerName($id) {
@@ -2361,7 +2395,7 @@ function getPointsForScatter()
 /**
  * Check a roster for the optimal lineup configuration
  */
-function checkRosterForOptimal(array $roster, int $season = null)
+function checkRosterForOptimal(array $roster, ?int $season = null)
 {
     global $selectedSeason;
     
@@ -3196,5 +3230,111 @@ function getRegularSeasonWinners()
     }
     
     return $winners;
+}
+
+/**
+ * Get schedule information with historical records and current streaks
+ */
+function getScheduleInfo($year, $week)
+{
+    $currentYear = date('Y');
+    $schedule = [];
+    
+    // Get schedule based on whether it's current year or historical
+    if ($year == $currentYear) {
+        // Use schedule table for current year
+        $result = query("SELECT s.manager1_id, s.manager2_id, m1.name as manager1, m2.name as manager2
+            FROM schedule s
+            JOIN managers m1 ON s.manager1_id = m1.id
+            JOIN managers m2 ON s.manager2_id = m2.id
+            WHERE s.year = $year AND s.week = $week");
+    } else {
+        // Use regular_season_matchups for historical years - only get unique matchups (avoid duplicates)
+        $result = query("SELECT DISTINCT 
+            CASE WHEN rsm.manager1_id < rsm.manager2_id THEN rsm.manager1_id ELSE rsm.manager2_id END as manager1_id,
+            CASE WHEN rsm.manager1_id < rsm.manager2_id THEN rsm.manager2_id ELSE rsm.manager1_id END as manager2_id,
+            m1.name as manager1, m2.name as manager2
+            FROM regular_season_matchups rsm
+            JOIN managers m1 ON (CASE WHEN rsm.manager1_id < rsm.manager2_id THEN rsm.manager1_id ELSE rsm.manager2_id END) = m1.id
+            JOIN managers m2 ON (CASE WHEN rsm.manager1_id < rsm.manager2_id THEN rsm.manager2_id ELSE rsm.manager1_id END) = m2.id
+            WHERE rsm.year = $year AND rsm.week_number = $week");
+    }
+    
+    while ($row = fetch_array($result)) {
+        $manager1_id = $row['manager1_id'];
+        $manager2_id = $row['manager2_id'];
+        $manager1 = $row['manager1'];
+        $manager2 = $row['manager2'];
+        
+        // Get historical head-to-head record - only count each game once by looking at one direction
+        $h2hResult = query("SELECT 
+            SUM(CASE WHEN manager1_score > manager2_score THEN 1 ELSE 0 END) as manager1_wins,
+            SUM(CASE WHEN manager2_score > manager1_score THEN 1 ELSE 0 END) as manager2_wins
+            FROM regular_season_matchups 
+            WHERE manager1_id = $manager1_id AND manager2_id = $manager2_id");
+        
+        $h2hRow = fetch_array($h2hResult);
+        $manager1_wins = $h2hRow['manager1_wins'] ?? 0;
+        $manager2_wins = $h2hRow['manager2_wins'] ?? 0;
+        $record = $manager1_wins . '-' . $manager2_wins;
+        
+        // Get postseason head-to-head record between these two managers
+        $postseasonH2HResult = query("SELECT 
+            SUM(CASE WHEN manager1_id = $manager1_id AND manager1_score > manager2_score THEN 1 ELSE 0 END) +
+            SUM(CASE WHEN manager2_id = $manager1_id AND manager2_score > manager1_score THEN 1 ELSE 0 END) as manager1_wins,
+            SUM(CASE WHEN manager1_id = $manager2_id AND manager1_score > manager2_score THEN 1 ELSE 0 END) +
+            SUM(CASE WHEN manager2_id = $manager2_id AND manager2_score > manager1_score THEN 1 ELSE 0 END) as manager2_wins
+            FROM playoff_matchups 
+            WHERE (manager1_id = $manager1_id AND manager2_id = $manager2_id) 
+               OR (manager1_id = $manager2_id AND manager2_id = $manager1_id)");
+        
+        $postseasonH2HRow = fetch_array($postseasonH2HResult);
+        $manager1_postseason_wins = $postseasonH2HRow['manager1_wins'] ?? 0;
+        $manager2_postseason_wins = $postseasonH2HRow['manager2_wins'] ?? 0;
+        $postseason_record = $manager1_postseason_wins . '-' . $manager2_postseason_wins;
+        
+        // Get current streak - only look at one direction to avoid duplicates
+        $streakResult = query("SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score
+            FROM regular_season_matchups 
+            WHERE (manager1_id = $manager1_id AND manager2_id = $manager2_id)
+            ORDER BY year DESC, week_number DESC");
+        
+        $streak = 0;
+        $streakWinner = '';
+        $lastWinner = '';
+        
+        while ($streakRow = fetch_array($streakResult)) {
+            $gameWinner = '';
+            if ($streakRow['manager1_score'] > $streakRow['manager2_score']) {
+                $gameWinner = getManagerName($streakRow['manager1_id']);
+            } elseif ($streakRow['manager2_score'] > $streakRow['manager1_score']) {
+                $gameWinner = getManagerName($streakRow['manager2_id']);
+            } else {
+                continue; // Skip ties
+            }
+            
+            if ($lastWinner == '') {
+                $lastWinner = $gameWinner;
+                $streakWinner = $gameWinner;
+                $streak = 1;
+            } elseif ($lastWinner == $gameWinner) {
+                $streak++;
+            } else {
+                break;
+            }
+        }
+        
+        $streakText = $streak > 0 ? $streakWinner . ' ' . $streak : 'Even';
+        
+        $schedule[] = [
+            'manager1' => $manager1,
+            'manager2' => $manager2,
+            'record' => $record,
+            'streak' => $streakText,
+            'postseason_record' => $postseason_record
+        ];
+    }
+    
+    return $schedule;
 }
 

@@ -23,16 +23,14 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - record against everyone
     - best trade
     - fewest points by position (all time, season)
-    - most QBs/RBs/etc drafted in first round
-    - most seahawks drafted
-    - best free agent pickup (current) cannot be right. it says Dobbs (169) but Puka had way more
     - most QB/RB/WR/etc points current season
 
 - Newsletter page
     - Bring in schedule so it knows next week's matchup
     - fix top performers & stats by week to be based on last week only
     - section for this week's preview
-- profile pie chart for season finishes 1-3, 4-6, 7-10
+
+- fix navigation on tablet
 
 Notes:
 Rams moved to LA between 2015 & 2016

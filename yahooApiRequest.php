@@ -10,12 +10,13 @@ $manager = isset($_POST['manager']) ? $_POST['manager'] : 0;
 
 // To get new game codes, uncomment the following lines. Then go to the yahooApi.php page (Admin)
 // Click Verify button, Yahoo will give you a code to copy. Close that window and paste it into the Admin page.
-// Select any options and click Submit. All the game codes will be dumped on the screen.
+// Select any options and click Submit. All the game codes will be dumped on the screen. New one on bottom.
 // $request_uri = '/games;game_codes=nfl';
 // $teams = get_data($request_uri, $access_token);
 // do_dump($teams);die;
 
 $seasons = [
+    2025 => ['league_id' => 23237, 'game_code' => 461],
     2024 => ['league_id' => 98957, 'game_code' => 449],
     2023 => ['league_id' => 74490, 'game_code' => 423],
     2022 => ['league_id' => 84027, 'game_code' => 414],
@@ -255,8 +256,8 @@ function handle_teams(object $data)
             $teamName = str_replace("'", "''", $team->team[0][2]->name);
             // Find yahoo team id
             $yahooTeamId = (int)$team->team[0][1]->team_id;
-            $moves = (int)$team->team[0][9]->number_of_moves;
-            $trades = (int)$team->team[0][10]->number_of_trades;
+            $moves = (int)$team->team[0][10]->number_of_moves;
+            $trades = (int)$team->team[0][11]->number_of_trades;
     
             echo $teamName.' = '.$yahooTeamId.'<br>';
             // Match up nickname to manager_id

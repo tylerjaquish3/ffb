@@ -2,6 +2,13 @@
 
 $pageName = 'Yahoo API';
 include 'header.php';
+
+// Check if environment is set to production
+if (isset($APP_ENV) && $APP_ENV === 'production') {
+    header("Location: 404.php");
+    exit;
+}
+
 include 'sidebar.html';
 
 if (isset($_GET['archive'])) {

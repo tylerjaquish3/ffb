@@ -48,6 +48,13 @@ if ($contentRow) {
 // Now include the HTML output files
 $pageName = "Edit Newsletter";
 include 'header.php';
+
+// Check if environment is set to production
+if (isset($APP_ENV) && $APP_ENV === 'production') {
+    header("Location: 404.php");
+    exit;
+}
+
 include 'sidebar.html';
 
 ?>

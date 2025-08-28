@@ -28,75 +28,155 @@ if (isset($_GET['id'])) {
 
 ?>
 
-<div class="app-content content container-fluid">
+<div class="app-content content">
     <div class="content-wrapper">
         <div class="content-header row"></div>
 
         <div class="content-body">
-            <!-- Headline Statistics -->
-            <div class="row">
-                <div class="col-xl-3 col-lg-6 col-sm-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
+
+            <!-- Tabs Navigation -->
+            <div class="row mb-1">
+                <div class="col-sm-12">
+                    <div class="tab-buttons-container">
+                        <button class="tab-button active" id="overview-tab" onclick="showCard('overview')">
+                            Overview
+                        </button>
+                        <button class="tab-button" id="awards-tab" onclick="showCard('awards')">
+                            Awards
+                        </button>
+                        <button class="tab-button" id="record-vs-opponent-tab" onclick="showCard('record-vs-opponent')">
+                            Record vs. Opponent
+                        </button>
+                        <button class="tab-button" id="head-to-head-tab" onclick="showCard('head-to-head')">
+                            Head to Head
+                        </button>
+                        <button class="tab-button" id="points-by-week-tab" onclick="showCard('points-by-week')">
+                            Points by Week
+                        </button>
+                        <button class="tab-button" id="drafts-tab" onclick="showCard('drafts')">
+                            Drafts
+                        </button>
+                        <button class="tab-button" id="draft-analysis-tab" onclick="showCard('draft-analysis')">
+                            Draft Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overview Tab -->
+            <div class="row card-section" id="overview">
+                <!-- Headline Statistics -->
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-xl-3 col-lg-6 col-sm-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="media">
+                                        <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
+                                            <i class="icon-star-full font-large-2 white"></i>
+                                        </div>
+                                        <div class="p-2 bg-green-ffb media-body">
+                                            <h5>Total Points</h5>
+                                            <h5 class="text-bold-400"><?php echo $profileNumbers['totalPoints'] . ' (Rank: ' . $profileNumbers['totalPointsRank'] . ')'; ?>&#x200E;</h5>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Total Points</h5>
-                                    <h5 class="text-bold-400"><?php echo $profileNumbers['totalPoints'] . ' (Rank: ' . $profileNumbers['totalPointsRank'] . ')'; ?>&#x200E;</h5>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-sm-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="media">
+                                        <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
+                                            <i class="icon-stats-bars font-large-2 white"></i>
+                                        </div>
+                                        <div class="p-2 bg-green-ffb media-body">
+                                            <h5>Postseason Record</h5>
+                                            <h5 class="text-bold-400"><?php echo $profileNumbers['playoffRecord'] . ' (Rank: ' . $profileNumbers['playoffRecordRank'] . ')'; ?>&#x200E;</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-sm-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="media">
+                                        <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
+                                            <i class="icon-trophy font-large-2 white"></i>
+                                        </div>
+                                        <div class="p-2 bg-green-ffb media-body">
+                                            <h5>Championships</h5>
+                                            <h5 class="text-bold-400"><?php echo $profileNumbers['championships'] . ' (' . $profileNumbers['championshipYears'] . ')'; ?>&#x200E;</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-sm-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="media">
+                                        <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
+                                            <i class="icon-calendar font-large-2 white"></i>
+                                        </div>
+                                        <div class="p-2 bg-green-ffb media-body">
+                                            <h5>Reg. Season Record</h5>
+                                            <h5 class="text-bold-400"><?php echo $profileNumbers['record'] . ' (Rank: ' . $profileNumbers['recordRank'] . ')'; ?>&#x200E;</h5>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-sm-12">
+                <!-- Seasons Card -->
+                <div class="col-sm-12 table-padding">
                     <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-stats-bars font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Postseason Record</h5>
-                                    <h5 class="text-bold-400"><?php echo $profileNumbers['playoffRecord'] . ' (Rank: ' . $profileNumbers['playoffRecordRank'] . ')'; ?>&#x200E;</h5>
-                                </div>
-                            </div>
+                        <div class="card-header">
+                            <h3>Seasons</h3>
                         </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-sm-12">
-                    <div class="card">
                         <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-trophy font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Championships</h5>
-                                    <h5 class="text-bold-400"><?php echo $profileNumbers['championships'] . ' (' . $profileNumbers['championshipYears'] . ')'; ?>&#x200E;</h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-sm-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-calendar font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Reg. Season Record</h5>
-                                    <h5 class="text-bold-400"><?php echo $profileNumbers['record'] . ' (Rank: ' . $profileNumbers['recordRank'] . ')'; ?>&#x200E;</h5>
-                                </div>
+                            <div class="card-block">
+                                <canvas id="finishesChart" class="height-400"></canvas>
+                                <br />
+                                <table class="table table-responsive table-striped nowrap" id="datatable-seasons">
+                                    <thead>
+                                        <th>Year</th>
+                                        <th>Team Name</th>
+                                        <th>Record</th>
+                                        <th>Win %</th>
+                                        <th>PF</th>
+                                        <th>PA</th>
+                                        <th>Finish</th>
+                                        <th>Moves</th>
+                                        <th>Trades</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($seasonNumbers as $year => $array) { ?>
+                                            <tr>
+                                                <td><?php echo $year; ?></td>
+                                                <td><?php echo $array['team_name']; ?></td>
+                                                <td><?php echo $array['record']; ?></td>
+                                                <td><?php echo $array['win_pct'] . ' %'; ?></td>
+                                                <td><?php echo $array['pf']; ?></td>
+                                                <td><?php echo $array['pa']; ?></td>
+                                                <td><?php echo $array['finish']; ?></td>
+                                                <td><?php echo $array['moves']; ?></td>
+                                                <td><?php echo $array['trades']; ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
+
+            <!-- Awards Tab -->
+            <div class="row card-section" id="awards" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -146,15 +226,15 @@ if (isset($_GET['id'])) {
                                         echo '</div></div>';
                                     } ?>
                                 </div>
-
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-12 col-md-3 table-padding">
+
+            <!-- Record vs. Opponent Tab -->
+            <div class="row card-section" id="record-vs-opponent" style="display: none;">
+                <div class="col-sm-12 col-md-4">
                     <div class="card">
                         <div class="card-header">
                             <h3>Record vs. Opponent</h3>
@@ -194,7 +274,7 @@ if (isset($_GET['id'])) {
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['wins']; ?></td>
                                                 <td><?php echo $row['losses']; ?></td>
-                                                <td><?php echo round(($row['wins'] * 100) / ($row['wins'] + $row['losses']), 1); ?></td>
+                                                <td><?php echo ($row['wins'] + $row['losses']) > 0 ? round(($row['wins'] * 100) / ($row['wins'] + $row['losses']), 1) : 'N/A'; ?></td>
                                             </tr>
 
                                         <?php } ?>
@@ -272,6 +352,8 @@ if (isset($_GET['id'])) {
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="col-sm-12 col-md-4 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Wins by Opponent</h4>
@@ -283,6 +365,8 @@ if (isset($_GET['id'])) {
                             </div>
                         </div>
                     </div>
+                        </div>
+                <div class="col-sm-12 col-md-4 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Finishes</h4>
@@ -294,51 +378,10 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-9 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Seasons</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="card-block">
-                                <canvas id="finishesChart" class="height-400"></canvas>
-                                <br />
-                                <table class="table table-responsive table-striped nowrap" id="datatable-seasons">
-                                    <thead>
-                                        <th>Year</th>
-                                        <th>Team Name</th>
-                                        <th>Record</th>
-                                        <th>Win %</th>
-                                        <th>PF</th>
-                                        <th>PA</th>
-                                        <th>Finish</th>
-                                        <th>Moves</th>
-                                        <th>Trades</th>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        foreach ($seasonNumbers as $year => $array) { ?>
-                                            <tr>
-                                                <td><?php echo $year; ?></td>
-                                                <td><?php echo $array['team_name']; ?></td>
-                                                <td><?php echo $array['record']; ?></td>
-                                                <td><?php echo $array['win_pct'] . ' %'; ?></td>
-                                                <td><?php echo $array['pf']; ?></td>
-                                                <td><?php echo $array['pa']; ?></td>
-                                                <td><?php echo $array['finish']; ?></td>
-                                                <td><?php echo $array['moves']; ?></td>
-                                                <td><?php echo $array['trades']; ?></td>
-                                            </tr>
-                                        <?php } ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
+            </div>            
+            
+            <!-- Drafts Tab -->
+            <div class="row card-section" id="drafts" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -409,7 +452,8 @@ if (isset($_GET['id'])) {
                 </div>
             </div>
 
-            <div class="row">
+            <!-- Draft Analysis Tab -->
+            <div class="row card-section" id="draft-analysis" style="display: none;">
                 <div class="col-sm-12 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -456,7 +500,9 @@ if (isset($_GET['id'])) {
                     </div>
                 </div>
             </div>
-            <div class="row">
+
+            <!-- Head to Head Tab -->
+            <div class="row card-section" id="head-to-head" style="display: none;">
                 <div class="col-sm-12 col-lg-8 table-padding" id="versus">
                     <div class="card">
                         <div class="card-header">
@@ -537,12 +583,12 @@ if (isset($_GET['id'])) {
                                         <tr><td>Postseason Wins</td><td><?php echo $postWins; ?></td></tr>
                                         <tr><td>Postseason Losses</td><td> <?php echo $postLosses; ?></td></tr>
 
-                                        <tr><td>Overall Winning %</td><td> <?php echo round(($wins + $postWins) * 100/ ($total + $postTotal), 1).' %'; ?></td></tr>
+                                        <tr><td>Overall Winning %</td><td> <?php echo ($total + $postTotal) > 0 ? round(($wins + $postWins) * 100/ ($total + $postTotal), 1).' %' : 'N/A'; ?></td></tr>
 
                                         <tr><td>Total Points For</td><td><?php echo $pf; ?></td></tr>
                                         <tr><td>Total Points Against</td><td><?php echo $pa; ?></td></tr>
-                                        <tr><td>Average Points For</td><td><?php echo round($pf/($total+$postTotal), 1); ?></td></tr>
-                                        <tr><td>Average Points Against</td><td><?php echo round($pa/($total+$postTotal), 1); ?></td></tr>
+                                        <tr><td>Average Points For</td><td><?php echo ($total+$postTotal) > 0 ? round($pf/($total+$postTotal), 1) : 'N/A'; ?></td></tr>
+                                        <tr><td>Average Points Against</td><td><?php echo ($total+$postTotal) > 0 ? round($pa/($total+$postTotal), 1) : 'N/A'; ?></td></tr>
 
                                         <tr><td>Biggest Win</td><td><?php echo round($bigWin, 2); ?></td></tr>
                                         <tr><td>Biggest Loss</td><td><?php echo round($bigLoss, 2); ?></td></tr>
@@ -705,7 +751,9 @@ if (isset($_GET['id'])) {
                     </div>
                 </div>
             </div>
-            <div class="row">
+
+            <!-- Points by Week Tab -->
+            <div class="row card-section" id="points-by-week" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -766,6 +814,7 @@ if (isset($_GET['id'])) {
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
@@ -774,6 +823,13 @@ if (isset($_GET['id'])) {
 
 <script type="text/javascript">
     $(document).ready(function() {
+
+        // Initialize the page with Overview tab active - delay to ensure showCard function is loaded
+        setTimeout(function() {
+            if (typeof showCard === 'function') {
+                showCard('overview');
+            }
+        }, 100);
 
         if ("<?php echo $versusSet; ?>" == true) {
             document.getElementById('versus').scrollIntoView(true);
@@ -786,16 +842,39 @@ if (isset($_GET['id'])) {
         });
 
         $('#oppRecordSelector').change(function() {
+            
             if ($('#oppRecordSelector').val() == 'reg') {
                 $('#datatable-regSeason').show();
                 $('#datatable-postseason').hide();
-                $('#postseasonWinsChart').hide();
-                $('#winsChart').show();
+                
+                // Adjust DataTable columns after showing
+                setTimeout(function() {
+                    $('#datatable-regSeason').DataTable().columns.adjust().draw();
+                }, 10);
+                
+                // Only hide/show charts if they exist
+                if (typeof postseasonWinsChart !== 'undefined' && postseasonWinsChart) {
+                    $('#postseasonWinsChart').hide();
+                }
+                if (typeof winsChart !== 'undefined' && winsChart) {
+                    $('#winsChart').show();
+                }
             } else {
                 $('#datatable-regSeason').hide();
                 $('#datatable-postseason').show();
-                $('#postseasonWinsChart').show();
-                $('#winsChart').hide();
+                
+                // Adjust DataTable columns after showing
+                setTimeout(function() {
+                    $('#datatable-postseason').DataTable().columns.adjust().draw();
+                }, 10);
+                
+                // Only hide/show charts if they exist
+                if (typeof winsChart !== 'undefined' && winsChart) {
+                    $('#winsChart').hide();
+                }
+                if (typeof postseasonWinsChart !== 'undefined' && postseasonWinsChart) {
+                    $('#postseasonWinsChart').show();
+                }
             }
         });
 
@@ -938,7 +1017,7 @@ if (isset($_GET['id'])) {
             align: 'end'
         };
 
-        var winsChart = new Chart(ctx, {
+        winsChart = new Chart(ctx, {
             type: 'pie',
             data: {
                 labels: managers,
@@ -975,7 +1054,7 @@ if (isset($_GET['id'])) {
             align: 'end'
         };
 
-        var postseasonWinsChart = new Chart(ctx, {
+        postseasonWinsChart = new Chart(ctx, {
             type: 'pie',
             data: {
                 labels: postManagers,
@@ -1233,7 +1312,7 @@ if (isset($_GET['id'])) {
         align: 'end'
     };
 
-    var finishesChart = new Chart(finishesCtx, {
+    finishesChart = new Chart(finishesCtx, {
         type: 'pie',
         data: {
             labels: finishesLabels,

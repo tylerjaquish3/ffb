@@ -31,7 +31,7 @@ include 'sidebar.html';
                             Season Analysis
                         </button>
                         <button class="tab-button" id="pfpa-correlation-tab" onclick="showCard('pfpa-correlation')">
-                            PF/PA Correlation Charts
+                            PF/PA Charts
                         </button>
                         <button class="tab-button" id="game-time-tab" onclick="showCard('game-time')">
                             Game Time Analysis

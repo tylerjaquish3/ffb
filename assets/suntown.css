@@ -298,7 +298,10 @@ tr.color-black td {
     background: #d3d3d3;
     padding: 20px;
     text-align: center;
-    margin-top: auto;
+    margin-top: 20px;
+    position: relative;
+    min-height: 60px;
+    clear: both;
 }
 
 
@@ -360,4 +363,42 @@ tr.color-black td {
 .tab-button:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Top Weekly Performers table fixes */
+#datatable-bestWeek {
+    width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: collapse !important;
+}
+
+#datatable-bestWeek thead th,
+#datatable-bestWeek tbody td {
+    white-space: nowrap !important;
+    min-width: 120px !important;
+    padding: 8px 12px !important;
+    vertical-align: top !important;
+    border: 1px solid #ddd !important;
+}
+
+#datatable-bestWeek thead th:first-child,
+#datatable-bestWeek tbody td:first-child {
+    min-width: 60px !important;
+    text-align: center !important;
+}
+
+/* Optimal Lineups table fixes */
+#datatable-optimal {
+    width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: collapse !important;
+}
+
+#datatable-optimal thead th,
+#datatable-optimal tbody td {
+    white-space: nowrap !important;
+    min-width: 100px !important;
+    padding: 8px 12px !important;
+    vertical-align: top !important;
+    border: 1px solid #ddd !important;
 }

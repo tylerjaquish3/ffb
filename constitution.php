@@ -153,44 +153,45 @@ while ($row = fetch_array($result)) {
             </div>
 
             <div class="row card-section" id="roster-history" style="display: none;">
-                <div class="col-sm-12">
-                    <div class="card">
+                <div class="col-sm-12" style="max-width: calc(100vw - 280px); overflow: hidden;">
+                    <div class="card" style="width: 100%; overflow: hidden; direction: ltr;">
                         <div class="card-header">
                             <h4>Roster Position History</h4>
                         </div>
-                        <div class="card-body">
-                            <div class="card-block" style="direction: ltr">
-                                <table id="datatable-settings" class="table table-responsive table-striped nowrap">
-                                    <thead>
-                                        <th>Count</th>
-                                        <?php
-                                        foreach ($allYears as $year) {
-                                            echo "<th>".$year."</th>";
-                                        } ?>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        
-                                        $result = query("SELECT * FROM season_positions ORDER BY sort_order ASC");
-                                        while ($row = fetch_array($result)) {
-                                            $spots[$row['year']][] =  $row['position'];
-                                        }
+                        <div class="card-body" style="padding: 0; overflow: hidden;">
+                            <div style="overflow-x: auto; overflow-y: hidden; padding: 1rem;">
+                            
+                            <table id="datatable-settings" class="table table-striped nowrap" style="width: auto;">
+                                <thead>
+                                    <th>Count</th>
+                                    <?php
+                                    foreach ($allYears as $year) {
+                                        echo "<th>".$year."</th>";
+                                    } ?>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    
+                                    $result = query("SELECT * FROM season_positions ORDER BY sort_order ASC");
+                                    while ($row = fetch_array($result)) {
+                                        $spots[$row['year']][] =  $row['position'];
+                                    }
 
-                                        for ($i = 0; $i < 25; $i++) {
-                                            echo '<tr>';
-                                                echo '<td>'.($i+1).'</td>';
-                                                foreach ($allYears as $year) {
-                                                    if (isset($spots[$year][$i])) {
-                                                        $order = $i+1;
-                                                        echo "<td data-order='".$order."'>".$spots[$year][$i]."</td>";
-                                                    } else {
-                                                        echo "<td data-order='99'></td>";
-                                                    }
+                                    for ($i = 0; $i < 25; $i++) {
+                                        echo '<tr>';
+                                            echo '<td>'.($i+1).'</td>';
+                                            foreach ($allYears as $year) {
+                                                if (isset($spots[$year][$i])) {
+                                                    $order = $i+1;
+                                                    echo "<td data-order='".$order."'>".$spots[$year][$i]."</td>";
+                                                } else {
+                                                    echo "<td data-order='99'></td>";
                                                 }
-                                            echo '</tr>';
-                                        } ?>
-                                    </tbody>
-                                </table>
+                                            }
+                                        echo '</tr>';
+                                    } ?>
+                                </tbody>
+                            </table>
                             </div>
                         </div>
                     </div>
@@ -347,6 +348,7 @@ while ($row = fetch_array($result)) {
         searching: false,
         paging: false,
         info: false,
+        autoWidth: false
     });
 
     // Initialize the page with League Info tab active

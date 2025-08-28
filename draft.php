@@ -8,10 +8,22 @@ include 'sidebar.html';
 
 <div class="app-content content container-fluid">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
-
         <div class="content-body">
-            <div class="row">
+
+            <!-- Tabs Navigation -->
+            <div class="row mb-1">
+                <div class="col-sm-12">
+                    <div class="tab-buttons-container">
+                        <button class="tab-button active" id="draft-results-tab" onclick="showCard('draft-results')">Draft Results</button>
+                        <button class="tab-button" id="draft-positions-tab" onclick="showCard('draft-positions')">Draft Positions</button>
+                        <button class="tab-button" id="best-drafts-tab" onclick="showCard('best-drafts')">Best Drafts</button>
+                        <button class="tab-button" id="draft-spots-tab" onclick="showCard('draft-spots')">Draft Spots Chart</button>
+                        <button class="tab-button" id="positions-drafted-tab" onclick="showCard('positions-drafted')">Positions by Round</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row card-section" id="draft-results">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -49,8 +61,9 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-12 col-lg-5 table-padding">
+
+            <div class="row card-section" id="draft-positions" style="display: none;">
+                <div class="col-sm-12 col-md-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Draft Positions</h4>
@@ -102,70 +115,76 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-lg-7 table-padding">
+            </div>
+
+            <div class="row card-section" id="best-drafts" style="display: none;">
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Best Drafts</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <div class="row">
-                                <div class="col-sm-12 col-lg-7">
-                                    <table class="table table-responsive table-striped nowrap" id="datatable-bestDrafts">
-                                        <thead>
-                                            <th>Manager</th>
-                                            <th>Year</th>
-                                            <th>Pick #</th>
-                                            <th>Points</th>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            $result = query("SELECT r.manager, r.year, sum(points) as points, min(draft.overall_pick) as pick
-                                                FROM rosters r
-                                                JOIN draft on r.player = draft.player AND r.year = draft.year
-                                                GROUP BY r.manager, r.year
-                                                ORDER BY sum(points) DESC");
-                                            while ($row = fetch_array($result)) { ?>
-                                                <tr>
-                                                    <td><?php echo $row['manager']; ?></td>
-                                                    <td><?php echo '<a href="/draft.php?manager='.$row['manager'].'&year='.$row['year'].'">'.$row['year'].'</a>'; ?></td>
-                                                    <td><?php echo $row['pick']; ?></td>
-                                                    <td class="text-right"><?php echo number_format($row['points'], 1); ?></td>
-                                                </tr>
-                                            <?php } ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="col-sm-12 col-lg-5">
-                                    <h4>Total Draft Points</h4>
-                                    <table class="table table-responsive table-striped nowrap" id="datatable-bestDraftTotals">
-                                        <thead>
-                                            <th>Manager</th>
-                                            <th>Points</th>
-                                            <th>Average</th>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            $result = query("SELECT r.manager, sum(points) as points, count(distinct draft.year) as years
-                                                FROM rosters r
-                                                JOIN draft on r.player = draft.player AND r.year = draft.year
-                                                GROUP BY r.manager
-                                                ORDER BY sum(points) DESC");
-                                            while ($row = fetch_array($result)) { ?>
-                                                <tr>
-                                                    <td><?php echo $row['manager']; ?></td>
-                                                    <td class="text-right"><?php echo number_format($row['points'], 0); ?></td>
-                                                    <td class="text-right"><?php echo number_format($row['points']/$row['years'], 0); ?></td>
-                                                </tr>
-                                            <?php } ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            <table class="table table-responsive table-striped nowrap" id="datatable-bestDrafts">
+                                <thead>
+                                    <th>Manager</th>
+                                    <th>Year</th>
+                                    <th>Pick #</th>
+                                    <th>Points</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $result = query("SELECT r.manager, r.year, sum(points) as points, min(draft.overall_pick) as pick
+                                        FROM rosters r
+                                        JOIN draft on r.player = draft.player AND r.year = draft.year
+                                        GROUP BY r.manager, r.year
+                                        ORDER BY sum(points) DESC");
+                                    while ($row = fetch_array($result)) { ?>
+                                        <tr>
+                                            <td><?php echo $row['manager']; ?></td>
+                                            <td><?php echo '<a href="/draft.php?manager='.$row['manager'].'&year='.$row['year'].'">'.$row['year'].'</a>'; ?></td>
+                                            <td><?php echo $row['pick']; ?></td>
+                                            <td class="text-right"><?php echo number_format($row['points'], 1); ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Total Draft Points</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-bestDraftTotals">
+                                <thead>
+                                    <th>Manager</th>
+                                    <th>Points</th>
+                                    <th>Average</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $result = query("SELECT r.manager, sum(points) as points, count(distinct draft.year) as years
+                                        FROM rosters r
+                                        JOIN draft on r.player = draft.player AND r.year = draft.year
+                                        GROUP BY r.manager
+                                        ORDER BY sum(points) DESC");
+                                    while ($row = fetch_array($result)) { ?>
+                                        <tr>
+                                            <td><?php echo $row['manager']; ?></td>
+                                            <td class="text-right"><?php echo number_format($row['points'], 0); ?></td>
+                                            <td class="text-right"><?php echo number_format($row['points']/$row['years'], 0); ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
+
+            <div class="row card-section" id="draft-spots" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -177,7 +196,8 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
-            <div class="row">
+
+            <div class="row card-section" id="positions-drafted" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -212,6 +232,11 @@ include 'sidebar.html';
 <style>
     #datatable-draft input[type=text] {
         width: 100%;
+    }
+    
+    /* Reduce spacing for tab navigation */
+    .tab-buttons-container {
+        padding: 10px 0 !important;
     }
 </style>
 
@@ -455,6 +480,9 @@ include 'sidebar.html';
             $('#datatable-draft > thead > tr.filters > th:nth-child(1) > input[type=text]').trigger('keyup');
             $('#datatable-draft').DataTable().page.len(25).draw();
         }
+
+        // Initialize the page with Draft Results tab active
+        showCard('draft-results');
 
     });
 </script>

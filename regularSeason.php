@@ -8,17 +8,49 @@ include 'sidebar.html';
 
 <div class="app-content content container-fluid">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
 
         <div class="content-body">
-            <div class="row">
+
+            <!-- Tabs Navigation -->
+            <div class="row mb-1">
+                <div class="col-sm-12">
+                    <div class="tab-buttons-container">
+                        <button class="tab-button active" id="matchups-stats-tab" onclick="showCard('matchups-stats')">
+                            Matchups & Stats
+                        </button>
+                        <button class="tab-button" id="weekly-rank-tab" onclick="showCard('weekly-rank')">
+                            Weekly Rank
+                        </button>
+                        <button class="tab-button" id="team-standings-tab" onclick="showCard('team-standings')">
+                            Team Standings Lookup
+                        </button>
+                        <button class="tab-button" id="league-standings-tab" onclick="showCard('league-standings')">
+                            League Standings History
+                        </button>
+                        <button class="tab-button" id="season-analysis-tab" onclick="showCard('season-analysis')">
+                            Season Analysis
+                        </button>
+                        <button class="tab-button" id="pfpa-correlation-tab" onclick="showCard('pfpa-correlation')">
+                            PF/PA Correlation Charts
+                        </button>
+                        <button class="tab-button" id="game-time-tab" onclick="showCard('game-time')">
+                            Game Time Analysis
+                        </button>
+                        <button class="tab-button" id="champions-tab" onclick="showCard('champions')">
+                            Champions
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row card-section" id="matchups-stats">
                 <div class="col-sm-12 col-lg-7 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Regular Season Matchups</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-regSeason">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-regSeason">
                                 <thead>
                                     <th>Year</th>
                                     <th>Week</th>
@@ -83,34 +115,38 @@ include 'sidebar.html';
                         </select>
                     </div>
                     <?php include 'regMiscStats.php'; ?>
+                </div>
+            </div>
+        </div>
 
-                    <br /><br />
-                    <div class="table-padding">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Weekly Rank by Points Scored</h4>
-                            </div>
-                            <div class="card-body" style="direction: ltr;">
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <table class="table table-striped nowrap" id="datatable-weeklyRanks">
-                                            <thead>
-                                                <th></th>
-                                                <th>Year</th>
-                                                <th>Manager</th>
-                                                <th>Avg. Weekly Rank</th>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
-                                    </div>
+        <div class="row card-section" id="weekly-rank" style="display: none;">
+            <div class="col-sm-12 table-padding">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Weekly Rank by Points Scored</h4>
+                    </div>
+                    <div class="card-body" style="direction: ltr;">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="table-responsive">
+                                    <table class="table table-striped nowrap" id="datatable-weeklyRanks" style="width: 100%;">
+                                        <thead>
+                                            <th></th>
+                                            <th>Year</th>
+                                            <th>Manager</th>
+                                            <th>Avg. Weekly Rank</th>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="row" style="direction: ltr;">
+        <div class="row card-section" id="team-standings" style="display: none;">
                 <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -153,7 +189,7 @@ include 'sidebar.html';
                             <h4>Results</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-results">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-results">
                                 <thead>
                                     <th>Year</th>
                                     <th>Week</th>
@@ -167,7 +203,7 @@ include 'sidebar.html';
                 </div>
             </div>
 
-            <div class="row" style="direction: ltr;">
+            <div class="row card-section" id="league-standings" style="display: none;">
                 <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -210,7 +246,7 @@ include 'sidebar.html';
                             <span id="count"></span>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-league-standings">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-league-standings">
                                 <thead>
                                     <th>Rank</th>
                                     <th>Manager</th>
@@ -225,7 +261,7 @@ include 'sidebar.html';
                 </div>
             </div>
 
-            <div class="row mt-2">
+            <div class="row card-section" id="season-analysis" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -237,7 +273,7 @@ include 'sidebar.html';
                             </div>
                             <div>
                                 <br />
-                                <table class="table table-responsive" id="datatable-wins">
+                                <table class="table table-responsive table-striped nowrap" id="datatable-wins">
                                     <thead>
                                         <th>Year</th>
                                         <th>Ben</th>
@@ -276,7 +312,8 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
-            <div class="row">
+
+            <div class="row card-section" id="pfpa-correlation" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -289,8 +326,6 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -305,14 +340,14 @@ include 'sidebar.html';
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row card-section" id="game-time" style="display: none;">
                 <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Top Points by Game Time</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-game-time">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-game-time">
                                 <thead>
                                     <th>Year</th>
                                     <th>Week</th>
@@ -359,7 +394,7 @@ include 'sidebar.html';
                             <h4 style="float: right">Total Game Time Points</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-game-time2">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-game-time2">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Game Time</th>
@@ -388,14 +423,14 @@ include 'sidebar.html';
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-sm-6 table-padding">
+            <div class="row card-section" id="champions" style="display: none;">
+                <div class="col-sm-12 col-md-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Regular Season Champions</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive" id="datatable-reg-season-winners">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-reg-season-winners">
                                 <thead>
                                     <th>Year</th>
                                     <th>Champion</th>
@@ -429,6 +464,11 @@ include 'sidebar.html';
     #datatable-regSeason input[type=text] {
         width: 100%;
     }
+    
+    /* Reduce spacing for tab navigation */
+    .tab-buttons-container {
+        padding: 10px 0 !important;
+    }
 </style>
 
 
@@ -436,6 +476,9 @@ include 'sidebar.html';
 <?php include 'footer.php'; ?>
 
 <script type="text/javascript">
+    // Declare DataTable variables globally
+    var lookupTable, standingsTable, table;
+
     $(document).ready(function() {
 
         $('#datatable-regSeason thead tr')
@@ -514,6 +557,7 @@ include 'sidebar.html';
         });
         
         $('#datatable-reg-season-winners').DataTable({
+            "pageLength": 25,
             "order": [
                 [0, "asc"]
             ]
@@ -674,7 +718,7 @@ include 'sidebar.html';
             lookupTable.ajax.reload();
         });
 
-        let lookupTable = $('#datatable-results').DataTable({
+        lookupTable = $('#datatable-results').DataTable({
             searching: false,
             ajax: {
                 url: 'dataLookup.php',
@@ -696,7 +740,7 @@ include 'sidebar.html';
             ]
         });
 
-        let standingsTable = $('#datatable-league-standings').DataTable({
+        standingsTable = $('#datatable-league-standings').DataTable({
             searching: false,
             paging: false,
             info: false,
@@ -845,8 +889,10 @@ include 'sidebar.html';
             ]
         });
 
-        var table = $('#datatable-weeklyRanks').DataTable({
+        table = $('#datatable-weeklyRanks').DataTable({
             pageLength: 10,
+            scrollX: true,
+            autoWidth: false,
             ajax: {
                 url: 'dataLookup.php',
                 data: {
@@ -858,11 +904,12 @@ include 'sidebar.html';
                     className: 'dt-control',
                     orderable: false,
                     data: null,
-                    defaultContent: '<i class="icon-plus"></i>'
+                    defaultContent: '<i class="icon-plus"></i>',
+                    width: '30px'
                 },
-                { data: "year" },
-                { data: "manager" },
-                { data: "avg_rank" }
+                { data: "year", width: '80px' },
+                { data: "manager", width: '120px' },
+                { data: "avg_rank", width: '150px' }
             ],
             order: [
                 [1, "desc"],
@@ -899,17 +946,27 @@ include 'sidebar.html';
                 },
                 dataType: 'json',
                 success: function (data) {
+                    if (!data || data.length === 0) {
+                        div.removeClass('loading');
+                        div.text('No data available');
+                        return;
+                    }
+
                     let count = 1;
                     const table = document.createElement("table");
+                    table.className = "table table-striped table-condensed";
                     const thead = document.createElement("thead");
                     const tbody = document.createElement("tbody");
+                    
                     for (const row of data) {
                         if (count == 1) {
+                            const headerRow = document.createElement("tr");
                             for (const key of Object.keys(row)) {
                                 const th = document.createElement("th");
-                                th.textContent = key.charAt(0).toUpperCase() + key.slice(1);;
-                                thead.appendChild(th);
+                                th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+                                headerRow.appendChild(th);
                             }
+                            thead.appendChild(headerRow);
                             table.appendChild(thead);
                         } 
                         const tr = document.createElement("tr");
@@ -918,7 +975,6 @@ include 'sidebar.html';
                             td.textContent = row[key];
                             tr.appendChild(td);
                         }
-
                         tbody.appendChild(tr);
                         count++;
                     }
@@ -928,14 +984,31 @@ include 'sidebar.html';
                     div.text('');
                     div.append(table);
 
-                    // Make the table into a datatable
-                    $(table).DataTable({
-                        paging: false
-                    });
+                    // Initialize DataTable with error handling
+                    try {
+                        $(table).DataTable({
+                            paging: false,
+                            searching: false,
+                            info: false,
+                            ordering: true,
+                            autoWidth: false,
+                            responsive: true
+                        });
+                    } catch (error) {
+                        console.warn('DataTable initialization failed:', error);
+                        // Table will still be usable without DataTable features
+                    }
+                },
+                error: function(xhr, status, error) {
+                    div.removeClass('loading');
+                    div.text('Error loading data: ' + error);
                 }
             } );
 
             return div; 
         }
+
+        // Initialize the page with Matchups & Stats tab active
+        showCard('matchups-stats');
     });
 </script>

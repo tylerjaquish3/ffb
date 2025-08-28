@@ -195,7 +195,19 @@ function lookupGameTime(?int $id) {
             } else {
             ?>
 
-            <div class="row">
+            <!-- Tabs Navigation -->
+            <div class="row mb-1" style="margin-bottom: 10px;">
+                <div class="col-sm-12">
+                    <div class="tab-buttons-container">
+                        <button class="tab-button active" id="recap-tab" onclick="showCard('recap')">Recap</button>
+                        <button class="tab-button" id="matchup-rosters-tab" onclick="showCard('matchup-rosters')">Matchup Rosters</button>
+                        <button class="tab-button" id="points-by-position-tab" onclick="showCard('points-by-position')">Points by Position</button>
+                        <button class="tab-button" id="full-season-roster-tab" onclick="showCard('full-season-roster')">Full Season Roster</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row card-section" id="recap">
                 <div class="col-md-6 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -270,7 +282,7 @@ function lookupGameTime(?int $id) {
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row card-section" id="matchup-rosters" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -388,7 +400,7 @@ function lookupGameTime(?int $id) {
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row card-section" id="points-by-position" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -403,7 +415,7 @@ function lookupGameTime(?int $id) {
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row card-section" id="full-season-roster" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -486,6 +498,13 @@ function lookupGameTime(?int $id) {
 
 <?php include 'footer.php'; ?>
 
+<style>
+    /* Reduce spacing for tab navigation */
+    .tab-buttons-container {
+        padding: 10px 0 !important;
+    }
+</style>
+
 <script type="text/javascript">
     $(document).ready(function() {
 
@@ -560,7 +579,7 @@ function lookupGameTime(?int $id) {
         });
 
         var ctx = $('#posPointsChart');
-        var stackedBar = new Chart(ctx, {
+        var posPointsChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: <?php echo json_encode($posPointsChart['labels']); ?>,
@@ -598,7 +617,7 @@ function lookupGameTime(?int $id) {
         });
 
         var ctx = $('#gameTimeChart');
-        var stackedBar = new Chart(ctx, {
+        var gameTimeChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: <?php echo json_encode($gameTimeChart['labels']); ?>,
@@ -632,5 +651,9 @@ function lookupGameTime(?int $id) {
             },
             plugins: [ChartDataLabels]
         });
+
+        // Initialize the page with Recap tab active
+        showCard('recap');
+
     });
 </script>

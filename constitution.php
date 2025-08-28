@@ -14,11 +14,36 @@ while ($row = fetch_array($result)) {
 
 <div class="app-content content container-fluid">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
 
         <div class="content-body">
 
-            <div class="row">
+            <!-- Tabs Navigation -->
+            <div class="row mb-1">
+                <div class="col-sm-12">
+                    <div class="tab-buttons-container">
+                        <button class="tab-button active" id="league-info-tab" onclick="showCard('league-info')">
+                            League Info
+                        </button>
+                        <button class="tab-button" id="draft-tab" onclick="showCard('draft')">
+                            Draft
+                        </button>
+                        <button class="tab-button" id="league-rules-tab" onclick="showCard('league-rules')">
+                            League Rules
+                        </button>
+                        <button class="tab-button" id="league-settings-tab" onclick="showCard('league-settings')">
+                            League Settings
+                        </button>
+                        <button class="tab-button" id="roster-history-tab" onclick="showCard('roster-history')">
+                            Roster Position History
+                        </button>
+                        <button class="tab-button" id="meeting-notes-tab" onclick="showCard('meeting-notes')">
+                            Meeting Notes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row card-section" id="league-info">
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
@@ -52,7 +77,7 @@ while ($row = fetch_array($result)) {
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row card-section" id="draft" style="display: none;">
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
@@ -75,7 +100,7 @@ while ($row = fetch_array($result)) {
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row card-section" id="league-rules" style="display: none;">
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
@@ -100,7 +125,7 @@ while ($row = fetch_array($result)) {
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row card-section" id="league-settings" style="display: none;">
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
@@ -127,7 +152,7 @@ while ($row = fetch_array($result)) {
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row card-section" id="roster-history" style="display: none;">
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
@@ -172,8 +197,33 @@ while ($row = fetch_array($result)) {
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row card-section" id="meeting-notes" style="display: none;">
                 <div class="col-sm-12">
+                    <!-- 2025 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><a href="/year20">Twenty Year Anniversary</a></h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block" style="direction: ltr">
+                                <strong>No rule changes/voting necessary.</strong><br /><br />
+                                <strong>Determined 2025 draft order with challenges</strong><br />
+                                <ol>
+                                    <li>Mysterious Body | Winner: Justin</li>
+                                    <li>The Art of the Tortilla | Winner: Cole</li>
+                                    <li>Pink Flag Rally | Winner: Cam & Tyler</li>
+                                    <li>I Scream Challenge | Winner: Ben</li>
+                                    <li>FG Face Off | Winner: Tyler</li>
+                                </ol>
+                                Overall winner: Justin
+                                <br />
+                                <strong>Draft date: 8.24.25 | Time: 11:00am | Location: Tyler's</strong>
+                                <br /><br />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Meeting Agenda 7.24.24 -->
                     <div class="card">
                         <div class="card-header">
                             <h4>Meeting Agenda | 7.24.24</h4>
@@ -192,16 +242,13 @@ while ($row = fetch_array($result)) {
                                 <strong>Determined 2024 draft order</strong><br />
                                 <a href="https://youtu.be/GswkYPesTJk" target="_blank">Watch Video Here</a>
                                 <br /><br />
-                                <strong>Draft date: 8.25.24 | Time: 3:30pm | Location: Sartin's (Spokane, WA)</strong>
+                                <strong>Draft date: 8.25.24 | Time: 3:30pm | Location: AJ's</strong>
                                 <br /><br />
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="col-sm-12">
+                    <!-- Meeting Agenda 8.2.2023 -->
                     <div class="card">
                         <div class="card-header">
                             <h4>Meeting Agenda | 8.2.2023</h4>
@@ -218,16 +265,13 @@ while ($row = fetch_array($result)) {
                                 <strong>Determined 2023 draft order (bingo balls determined who picked their draft spot next)</strong>
                                 <br /><br />
                             
-                                <strong>Draft date: 8.27.23 | Time: 2pm | Location: Didier's (Pasco, WA)</strong>
+                                <strong>Draft date: 8.27.23 | Time: 2pm | Location: Justin's</strong>
                                 <br /><br />
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="col-sm-12">
+                    <!-- Meeting Agenda 7.26.2022 -->
                     <div class="card">
                         <div class="card-header">
                             <h4>Meeting Agenda | 7.26.2022</h4>
@@ -244,7 +288,7 @@ while ($row = fetch_array($result)) {
 
                                 <a href="https://www.cameo.com/recipient/62dac9a54baeecb8a4f7d7ce?from_share_sheet=1&utm_campaign=video_share_to_copy">Watch Dean Blandino Video Here</a>
                                 <br /><br />
-                                <strong>Draft date: 9.5.22 | Time: 3pm | Location: E. Boboth's (Sunnyside, WA)</strong>
+                                <strong>Draft date: 9.5.22 | Time: 3pm | Location: Everett's</strong>
                                 <br /><br />
                                 FAB info:<br />
                                 <ul>
@@ -262,11 +306,8 @@ while ($row = fetch_array($result)) {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-sm-12">
+                    
+                    <!-- Meeting Agenda 8.3.2021 -->
                     <div class="card">
                         <div class="card-header">
                             <h4>Meeting Agenda | 8.3.2021</h4>
@@ -287,7 +328,7 @@ while ($row = fetch_array($result)) {
                                 </ol>
                                 <strong>Determined 2021 draft order</strong><br />
 
-                                <strong>Draft date: 9.6.21 | Time: 4pm | Location: Stamschror's (Spokane Valley, WA)</strong>
+                                <strong>Draft date: 9.6.21 | Time: 4pm | Location: Andy's</strong>
                             </div>
                         </div>
                     </div>
@@ -307,4 +348,10 @@ while ($row = fetch_array($result)) {
         paging: false,
         info: false,
     });
+
+    // Initialize the page with League Info tab active
+    document.addEventListener('DOMContentLoaded', function() {
+        showCard('league-info');
+    });
+
 </script>

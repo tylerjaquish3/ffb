@@ -1,6 +1,7 @@
-    <div class="footer">
-        <a href="/yahooApi.php">Admin</a> | 
+    <div class="footer" style="direction: ltr;">
         <?php echo $version.' '.$vDate; ?>
+        &nbsp;|&nbsp;
+        <a href="/yahooApi.php">Admin</a>
     </div>
     
     <!-- BEGIN VENDOR JS-->
@@ -15,6 +16,7 @@
     <script src="/assets/app-menu.min.js" type="text/javascript"></script>
     <script src="/assets/app.min.js" type="text/javascript"></script>
     <script src="/assets/owl.carousel.min.js" type="text/javascript"></script>
+    <script src="/assets/suntown.js" type="text/javascript"></script>
 
 </body>
 

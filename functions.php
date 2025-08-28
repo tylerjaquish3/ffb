@@ -2228,7 +2228,7 @@ function getMedian($season, string $pos)
         $count++;
     }
 
-    return $total / $count;
+    return $count > 0 ? $total / $count : 0;
 }
 
 /**
@@ -2244,6 +2244,8 @@ function getAveragePick($season, string $pos)
     while ($row = fetch_array($result)) {
         return $row['overall_pick'];
     }
+    
+    return 0; // Return 0 if no records found
 }
 
 /**

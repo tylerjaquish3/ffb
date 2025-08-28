@@ -31,7 +31,43 @@ include 'sidebar.html';
                     </select>
                 </div>
             </div>
-            <div class="row">
+
+            <!-- Tabs Navigation -->
+            <div class="row mb-1">
+                <div class="col-sm-12">
+                    <div class="tab-buttons-container">
+                        <button class="tab-button active" id="performance-stats-tab" onclick="showCard('performance-stats')">
+                            Overview
+                        </button>
+                        <button class="tab-button" id="top-performers-tab" onclick="showCard('top-performers')">
+                            Top Performers
+                        </button>
+                        <button class="tab-button" id="player-stats-tab" onclick="showCard('player-stats')">
+                            Stats For
+                        </button>
+                        <button class="tab-button" id="stats-against-tab" onclick="showCard('stats-against')">
+                            Stats Against
+                        </button>
+                        <button class="tab-button" id="optimal-lineups-tab" onclick="showCard('optimal-lineups')">
+                            Optimal Lineups
+                        </button>
+                        <button class="tab-button" id="draft-analysis-tab" onclick="showCard('draft-analysis')">
+                            Draft Analysis
+                        </button>
+                        <button class="tab-button" id="team-records-tab" onclick="showCard('team-records')">
+                            Team Records
+                        </button>
+                        <button class="tab-button" id="lineup-management-tab" onclick="showCard('lineup-management')">
+                            Lineup Management
+                        </button>
+                        <button class="tab-button" id="charts-tab" onclick="showCard('charts')">
+                            Charts
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row card-section" id="performance-stats">
 
                 <div class="col-sm-12 col-lg-4">
                     <div class="card">
@@ -111,7 +147,7 @@ include 'sidebar.html';
                     </div>
                 </div>
 
-                <div class="col-sm-12 col-lg-8 table-padding">
+                <div class="col-sm-12 col-md-8 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Points</h4>
@@ -164,7 +200,9 @@ include 'sidebar.html';
                 </div>
 
             </div>
-            <div class="row">
+
+            <div class="row card-section" id="top-performers" style="display: none;">
+                
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -208,11 +246,12 @@ include 'sidebar.html';
                 </div>
 
             </div>
-            <div class="row">
+
+            <div class="row card-section" id="player-stats" style="display: none;">
                 <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Stats</h4>
+                            <h4 style="float: right">Stats For</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <table class="stripe nowrap row-border order-column" id="datatable-currentStats">
@@ -296,6 +335,8 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
+
+            <div class="row card-section" id="stats-against" style="display: none;">
 
             <div class="row">
                 <div class="col-sm-12 col-lg-6 table-padding">
@@ -386,7 +427,9 @@ include 'sidebar.html';
                 </div>
             </div>
 
-            <div class="row">
+        </div>
+
+            <div class="row card-section" id="optimal-lineups" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -414,80 +457,154 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Worst Draft Picks</h4>
+
+            <div class="row card-section" id="draft-analysis" style="display: none;">
+                
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="float: right">Worst Draft Picks</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr">
+                                <table class="stripe nowrap row-border order-column full-width" id="datatable-worstDraft">
+                                    <thead>
+                                        <th>Manager</th>
+                                        <th>Player</th>
+                                        <th>Pick</th>
+                                        <th>Points</th>
+                                        <th>Avg Pick</th>
+                                        <th>Avg Points</th>
+                                        <th>Score</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($worstDraft as $row) {
+                                        ?>
+                                            <tr>
+                                                <td><?php echo $row['manager']; ?></td>
+                                                <td><?php echo $row['player']; ?></td>
+                                                <td><?php echo $row['overall_pick']; ?></td>
+                                                <td><?php echo round($row['points'], 1); ?></td>
+                                                <td><?php echo round($row['avg_pick'], 1); ?></td>
+                                                <td><?php echo round($row['median'], 1); ?></td>
+                                                <td><?php echo round($row['score'], 1); ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column full-width" id="datatable-worstDraft">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Player</th>
-                                    <th>Pick</th>
-                                    <th>Points</th>
-                                    <th>Avg Pick</th>
-                                    <th>Avg Points</th>
-                                    <th>Score</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    foreach ($worstDraft as $row) {
-                                    ?>
-                                        <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo $row['player']; ?></td>
-                                            <td><?php echo $row['overall_pick']; ?></td>
-                                            <td><?php echo round($row['points'], 1); ?></td>
-                                            <td><?php echo round($row['avg_pick'], 1); ?></td>
-                                            <td><?php echo round($row['median'], 1); ?></td>
-                                            <td><?php echo round($row['score'], 1); ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
+                    </div>
+
+                    <div class="col-sm-12 col-md-6 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="float: right">Best Draft Picks</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr">
+                                <table class="stripe nowrap row-border order-column full-width" id="datatable-bestDraft">
+                                    <thead>
+                                        <th>Manager</th>
+                                        <th>Player</th>
+                                        <th>Pick</th>
+                                        <th>Points</th>
+                                        <th>Avg Pick</th>
+                                        <th>Avg Points</th>
+                                        <th>Score</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($bestDraft as $row) {
+                                        ?>
+                                            <tr>
+                                                <td><?php echo $row['manager']; ?></td>
+                                                <td><?php echo $row['player']; ?></td>
+                                                <td><?php echo $row['overall_pick']; ?></td>
+                                                <td><?php echo round($row['points'], 1); ?></td>
+                                                <td><?php echo round($row['avg_pick'], 1); ?></td>
+                                                <td><?php echo round($row['median'], 1); ?></td>
+                                                <td><?php echo round($row['score'], 1); ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Best Draft Picks</h4>
+                <div class="row">
+                    <div class="col-sm-12 col-lg-6 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="float: right">Points From Draft</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr">
+                                <table class="stripe nowrap row-border order-column full-width" id="datatable-drafted">
+                                    <thead>
+                                        <th>Manager</th>
+                                        <th>All Drafted</th>
+                                        <th>Drafted 1-5</th>
+                                        <th>Drafted 10-17</th>
+                                        <th>Undrafted</th>
+                                        <th>Players Retained</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($draftedPoints as $row) {
+                                        ?>
+                                            <tr>
+                                                <td><?php echo $row['manager']; ?></td>
+                                                <td><?php echo round($row['drafted_points'], 1); ?></td>
+                                                <td><?php echo round($row['early_round'], 1); ?></td>
+                                                <td><?php echo round($row['late_round'], 1); ?></td>
+                                                <td><?php echo round($row['undrafted_points'], 1); ?></td>
+                                                <td><?php echo round($row['retained'], 1); ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column full-width" id="datatable-bestDraft">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Player</th>
-                                    <th>Pick</th>
-                                    <th>Points</th>
-                                    <th>Avg Pick</th>
-                                    <th>Avg Points</th>
-                                    <th>Score</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    foreach ($bestDraft as $row) {
-                                    ?>
-                                        <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo $row['player']; ?></td>
-                                            <td><?php echo $row['overall_pick']; ?></td>
-                                            <td><?php echo round($row['points'], 1); ?></td>
-                                            <td><?php echo round($row['avg_pick'], 1); ?></td>
-                                            <td><?php echo round($row['median'], 1); ?></td>
-                                            <td><?php echo round($row['score'], 1); ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
+                    </div>
+                    
+                    <div class="col-sm-12 col-lg-6 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="float: right">Draft Performance</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr">
+                                <table class="stripe nowrap row-border order-column full-width" id="datatable-draftPerformance">
+                                    <thead>
+                                        <th>Manager</th>
+                                        <th>Pick #</th>
+                                        <th>Player</th>
+                                        <th>GP in lineup</th>
+                                        <th>Points</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($draftPerformance as $row) { ?>
+                                            <tr>
+                                                <td><?php echo $row['manager']; ?></td>
+                                                <td><?php echo $row['overall_pick']; ?></td>
+                                                <td><?php echo $row['player']; ?></td>
+                                                <td><?php echo $row['GP']; ?></td>
+                                                <td><?php echo $row['points'] ? round($row['points'], 1) : 0; ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-sm-12 col-lg-4 table-padding">
+            </div>
+
+            <div class="row card-section" id="team-records" style="display: none;">
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Record Against Everyone</h4>
@@ -516,9 +633,10 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
-            <div class="row">
 
-                <div class="col-sm-12 col-lg-4 table-padding">
+            <div class="row card-section" id="lineup-management" style="display: none;">
+
+                <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Lineup Accuracy</h4>
@@ -536,73 +654,10 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-lg-4 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Points From Draft</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column full-width" id="datatable-drafted">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>All Drafted</th>
-                                    <th>Drafted 1-5</th>
-                                    <th>Drafted 10-17</th>
-                                    <th>Undrafted</th>
-                                    <th>Players Retained</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    foreach ($draftedPoints as $row) {
-                                    ?>
-                                        <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo round($row['drafted_points'], 1); ?></td>
-                                            <td><?php echo round($row['early_round'], 1); ?></td>
-                                            <td><?php echo round($row['late_round'], 1); ?></td>
-                                            <td><?php echo round($row['undrafted_points'], 1); ?></td>
-                                            <td><?php echo round($row['retained'], 1); ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
                 
-                <div class="col-sm-12 col-lg-4 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Draft Performance</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column full-width" id="datatable-draftPerformance">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Pick #</th>
-                                    <th>Player</th>
-                                    <th>GP in lineup</th>
-                                    <th>Points</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    foreach ($draftPerformance as $row) { ?>
-                                        <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo $row['overall_pick']; ?></td>
-                                            <td><?php echo $row['player']; ?></td>
-                                            <td><?php echo $row['GP']; ?></td>
-                                            <td><?php echo $row['points'] ? round($row['points'], 1) : 0; ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            <div class="row">
+            <div class="row card-section" id="charts" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -613,10 +668,8 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="col-12 table-padding">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Standings By Week</h4>
@@ -1111,11 +1164,14 @@ include 'sidebar.html';
             plugins: [quadrants,ChartDataLabels]
         });
 
+        // Make chart globally accessible
+        window.currentSeasonScatterChart = scatterChart;
+
         let weeks = <?php echo json_encode($weekStandings['weeks']); ?>;
         let managers = <?php echo json_encode($weekStandings['managers']); ?>;
         
         var ctx = $('#standingsChart');
-        new Chart(ctx, {
+        let standingsChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: weeks,
@@ -1149,6 +1205,14 @@ include 'sidebar.html';
                 }
             }
         });
+
+        // Make chart globally accessible
+        window.currentSeasonStandingsChart = standingsChart;
+    });
+
+    // Initialize the page with Performance Stats tab active
+    document.addEventListener('DOMContentLoaded', function() {
+        showCard('performance-stats');
     });
 </script>
 

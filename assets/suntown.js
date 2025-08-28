@@ -92,4 +92,102 @@ function showCard(cardId) {
             }
         }, 100);
     }
+
+    // Adjust DataTables when showing performance stats tab
+    if (cardId === 'performance-stats') {
+        // No DataTables to adjust, just performance cards
+    }
+
+    // Adjust DataTables when showing team points tab
+    if (cardId === 'team-points') {
+        setTimeout(() => {
+            if (typeof $('#datatable-currentPoints').DataTable !== 'undefined') {
+                $('#datatable-currentPoints').DataTable().columns.adjust().draw();
+            }
+            if (typeof $('#datatable-bestWeek').DataTable !== 'undefined') {
+                $('#datatable-bestWeek').DataTable().columns.adjust().draw();
+            }
+        }, 100);
+    }
+
+    // Adjust DataTables when showing player stats tab
+    if (cardId === 'player-stats') {
+        setTimeout(() => {
+            if (typeof $('#datatable-currentStats').DataTable !== 'undefined') {
+                $('#datatable-currentStats').DataTable().columns.adjust().draw();
+            }
+            if (typeof $('#datatable-currentWeekStats').DataTable !== 'undefined') {
+                $('#datatable-currentWeekStats').DataTable().columns.adjust().draw();
+            }
+        }, 100);
+    }
+
+    // Adjust DataTables when showing stats against tab
+    if (cardId === 'stats-against') {
+        setTimeout(() => {
+            if (typeof $('#datatable-statsAgainst').DataTable !== 'undefined') {
+                $('#datatable-statsAgainst').DataTable().columns.adjust().draw();
+            }
+            if (typeof $('#datatable-weekStatsAgainst').DataTable !== 'undefined') {
+                $('#datatable-weekStatsAgainst').DataTable().columns.adjust().draw();
+            }
+        }, 100);
+    }
+
+    // Adjust DataTables when showing optimal lineups tab
+    if (cardId === 'optimal-lineups') {
+        setTimeout(() => {
+            if (typeof $('#datatable-optimal').DataTable !== 'undefined') {
+                $('#datatable-optimal').DataTable().columns.adjust().draw();
+            }
+        }, 100);
+    }
+
+    // Adjust DataTables when showing draft analysis tab
+    if (cardId === 'draft-analysis') {
+        setTimeout(() => {
+            if (typeof $('#datatable-worstDraft').DataTable !== 'undefined') {
+                $('#datatable-worstDraft').DataTable().columns.adjust().draw();
+            }
+            if (typeof $('#datatable-bestDraft').DataTable !== 'undefined') {
+                $('#datatable-bestDraft').DataTable().columns.adjust().draw();
+            }
+        }, 100);
+    }
+
+    // Adjust DataTables when showing team records tab
+    if (cardId === 'team-records') {
+        setTimeout(() => {
+            if (typeof $('#datatable-everyone').DataTable !== 'undefined') {
+                $('#datatable-everyone').DataTable().columns.adjust().draw();
+            }
+        }, 100);
+    }
+
+    // Adjust DataTables when showing lineup management tab
+    if (cardId === 'lineup-management') {
+        setTimeout(() => {
+            if (typeof $('#datatable-lineupAccuracy').DataTable !== 'undefined') {
+                $('#datatable-lineupAccuracy').DataTable().columns.adjust().draw();
+            }
+            if (typeof $('#datatable-drafted').DataTable !== 'undefined') {
+                $('#datatable-drafted').DataTable().columns.adjust().draw();
+            }
+            if (typeof $('#datatable-draftPerformance').DataTable !== 'undefined') {
+                $('#datatable-draftPerformance').DataTable().columns.adjust().draw();
+            }
+        }, 100);
+    }
+
+    // Redraw charts when showing charts tab
+    if (cardId === 'charts') {
+        setTimeout(() => {
+            if (typeof window.currentSeasonScatterChart !== 'undefined') {
+                window.currentSeasonScatterChart.resize();
+            }
+            if (typeof window.currentSeasonStandingsChart !== 'undefined') {
+                window.currentSeasonStandingsChart.resize();
+            }
+        }, 100);
+    }
 }

@@ -1,4 +1,6 @@
     <div class="footer" style="direction: ltr;">
+        Copyright <?php echo date("Y"); ?> &copy; Suntown FFB. All Rights Reserved.
+        &nbsp;|&nbsp;
         <?php echo $version.' '.$vDate; ?>
         &nbsp;|&nbsp;
         <a href="/yahooApi.php">Admin</a>

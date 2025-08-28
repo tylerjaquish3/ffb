@@ -1,6 +1,20 @@
 html body {
     /* background-color: #04015d; */
     background-color: #297eff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Make the navbar fixed height */
+.header-navbar {
+    flex-shrink: 0;
+}
+
+/* Make the main layout area grow to fill space */
+.vertical-layout {
+    flex: 1;
+    display: flex;
 }
 
 .header-navbar.navbar-semi-dark .navbar-header {
@@ -282,6 +296,9 @@ tr.color-black td {
 
 .footer {
     background: #d3d3d3;
+    padding: 20px;
+    text-align: center;
+    margin-top: auto;
 }
 
 

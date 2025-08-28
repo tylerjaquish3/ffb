@@ -203,25 +203,28 @@ include 'sidebar.html';
 
             <div class="row card-section" id="top-performers" style="display: none;">
                 
-                <div class="col-sm-12 table-padding">
-                    <div class="card">
+                <div class="col-sm-12" style="max-width: calc(100vw - 280px); overflow: hidden;">
+                    <div class="card" style="width: 100%; overflow: hidden; direction: ltr;">
                         <div class="card-header">
                             <h4 style="float: right">Top Weekly Performers</h4>
                         </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
+                        <div class="card-body" style="padding: 0; overflow: hidden;">
+                            <div style="overflow-x: auto; overflow-y: hidden; padding: 1rem;">
                             <table class="stripe nowrap row-border order-column full-width" id="datatable-bestWeek">
                                 <thead>
-                                    <th>Week</th>
-                                    <?php
-                                    foreach ($bestWeek as $manager => $values) {
-                                        $headers = array_keys($values);
-                                        $currentPointsColCount = count($headers);
-                                        foreach ($headers as $header) {
-                                            echo '<th>Top '.$header.'</th>';
+                                    <tr>
+                                        <th>Week</th>
+                                        <?php
+                                        foreach ($bestWeek as $manager => $values) {
+                                            $headers = array_keys($values);
+                                            $currentPointsColCount = count($headers);
+                                            foreach ($headers as $header) {
+                                                echo '<th>Top '.$header.'</th>';
+                                            }
+                                            break;
                                         }
-                                        break;
-                                    }
-                                    ?>
+                                        ?>
+                                    </tr>
                                 </thead>
                                 <tbody>
                                     <?php
@@ -241,6 +244,7 @@ include 'sidebar.html';
                                     <?php } ?>
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -248,89 +252,94 @@ include 'sidebar.html';
             </div>
 
             <div class="row card-section" id="player-stats" style="display: none;">
-                <div class="col-sm-12 col-lg-6 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Stats For</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column" id="datatable-currentStats">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Total Yds</th>
-                                    <th>Total TDs</th>
-                                    <th>Pass Yds</th>
-                                    <th>Pass TDs</th>
-                                    <th>Ints</th>
-                                    <th>Rush Yds</th>
-                                    <th>Rush TDs</th>
-                                    <th>Rec</th>
-                                    <th>Rec Yds</th>
-                                    <th>Rec TDs</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    while ($row = fetch_array($stats)) { ?>
-                                        <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
-                                            <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
-                                            <td><?php echo $row['pass_yds']; ?></td>
-                                            <td><?php echo $row['pass_tds']; ?></td>
-                                            <td><?php echo $row['ints']; ?></td>
-                                            <td><?php echo $row['rush_yds']; ?></td>
-                                            <td><?php echo $row['rush_tds']; ?></td>
-                                            <td><?php echo $row['rec']; ?></td>
-                                            <td><?php echo $row['rec_yds']; ?></td>
-                                            <td><?php echo $row['rec_tds']; ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
+
+                <div class="row">
+                    <div class="col-sm-12 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="float: right">Stats For</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr">
+                                <table class="stripe nowrap row-border order-column" id="datatable-currentStats">
+                                    <thead>
+                                        <th>Manager</th>
+                                        <th>Total Yds</th>
+                                        <th>Total TDs</th>
+                                        <th>Pass Yds</th>
+                                        <th>Pass TDs</th>
+                                        <th>Ints</th>
+                                        <th>Rush Yds</th>
+                                        <th>Rush TDs</th>
+                                        <th>Rec</th>
+                                        <th>Rec Yds</th>
+                                        <th>Rec TDs</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        while ($row = fetch_array($stats)) { ?>
+                                            <tr>
+                                                <td><?php echo $row['manager']; ?></td>
+                                                <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
+                                                <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
+                                                <td><?php echo $row['pass_yds']; ?></td>
+                                                <td><?php echo $row['pass_tds']; ?></td>
+                                                <td><?php echo $row['ints']; ?></td>
+                                                <td><?php echo $row['rush_yds']; ?></td>
+                                                <td><?php echo $row['rush_tds']; ?></td>
+                                                <td><?php echo $row['rec']; ?></td>
+                                                <td><?php echo $row['rec_yds']; ?></td>
+                                                <td><?php echo $row['rec_tds']; ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-lg-6 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Stats by Week</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column" id="datatable-currentWeekStats">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Week</th>
-                                    <th>Total Yds</th>
-                                    <th>Total TDs</th>
-                                    <th>Pass Yds</th>
-                                    <th>Pass TDs</th>
-                                    <th>Ints</th>
-                                    <th>Rush Yds</th>
-                                    <th>Rush TDs</th>
-                                    <th>Rec</th>
-                                    <th>Rec Yds</th>
-                                    <th>Rec TDs</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    while ($row = fetch_array($weekStats)) { ?>
-                                        <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo $row['week']; ?></td>
-                                            <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
-                                            <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
-                                            <td><?php echo $row['pass_yds']; ?></td>
-                                            <td><?php echo $row['pass_tds']; ?></td>
-                                            <td><?php echo $row['ints']; ?></td>
-                                            <td><?php echo $row['rush_yds']; ?></td>
-                                            <td><?php echo $row['rush_tds']; ?></td>
-                                            <td><?php echo $row['rec']; ?></td>
-                                            <td><?php echo $row['rec_yds']; ?></td>
-                                            <td><?php echo $row['rec_tds']; ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
+                <div class="row">
+                    <div class="col-sm-12 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="float: right">Stats by Week</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr">
+                                <table class="stripe nowrap row-border order-column" id="datatable-currentWeekStats">
+                                    <thead>
+                                        <th>Manager</th>
+                                        <th>Week</th>
+                                        <th>Total Yds</th>
+                                        <th>Total TDs</th>
+                                        <th>Pass Yds</th>
+                                        <th>Pass TDs</th>
+                                        <th>Ints</th>
+                                        <th>Rush Yds</th>
+                                        <th>Rush TDs</th>
+                                        <th>Rec</th>
+                                        <th>Rec Yds</th>
+                                        <th>Rec TDs</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        while ($row = fetch_array($weekStats)) { ?>
+                                            <tr>
+                                                <td><?php echo $row['manager']; ?></td>
+                                                <td><?php echo $row['week']; ?></td>
+                                                <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
+                                                <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
+                                                <td><?php echo $row['pass_yds']; ?></td>
+                                                <td><?php echo $row['pass_tds']; ?></td>
+                                                <td><?php echo $row['ints']; ?></td>
+                                                <td><?php echo $row['rush_yds']; ?></td>
+                                                <td><?php echo $row['rush_tds']; ?></td>
+                                                <td><?php echo $row['rec']; ?></td>
+                                                <td><?php echo $row['rec_yds']; ?></td>
+                                                <td><?php echo $row['rec_tds']; ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -338,104 +347,107 @@ include 'sidebar.html';
 
             <div class="row card-section" id="stats-against" style="display: none;">
 
-            <div class="row">
-                <div class="col-sm-12 col-lg-6 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Stats Against</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column" id="datatable-statsAgainst">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Total Yds</th>
-                                    <th>Total TDs</th>
-                                    <th>Pass Yds</th>
-                                    <th>Pass TDs</th>
-                                    <th>Ints</th>
-                                    <th>Rush Yds</th>
-                                    <th>Rush TDs</th>
-                                    <th>Rec</th>
-                                    <th>Rec Yds</th>
-                                    <th>Rec TDs</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    foreach ($statsAgainst as $manager => $row) { ?>
-                                        <tr>
-                                            <td><?php echo $manager; ?></td>
-                                            <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
-                                            <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
-                                            <td><?php echo $row['pass_yds']; ?></td>
-                                            <td><?php echo $row['pass_tds']; ?></td>
-                                            <td><?php echo $row['ints']; ?></td>
-                                            <td><?php echo $row['rush_yds']; ?></td>
-                                            <td><?php echo $row['rush_tds']; ?></td>
-                                            <td><?php echo $row['receptions']; ?></td>
-                                            <td><?php echo $row['rec_yds']; ?></td>
-                                            <td><?php echo $row['rec_tds']; ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-12 col-lg-6 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Stats Against by Week</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="stripe nowrap row-border order-column" id="datatable-weekStatsAgainst">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Week</th>
-                                    <th>Total Yds</th>
-                                    <th>Total TDs</th>
-                                    <th>Pass Yds</th>
-                                    <th>Pass TDs</th>
-                                    <th>Ints</th>
-                                    <th>Rush Yds</th>
-                                    <th>Rush TDs</th>
-                                    <th>Rec</th>
-                                    <th>Rec Yds</th>
-                                    <th>Rec TDs</th>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    foreach ($weekStatsAgainst as $row) { ?>
-                                        <tr>
-                                            <td><?php echo $row['manager']; ?></td>
-                                            <td><?php echo $row['week']; ?></td>
-                                            <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
-                                            <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
-                                            <td><?php echo $row['pass_yds']; ?></td>
-                                            <td><?php echo $row['pass_tds']; ?></td>
-                                            <td><?php echo $row['ints']; ?></td>
-                                            <td><?php echo $row['rush_yds']; ?></td>
-                                            <td><?php echo $row['rush_tds']; ?></td>
-                                            <td><?php echo $row['receptions']; ?></td>
-                                            <td><?php echo $row['rec_yds']; ?></td>
-                                            <td><?php echo $row['rec_tds']; ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
+                <div class="row">
+                    <div class="col-sm-12 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="float: right">Stats Against</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr">
+                                <table class="stripe nowrap row-border order-column" id="datatable-statsAgainst">
+                                    <thead>
+                                        <th>Manager</th>
+                                        <th>Total Yds</th>
+                                        <th>Total TDs</th>
+                                        <th>Pass Yds</th>
+                                        <th>Pass TDs</th>
+                                        <th>Ints</th>
+                                        <th>Rush Yds</th>
+                                        <th>Rush TDs</th>
+                                        <th>Rec</th>
+                                        <th>Rec Yds</th>
+                                        <th>Rec TDs</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($statsAgainst as $manager => $row) { ?>
+                                            <tr>
+                                                <td><?php echo $manager; ?></td>
+                                                <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
+                                                <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
+                                                <td><?php echo $row['pass_yds']; ?></td>
+                                                <td><?php echo $row['pass_tds']; ?></td>
+                                                <td><?php echo $row['ints']; ?></td>
+                                                <td><?php echo $row['rush_yds']; ?></td>
+                                                <td><?php echo $row['rush_tds']; ?></td>
+                                                <td><?php echo $row['receptions']; ?></td>
+                                                <td><?php echo $row['rec_yds']; ?></td>
+                                                <td><?php echo $row['rec_tds']; ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-sm-12 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="float: right">Stats Against by Week</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr">
+                                <table class="stripe nowrap row-border order-column" id="datatable-weekStatsAgainst">
+                                    <thead>
+                                        <th>Manager</th>
+                                        <th>Week</th>
+                                        <th>Total Yds</th>
+                                        <th>Total TDs</th>
+                                        <th>Pass Yds</th>
+                                        <th>Pass TDs</th>
+                                        <th>Ints</th>
+                                        <th>Rush Yds</th>
+                                        <th>Rush TDs</th>
+                                        <th>Rec</th>
+                                        <th>Rec Yds</th>
+                                        <th>Rec TDs</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($weekStatsAgainst as $row) { ?>
+                                            <tr>
+                                                <td><?php echo $row['manager']; ?></td>
+                                                <td><?php echo $row['week']; ?></td>
+                                                <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
+                                                <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
+                                                <td><?php echo $row['pass_yds']; ?></td>
+                                                <td><?php echo $row['pass_tds']; ?></td>
+                                                <td><?php echo $row['ints']; ?></td>
+                                                <td><?php echo $row['rush_yds']; ?></td>
+                                                <td><?php echo $row['rush_tds']; ?></td>
+                                                <td><?php echo $row['receptions']; ?></td>
+                                                <td><?php echo $row['rec_yds']; ?></td>
+                                                <td><?php echo $row['rec_tds']; ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-        </div>
-
             <div class="row card-section" id="optimal-lineups" style="display: none;">
-                <div class="col-sm-12 table-padding">
-                    <div class="card">
+                <div class="col-sm-12" style="max-width: calc(100vw - 280px); overflow: hidden;">
+                    <div class="card" style="width: 100%; overflow: hidden; direction: ltr;">
                         <div class="card-header">
                             <h4 style="float: right">Optimal Lineups</h4>
                         </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
+                        <div class="card-body" style="padding: 0; overflow: hidden;">
+                            <div style="overflow-x: auto; overflow-y: hidden; padding: 1rem;">
                             <table class="stripe nowrap row-border order-column full-width" id="datatable-optimal">
                                 <thead>
                                     <th>Manager</th>
@@ -453,6 +465,7 @@ include 'sidebar.html';
                                 </thead>
                                 <tbody></tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -624,7 +637,10 @@ include 'sidebar.html';
                                             <td><?php echo $manager; ?></td>
                                             <td><?php echo $array['wins']; ?></td>
                                             <td><?php echo $array['losses']; ?></td>
-                                            <td><?php echo round(($array['wins'] / ($array['wins'] + $array['losses'])) * 100, 1) . ' %'; ?></td>
+                                            <td><?php 
+                                                $total = $array['wins'] + $array['losses'];
+                                                echo $total > 0 ? round(($array['wins'] / $total) * 100, 1) . ' %' : '0 %'; 
+                                            ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -808,12 +824,16 @@ include 'sidebar.html';
             info: false,
             scrollX: "100%",
             scrollCollapse: true,
-            fixedColumns:   {
+            fixedColumns: {
                 left: 1
             },
             order: [
                 [0, "desc"]
-            ]
+            ],
+            initComplete: function() {
+                // Ensure proper column alignment after initialization
+                this.api().columns.adjust().draw();
+            }
         });
 
         $('#datatable-statsAgainst').DataTable({
@@ -997,7 +1017,17 @@ include 'sidebar.html';
                         }
                     });
                 });
+                // Reposition footer after table initialization
+                setTimeout(() => {
+                    const footer = document.querySelector('.footer');
+                    if (footer) {
+                        footer.style.marginTop = '20px';
+                        footer.style.position = 'relative';
+                        footer.style.clear = 'both';
+                    }
+                }, 50);
             }
+        });
         });
 
         $('#datatable-bestDraft').DataTable({
@@ -1106,6 +1136,8 @@ include 'sidebar.html';
                 datasets: dataset
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         display: true,
@@ -1208,7 +1240,7 @@ include 'sidebar.html';
 
         // Make chart globally accessible
         window.currentSeasonStandingsChart = standingsChart;
-    });
+    // });
 
     // Initialize the page with Performance Stats tab active
     document.addEventListener('DOMContentLoaded', function() {
@@ -1225,5 +1257,11 @@ include 'sidebar.html';
     }
     #datatable-optimal_wrapper {
         max-width: 1465px;
+    }
+    
+    /* Ensure charts fit properly within their containers */
+    .chart-block canvas {
+        max-width: 100% !important;
+        max-height: 100% !important;
     }
 </style>

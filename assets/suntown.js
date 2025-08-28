@@ -110,6 +110,23 @@ function showCard(cardId) {
         }, 100);
     }
 
+    // Adjust DataTables when showing top performers tab
+    if (cardId === 'top-performers') {
+        setTimeout(() => {
+            if (typeof $('#datatable-bestWeek').DataTable !== 'undefined') {
+                const table = $('#datatable-bestWeek').DataTable();
+                // Recalculate column widths
+                table.columns.adjust();
+                // Trigger redraw to ensure proper layout
+                table.draw();
+                // Relayout fixed columns if available
+                if (table.fixedColumns) {
+                    table.fixedColumns().relayout();
+                }
+            }
+        }, 150);
+    }
+
     // Adjust DataTables when showing player stats tab
     if (cardId === 'player-stats') {
         setTimeout(() => {
@@ -152,6 +169,21 @@ function showCard(cardId) {
             if (typeof $('#datatable-bestDraft').DataTable !== 'undefined') {
                 $('#datatable-bestDraft').DataTable().columns.adjust().draw();
             }
+            if (typeof $('#datatable-drafted').DataTable !== 'undefined') {
+                $('#datatable-drafted').DataTable().columns.adjust().draw();
+            }
+            if (typeof $('#datatable-draftPerformance').DataTable !== 'undefined') {
+                $('#datatable-draftPerformance').DataTable().columns.adjust().draw();
+            }
+            // Force footer repositioning after DataTables are rendered
+            setTimeout(() => {
+                const footer = document.querySelector('.footer');
+                if (footer) {
+                    footer.style.marginTop = '20px';
+                    footer.style.position = 'relative';
+                    footer.style.clear = 'both';
+                }
+            }, 100);
         }, 100);
     }
 
@@ -188,6 +220,66 @@ function showCard(cardId) {
             if (typeof window.currentSeasonStandingsChart !== 'undefined') {
                 window.currentSeasonStandingsChart.resize();
             }
+        }, 100);
+    }
+
+    // Profile page specific tab handling
+    // Adjust DataTables when showing overview tab
+    if (cardId === 'overview') {
+        setTimeout(() => {
+            if (typeof $('#datatable-seasons').DataTable !== 'undefined') {
+                $('#datatable-seasons').DataTable().columns.adjust().draw();
+            }
+        }, 100);
+    }
+
+    // Redraw charts when showing record vs opponent tab
+    if (cardId === 'record-vs-opponent') {
+        setTimeout(() => {
+            if (typeof $('#datatable-regSeason').DataTable !== 'undefined') {
+                $('#datatable-regSeason').DataTable().columns.adjust().draw();
+            }
+            if (typeof $('#datatable-postseason').DataTable !== 'undefined') {
+                $('#datatable-postseason').DataTable().columns.adjust().draw();
+            }
+            if (typeof winsChart !== 'undefined' && winsChart && winsChart.resize) winsChart.resize();
+            if (typeof postseasonWinsChart !== 'undefined' && postseasonWinsChart && postseasonWinsChart.resize) postseasonWinsChart.resize();
+            if (typeof finishesChart !== 'undefined' && finishesChart && finishesChart.resize) finishesChart.resize();
+        }, 100);
+    }
+
+    // Adjust DataTables when showing drafts tab
+    if (cardId === 'drafts') {
+        setTimeout(() => {
+            if (typeof $('#datatable-drafts').DataTable !== 'undefined') {
+                $('#datatable-drafts').DataTable().columns.adjust().draw();
+            }
+        }, 100);
+    }
+
+    // Redraw charts when showing draft analysis tab
+    if (cardId === 'draft-analysis') {
+        setTimeout(() => {
+            if (typeof $('#datatable-topPlayers').DataTable !== 'undefined') {
+                $('#datatable-topPlayers').DataTable().columns.adjust().draw();
+            }
+            if (typeof positionsDraftedChart !== 'undefined') positionsDraftedChart.resize();
+        }, 100);
+    }
+
+    // Adjust DataTables when showing head to head tab
+    if (cardId === 'head-to-head') {
+        setTimeout(() => {
+            if (typeof $('#datatable-versus').DataTable !== 'undefined') {
+                $('#datatable-versus').DataTable().columns.adjust().draw();
+            }
+        }, 100);
+    }
+
+    // Redraw charts when showing points by week tab
+    if (cardId === 'points-by-week') {
+        setTimeout(() => {
+            if (typeof pointsByWeekChart !== 'undefined') pointsByWeekChart.resize();
         }, 100);
     }
 }

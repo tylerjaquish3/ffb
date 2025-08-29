@@ -191,7 +191,7 @@ include 'sidebar.html';
                                     </div>
                                     <?php include 'postMiscStats.php'; ?>
                                 </div>
-                                <div class="col-sm-12 col-lg-6">
+                                <div class="col-sm-12 col-lg-6 mt-2">
                                     <div class="card-header" style="float: left">
                                         <h4><a href="regularSeason.php">Regular Season Stats</a></h4>
                                     </div>

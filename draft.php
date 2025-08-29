@@ -17,7 +17,6 @@ include 'sidebar.html';
                         <button class="tab-button active" id="draft-results-tab" onclick="showCard('draft-results')">Draft Results</button>
                         <button class="tab-button" id="draft-positions-tab" onclick="showCard('draft-positions')">Draft Positions</button>
                         <button class="tab-button" id="best-drafts-tab" onclick="showCard('best-drafts')">Best Drafts</button>
-                        <button class="tab-button" id="draft-spots-tab" onclick="showCard('draft-spots')">Draft Spots Chart</button>
                         <button class="tab-button" id="positions-drafted-tab" onclick="showCard('positions-drafted')">Positions by Round</button>
                     </div>
                 </div>
@@ -115,6 +114,16 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Draft Spots</h4>
+                        </div>
+                        <div class="card-body chart-block" style="background: #fff; direction: ltr">
+                            <canvas id="draftSpotsChart" style="height: 600px"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="row card-section" id="best-drafts" style="display: none;">
@@ -179,19 +188,6 @@ include 'sidebar.html';
                                     <?php } ?>
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row card-section" id="draft-spots" style="display: none;">
-                <div class="col-sm-12 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Draft Spots</h4>
-                        </div>
-                        <div class="card-body chart-block" style="background: #fff; direction: ltr">
-                            <canvas id="draftSpotsChart" style="height: 600px"></canvas>
                         </div>
                     </div>
                 </div>

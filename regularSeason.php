@@ -27,8 +27,8 @@ include 'sidebar.html';
                         <button class="tab-button" id="league-standings-tab" onclick="showCard('league-standings')">
                             League Standings History
                         </button>
-                        <button class="tab-button" id="season-analysis-tab" onclick="showCard('season-analysis')">
-                            Season Analysis
+                        <button class="tab-button" id="wins-by-season-tab" onclick="showCard('wins-by-season')">
+                            Wins by Season
                         </button>
                         <button class="tab-button" id="pfpa-correlation-tab" onclick="showCard('pfpa-correlation')">
                             PF/PA Charts
@@ -261,7 +261,7 @@ include 'sidebar.html';
                 </div>
             </div>
 
-            <div class="row card-section" id="season-analysis" style="display: none;">
+            <div class="row card-section" id="wins-by-season" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">

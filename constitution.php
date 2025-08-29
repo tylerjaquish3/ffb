@@ -153,12 +153,12 @@ while ($row = fetch_array($result)) {
             </div>
 
             <div class="row card-section" id="roster-history" style="display: none;">
-                <div class="col-sm-12" style="max-width: calc(100vw - 280px); overflow: hidden;">
-                    <div class="card" style="width: 100%; overflow: hidden; direction: ltr;">
+                <div class="col-sm-12">
+                    <div class="card">
                         <div class="card-header">
                             <h4>Roster Position History</h4>
                         </div>
-                        <div class="card-body" style="padding: 0; overflow: hidden;">
+                        <div class="card-body" style="padding: 0;">
                             <div style="overflow-x: auto; overflow-y: hidden; padding: 1rem;">
                             
                             <table id="datatable-settings" class="table table-striped nowrap" style="width: auto;">

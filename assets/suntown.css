@@ -197,11 +197,16 @@ span.seed {
     color: burlywood;
     margin: 5px 0px;
     direction: ltr;
+    width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
 }
 
 .plaque a, .plaque a:hover {
     color: burlywood !important;
     text-decoration: none;
+    display: block;
+    width: 100%;
 }
 
 .info-card {
@@ -401,4 +406,165 @@ tr.color-black td {
     padding: 8px 12px !important;
     vertical-align: top !important;
     border: 1px solid #ddd !important;
+}
+
+/* Mobile fixes to prevent horizontal scroll */
+@media (max-width: 768px) {
+    /* Fix negative margin causing overflow */
+    .tab-size-alt h2 {
+        margin-right: 0px !important;
+    }
+    
+    /* Allow DataTables to wrap and reduce min-widths on mobile */
+    #datatable-bestWeek thead th,
+    #datatable-bestWeek tbody td {
+        white-space: normal !important;
+        min-width: 80px !important;
+        padding: 6px 8px !important;
+    }
+    
+    #datatable-optimal thead th,
+    #datatable-optimal tbody td {
+        white-space: normal !important;
+        min-width: 70px !important;
+        padding: 6px 8px !important;
+    }
+    
+    /* Override DataTables nowrap class on mobile */
+    table.dataTable.nowrap th,
+    table.dataTable.nowrap td {
+        white-space: normal !important;
+        min-width: 60px !important;
+    }
+    
+    /* Make the specific wins table mobile-friendly */
+    #datatable-wins thead th,
+    #datatable-wins tbody td {
+        white-space: normal !important;
+        min-width: 50px !important;
+        padding: 6px 4px !important;
+        font-size: 0.85rem;
+    }
+    
+    /* Ensure main content doesn't overflow */
+    .app-content {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    /* Ensure footer doesn't cause overflow */
+    .footer {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Make DataTables responsive on mobile */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Ensure body doesn't overflow */
+    body {
+        overflow-x: hidden;
+    }
+    
+    /* Make Bootstrap grid more mobile-friendly */
+    .container-fluid,
+    .app-content.content.container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    /* Trophy plaques - make them fit within the card */
+    .plaque {
+        margin: 3px 0px !important;
+        padding: 6px 4px !important;
+        font-size: 0.8rem;
+        line-height: 1.2;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+    
+    /* Ensure plaque containers don't overflow */
+    .card-body .row [class*="col-"] {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    /* Force trophy section columns to behave properly on mobile */
+    .card-body .row .col-md-3.col-xs-6 {
+        width: 50% !important;
+        float: left !important;
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+    }
+    
+    /* Ensure the card doesn't have horizontal overflow */
+    .card-body {
+        overflow-x: hidden;
+    }
+    
+    /* Make sure the row doesn't extend beyond card boundaries */
+    .card-body .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    /* Roster history table - make full width on mobile */
+    #roster-history .col-sm-12 {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+    
+    #roster-history .card {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    
+    /* Make the roster history table responsive on mobile */
+    #datatable-settings thead th,
+    #datatable-settings tbody td {
+        white-space: nowrap !important;
+        min-width: 45px !important;
+        padding: 4px 2px !important;
+        font-size: 0.75rem;
+        text-align: center;
+    }
+    
+    /* Ensure the table container takes full width */
+    #roster-history .card-body > div {
+        padding: 0.5rem !important;
+    }
+    
+    /* Fix tab overlap with subtitle on mobile - ONLY for profile page */
+    .profile-page .content-body .tab-buttons-container {
+        margin-top: 30px !important;
+        padding-top: 20px !important;
+    }
+    
+    /* Make Top Performers table full width on mobile */
+    #top-performers .col-sm-12 {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    
+    #top-performers .card {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    
+    /* Make Optimal Lineups table full width on mobile */
+    #optimal-lineups .col-sm-12 {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    
+    #optimal-lineups .card {
+        width: 100% !important;
+        margin: 0 !important;
+    }
 }

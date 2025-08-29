@@ -28,7 +28,7 @@ if (isset($_GET['id'])) {
 
 ?>
 
-<div class="app-content content">
+<div class="app-content content profile-page">
     <div class="content-wrapper">
         <div class="content-header row"></div>
 

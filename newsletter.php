@@ -102,7 +102,7 @@ if ($previewRow && !empty($previewRow['preview'])) {
                         </div>
                         <div class="card-body" style="background: #fff;">
                             <?php if (!empty($scheduleInfo)): ?>
-                                <table id="datatable-schedule" class="table table-striped table-bordered" style="direction: ltr;">
+                                <table id="datatable-schedule" class="table table-striped table-bordered table-responsive" style="direction: ltr;">
                                     <thead>
                                         <tr>
                                             <th>Manager 1</th>
@@ -140,7 +140,7 @@ if ($previewRow && !empty($previewRow['preview'])) {
                             <div class="card-header" style="direction: ltr;">
                                 <h4><?php echo ($selectedSeason - 1); ?> Recap</h4>
                             </div>
-                            <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="card-body p-1" style="background: #fff; direction: ltr">
                                 <?php echo nl2br(htmlspecialchars($recapContent)); ?>
                             </div>
                         </div>
@@ -150,7 +150,7 @@ if ($previewRow && !empty($previewRow['preview'])) {
                             <div class="card-header" style="direction: ltr;">
                                 <h4>Week <?php echo $selectedWeek; ?> Preview</h4>
                             </div>
-                            <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="card-body p-1" style="background: #fff; direction: ltr">
                                 <?php echo nl2br(htmlspecialchars($previewContent)); ?>
                             </div>
                         </div>

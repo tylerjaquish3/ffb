@@ -1,5 +1,5 @@
 // Function to show/hide cards based on tab selection
-function showCard(cardId) {
+function showCard(cardId, updateUrl = false) {
     // Hide all card sections
     const cardSections = document.querySelectorAll('.card-section');
     cardSections.forEach(section => {
@@ -10,6 +10,11 @@ function showCard(cardId) {
     const selectedCard = document.getElementById(cardId);
     if (selectedCard) {
         selectedCard.style.display = 'block';
+        
+        // Update URL hash if requested
+        if (updateUrl) {
+            window.history.replaceState(null, null, '#' + cardId);
+        }
     }
 
     // Update button active states
@@ -17,6 +22,14 @@ function showCard(cardId) {
     buttons.forEach(button => {
         button.classList.remove('active');
     });
+    
+    // Initialize or update charts when the relevant tab is shown
+    if (cardId === 'pfpa-correlation' && typeof updatePointsBySeasonChart === 'function') {
+        // Delay to ensure the tab content is visible
+        setTimeout(function() {
+            updatePointsBySeasonChart();
+        }, 100);
+    }
 
     // Add active class to clicked button
     const activeButton = document.getElementById(cardId + '-tab');
@@ -54,15 +67,16 @@ function showCard(cardId) {
     // Redraw charts when showing season analysis tab
     if (cardId === 'season-analysis') {
         setTimeout(() => {
-            if (typeof myBarChart !== 'undefined') myBarChart.resize();
+            if (typeof myBarChart !== 'undefined' && myBarChart.resize) myBarChart.resize();
         }, 100);
     }
 
     // Redraw charts when showing PF/PA correlation tab
     if (cardId === 'pfpa-correlation') {
         setTimeout(() => {
-            if (typeof scatterChart !== 'undefined') scatterChart.resize();
-            if (typeof scatterChart2 !== 'undefined') scatterChart2.resize();
+            if (typeof scatterChart !== 'undefined' && scatterChart.resize) scatterChart.resize();
+            if (typeof scatterChart2 !== 'undefined' && scatterChart2.resize) scatterChart2.resize();
+            if (typeof window.pointsBySeasonChart !== 'undefined' && window.pointsBySeasonChart.resize) window.pointsBySeasonChart.resize();
         }, 100);
     }
 
@@ -283,3 +297,69 @@ function showCard(cardId) {
         }, 100);
     }
 }
+
+// Function to activate tab based on URL hash
+function activateTabFromUrlHash() {
+    // Get the hash from URL (remove the # symbol)
+    let hash = window.location.hash.substring(1);
+    
+    // If hash exists and it corresponds to a tab element
+    if (hash && document.getElementById(hash)) {
+        // Show the tab content
+        showCard(hash);
+        
+        // Scroll to the tab content
+        document.getElementById(hash).scrollIntoView();
+        
+        return true; // Indicate that we found and activated a tab
+    }
+    return false; // Indicate no tab was activated
+}
+
+// Define a variable to track if we've already processed the hash
+let hasProcessedHash = false;
+
+// Execute with higher priority than the default tab selection
+window.addEventListener('load', function() {
+    // Allow a small timeout to ensure any other scripts have run
+    setTimeout(function() {
+        if (!hasProcessedHash) {
+            // Activate tab based on URL hash when page is fully loaded
+            hasProcessedHash = activateTabFromUrlHash();
+        }
+    }, 50); // Small delay to ensure this runs after other scripts
+}, false);
+
+// Also run when DOMContentLoaded fires
+document.addEventListener('DOMContentLoaded', function() {
+    // First try to process the hash immediately
+    hasProcessedHash = activateTabFromUrlHash();
+    
+    // If that didn't work, try again after a short delay
+    if (!hasProcessedHash) {
+        setTimeout(function() {
+            if (!hasProcessedHash) {
+                hasProcessedHash = activateTabFromUrlHash();
+            }
+        }, 10);
+    }
+}, false);
+
+// Update onclick handlers for all tab buttons to include URL hash updating
+document.addEventListener('DOMContentLoaded', function() {
+    // Find all tab buttons
+    const tabButtons = document.querySelectorAll('.tab-button');
+    
+    // For each button, add a click event listener that updates the URL hash
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Get the tab ID from the button ID (remove -tab suffix)
+            const tabId = button.id.replace('-tab', '');
+            
+            // Update URL hash without calling showCard again (it's already called by the original onclick)
+            setTimeout(() => {
+                window.history.replaceState(null, null, '#' + tabId);
+            }, 0);
+        });
+    });
+});

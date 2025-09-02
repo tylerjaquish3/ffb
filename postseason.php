@@ -6,13 +6,65 @@ include 'sidebar.html';
 
 ?>
 
-<div class="app-content content container-fluid">
+<div class="app-content content">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
 
         <div class="content-body">
-            <div class="row">
-                <div class="col-sm-12 col-lg-6 table-padding">
+
+            <!-- Tabs Navigation -->
+            <div class="row mb-1">
+                <div class="col-sm-12">
+                    <div class="tab-buttons-container">
+                        <button class="tab-button active" id="overview-tab" onclick="showCard('overview')">
+                            Overview
+                        </button>
+                        <button class="tab-button" id="matchups-tab" onclick="showCard('matchups')">
+                            Matchups
+                        </button>
+                        <button class="tab-button" id="champion-details-tab" onclick="showCard('champion-details')">
+                            Champion Details
+                        </button>
+                        <button class="tab-button" id="records-championships-tab" onclick="showCard('records-championships')">
+                            Records
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row card-section" id="overview">
+                <div class="col-sm-12 col-md-8 table-padding">
+                    <div class="card-header" style="float: left">
+                        <h4>Postseason</h4>
+                    </div>
+                    <div style="float: right">
+                        <select id="postMiscStats" class="dropdown form-control">
+                            <option value="20">Average Finish</option>
+                            <option value="21">First Round Byes</option>
+                            <option value="22">Appearances</option>
+                            <option value="23">Underdog Wins</option>
+                            <option value="24">Top Seed Losses</option>
+                            <option value="25">Playoff Points</option>
+                            <option value="26">Win/Loss Margin</option>
+                        </select>
+                    </div>
+                    <?php include 'postMiscStats.php'; ?>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Championships</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="card-block" style="height: 400px; max-height:450px;">
+                                <canvas id="winsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row card-section" id="matchups">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Matchups</h4>
@@ -56,32 +108,57 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-lg-6 table-padding">
-                    <div class="card-header" style="float: left">
-                        <h4>Postseason</h4>
+                
+            </div>
+
+            <div class="row card-section" id="champion-details" style="display: none;">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Champion Details</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive table-striped nowrap full-width" id="datatable-champions">
+                                <thead>
+                                    <th>Year</th>
+                                    <th>Champion</th>
+                                    <th>Draft Pick</th>
+                                    <th>Record</th>
+                                    <th>Seed</th>
+                                    <th>Trades</th>
+                                    <th>Top Draft Pick</th>
+                                    <th>Top Add</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    foreach ($champions as $champion) { ?>
+                                        <tr>
+                                            <td><?php echo $champion['year']; ?></td>
+                                            <td><?php echo $champion['name']; ?></td>
+                                            <td><?php echo $champion['draft_pick']; ?></td>
+                                            <td><?php echo $champion['record']; ?></td>
+                                            <td><?php echo $champion['seed']; ?></td>
+                                            <td><?php echo $champion['trades']; ?></td>
+                                            <td><?php echo $champion['top_draft_pick']; ?></td>
+                                            <td><?php echo $champion['top_add']; ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div style="float: right">
-                        <select id="postMiscStats" class="dropdown form-control">
-                            <option value="20">Average Finish</option>
-                            <option value="21">First Round Byes</option>
-                            <option value="22">Appearances</option>
-                            <option value="23">Underdog Wins</option>
-                            <option value="24">Top Seed Losses</option>
-                            <option value="25">Playoff Points</option>
-                            <option value="26">Win/Loss Margin</option>
-                        </select>
-                    </div>
-                    <?php include 'postMiscStats.php'; ?>
                 </div>
             </div>
-            <div class="row mt-2">
-                <div class="col-sm-12 col-lg-8 table-padding">
+
+            <div class="row card-section" id="records-championships" style="display: none;">
+                <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Records</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive table-striped nowrap" id="datatable-records">
+                            <div class="table-container" style="overflow-x: auto;">
+                                <table class="table table-striped nowrap" id="datatable-records">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Quarter Wins</th>
@@ -115,18 +192,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-lg-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Championships</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <div class="card-block" style="height: 300px; max-height:450px;">
-                                <canvas id="winsChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -229,6 +295,15 @@ include 'sidebar.html';
             ]
         });
 
+        $('#datatable-champions').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+            "order": [
+                [0, "desc"]
+            ]
+        });
+
         var ctx = $('#winsChart');
         var managers = <?php echo json_encode($winsChart['managers']); ?>;
         var wins = <?php echo json_encode($winsChart['wins']); ?>;
@@ -267,5 +342,8 @@ include 'sidebar.html';
             plugins: [ChartDataLabels]
         });
 
+        // Initialize the page with Matchups & Stats tab active
+        showCard('overview');
+        
     });
 </script>

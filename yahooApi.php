@@ -27,7 +27,6 @@ if( ! $request_token_url ) {
 
 <div class="app-content content container-fluid">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
 
         <div class="content-body">
 

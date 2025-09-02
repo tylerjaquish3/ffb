@@ -646,4 +646,65 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'weeks-by-year') {
     die;
 }
 
+// Get points by season for all managers
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-season-all-managers') {
+
+    $startWeek = explode('_', $_GET['startWeek'])[0];
+    $startYear = explode('_', $_GET['startWeek'])[1];
+    $endWeek = explode('_', $_GET['endWeek'])[0];
+    $endYear = explode('_', $_GET['endWeek'])[1];
+    $onlyWeek = $_GET['onlyWeek'];
+
+    $managers = [];
+    $weeks = [];
+    
+    // Get all managers
+    $managerResult = query("SELECT id, name FROM managers ORDER BY name");
+    $managerIds = [];
+    $managerNames = [];
+    while ($row = fetch_array($managerResult)) {
+        $managerIds[] = $row['id'];
+        $managerNames[$row['id']] = $row['name'];
+        $managers[$row['name']] = [];
+    }
+
+    // Build the base SQL query
+    $sql = "SELECT week_number, year, manager1_id, manager1_score as points
+        FROM regular_season_matchups
+        WHERE ((year = $startYear AND week_number >= $startWeek) 
+        OR (year > $startYear AND year < $endYear) 
+        OR (year = $endYear AND week_number <= $endWeek))";
+
+    if ($onlyWeek) {
+        $sql .= " AND week_number = $onlyWeek";
+    }
+
+    $sql .= " ORDER BY year, week_number, manager1_id";
+
+    $result = query($sql);
+    $weekTracker = [];
+    
+    while ($row = fetch_array($result)) {
+        $weekKey = 'Wk. '.$row['week_number'].' '.$row['year'];
+        $managerName = $managerNames[$row['manager1_id']];
+        
+        // Track unique weeks
+        if (!in_array($weekKey, $weekTracker)) {
+            $weekTracker[] = $weekKey;
+        }
+        
+        // Add points for this manager and week
+        $managers[$managerName][] = (float)$row['points'];
+    }
+    
+    // Sort weeks chronologically
+    $weeks = $weekTracker;
+
+    echo json_encode([
+        'managers' => $managers,
+        'weeks' => $weeks
+    ]);
+    die;
+}
+
 ?>

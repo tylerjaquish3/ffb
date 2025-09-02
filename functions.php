@@ -69,11 +69,13 @@ if ($pageName == 'Regular Season') {
     $scatterChart = getPointMargins();
     $pfwins = getPfWinsData();
     $dashboardNumbers = getDashboardNumbers();
+    $allWeeks = getAllWeekOptions();
 }
 if ($pageName == 'Postseason') {
     $postseasonMatchups = getPostseasonMatchups();
     $postseasonRecord = getPostseasonRecord();
     $winsChart = getChampChartNumbers();
+    $champions = getChampions();
 }
 if ($pageName == 'Draft') {
     $draftResults = getDraftResults();
@@ -1296,6 +1298,114 @@ function getChampChartNumbers()
     $response['wins'] = $wins;
 
     return $response;
+}
+
+function getChampions()
+{
+    $champions = [];
+    
+    // Get all champions with basic info
+    $result = query("SELECT f.year, f.manager_id, m.name 
+        FROM finishes f 
+        JOIN managers m ON f.manager_id = m.id 
+        WHERE f.finish = 1 
+        ORDER BY f.year");
+    
+    while ($row = fetch_array($result)) {
+        $year = $row['year'];
+        $managerId = $row['manager_id'];
+        $name = $row['name'];
+        
+        $champion = [
+            'year' => $year,
+            'manager_id' => $managerId,
+            'name' => $name,
+            'draft_pick' => 'N/A',
+            'trades' => 0,
+            'top_draft_pick' => 'N/A',
+            'top_add' => 'N/A',
+            'record' => 'N/A',
+            'seed' => 'N/A'
+        ];
+        
+        // Get draft pick (first round pick position)
+        $draftResult = query("SELECT overall_pick FROM draft 
+            WHERE year = $year AND manager_id = $managerId AND round = 1");
+        if ($draftRow = fetch_array($draftResult)) {
+            $champion['draft_pick'] = $draftRow['overall_pick'];
+        }
+        
+        // Count trades/moves for the season (unique trade identifiers)
+        $tradesResult = query("SELECT COUNT(DISTINCT trade_identifier) as trade_count 
+            FROM trades 
+            WHERE year = $year AND (manager_from_id = $managerId OR manager_to_id = $managerId)");
+        if ($tradesRow = fetch_array($tradesResult)) {
+            $champion['trades'] = $tradesRow['trade_count'];
+        }
+        
+        // Get top drafted player (highest scoring drafted player)
+        $topDraftResult = query("SELECT d.player, SUM(r.points) as total_points 
+            FROM draft d 
+            LEFT JOIN rosters r ON d.player = r.player AND d.year = r.year AND d.manager_id = (
+                SELECT id FROM managers WHERE name = r.manager
+            )
+            WHERE d.year = $year AND d.manager_id = $managerId 
+            GROUP BY d.player 
+            ORDER BY total_points DESC 
+            LIMIT 1");
+        if ($topDraftRow = fetch_array($topDraftResult)) {
+            $champion['top_draft_pick'] = $topDraftRow['player'] . ' (' . round($topDraftRow['total_points'], 1) . ' pts)';
+        }
+        
+        // Get top waiver/free agent pickup (highest scoring non-drafted player)
+        $topAddResult = query("SELECT r.player, SUM(r.points) as total_points 
+            FROM rosters r 
+            WHERE r.year = $year AND r.manager = '$name' 
+            AND r.player NOT IN (
+                SELECT d.player FROM draft d WHERE d.year = $year
+            )
+            GROUP BY r.player 
+            ORDER BY total_points DESC 
+            LIMIT 1");
+        if ($topAddRow = fetch_array($topAddResult)) {
+            $champion['top_add'] = $topAddRow['player'] . ' (' . round($topAddRow['total_points'], 1) . ' pts)';
+        }
+        
+        // Get regular season record
+        $wins = 0;
+        $losses = 0;
+        
+        $recordResult = query("SELECT 
+            SUM(CASE WHEN manager1_score > manager2_score THEN 1 ELSE 0 END) as wins,
+            SUM(CASE WHEN manager1_score < manager2_score THEN 1 ELSE 0 END) as losses
+            FROM regular_season_matchups 
+            WHERE year = $year AND manager1_id = $managerId");
+        
+        while ($recordRow = fetch_array($recordResult)) {
+            $wins += $recordRow['wins'];
+            $losses += $recordRow['losses'];
+        }
+        
+        $champion['record'] = $wins . '-' . $losses;
+        
+        // Get playoff seed
+        $seedResult = query("SELECT manager1_seed, manager2_seed, manager1_id, manager2_id
+            FROM playoff_matchups 
+            WHERE year = $year AND (manager1_id = $managerId OR manager2_id = $managerId)
+            ORDER BY round 
+            LIMIT 1");
+        if ($seedRow = fetch_array($seedResult)) {
+            if ($seedRow['manager1_id'] == $managerId) {
+                $champion['seed'] = $seedRow['manager1_seed'];
+            } else {
+                $champion['seed'] = $seedRow['manager2_seed'];
+            }
+        }
+        
+        $champions[] = $champion;
+    }
+    
+    return $champions;
 }
 
 /**

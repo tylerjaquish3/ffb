@@ -25,9 +25,12 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - fewest points by position (all time, season)
     - most QB/RB/WR/etc points current season
 
-- Newsletter page
 - fix yahoo api
 - fix navigation on tablet
+- mock schedule with dropdown (if we each played that manager's schedule)
+- strength of schedule ranks hardest to easiest schedule based on standings each week
+- current season, add line chart for top score, avg score, low score for each week
+- current season, add scheudle and link to newsletter
 
 Notes:
 Rams moved to LA between 2015 & 2016

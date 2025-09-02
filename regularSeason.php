@@ -6,7 +6,7 @@ include 'sidebar.html';
 
 ?>
 
-<div class="app-content content container-fluid">
+<div class="app-content content">
     <div class="content-wrapper">
 
         <div class="content-body">
@@ -334,6 +334,60 @@ include 'sidebar.html';
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <div class="card-block chart-block">
                                 <canvas id="pfwinsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Points By Week</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="card-block">
+                                <div class="row">
+                                    <div class="col-sm-12" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 20px;">
+                                        <button class="btn btn-primary" id="allSeasonsRegular">All Seasons</button>
+                                        <button class="btn btn-primary" id="currentSeasonRegular">Current Season</button>
+                                        <button class="btn btn-primary" id="lastSeasonRegular">Last Season</button>
+                                        <button class="btn btn-primary" id="lastFiveSeasonsRegular">Last 5 Seasons</button>
+                                        <label style="margin: 0;"><strong>Start:</strong></label>
+                                        <select id="startWeekRegular" class="dropdown form-control" style="width: auto;">
+                                            <?php
+                                            foreach ($allWeeks as $week) {
+                                                echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                        <label style="margin: 0;"><strong>End:</strong></label>
+                                        <select id="endWeekRegular" class="dropdown form-control" style="width: auto;">
+                                            <?php
+                                            foreach ($allWeeks as $week) {
+                                                // if last, select it
+                                                if ($week['week_id'] == $allWeeks[count($allWeeks)-1]['week_id']) {
+                                                    echo '<option selected value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
+                                                } else {
+                                                    echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
+                                                }
+                                            }
+                                            ?>
+                                        </select>
+                                        <label style="margin: 0;"><strong>Week:</strong></label>
+                                        <select id="onlyWeekRegular" class="dropdown form-control" style="width: auto;">
+                                            <option value="0">All Weeks</option>
+                                            <?php
+                                            for ($i = 1; $i <= 14; $i++) {
+                                                echo '<option value="'.$i.'">Week '.$i.'</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12" style="height: 600px;">
+                                        <canvas id="pointsBySeasonChart"></canvas>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1010,5 +1064,168 @@ include 'sidebar.html';
 
         // Initialize the page with Matchups & Stats tab active
         showCard('matchups-stats');
+        
+        // Points by Season Chart functionality
+        window.pointsBySeasonChart = null;
+        
+        function updatePointsBySeasonChart() {
+            $.ajax({
+                url: 'dataLookup.php',
+                data: {
+                    dataType: 'points-by-season-all-managers',
+                    startWeek: $('#startWeekRegular').val(),
+                    endWeek: $('#endWeekRegular').val(),
+                    onlyWeek: $('#onlyWeekRegular').val()
+                },
+                error: function() {
+                    console.log('Error loading points by season data');
+                },
+                success: function(response) {
+                    var data = JSON.parse(response);
+                    
+                    var ctx = $('#pointsBySeasonChart');
+                    
+                    // Destroy existing chart if it exists
+                    if (window.pointsBySeasonChart) {
+                        window.pointsBySeasonChart.destroy();
+                    }
+                    
+                    // Define colors for each manager
+                    var colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6","#f87598"];
+                    var datasets = [];
+                    var colorIndex = 0;
+                    
+                    // Create dataset for each manager
+                    for (var managerName in data.managers) {
+                        datasets.push({
+                            label: managerName,
+                            data: data.managers[managerName],
+                            borderColor: colors[colorIndex % colors.length],
+                            backgroundColor: colors[colorIndex % colors.length] + '20', // Add transparency
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
+                        });
+                        colorIndex++;
+                    }
+                    
+                    window.pointsBySeasonChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.weeks,
+                            datasets: datasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Points',
+                                        font: {
+                                            size: 16
+                                        }
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Week',
+                                        font: {
+                                            size: 16
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Season variables needed for button functionality
+        var season = <?php echo date('Y'); ?>;
+        var allWeeks = <?php echo json_encode($allWeeks); ?>;
+        
+        // Button event handlers for points by season chart
+        $('#startWeekRegular').change(function() {
+            updatePointsBySeasonChart();
+        });
+        
+        $('#endWeekRegular').change(function() {
+            updatePointsBySeasonChart();
+        });
+        
+        $('#onlyWeekRegular').change(function() {
+            updatePointsBySeasonChart();
+        });
+        
+        $('#allSeasonsRegular').click(function() {
+            $('#startWeekRegular').val('1_2006');
+            $('#endWeekRegular').val(allWeeks[allWeeks.length-1]['week_id']);
+            $('#onlyWeekRegular').val('0');
+            updatePointsBySeasonChart();
+        });
+        
+        $('#currentSeasonRegular').click(function() {
+            $('#startWeekRegular').val('1_'+season);
+            $('#endWeekRegular').val(allWeeks[allWeeks.length-1]['week_id']);
+            $('#onlyWeekRegular').val('0');
+            updatePointsBySeasonChart();
+        });
+        
+        $('#lastSeasonRegular').click(function() {
+            $('#startWeekRegular').val('1_'+(season-1));
+            $('#endWeekRegular').val('14_'+(season-1));
+            $('#onlyWeekRegular').val('0');
+            updatePointsBySeasonChart();
+        });
+        
+        $('#lastFiveSeasonsRegular').click(function() {
+            $('#startWeekRegular').val('1_'+(season-5));
+            $('#endWeekRegular').val(allWeeks[allWeeks.length-1]['week_id']);
+            $('#onlyWeekRegular').val('0');
+            updatePointsBySeasonChart();
+        });
+        
+        // Initialize the chart when page loads
+        if ($('#pfpa-correlation').css('display') !== 'none') {
+            updatePointsBySeasonChart();
+        }
+
+        $('#currentSeasonRegular').click(function() {
+            $('#startWeekRegular').val('1_'+season);
+            $('#endWeekRegular').val(allWeeks[allWeeks.length-1]['week_id']);
+            updatePointsBySeasonChart();
+        });
+
+        $('#lastSeasonRegular').click(function() {
+            $('#startWeekRegular').val('1_'+(season-1));
+            $('#endWeekRegular').val('14_'+(season-1));
+            updatePointsBySeasonChart();
+        });
+
+        $('#lastFiveSeasonsRegular').click(function() {
+            $('#startWeekRegular').val('1_'+(season-5));
+            $('#endWeekRegular').val(allWeeks[allWeeks.length-1]['week_id']);
+            updatePointsBySeasonChart();
+        });
+
+        // Initialize the points by season chart when the pfpa-correlation tab is shown
+        // We'll trigger this when the tab is clicked
+        $(document).on('click', '#pfpa-correlation-tab', function() {
+            // Delay to ensure the tab content is visible
+            setTimeout(function() {
+                updatePointsBySeasonChart();
+            }, 100);
+        });
     });
 </script>

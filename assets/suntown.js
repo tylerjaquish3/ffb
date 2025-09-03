@@ -30,6 +30,13 @@ function showCard(cardId, updateUrl = false) {
             updatePointsBySeasonChart();
         }, 100);
     }
+    console.log(cardId)
+    // Initialize standings chart when weekly standings tab is selected
+    if (cardId === 'weekly-standings' && typeof initStandingsChart === 'function') {
+        setTimeout(function() {
+            initStandingsChart();
+        }, 100);
+    }
 
     // Add active class to clicked button
     const activeButton = document.getElementById(cardId + '-tab');
@@ -79,6 +86,8 @@ function showCard(cardId, updateUrl = false) {
             if (typeof window.pointsBySeasonChart !== 'undefined' && window.pointsBySeasonChart.resize) window.pointsBySeasonChart.resize();
         }, 100);
     }
+    
+    // The weekly standings chart initialization is already handled above
 
     // Adjust DataTables when showing team standings tab
     if (cardId === 'team-standings') {

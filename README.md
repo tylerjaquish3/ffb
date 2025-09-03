@@ -31,6 +31,9 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - strength of schedule ranks hardest to easiest schedule based on standings each week
 - current season, add line chart for top score, avg score, low score for each week
 - current season, add scheudle and link to newsletter
+- fun fact finder page
+- allow people add comments/smack talk to profile
+- add tabs to season recap page
 
 Notes:
 Rams moved to LA between 2015 & 2016

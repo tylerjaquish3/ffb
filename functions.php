@@ -77,6 +77,10 @@ if ($pageName == 'Postseason') {
     $winsChart = getChampChartNumbers();
     $champions = getChampions();
 }
+if ($pageName == 'Schedule') {
+    $selectedSeason = isset($_GET['id']) ? $_GET['id'] : $season;
+    $scheduleData = getFullSchedule($selectedSeason);
+}
 if ($pageName == 'Draft') {
     $draftResults = getDraftResults();
     $draftSpotChart = getDraftChartNumbers();
@@ -115,38 +119,22 @@ if ($pageName == 'Rosters') {
     $gameTimeChart = getGameTimeChartNumbers();
 }
 if ($pageName == 'Newsletter') {
-    global $selectedSeason, $selectedWeek;
     $selectedSeason = isset($_GET['year']) ? $_GET['year'] : $season;
     $selectedWeek = isset($_GET['week']) ? $_GET['week'] : $week;
     
-    // Validate that the selected season exists
-    $seasonCheck = query("SELECT COUNT(*) as count FROM rosters WHERE year = $selectedSeason");
-    $seasonRow = fetch_array($seasonCheck);
-    if ($seasonRow['count'] == 0) {
-        // If it's the current year and has no data, that's okay - keep it and default to week 1
-        if ($selectedSeason == date('Y')) {
-            $selectedWeek = 1;
-        } else {
-            // For other years with no data, fall back to the latest season
-            $selectedSeason = $season;
-        }
-    }
-    
-    // Only validate week if we have roster data for this season
-    if ($seasonRow['count'] > 0) {
-        // Validate that the selected week exists for the selected season
-        $weekCheck = query("SELECT COUNT(*) as count FROM rosters WHERE year = $selectedSeason AND week = $selectedWeek");
-        $weekRow = fetch_array($weekCheck);
-        if ($weekRow['count'] == 0) {
-            // Get the latest week for this season
-            $latestWeekResult = query("SELECT MAX(week) as max_week FROM rosters WHERE year = $selectedSeason");
-            $latestWeekRow = fetch_array($latestWeekResult);
-            $selectedWeek = $latestWeekRow['max_week'] ? $latestWeekRow['max_week'] : 1;
-        }
-    }
 
-    // Only load data if we're not in week 1 and have sufficient data
-    if ($selectedWeek > 1) {
+    // Check for rosters with the year and week
+    $rosterQuery = query("SELECT * FROM rosters WHERE year = $selectedSeason AND week = $selectedWeek");
+    $rosterData = fetch_array($rosterQuery);
+    $rosterAvailable = !empty($rosterData);
+
+    // Check for a newsletter
+    $newsletterQuery = query("SELECT * FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
+    $contentData = fetch_array($newsletterQuery);
+    $contentAvailable = !empty($contentData);
+
+    // Only load data if we're not in week 1 and have roster data
+    if ($selectedWeek > 1 && $rosterAvailable) {
         $bestWeek = getCurrentSeasonBestWeek();
         $topPerformers = getCurrentSeasonTopPerformers();
         $stats = getCurrentSeasonStats();
@@ -154,7 +142,7 @@ if ($pageName == 'Newsletter') {
         $everyoneRecord = getRecordAgainstEveryone();
         $teamWeek = getCurrentSeasonBestTeamWeek();
         $weekStandings = getSeasonStandings($selectedSeason);
-    }
+    } 
     
     // Load schedule info for all weeks
     $scheduleInfo = getScheduleInfo($selectedSeason, $selectedWeek);
@@ -3344,6 +3332,34 @@ function getRegularSeasonWinners()
     return $winners;
 }
 
+
+/**
+ * Get the date range for a specific week and year
+ */
+function getWeekDateRange($year, $week)
+{
+    // Query the min and max game times for this week and year
+    $result = query("SELECT MIN(game_time) as start_date, MAX(game_time) as end_date 
+                    FROM rosters 
+                    WHERE year = $year AND week = $week AND game_time IS NOT NULL");
+    
+    while ($row = fetch_array($result)) {
+        if ($row['start_date'] && $row['end_date']) {
+            // Parse the dates
+            $startDate = new DateTime($row['start_date']);
+            $endDate = new DateTime($row['end_date']);
+            
+            // Format the dates
+            return [
+                'start_date' => $startDate->format('M j'),
+                'end_date' => $endDate->format('M j, Y')
+            ];
+        }
+    }
+    
+    return null;
+}
+
 /**
  * Get schedule information with historical records and current streaks
  */
@@ -3448,5 +3464,128 @@ function getScheduleInfo($year, $week)
     }
     
     return $schedule;
+}
+
+/**
+ * Get all matchups for a season to display on the schedule page
+ */
+function getFullSchedule($year = null)
+{
+    global $season;
+    
+    // Use current season if not specified
+    $selectedYear = $year ? $year : $season;
+    
+    $response = [];
+    $processedMatchups = [];
+    
+    // Get all played matchups from regular_season_matchups for selected season
+    $result = query("SELECT rsm.year, rsm.week_number, 
+                     m1.name as manager1_name, m2.name as manager2_name,
+                     rsm.manager1_id, rsm.manager2_id, 
+                     rsm.manager1_score, rsm.manager2_score,
+                     rsm.winning_manager_id, rsm.losing_manager_id
+                     FROM regular_season_matchups rsm
+                     JOIN managers m1 ON m1.id = rsm.manager1_id
+                     JOIN managers m2 ON m2.id = rsm.manager2_id
+                     WHERE rsm.year = $selectedYear
+                     ORDER BY rsm.week_number, rsm.id");
+    
+    while ($row = fetch_array($result)) {
+        $weekNum = $row['week_number'];
+        $manager1Id = $row['manager1_id'];
+        $manager2Id = $row['manager2_id'];
+        
+        // Create a unique key for this matchup
+        $matchupKey = $weekNum . '_' . min($manager1Id, $manager2Id) . '_' . max($manager1Id, $manager2Id);
+        
+        // Skip if we've already processed this matchup
+        if (isset($processedMatchups[$matchupKey])) {
+            continue;
+        }
+        
+        // Mark this matchup as processed
+        $processedMatchups[$matchupKey] = true;
+        
+        if (!isset($response[$weekNum])) {
+            $response[$weekNum] = [
+                'week' => $weekNum,
+                'year' => $row['year'],
+                'matchups' => [],
+                'is_completed' => true
+            ];
+        }
+        
+        $response[$weekNum]['matchups'][] = [
+            'manager1_name' => $row['manager1_name'],
+            'manager2_name' => $row['manager2_name'],
+            'manager1_id' => $row['manager1_id'],
+            'manager2_id' => $row['manager2_id'],
+            'manager1_score' => $row['manager1_score'],
+            'manager2_score' => $row['manager2_score'],
+            'winning_manager_id' => $row['winning_manager_id'],
+            'losing_manager_id' => $row['losing_manager_id'],
+            'is_completed' => true
+        ];
+    }
+    
+    // Get all future matchups from schedule table
+    $result = query("SELECT s.year, s.week, 
+                     m1.name as manager1_name, m2.name as manager2_name,
+                     s.manager1_id, s.manager2_id
+                     FROM schedule s
+                     JOIN managers m1 ON m1.id = s.manager1_id
+                     JOIN managers m2 ON m2.id = s.manager2_id
+                     WHERE s.year = $selectedYear
+                     ORDER BY s.week, s.id");
+    
+    while ($row = fetch_array($result)) {
+        $weekNum = $row['week'];
+        $manager1Id = $row['manager1_id'];
+        $manager2Id = $row['manager2_id'];
+        
+        // Create a unique key for this matchup
+        $matchupKey = $weekNum . '_' . min($manager1Id, $manager2Id) . '_' . max($manager1Id, $manager2Id);
+        
+        // Skip if we've already processed this matchup (either from rsm or schedule)
+        if (isset($processedMatchups[$matchupKey])) {
+            continue;
+        }
+        
+        // Mark this matchup as processed
+        $processedMatchups[$matchupKey] = true;
+        
+        // If this week already exists in our response, it means we have some results
+        // from regular_season_matchups for this week, but not this specific matchup
+        if (!isset($response[$weekNum])) {
+            $response[$weekNum] = [
+                'week' => $weekNum,
+                'year' => $row['year'],
+                'matchups' => [],
+                'is_completed' => false
+            ];
+        }
+        
+        $response[$weekNum]['matchups'][] = [
+            'manager1_name' => $row['manager1_name'],
+            'manager2_name' => $row['manager2_name'],
+            'manager1_id' => $row['manager1_id'],
+            'manager2_id' => $row['manager2_id'],
+            'is_completed' => false
+        ];
+    }
+    
+    // Sort by week
+    ksort($response);
+    
+    // Add date ranges for each week
+    foreach ($response as $weekNum => &$weekData) {
+        $dateRange = getWeekDateRange($selectedYear, $weekNum);
+        if ($dateRange) {
+            $weekData['date_range'] = $dateRange['start_date'] . ' - ' . $dateRange['end_date'];
+        }
+    }
+    
+    return $response;
 }
 

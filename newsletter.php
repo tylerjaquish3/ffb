@@ -4,6 +4,7 @@ $pageName = "Newsletter";
 include 'header.php';
 include 'sidebar.html';
 
+
 // Fetch newsletter content from database
 $recapContent = "Recap content is not available for this week.";
 $previewContent = "Preview content is not available for this week.";
@@ -26,7 +27,6 @@ if ($previewRow && !empty($previewRow['preview'])) {
 
 <div class="app-content content container-fluid">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
 
         <div class="content-body">
             
@@ -68,14 +68,22 @@ if ($previewRow && !empty($previewRow['preview'])) {
                     <label for="week-select" style="color: #fff;">Week:</label>
                     <select id="week-select" class="form-control">
                         <?php
-                        $result = query("SELECT DISTINCT week FROM rosters WHERE year = $selectedSeason ORDER BY week ASC");
+                        $currentYear = date('Y');
+                        
+                        // Use schedule table for current year, rosters table for past years
+                        if ($selectedSeason == $currentYear) {
+                            $result = query("SELECT DISTINCT week FROM schedule WHERE year = $selectedSeason ORDER BY week ASC");
+                        } else {
+                            $result = query("SELECT DISTINCT week FROM rosters WHERE year = $selectedSeason ORDER BY week ASC");
+                        }
+                        
                         $weeks = [];
                         while ($row = fetch_array($result)) {
                             $weeks[] = $row['week'];
                         }
                         
                         // If no weeks found and this is the current year, default to Week 1
-                        if (empty($weeks) && $selectedSeason == date('Y')) {
+                        if (empty($weeks) && $selectedSeason == $currentYear) {
                             $weeks[] = 1;
                         }
                         
@@ -132,7 +140,22 @@ if ($previewRow && !empty($previewRow['preview'])) {
                 </div>
             </div>
             
-            <?php if ($selectedWeek == 1): ?>
+            <?php if (!$contentAvailable): ?>
+                <!-- Content Not Available Message -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-header" style="direction: ltr;">
+                                <h4>Newsletter Content</h4>
+                            </div>
+                            <div class="card-body p-1" style="background: #fff; direction: ltr;">
+                                <h4 class="alert-heading">Content Not Available</h4>
+                                <p>The newsletter for Week <?php echo $selectedWeek; ?> of the <?php echo $selectedSeason; ?> season is not available yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php else: ?>
                 <!-- Week 1: Show year recap and preview -->
                 <div class="row">
                     <div class="col-sm-12 col-lg-6">
@@ -156,7 +179,8 @@ if ($previewRow && !empty($previewRow['preview'])) {
                         </div>
                     </div>
                 </div>
-            <?php else: ?>
+            <?php endif; ?>
+            <?php if ($rosterAvailable): ?>
                 <!-- Week 2+: Show full content -->
                 <div class="row">
                     <div class="col-sm-12 col-lg-4">
@@ -256,7 +280,6 @@ if ($previewRow && !empty($previewRow['preview'])) {
                         </div>
                     </div>
 
-                </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-12 table-padding">
@@ -496,7 +519,7 @@ if ($previewRow && !empty($previewRow['preview'])) {
         });
         
         // Only initialize DataTables if we're not in week 1
-        <?php if ($selectedWeek != 1): ?>
+        <?php if ($selectedWeek != 1 && $contentAvailable): ?>
         let currentPointsColCount = parseInt("<?php echo $currentPointsColCount; ?>");
         $('#datatable-currentPoints').DataTable({
             searching: false,

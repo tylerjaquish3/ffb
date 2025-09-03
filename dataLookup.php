@@ -625,8 +625,22 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-week') {
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'weeks-by-year') {
     $year = $_GET['year'];
     $weeks = [];
+    $currentYear = date('Y');
     
-    $result = query("SELECT DISTINCT week FROM rosters WHERE year = $year ORDER BY week ASC");
+    // Use schedule table for current year, rosters table for past years
+    if ($year == $currentYear) {
+        $result = query("SELECT DISTINCT week FROM schedule WHERE year = $year ORDER BY week ASC");
+        // If no results in schedule table, fall back to rosters table
+        if (!$result || fetch_array($result) === false) {
+            $result = query("SELECT DISTINCT week FROM rosters WHERE year = $year ORDER BY week ASC");
+        } else {
+            // Reset the cursor position after checking
+            $result = query("SELECT DISTINCT week FROM schedule WHERE year = $year ORDER BY week ASC");
+        }
+    } else {
+        $result = query("SELECT DISTINCT week FROM rosters WHERE year = $year ORDER BY week ASC");
+    }
+    
     while ($row = fetch_array($result)) {
         $weeks[] = [
             'value' => $row['week'],
@@ -635,7 +649,7 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'weeks-by-year') {
     }
     
     // If no weeks found and this is the current year, default to Week 1
-    if (empty($weeks) && $year == date('Y')) {
+    if (empty($weeks) && $year == $currentYear) {
         $weeks[] = [
             'value' => 1,
             'text' => 'Week 1'

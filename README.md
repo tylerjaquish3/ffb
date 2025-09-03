@@ -33,7 +33,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - current season, add scheudle and link to newsletter
 - fun fact finder page
 - allow people add comments/smack talk to profile
-- add tabs to season recap page
+
 
 Notes:
 Rams moved to LA between 2015 & 2016

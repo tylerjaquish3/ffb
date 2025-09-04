@@ -121,7 +121,6 @@ if ($pageName == 'Rosters') {
 if ($pageName == 'Newsletter') {
     $selectedSeason = isset($_GET['year']) ? $_GET['year'] : $season;
     $selectedWeek = isset($_GET['week']) ? $_GET['week'] : $week;
-    
 
     // Check for rosters with the year and week
     $rosterQuery = query("SELECT * FROM rosters WHERE year = $selectedSeason AND week = $selectedWeek");
@@ -134,7 +133,7 @@ if ($pageName == 'Newsletter') {
     $contentAvailable = !empty($contentData);
 
     // Only load data if we're not in week 1 and have roster data
-    if ($selectedWeek > 1 && $rosterAvailable) {
+    if ($rosterAvailable) {
         $bestWeek = getCurrentSeasonBestWeek();
         $topPerformers = getCurrentSeasonTopPerformers();
         $stats = getCurrentSeasonStats();

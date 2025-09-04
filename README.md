@@ -34,6 +34,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - fun fact finder page
 - allow people add comments/smack talk to profile
 
+-- FIX THE NEWSLETTER PAGE WITH ROSTER AVAILABLE - looks like js error
 
 Notes:
 Rams moved to LA between 2015 & 2016

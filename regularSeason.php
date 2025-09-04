@@ -144,6 +144,49 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
+            
+            <!-- New Record by Week Card -->
+            <div class="col-sm-12 table-padding">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Record by Week</h4>
+                    </div>
+                    <div class="card-body" style="direction: ltr;">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="table-responsive">
+                                    <table class="table table-striped nowrap" id="datatable-recordByWeek" style="width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>Manager</th>
+                                                <?php 
+                                                sort($recordsByWeek['weeks']);
+                                                foreach ($recordsByWeek['weeks'] as $week) {
+                                                    echo '<th>Week ' . $week . '</th>';
+                                                }
+                                                ?>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            foreach ($recordsByWeek['managers'] as $manager) {
+                                                echo '<tr>';
+                                                echo '<td>' . $manager . '</td>';
+                                                foreach ($recordsByWeek['weeks'] as $week) {
+                                                    $record = isset($recordsByWeek['records'][$manager][$week]) ? $recordsByWeek['records'][$manager][$week] : '0-0';
+                                                    echo '<td>' . $record . '</td>';
+                                                }
+                                                echo '</tr>';
+                                            }
+                                            ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="row card-section" id="team-standings" style="display: none;">
@@ -1062,6 +1105,13 @@ include 'sidebar.html';
             return div; 
         }
 
+        // Initialize DataTable for Record By Week
+        $('#datatable-recordByWeek').DataTable({
+            "searching": false,
+            "paging": false,
+            "info": false,
+        });
+        
         // Initialize the page with Matchups & Stats tab active
         showCard('matchups-stats');
         

@@ -70,6 +70,7 @@ if ($pageName == 'Regular Season') {
     $pfwins = getPfWinsData();
     $dashboardNumbers = getDashboardNumbers();
     $allWeeks = getAllWeekOptions();
+    $recordsByWeek = getRecordsByWeek();
 }
 if ($pageName == 'Postseason') {
     $postseasonMatchups = getPostseasonMatchups();
@@ -3586,5 +3587,53 @@ function getFullSchedule($year = null)
     }
     
     return $response;
+}
+
+/**
+ * Get record by week for all managers
+ * Returns an array with manager names as keys and arrays of week records as values
+ */
+function getRecordsByWeek()
+{
+    $sql = "SELECT 
+                m.name as manager,
+                rsm.week_number as week,
+                SUM(CASE WHEN rsm.winning_manager_id = m.id THEN 1 ELSE 0 END) as wins,
+                SUM(CASE WHEN rsm.losing_manager_id = m.id THEN 1 ELSE 0 END) as losses
+            FROM 
+                regular_season_matchups rsm
+            JOIN
+                managers m ON m.id = rsm.manager1_id
+            GROUP BY 
+                m.name, rsm.week_number
+            ORDER BY 
+                m.name, rsm.week_number";
+    
+    $result = query($sql);
+    
+    $recordsByWeek = array();
+    $managers = array();
+    $weeks = array();
+    
+    while ($row = fetch_array($result)) {
+        $manager = $row['manager'];
+        $week = $row['week'];
+        $wins = $row['wins'];
+        $losses = $row['losses'];
+        
+        if (!isset($recordsByWeek[$manager])) {
+            $recordsByWeek[$manager] = array();
+        }
+        
+        $recordsByWeek[$manager][$week] = $wins . '-' . $losses;
+        $managers[$manager] = true;
+        $weeks[$week] = true;
+    }
+    
+    return array(
+        'records' => $recordsByWeek,
+        'managers' => array_keys($managers),
+        'weeks' => array_keys($weeks)
+    );
 }
 

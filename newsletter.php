@@ -40,6 +40,9 @@ if ($selectedWeek == 1) {
     $contentAvailable = true;
 }
 
+// Get schedule info specifically for this newsletter's selected week
+$scheduleInfo = getScheduleInfo($selectedSeason, $selectedWeek);
+
 // Fetch newsletter content from database
 $recapContent = "Recap content is not available for this week.";
 $previewContent = "Preview content is not available for this week.";

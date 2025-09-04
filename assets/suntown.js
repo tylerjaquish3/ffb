@@ -30,7 +30,7 @@ function showCard(cardId, updateUrl = false) {
             updatePointsBySeasonChart();
         }, 100);
     }
-    console.log(cardId)
+
     // Initialize standings chart when weekly standings tab is selected
     if (cardId === 'weekly-standings' && typeof initStandingsChart === 'function') {
         setTimeout(function() {

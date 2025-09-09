@@ -571,7 +571,7 @@ include 'sidebar.html';
                                                 <td><?php echo $row['manager']; ?></td>
                                                 <td><?php echo round($row['drafted_points'], 1); ?></td>
                                                 <td><?php echo round($row['early_round'], 1); ?></td>
-                                                <td><?php echo round($row['late_round'], 1); ?></td>
+                                                <td><?php echo isset($row['late_round']) ? round($row['late_round'], 1) : 0; ?></td>
                                                 <td><?php echo round($row['undrafted_points'], 1); ?></td>
                                                 <td><?php echo round($row['retained'], 1); ?></td>
                                             </tr>

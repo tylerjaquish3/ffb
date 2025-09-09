@@ -1,4 +1,6 @@
 <?php
+// Increase maximum execution time to 300 seconds (5 minutes)
+set_time_limit(300);
 
 include 'yahooSharedFunctions.php';
 

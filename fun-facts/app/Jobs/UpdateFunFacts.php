@@ -23,8 +23,8 @@ class UpdateFunFacts implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $currentSeason = 2024;
-    protected $lastSeason = 2023;
+    protected $currentSeason = "";
+    protected $lastSeason = "";
 
     /**
      * Execute the job.
@@ -34,79 +34,82 @@ class UpdateFunFacts implements ShouldQueue
         $success = true;
         $message = "";
 
+        $this->currentSeason = date('Y');
+        $this->lastSeason = $this->currentSeason - 1;
+
         try {
-            // echo 'Fetching game times';
-            // // Fetch game times after
-            // FetchGameTimes::dispatch();
+            echo 'Fetching game times'.PHP_EOL;
+            // Fetch game times after
+            FetchGameTimes::dispatchSync();
 
             // 1,2,3
-            // $this->mostPointsFor();
-            // // 4,5,6
-            // $this->mostPostseasonPointsFor();
-            // // 7,8,9,89,90,91
-            // $this->leastPointsAgainst();
-            // // 10,11
-            // $this->mostWins();
-            // // 13,14,15
-            // $this->leastPointsFor();
-            // // 16,17
-            // $this->mostLosses();
-            // // 12,18,19,20,21,22,23,24,25,31,65,66
-            // $this->postseasonRecords();
-            // // 26,27,28
-            // $this->highestSeeds();
-            // // 29,30,67,68,69,70
-            // $this->singleOpponent();
-            // // 32
-            // $this->leastChampionships();
-            // // 50,51,52,53,54,55
-            // $this->postseasonMargin();
-            // // 39,40,56,57,60,61
-            // $this->streaks();
-            // // 62,63,71,72
-            // $this->draft();
-            // // 73,74,75
-            // $this->moves();
-            // // 76,77,78,79,80
-            // $this->currentSeasonStats();
-            // // 45,46,47,48
-            // $this->margins();
-            // // 41,42
-            // $this->appearances();
-            // // 60,61
-            // $this->currentPostseasonStreak();
-            // // 58,59
-            // $this->postseasonWinPct();
-            // // 81,82,84,85,86,87
-            // $this->currentSeasonPoints();
-            // // 83,88
-            // $this->getOptimalLineupPoints();
-            // // 92,93
-            // $this->weeklyRanks();
-            // // 111-128
-            // $this->positionTotals();
-            // // 95, 96, 99-106
-            // $this->pointsByGameTime();
-            // // 97,98,107,108
-            // $this->draftPicks();
-            // // 129-131
-            // $this->benchPoints();
-            // // 135
-            // $this->comeback();
-            // // 138,139
-            // $this->freeAgent();
-            // // 136,137
-            // $this->pointsInWinLoss();
-            // // 140,141
-            // $this->irPlayers();
-            // // 142,143,144
-            // $this->weeklyPositionPlayers();
+            $this->mostPointsFor();
+            // 4,5,6
+            $this->mostPostseasonPointsFor();
+            // 7,8,9,89,90,91
+            $this->leastPointsAgainst();
+            // 10,11
+            $this->mostWins();
+            // 13,14,15
+            $this->leastPointsFor();
+            // 16,17
+            $this->mostLosses();
+            // 12,18,19,20,21,22,23,24,25,31,65,66
+            $this->postseasonRecords();
+            // 26,27,28
+            $this->highestSeeds();
+            // 29,30,67,68,69,70
+            $this->singleOpponent();
+            // 32
+            $this->leastChampionships();
+            // 50,51,52,53,54,55
+            $this->postseasonMargin();
+            // 39,40,56,57,60,61
+            $this->streaks();
+            // 62,63,71,72
+            $this->draft();
+            // 73,74,75
+            $this->moves();
+            // 76,77,78,79,80
+            $this->currentSeasonStats();
+            // 45,46,47,48
+            $this->margins();
+            // 41,42
+            $this->appearances();
+            // 60,61
+            $this->currentPostseasonStreak();
+            // 58,59
+            $this->postseasonWinPct();
+            // 81,82,84,85,86,87
+            $this->currentSeasonPoints();
+            // 83,88
+            $this->getOptimalLineupPoints();
+            // 92,93
+            $this->weeklyRanks();
+            // 111-128
+            $this->positionTotals();
+            // 95, 96, 99-106
+            $this->pointsByGameTime();
+            // 97,98,107,108
+            $this->draftPicks();
+            // 129-131
+            $this->benchPoints();
+            // 135
+            $this->comeback();
+            // 138,139
+            $this->freeAgent();
+            // 136,137
+            $this->pointsInWinLoss();
+            // 140,141
+            $this->irPlayers();
+            // 142,143,144
+            $this->weeklyPositionPlayers();
             // 147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164
-            // $this->trackTopPositionPerformances();
-            // // 33,34,35,36
-            // $this->averagePoints();
-            // // 163,164,165,166
-            // $this->mostPicksByPosition();
+            $this->trackTopPositionPerformances();
+            // 33,34,35,36
+            $this->averagePoints();
+            // 163,164,165,166
+            $this->mostPicksByPosition();
             // 169,170
             $this->seahawksDrafted();
 

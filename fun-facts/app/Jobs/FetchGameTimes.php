@@ -42,9 +42,9 @@ class FetchGameTimes implements ShouldQueue
                 $year = pathinfo($file, PATHINFO_FILENAME);
 
                 // Skip all files except this year
-                // if ($year != $thisYear) {
-                //     continue;
-                // }
+                if ($year != $thisYear) {
+                    continue;
+                }
                 
                 $data = $this->getDataArray($file);
 

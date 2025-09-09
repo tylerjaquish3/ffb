@@ -1,4 +1,6 @@
 <?php
+// Increase maximum execution time to 300 seconds (5 minutes)
+set_time_limit(300);
 
 include 'yahooSharedFunctions.php';
 
@@ -151,7 +153,13 @@ if ($section == 'trades') {
 
 if ($section == 'fun_facts') {
     echo 'Getting fun facts...<br />';
-    handle_fun_facts();
+    echo 'Debug: Starting fun_facts processing at ' . date('Y-m-d H:i:s') . '<br />';
+    try {
+        handle_fun_facts();
+        echo 'Debug: Fun facts command completed successfully.<br />';
+    } catch (Exception $e) {
+        echo 'Debug: Error running fun facts command: ' . $e->getMessage() . '<br />';
+    }
     echo '<hr />';die;
 }
 
@@ -385,32 +393,39 @@ function handle_team_rosters(int $yahooId, int $week, object $data)
         echo $manager.' - '.$playerName.' ('.$team.' - '.$pos.' - '.$spot.')<br>';
         echo 'Points: '.$points.' | Projected: '.$projected.'<br>';
         // Insert player into rosters
-        // $rosterId = updateOrCreate('rosters', [
-        //     'manager' => $manager,
-        //     'year' => $year,
-        //     'week' => $week,
-        //     'player' => $playerName,
-        //     'position' => $pos
-        // ], [
-        //     'team' => $team,
-        //     'roster_spot' => $spot,
-        //     'projected' => $projected,
-        //     'points' => $points
-        // ]);
+        $rosterId = updateOrCreate('rosters', [
+            'manager' => $manager,
+            'year' => $year,
+            'week' => $week,
+            'player' => $playerName,
+            'position' => $pos
+        ], [
+            'team' => $team,
+            'roster_spot' => $spot,
+            'projected' => $projected,
+            'points' => $points
+        ]);
 
-        // if ($spot != 'IR') {
-        //     // Insert stats
-        //     updateOrCreate('stats', [
-        //         'roster_id' => $rosterId
-        //     ], $stats['stats']);
-        // }
+        if ($spot != 'IR' && isset($stats['stats']) && is_array($stats['stats'])) {
+            
+            // Insert stats - make sure we have valid stats array
+            // Convert any nulls to 0 to prevent SQL issues
+            $cleanStats = array_map(function($value) {
+                return $value === null ? 0 : $value;
+            }, $stats['stats']);
+
+            updateOrCreate('stats', [
+                'roster_id' => $rosterId
+            ], $cleanStats);
+            
+        }
     }
 }
 
 function get_player_stats(string $playerKey, int $week)
 {
-    global $access_token, $leagueId;
-    $request_uri = '/league/423.l.'.$leagueId.'/players;player_keys='.$playerKey.'/stats;type=week;week='.$week;
+    global $access_token, $leagueId, $gameCode;
+    $request_uri = '/league/'.$gameCode.'.l.'.$leagueId.'/players;player_keys='.$playerKey.'/stats;type=week;week='.$week;
     $data = get_data($request_uri, $access_token);
 
     if (!$data) {
@@ -445,17 +460,17 @@ function get_player_stats(string $playerKey, int $week)
     ];
     
     // Loop through player's stats
-    // $stats = $player[1]->player_stats->stats;
-    // foreach ($stats as $stat) {
-    //     if (gettype($stat) == 'object') {
-    //         $statId = $stat->stat->stat_id;
-    //         $statValue = $stat->stat->value;
-    //         // use $statIds to put values in $values['stats']
-    //         if (array_key_exists($statId, $statIds)) {
-    //             $values['stats'][$statIds[$statId]] = (int)$statValue;
-    //         }
-    //     }
-    // }
+    $stats = $player[1]->player_stats->stats;
+    foreach ($stats as $stat) {
+        if (gettype($stat) == 'object') {
+            $statId = $stat->stat->stat_id;
+            $statValue = $stat->stat->value;
+            // use $statIds to put values in $values['stats']
+            if (array_key_exists($statId, $statIds)) {
+                $values['stats'][$statIds[$statId]] = (int)$statValue;
+            }
+        }
+    }
     // do_dump($values);die;
 
     return $values;
@@ -532,10 +547,12 @@ function lookup_week(string $date)
 
 function handle_fun_facts()
 {
-    // updateProjected();
+    // Change directory to fun-facts and run artisan command
+    $fun_facts_dir = __DIR__ . '/fun-facts';
     
-    echo 'This is not set up currently';
+    echo "Debug: Running artisan command from {$fun_facts_dir}<br>";
     
+    // Couldn't get this to work...yet
 }
 
 function dd($text)

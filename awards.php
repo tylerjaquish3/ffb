@@ -15,9 +15,8 @@ if (isset($_GET['new_leader'])) {
 }
 ?>
 
-<div class="app-content content container-fluid">
+<div class="app-content content">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
 
         <div class="content-body">
             <div class="row" style="direction: ltr;">

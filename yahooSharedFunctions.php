@@ -22,7 +22,7 @@ function make_curl_request(string $method, string $final_url, string $params = '
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
-    $timeout = 2; // seconds
+    $timeout = 60; // seconds
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
 
@@ -142,15 +142,31 @@ function query($sql)
 {
     global $conn, $DB_TYPE;
 
+    // Log SQL queries for debugging
+    file_put_contents('debug_sql.txt', date('Y-m-d H:i:s') . " - SQL Query: $sql\n", FILE_APPEND);
+
     if ($DB_TYPE == 'sqlite') {
         $sql = str_replace("if(", "iif(", $sql);
         $sql = str_replace("IF(", "IIF(", $sql);
         $sql = str_replace("IF (", "IIF (", $sql);
 
-        return $conn->query($sql);
+        try {
+            $result = $conn->query($sql);
+            if (!$result) {
+                file_put_contents('debug_sql.txt', "SQLite Error on query\n\n", FILE_APPEND);
+            }
+            return $result;
+        } catch (Exception $e) {
+            file_put_contents('debug_sql.txt', "Exception in query: " . $e->getMessage() . "\n\n", FILE_APPEND);
+            return false;
+        }
     }
 
-    return mysqli_query($conn, $sql);
+    $result = mysqli_query($conn, $sql);
+    if (!$result) {
+        file_put_contents('debug_sql.txt', "MySQL Error: " . mysqli_error($conn) . "\n\n", FILE_APPEND);
+    }
+    return $result;
 }
 
 function fetch_array($result)
@@ -172,7 +188,9 @@ function updateOrCreate(string $table, array $params, array $values)
     $lastId = null;
     $query = "SELECT * FROM {$table} WHERE ";
     foreach ($params as $key => $value) {
-        $query .= "{$key} = '{$value}' AND ";
+        // Use SQLite3::escapeString for PDO or just quote the value
+        $escapedValue = is_string($value) ? str_replace("'", "''", $value) : $value;
+        $query .= "{$key} = '{$escapedValue}' AND ";
     }
     $query = substr($query, 0, -5);
     $result = query($query);
@@ -181,12 +199,15 @@ function updateOrCreate(string $table, array $params, array $values)
         // update
         $query = "UPDATE {$table} SET ";
         foreach ($values as $key => $value) {
-            $query .= "{$key} = '{$value}', ";
+            // Properly escape values
+            $escapedValue = is_string($value) ? str_replace("'", "''", $value) : $value;
+            $query .= "{$key} = '{$escapedValue}', ";
         }
         $query = substr($query, 0, -2);
         $query .= " WHERE ";
         foreach ($params as $key => $value) {
-            $query .= "{$key} = '{$value}' AND ";
+            $escapedValue = is_string($value) ? str_replace("'", "''", $value) : $value;
+            $query .= "{$key} = '{$escapedValue}' AND ";
         }
         $query = substr($query, 0, -5);
         $result = query($query);

@@ -1,7 +1,26 @@
 <?php
+// Increase maximum execution time to 300 seconds (5 minutes)
+set_time_limit(300);
 
 $pageName = 'Yahoo API';
 include 'header.php';
+
+// Custom styles for loader
+echo '<style>
+.spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #0275d8;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>';
 
 // Check if environment is set to production
 if (isset($APP_ENV) && $APP_ENV === 'production') {
@@ -90,6 +109,10 @@ if( ! $request_token_url ) {
                             <h4 class="card-title">Output</h4>
                         </div>
                         <div class="card-body info-card" style="overflow: scroll;">
+                            <div id="loading" style="display: none; text-align: center; margin: 20px 0;">
+                                <div class="spinner"></div>
+                                <p style="margin-top: 10px;">Processing request, please wait...</p>
+                            </div>
                             <div id="output">Output will show here...</div>
                         </div>
                     </div>
@@ -112,6 +135,10 @@ if( ! $request_token_url ) {
             weeks.push($(this).val());
         });
 
+        // Show the loading spinner
+        $('#loading').show();
+        $('#output').html('');
+        
         if (!access_token) {
             $.ajax({
                 url: 'yahooApiToken.php',
@@ -124,6 +151,10 @@ if( ! $request_token_url ) {
                     access_token = response;
     
                     makeRequest(year, weeks);
+                },
+                error: function() {
+                    $('#loading').hide();
+                    $('#output').html('<div class="alert alert-danger">Error fetching access token. Please try again.</div>');
                 }
             });
         } else {
@@ -132,14 +163,32 @@ if( ! $request_token_url ) {
     });
 
     function makeRequest(year, weeks) {
-        $('#output').html('');
+        // Count selected sections for tracking completion
+        var pendingRequests = $('input[name="sections[]"]:checked').length;
+        var hasRosters = $('input[name="sections[]"][value="rosters"]:checked').length > 0;
+        
+        // If no sections are selected, hide the spinner
+        if (pendingRequests === 0) {
+            $('#loading').hide();
+            $('#output').html('<div class="alert alert-warning">Please select at least one section to update.</div>');
+            return;
+        }
+        
+        // If rosters is selected, we handle it differently because of its recursive nature
+        if (hasRosters) {
+            pendingRequests--;
+        }
 
         // For each selected section, make request
         $('input[name="sections[]"]:checked').each(function () {
-
             let section = $(this).val();
             if (section == 'rosters') {
-                makeRosterRequest(year, weeks, 1);
+                makeRosterRequest(year, weeks, 1, function() {
+                    // Hide spinner when rosters are complete
+                    if (pendingRequests === 0) {
+                        $('#loading').hide();
+                    }
+                });
             } else {
                 $.ajax({
                     url: 'yahooApiRequest.php',
@@ -152,15 +201,32 @@ if( ! $request_token_url ) {
                     },
                     success: function(response) {
                         $('#output').append(response);
+                        pendingRequests--;
+                        
+                        // Hide spinner when all requests are complete
+                        if (pendingRequests === 0 && !hasRosters) {
+                            $('#loading').hide();
+                        }
+                    },
+                    error: function() {
+                        $('#output').append('<div class="alert alert-danger">Error processing ' + section + '. Please try again.</div>');
+                        pendingRequests--;
+                        
+                        // Hide spinner when all requests are complete
+                        if (pendingRequests === 0 && !hasRosters) {
+                            $('#loading').hide();
+                        }
                     }
                 });
             }
         });
     }
 
-    function makeRosterRequest(year, weeks, manager) 
+    function makeRosterRequest(year, weeks, manager, callback) 
     {
         if (manager == 11) {
+            // All managers processed, call the callback to signal completion
+            if (callback) callback();
             return;
         }
         $.ajax({
@@ -177,8 +243,15 @@ if( ! $request_token_url ) {
                 $('#output').append(response);
                 manager++;
                 setTimeout(function () {
-                    makeRosterRequest(year, weeks, manager);
-                }, 5000);
+                    makeRosterRequest(year, weeks, manager, callback);
+                }, 2000);
+            },
+            error: function() {
+                $('#output').append('<div class="alert alert-danger">Error processing rosters for manager ' + manager + '. Continuing with next manager.</div>');
+                manager++;
+                setTimeout(function () {
+                    makeRosterRequest(year, weeks, manager, callback);
+                }, 2000);
             }
         });   
     }

@@ -180,7 +180,7 @@ include 'sidebar.html';
                                     </div>
                                     <div style="float: right; margin-right: 20px;">
                                         <select id="postMiscStats" class="dropdown form-control">
-                                            <option value="20">Average Finish</option>
+                                            <option value="20" selected>Average Finish</option>
                                             <option value="21">First Round Byes</option>
                                             <option value="22">Appearances</option>
                                             <option value="23">Underdog Wins</option>
@@ -191,13 +191,13 @@ include 'sidebar.html';
                                     </div>
                                     <?php include 'postMiscStats.php'; ?>
                                 </div>
-                                <div class="col-sm-12 col-lg-6 mt-2">
+                                <div class="col-sm-12 col-lg-6">
                                     <div class="card-header" style="float: left">
                                         <h4><a href="regularSeason.php">Regular Season Stats</a></h4>
                                     </div>
                                     <div style="float: right">
                                         <select id="regMiscStats" class="dropdown form-control">
-                                            <option value="3">Season Points</option>
+                                            <option value="3" selected>Season Points</option>
                                             <option value="1">Win/Lose Streaks</option>
                                             <option value="2">Total Points</option>
                                             <option value="4">Average PF/PA</option>

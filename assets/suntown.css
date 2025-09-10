@@ -418,6 +418,7 @@ div.dt-container div.dt-layout-row {
 
 /* Mobile fixes to prevent horizontal scroll */
 @media (max-width: 768px) {
+
     /* Fix negative margin causing overflow */
     .tab-size-alt h2 {
         margin-right: 0px !important;

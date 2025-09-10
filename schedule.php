@@ -153,7 +153,37 @@ if (isset($_GET['id'])) {
                             <h4>Strength of Schedule</h4>
                         </div>
                         <div class="card-body" style="direction: ltr;">
-                            <p>Strength of schedule data will be implemented here. This will show the hardest to easiest schedule based on standings each week.</p>
+                            <div class="table-responsive">
+                                <table id="strength-of-schedule-table" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Manager</th>
+                                            <th>Opponent Record</th>
+                                            <th>Opponent Points</th>
+                                            <th>Avg. Opponent PPG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $sosData = getStrengthOfSchedule($selectedSeason);
+                                        $currentYear = date('Y');
+                                        $isCurrentSeason = ($selectedSeason == $currentYear);
+                                        
+                                        foreach ($sosData as $data) {
+                                            
+                                            echo '<tr>';
+                                            echo '<td>' . $data['rank'] . '</td>';
+                                            echo '<td><a href="/profile.php?id=' . $data['name'] . '">' . $data['name'] . '</a></td>';
+                                            echo '<td>' . $data['opponent_record'] . '</td>';
+                                            echo '<td>' . number_format($data['opponent_points'], 2) . '</td>';
+                                            echo '<td>' . number_format($data['avg_opponent_points'], 2) . '</td>';
+                                            echo '</tr>';
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -167,7 +197,47 @@ if (isset($_GET['id'])) {
                             <h4>Mock Schedule</h4>
                         </div>
                         <div class="card-body" style="direction: ltr;">
-                            <p>Mock schedule data will be implemented here. This will show how each manager would perform if they played other managers' schedules.</p>
+                            <div class="row mb-3">
+                                <div class="col-sm-12 col-md-6">
+                                    <select id="schedule-manager-select" class="form-control">
+                                        <?php
+                                        // Get managers from the managers table
+                                        $result = query("SELECT id, manager_name FROM managers ORDER BY id");
+                                        if (!$result) {
+                                            // Fallback if managers table doesn't exist or has a different structure
+                                            $result = query("SELECT DISTINCT manager1_id as id FROM regular_season_matchups WHERE year = $selectedSeason ORDER BY manager1_id");
+                                        }
+                                        
+                                        while ($row = fetch_array($result)) {
+                                            $managerId = isset($row['id']) ? $row['id'] : $row['manager1_id'];
+                                            $managerName = isset($row['manager_name']) ? $row['manager_name'] : getManagerName($managerId);
+                                            echo '<option value="'.$managerId.'">'.$managerName.'</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="mock-schedule-results">
+                                <div class="text-center initial-message">
+                                    <p>Select a manager's schedule to see how other managers would perform with that schedule.</p>
+                                </div>
+                                <div class="table-responsive" style="display: none;">
+                                    <table id="mock-schedule-table" class="table table-striped table-bordered">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>Rank</th>
+                                                <th>Manager</th>
+                                                <th>Mock Record</th>
+                                                <th>Win %</th>
+                                                <th>Total Points</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="mock-schedule-tbody">
+                                            <!-- Data will be inserted here via AJAX -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -181,6 +251,7 @@ if (isset($_GET['id'])) {
 <script>
     $(document).ready(function() {
         let baseUrl = "<?php echo $BASE_URL; ?>";
+        let selectedSeason = "<?php echo $selectedSeason; ?>";
         
         $('#year-select').change(function() {
             window.location = baseUrl + 'schedule.php?id=' + $('#year-select').val();
@@ -192,5 +263,73 @@ if (isset($_GET['id'])) {
                 showCard('matchups');
             }
         }, 100);
+        
+        // Auto-select the first manager when the Mock Schedule tab is clicked
+        $('#mock-schedule-tab').click(function() {
+            if ($('#mock-schedule-tbody').is(':empty')) {
+                setTimeout(function() {
+                    $('#schedule-manager-select').trigger('change');
+                }, 100);
+            }
+        });
+        
+        // Initialize strength of schedule DataTable
+        $('#strength-of-schedule-tab').click(function() {
+            // Initialize only once
+            if (!$.fn.DataTable.isDataTable('#strength-of-schedule-table')) {
+                $('#strength-of-schedule-table').DataTable({
+                    searching: false,
+                    paging: false,
+                    info: false
+                });
+            }
+        });
+        
+        // Handle mock schedule manager selection
+        $('#schedule-manager-select').change(function() {
+            const selectedManagerId = $(this).val();
+            const selectedManagerName = $(this).find("option:selected").text();
+            
+            // Show loading indicator
+            $('.initial-message').html('<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i><p>Loading results...</p></div>');
+            
+            // Fetch mock schedule data via AJAX
+            $.ajax({
+                url: baseUrl + 'dataLookup.php',
+                type: 'GET',
+                data: {
+                    dataType: 'mockSchedule',
+                    year: selectedSeason,
+                    scheduleManagerId: selectedManagerId
+                },
+                success: function(response) {
+                    // Hide the initial message and show the table
+                    $('.initial-message').hide();
+                    $('.table-responsive').show();
+                    $('#mock-schedule-explanation').show();
+                    
+                    // Update the table body with the data
+                    $('#mock-schedule-tbody').html(response);
+                    
+                    // Initialize DataTable after data is loaded
+                    setTimeout(function() {
+                        if ($.fn.DataTable.isDataTable('#mock-schedule-table')) {
+                            $('#mock-schedule-table').DataTable().destroy();
+                        }
+                        $('#mock-schedule-table').DataTable({
+                            searching: false,
+                            paging: false,
+                            info: false
+                        });
+                    }, 100);
+                },
+                error: function() {
+                    $('.initial-message').html('<div class="alert alert-danger">Error loading mock schedule data.</div>');
+                    $('.initial-message').show();
+                    $('.table-responsive').hide();
+                    $('#mock-schedule-explanation').hide();
+                }
+            });
+        });
     });
 </script>

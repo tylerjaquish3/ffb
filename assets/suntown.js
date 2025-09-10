@@ -226,6 +226,9 @@ function showCard(cardId, updateUrl = true) {
             if (typeof window.currentSeasonScatterChart !== 'undefined') {
                 window.currentSeasonScatterChart.resize();
             }
+            if (typeof window.weeklyScoresChart !== 'undefined') {
+                window.weeklyScoresChart.resize();
+            }
             if (typeof window.currentSeasonStandingsChart !== 'undefined') {
                 window.currentSeasonStandingsChart.resize();
             }

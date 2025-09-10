@@ -760,4 +760,140 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-week-all-manager
     die;
 }
 
+// Mock Schedule data retrieval
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'mockSchedule') {
+    $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
+    $scheduleManagerId = isset($_GET['scheduleManagerId']) ? intval($_GET['scheduleManagerId']) : 1;
+    
+    // Get the schedule for the selected manager
+    $scheduleQuery = "SELECT week_number, 
+                      CASE WHEN manager1_id = $scheduleManagerId THEN manager2_id ELSE manager1_id END as opponent_id,
+                      CASE WHEN manager1_id = $scheduleManagerId THEN manager2_score ELSE manager1_score END as opponent_score
+                 FROM regular_season_matchups 
+                 WHERE year = $year 
+                 AND (manager1_id = $scheduleManagerId OR manager2_id = $scheduleManagerId)
+                 ORDER BY week_number";
+    
+    $scheduleResult = query($scheduleQuery);
+    $schedule = [];
+    
+    while ($row = fetch_array($scheduleResult)) {
+        $schedule[$row['week_number']] = [
+            'opponent_id' => $row['opponent_id'],
+            'opponent_score' => $row['opponent_score']
+        ];
+    }
+    
+    // Get all managers' weekly scores
+    $scoresQuery = "SELECT 
+                      week_number, 
+                      manager1_id, 
+                      manager1_score
+                   FROM regular_season_matchups
+                   WHERE year = $year
+                   UNION ALL
+                   SELECT 
+                      week_number, 
+                      manager2_id as manager1_id, 
+                      manager2_score as manager1_score
+                   FROM regular_season_matchups
+                   WHERE year = $year
+                   ORDER BY week_number, manager1_id";
+    
+    $scoresResult = query($scoresQuery);
+    $managerScores = [];
+    
+    // Initialize manager scores array
+    $managersQuery = "SELECT DISTINCT 
+                       CASE 
+                         WHEN manager1_id IS NOT NULL THEN manager1_id 
+                         ELSE manager2_id 
+                       END as manager_id
+                     FROM regular_season_matchups
+                     WHERE year = $year";
+    
+    $managersResult = query($managersQuery);
+    
+    while ($row = fetch_array($managersResult)) {
+        $managerId = $row['manager_id'];
+        $managerScores[$managerId] = [
+            'manager_id' => $managerId,
+            'manager_name' => getManagerName($managerId),
+            'weeks' => [],
+            'mock_wins' => 0,
+            'mock_losses' => 0,
+            'total_points' => 0
+        ];
+    }
+    
+    // Store each manager's weekly scores
+    while ($row = fetch_array($scoresResult)) {
+        $weekNum = $row['week_number'];
+        $manager1Id = $row['manager1_id'];
+        $manager1Score = $row['manager1_score'];
+        
+        if (!isset($managerScores[$manager1Id]['weeks'][$weekNum])) {
+            $managerScores[$manager1Id]['weeks'][$weekNum] = $manager1Score;
+            $managerScores[$manager1Id]['total_points'] += $manager1Score;
+        }
+    }
+    
+    // Calculate mock records for each manager using the selected manager's schedule
+    foreach ($managerScores as $managerId => &$managerData) {
+        foreach ($schedule as $weekNum => $weekData) {
+            $opponentId = $weekData['opponent_id'];
+            $opponentScore = $weekData['opponent_score'];
+            
+            // Skip if the manager would be playing against themselves
+            if ($managerId == $opponentId) {
+                continue;
+            }
+            
+            if (isset($managerData['weeks'][$weekNum])) {
+                $managerScore = $managerData['weeks'][$weekNum];
+                
+                if ($managerScore > $opponentScore) {
+                    $managerData['mock_wins']++;
+                } else {
+                    $managerData['mock_losses']++;
+                }
+            }
+        }
+    }
+    unset($managerData); // Break the reference
+    
+    // Sort managers by mock wins (descending) and then by total points (descending)
+    usort($managerScores, function($a, $b) {
+        if ($a['mock_wins'] != $b['mock_wins']) {
+            return $b['mock_wins'] - $a['mock_wins']; // Sort by wins desc
+        }
+        return $b['total_points'] - $a['total_points']; // If wins are tied, sort by points desc
+    });
+    
+    // Output only the table rows for AJAX response
+    $rank = 1;
+    foreach ($managerScores as $managerData) {
+        $managerId = $managerData['manager_id'];
+        $isScheduleManager = ($managerId == $scheduleManagerId);
+        
+        echo '<tr' . ($isScheduleManager ? ' class="table-primary"' : '') . '>';
+        echo '<td>' . $rank . '</td>';
+        echo '<td>' . $managerData['manager_name'];
+        
+        if ($isScheduleManager) {
+            echo ' <span class="badge badge-primary">Original Schedule</span>';
+        }
+        
+        echo '</td>';
+        echo '<td>' . $managerData['mock_wins'] . '-' . $managerData['mock_losses'] . '</td>';
+        $totalGames = $managerData['mock_wins'] + $managerData['mock_losses'];
+        $winPct = ($totalGames > 0) ? round(($managerData['mock_wins'] / $totalGames) * 100, 1) : 0;
+        echo '<td>' . $winPct . '%</td>';
+        echo '<td>' . number_format($managerData['total_points'], 2) . '</td>';
+        echo '</tr>';
+        
+        $rank++;
+    }    die;
+}
+
 ?>

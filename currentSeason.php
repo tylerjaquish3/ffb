@@ -250,7 +250,7 @@ include 'sidebar.html';
             <div class="row card-section" id="player-stats" style="display: none;">
 
                 <div class="row">
-                    <div class="col-sm-12 table-padding">
+                    <div class="col-sm-12 col-lg-10 table-padding">
                         <div class="card">
                             <div class="card-header">
                                 <h4 style="float: right">Stats For</h4>
@@ -294,13 +294,13 @@ include 'sidebar.html';
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-12 table-padding">
+                    <div class="col-sm-12 col-lg-10 table-padding">
                         <div class="card">
                             <div class="card-header">
                                 <h4 style="float: right">Stats by Week</h4>
                             </div>
                             <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="stripe nowrap row-border order-column" id="datatable-currentWeekStats">
+                                <table class="stripe nowrap row-border order-column full-width" id="datatable-currentWeekStats">
                                     <thead>
                                         <th>Manager</th>
                                         <th>Week</th>
@@ -344,13 +344,13 @@ include 'sidebar.html';
             <div class="row card-section" id="stats-against" style="display: none;">
 
                 <div class="row">
-                    <div class="col-sm-12 table-padding">
+                    <div class="col-sm-12 col-lg-10 table-padding">
                         <div class="card">
                             <div class="card-header">
                                 <h4 style="float: right">Stats Against</h4>
                             </div>
                             <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="stripe nowrap row-border order-column" id="datatable-statsAgainst">
+                                <table class="stripe nowrap row-border order-column full-width" id="datatable-statsAgainst">
                                     <thead>
                                         <th>Manager</th>
                                         <th>Total Yds</th>
@@ -388,13 +388,13 @@ include 'sidebar.html';
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-12 table-padding">
+                    <div class="col-sm-12 col-lg-10 table-padding">
                         <div class="card">
                             <div class="card-header">
                                 <h4 style="float: right">Stats Against by Week</h4>
                             </div>
                             <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="stripe nowrap row-border order-column" id="datatable-weekStatsAgainst">
+                                <table class="stripe nowrap row-border order-column full-width" id="datatable-weekStatsAgainst">
                                     <thead>
                                         <th>Manager</th>
                                         <th>Week</th>
@@ -677,6 +677,17 @@ include 'sidebar.html';
                         </div>
                         <div class="card-body chart-block" style="direction: ltr;">
                             <canvas id="scatterChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Weekly Score Analysis</h4>
+                        </div>
+                        <div class="card-body chart-block" style="background: #fff; direction: ltr">
+                            <canvas id="weeklyScoresChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -1234,6 +1245,110 @@ include 'sidebar.html';
 
         // Make chart globally accessible
         window.currentSeasonStandingsChart = standingsChart;
+        
+        // Weekly Scores Chart
+        let weekLabels = <?php echo json_encode($weeklyScores['weeks']); ?>;
+        let maxScores = <?php echo json_encode($weeklyScores['maxScores']); ?>;
+        let minScores = <?php echo json_encode($weeklyScores['minScores']); ?>;
+        let avgScores = <?php echo json_encode($weeklyScores['avgScores']); ?>;
+        
+        var weeklyScoresCtx = $('#weeklyScoresChart');
+        let weeklyScoresChart = new Chart(weeklyScoresCtx, {
+            type: 'line',
+            data: {
+                labels: weekLabels,
+                datasets: [
+                    {
+                        label: 'Top Score',
+                        data: maxScores,
+                        backgroundColor: 'rgba(75, 192, 75, 0.1)',
+                        borderColor: 'rgba(75, 192, 75, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(75, 192, 75, 1)',
+                        pointRadius: 4,
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Average Score',
+                        data: avgScores,
+                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                        pointRadius: 4,
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Low Score',
+                        data: minScores,
+                        backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                        pointRadius: 4,
+                        tension: 0.3,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Points',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Week',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                elements: {
+                    line: {
+                        tension: 0.3
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                return label + context.parsed.y.toFixed(2) + ' points';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Make chart globally accessible
+        window.weeklyScoresChart = weeklyScoresChart;
     // });
 
     // Initialize the page with Performance Stats tab active

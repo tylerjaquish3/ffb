@@ -28,11 +28,6 @@
         padding: 10px;
     }
 
-    .table-padding {
-        padding-left: 1px;
-        padding-right: 1px;
-    }
-
     li.nav-item.hidden-md-up.float-xs-right {
         display: none;
     }
@@ -41,7 +36,7 @@
         padding-top: 0px;
     }
 
-    .app-content.content.container-fluid {
+    .app-content.content{
         margin-top: 50px;
     }
 
@@ -85,16 +80,20 @@
     }
 }
 
-@media only screen and (max-width: 975px) and (min-width: 750px) {
-    .tab-size {
-        display: none;
-    }
-    .tab-size-alt {
-        display: block;
-    }
+@media only screen and (max-width: 975px) and (min-width: 700px) {
+  .tab-size {
+      display: none;
+  }
+  .tab-size-alt {
+      display: block;
+  }
+
+  .app-content.content{
+    padding-top: 50px;
+  }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 700px) {
     .float-md-start {
       float: left !important;
     }

@@ -26,7 +26,7 @@ if (!isset($_GET['week'])) {
 }
 
 // Check for rosters with the selected year and week
-$rosterQuery = query("SELECT * FROM rosters WHERE year = $selectedSeason AND week = $selectedWeek");
+$rosterQuery = query("SELECT * FROM rosters WHERE year = $selectedSeason AND week = $selectedWeek-1");
 $rosterData = fetch_array($rosterQuery);
 $rosterAvailable = !empty($rosterData);
 
@@ -211,7 +211,7 @@ if ($previewRow && !empty($previewRow['preview'])) {
                         </div>
                     </div>
                 </div>
-            <?php else: ?>
+            <?php elseif ($selectedWeek == 1): ?>
                 <!-- Week 1: Show year recap and preview -->
                 <div class="row">
                     <div class="col-sm-12 col-lg-6">
@@ -220,7 +220,7 @@ if ($previewRow && !empty($previewRow['preview'])) {
                                 <h4><?php echo ($selectedSeason - 1); ?> Recap</h4>
                             </div>
                             <div class="card-body p-1" style="background: #fff; direction: ltr">
-                                <?php echo nl2br(htmlspecialchars($recapContent)); ?>
+                                <?php echo nl2br($recapContent); ?>
                             </div>
                         </div>
                     </div>
@@ -230,7 +230,31 @@ if ($previewRow && !empty($previewRow['preview'])) {
                                 <h4>Week <?php echo $selectedWeek; ?> Preview</h4>
                             </div>
                             <div class="card-body p-1" style="background: #fff; direction: ltr">
-                                <?php echo nl2br(htmlspecialchars($previewContent)); ?>
+                                <?php echo nl2br($previewContent); ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <!-- Week 2+: Show week recap and preview -->
+                <div class="row">
+                    <div class="col-sm-12 col-lg-6">
+                        <div class="card">
+                            <div class="card-header" style="direction: ltr;">
+                                <h4>Week <?php echo ($selectedWeek - 1); ?> Recap</h4>
+                            </div>
+                            <div class="card-body p-1" style="background: #fff; direction: ltr">
+                                <?php echo nl2br($recapContent); ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-6">
+                        <div class="card">
+                            <div class="card-header" style="direction: ltr;">
+                                <h4>Week <?php echo $selectedWeek; ?> Preview</h4>
+                            </div>
+                            <div class="card-body p-1" style="background: #fff; direction: ltr">
+                                <?php echo nl2br($previewContent); ?>
                             </div>
                         </div>
                     </div>
@@ -313,6 +337,34 @@ if ($previewRow && !empty($previewRow['preview'])) {
                                         </h5>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-4 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="float: right">Record Against Everyone</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr">
+                                <table class="table table-striped nowrap" id="datatable-everyone">
+                                    <thead>
+                                        <th>Manager</th>
+                                        <th>Wins</th>
+                                        <th>Losses</th>
+                                        <th>Win %</th>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($everyoneRecord as $manager => $array) { ?>
+                                            <tr>
+                                                <td><?php echo $manager; ?></td>
+                                                <td><?php echo $array['wins']; ?></td>
+                                                <td><?php echo $array['losses']; ?></td>
+                                                <td><?php echo round(($array['wins'] / ($array['wins'] + $array['losses'])) * 100, 1) . ' %'; ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -455,34 +507,6 @@ if ($previewRow && !empty($previewRow['preview'])) {
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-12 col-lg-4 table-padding">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 style="float: right">Record Against Everyone</h4>
-                            </div>
-                            <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="table table-striped nowrap" id="datatable-everyone">
-                                    <thead>
-                                        <th>Manager</th>
-                                        <th>Wins</th>
-                                        <th>Losses</th>
-                                        <th>Win %</th>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        foreach ($everyoneRecord as $manager => $array) { ?>
-                                            <tr>
-                                                <td><?php echo $manager; ?></td>
-                                                <td><?php echo $array['wins']; ?></td>
-                                                <td><?php echo $array['losses']; ?></td>
-                                                <td><?php echo round(($array['wins'] / ($array['wins'] + $array['losses'])) * 100, 1) . ' %'; ?></td>
-                                            </tr>
-                                        <?php } ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
                
                     <?php if ($selectedWeek != 2): ?>
                     <div class="col-sm-12 col-lg-8 table-padding">

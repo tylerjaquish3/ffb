@@ -121,10 +121,10 @@ if ($pageName == 'Rosters') {
 }
 if ($pageName == 'Newsletter') {
     $selectedSeason = isset($_GET['year']) ? $_GET['year'] : $season;
-    $selectedWeek = isset($_GET['week']) ? $_GET['week'] : $week;
+    $selectedWeek = isset($_GET['week']) ? $_GET['week'] : $week+1;
 
     // Check for rosters with the year and week
-    $rosterQuery = query("SELECT * FROM rosters WHERE year = $selectedSeason AND week = $selectedWeek");
+    $rosterQuery = query("SELECT * FROM rosters WHERE year = $selectedSeason AND week = $selectedWeek-1");
     $rosterData = fetch_array($rosterQuery);
     $rosterAvailable = !empty($rosterData);
 

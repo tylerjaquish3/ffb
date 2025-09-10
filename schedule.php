@@ -7,7 +7,7 @@ include 'sidebar.html';
 if (isset($_GET['id'])) {
     $selectedSeason = $_GET['id'];
 } else {
-    $result = query("SELECT DISTINCT year FROM finishes ORDER BY year DESC LIMIT 1");
+    $result = query("SELECT DISTINCT year FROM regular_season_matchups ORDER BY year DESC LIMIT 1");
     while ($row = fetch_array($result)) {
         $selectedSeason = $row['year'];
     }

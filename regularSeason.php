@@ -102,7 +102,7 @@ include 'sidebar.html';
                         <select id="regMiscStats" class="dropdown form-control">
                             <option value="1">Win/Lose Streaks</option>
                             <option value="2">Total Points</option>
-                            <option value="3">Season Points</option>
+                            <option value="3" selected>Season Points</option>
                             <option value="4">Average PF/PA</option>
                             <option value="5">Start Streaks</option>
                             <option value="6">Win/Loss Margin</option>
@@ -428,7 +428,7 @@ include 'sidebar.html';
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-12" style="height: 600px;">
-                                        <canvas id="pointsBySeasonChart"></canvas>
+                                        <canvas id="pointsByWeekChart"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -589,10 +589,16 @@ include 'sidebar.html';
                 [0, "desc"],
                 [1, "desc"]
             ],
-            "columnDefs": [{
-                "targets": [8,9],
-                "visible": false,
-            }],
+            "columnDefs": [
+                {
+                    "targets": [8,9],
+                    "visible": false,
+                },
+                {
+                    "targets": [1],
+                    "type": "num"
+                }
+            ],
             orderCellsTop: true,
             fixedHeader: true,
             initComplete: function () {
@@ -614,17 +620,27 @@ include 'sidebar.html';
                         // Get the search value
                         $(this).attr('title', $(this).val());
                         var regexr = '({search})';
-                        // Search the column for that value
-                        api
-                            .column(colIdx)
-                            .search(
-                                this.value != ''
-                                    ? regexr.replace('{search}', '(((' + this.value + ')))')
-                                    : '',
-                                this.value != '',
-                                this.value == ''
-                            )
-                            .draw();
+                        
+                        // For Week column (index 1), use exact match with ^ and $ anchors
+                        if (colIdx === 1 && this.value !== '') {
+                            // Use ^value$ for exact numeric match
+                            api
+                                .column(colIdx)
+                                .search('^' + this.value + '$', true, false)
+                                .draw();
+                        } else {
+                            // For other columns, use the original regex search
+                            api
+                                .column(colIdx)
+                                .search(
+                                    this.value != ''
+                                        ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                        : '',
+                                    this.value != '',
+                                    this.value == ''
+                                )
+                                .draw();
+                        }
                     })
                     .on('keyup', function (e) {
                         e.stopPropagation();
@@ -880,6 +896,11 @@ include 'sidebar.html';
         $('#regMiscStats').change(function() {
             showRegTable($('#regMiscStats').val());
         });
+        
+        // Initialize with Season Points table (value 3) when page loads
+        $(document).ready(function() {
+            showRegTable('3');
+        });
 
         function showRegTable(tableId) {
             for (i = 1; i < 14; i++) {
@@ -1116,28 +1137,28 @@ include 'sidebar.html';
         showCard('matchups-stats');
         
         // Points by Season Chart functionality
-        window.pointsBySeasonChart = null;
+        window.pointsByWeekChart = null;
         
-        function updatePointsBySeasonChart() {
+        function updatePointsByWeekChart() {
             $.ajax({
                 url: 'dataLookup.php',
                 data: {
-                    dataType: 'points-by-season-all-managers',
+                    dataType: 'points-by-week-all-managers',
                     startWeek: $('#startWeekRegular').val(),
                     endWeek: $('#endWeekRegular').val(),
                     onlyWeek: $('#onlyWeekRegular').val()
                 },
                 error: function() {
-                    console.log('Error loading points by season data');
+                    console.log('Error loading points by week data');
                 },
                 success: function(response) {
                     var data = JSON.parse(response);
                     
-                    var ctx = $('#pointsBySeasonChart');
+                    var ctx = $('#pointsByWeekChart');
                     
                     // Destroy existing chart if it exists
-                    if (window.pointsBySeasonChart) {
-                        window.pointsBySeasonChart.destroy();
+                    if (window.pointsByWeekChart) {
+                        window.pointsByWeekChart.destroy();
                     }
                     
                     // Define colors for each manager
@@ -1160,7 +1181,7 @@ include 'sidebar.html';
                         colorIndex++;
                     }
                     
-                    window.pointsBySeasonChart = new Chart(ctx, {
+                    window.pointsByWeekChart = new Chart(ctx, {
                         type: 'line',
                         data: {
                             labels: data.weeks,
@@ -1207,66 +1228,66 @@ include 'sidebar.html';
         
         // Button event handlers for points by season chart
         $('#startWeekRegular').change(function() {
-            updatePointsBySeasonChart();
+            updatePointsByWeekChart();
         });
         
         $('#endWeekRegular').change(function() {
-            updatePointsBySeasonChart();
+            updatePointsByWeekChart();
         });
         
         $('#onlyWeekRegular').change(function() {
-            updatePointsBySeasonChart();
+            updatePointsByWeekChart();
         });
         
         $('#allSeasonsRegular').click(function() {
             $('#startWeekRegular').val('1_2006');
             $('#endWeekRegular').val(allWeeks[allWeeks.length-1]['week_id']);
             $('#onlyWeekRegular').val('0');
-            updatePointsBySeasonChart();
+            updatePointsByWeekChart();
         });
         
         $('#currentSeasonRegular').click(function() {
             $('#startWeekRegular').val('1_'+season);
             $('#endWeekRegular').val(allWeeks[allWeeks.length-1]['week_id']);
             $('#onlyWeekRegular').val('0');
-            updatePointsBySeasonChart();
+            updatePointsByWeekChart();
         });
         
         $('#lastSeasonRegular').click(function() {
             $('#startWeekRegular').val('1_'+(season-1));
             $('#endWeekRegular').val('14_'+(season-1));
             $('#onlyWeekRegular').val('0');
-            updatePointsBySeasonChart();
+            updatePointsByWeekChart();
         });
         
         $('#lastFiveSeasonsRegular').click(function() {
             $('#startWeekRegular').val('1_'+(season-5));
             $('#endWeekRegular').val(allWeeks[allWeeks.length-1]['week_id']);
             $('#onlyWeekRegular').val('0');
-            updatePointsBySeasonChart();
+            updatePointsByWeekChart();
         });
         
         // Initialize the chart when page loads
         if ($('#pfpa-correlation').css('display') !== 'none') {
-            updatePointsBySeasonChart();
+            updatePointsByWeekChart();
         }
 
         $('#currentSeasonRegular').click(function() {
             $('#startWeekRegular').val('1_'+season);
             $('#endWeekRegular').val(allWeeks[allWeeks.length-1]['week_id']);
-            updatePointsBySeasonChart();
+            updatePointsByWeekChart();
         });
 
         $('#lastSeasonRegular').click(function() {
             $('#startWeekRegular').val('1_'+(season-1));
             $('#endWeekRegular').val('14_'+(season-1));
-            updatePointsBySeasonChart();
+            updatePointsByWeekChart();
         });
 
         $('#lastFiveSeasonsRegular').click(function() {
             $('#startWeekRegular').val('1_'+(season-5));
             $('#endWeekRegular').val(allWeeks[allWeeks.length-1]['week_id']);
-            updatePointsBySeasonChart();
+            updatePointsByWeekChart();
         });
 
         // Initialize the points by season chart when the pfpa-correlation tab is shown
@@ -1274,7 +1295,7 @@ include 'sidebar.html';
         $(document).on('click', '#pfpa-correlation-tab', function() {
             // Delay to ensure the tab content is visible
             setTimeout(function() {
-                updatePointsBySeasonChart();
+                updatePointsByWeekChart();
             }, 100);
         });
     });

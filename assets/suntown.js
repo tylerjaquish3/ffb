@@ -1,5 +1,5 @@
 // Function to show/hide cards based on tab selection
-function showCard(cardId, updateUrl = false) {
+function showCard(cardId, updateUrl = true) {
     // Hide all card sections
     const cardSections = document.querySelectorAll('.card-section');
     cardSections.forEach(section => {
@@ -11,7 +11,7 @@ function showCard(cardId, updateUrl = false) {
     if (selectedCard) {
         selectedCard.style.display = 'block';
         
-        // Update URL hash if requested
+        // Update URL hash by default (changed default to true)
         if (updateUrl) {
             window.history.replaceState(null, null, '#' + cardId);
         }
@@ -22,6 +22,9 @@ function showCard(cardId, updateUrl = false) {
     buttons.forEach(button => {
         button.classList.remove('active');
     });
+    
+    // Specifically set the active class on the matching tab button
+    // This will be handled at the end of the function
     
     // Initialize or update charts when the relevant tab is shown
     if (cardId === 'pfpa-correlation' && typeof updatePointsBySeasonChart === 'function') {
@@ -314,8 +317,8 @@ function activateTabFromUrlHash() {
     
     // If hash exists and it corresponds to a tab element
     if (hash && document.getElementById(hash)) {
-        // Show the tab content
-        showCard(hash);
+        // Show the tab content - setting updateUrl to false to avoid changing the URL again
+        showCard(hash, false);
         
         // Scroll to the tab content
         document.getElementById(hash).scrollIntoView();

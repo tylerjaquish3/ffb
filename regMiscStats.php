@@ -105,7 +105,7 @@
 	</tfoot>
 </table>
 <!-- Season points -->
-<table class="table table-responsive table-striped nowrap" id="datatable-misc3">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc3" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Most PF</th>

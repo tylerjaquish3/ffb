@@ -74,7 +74,7 @@
 	</tfoot>
 </table>
 <!-- Total Points -->
-<table class="table table-responsive table-striped nowrap" id="datatable-misc2" style="display:none;">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc2">
 	<thead>
 		<th>Manager</th>
 		<th>Points For</th>

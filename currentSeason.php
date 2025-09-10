@@ -202,13 +202,12 @@ include 'sidebar.html';
 
             <div class="row card-section" id="top-performers" style="display: none;">
                 
-                <div class="col-sm-12" style="max-width: calc(100vw - 280px); overflow: hidden;">
-                    <div class="card" style="width: 100%; overflow: hidden; direction: ltr;">
+                <div class="col-sm-12">
+                    <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Top Weekly Performers</h4>
                         </div>
-                        <div class="card-body" style="padding: 0; overflow: hidden;">
-                            <div style="overflow-x: auto; overflow-y: hidden; padding: 1rem;">
+                        <div class="card-body" style="background: #fff; direction: ltr">
                             <table class="stripe nowrap row-border order-column full-width" id="datatable-bestWeek">
                                 <thead>
                                     <tr>
@@ -243,11 +242,9 @@ include 'sidebar.html';
                                     <?php } ?>
                                 </tbody>
                             </table>
-                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="row card-section" id="player-stats" style="display: none;">
@@ -259,7 +256,7 @@ include 'sidebar.html';
                                 <h4 style="float: right">Stats For</h4>
                             </div>
                             <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="stripe nowrap row-border order-column" id="datatable-currentStats">
+                                <table class="stripe nowrap row-border order-column full-width" id="datatable-currentStats">
                                     <thead>
                                         <th>Manager</th>
                                         <th>Total Yds</th>
@@ -440,13 +437,13 @@ include 'sidebar.html';
             </div>
 
             <div class="row card-section" id="optimal-lineups" style="display: none;">
-                <div class="col-sm-12 table-padding">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Optimal Lineups</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive stripe nowrap" id="datatable-optimal">
+                            <table class="table stripe nowrap" id="datatable-optimal">
                                 <thead>
                                     <tr>
                                         <th>Manager</th>
@@ -473,7 +470,7 @@ include 'sidebar.html';
             <div class="row card-section" id="draft-analysis" style="display: none;">
                 
                 <div class="row">
-                    <div class="col-sm-12 col-md-6 table-padding">
+                    <div class="col-sm-12 col-md-6">
                         <div class="card">
                             <div class="card-header">
                                 <h4 style="float: right">Worst Draft Picks</h4>
@@ -509,7 +506,7 @@ include 'sidebar.html';
                         </div>
                     </div>
 
-                    <div class="col-sm-12 col-md-6 table-padding">
+                    <div class="col-sm-12 col-md-6">
                         <div class="card">
                             <div class="card-header">
                                 <h4 style="float: right">Best Draft Picks</h4>
@@ -547,7 +544,7 @@ include 'sidebar.html';
                 </div>
 
                 <div class="row">
-                    <div class="col-sm-12 col-lg-6 table-padding">
+                    <div class="col-sm-12 col-lg-6">
                         <div class="card">
                             <div class="card-header">
                                 <h4 style="float: right">Points From Draft</h4>
@@ -581,7 +578,7 @@ include 'sidebar.html';
                         </div>
                     </div>
                     
-                    <div class="col-sm-12 col-lg-6 table-padding">
+                    <div class="col-sm-12 col-lg-6">
                         <div class="card">
                             <div class="card-header">
                                 <h4 style="float: right">Draft Performance</h4>
@@ -701,8 +698,6 @@ include 'sidebar.html';
 </div>
 
 <?php include 'footer.php'; ?>
-
-<script src="/assets/dataTables-fixedColumns.min.js" type="text/javascript"></script>
 
 <script type="text/javascript">
     $(document).ready(function() {
@@ -922,22 +917,12 @@ include 'sidebar.html';
                 data: function (d) {
                     d.dataType = 'optimal-lineups';
                     d.season = $('#year-select').val();
-                },
-                complete: function() {
-                    // Force layout recalculation after data is loaded
-                    setTimeout(function() {
-                        var table = $('#datatable-optimal').DataTable();
-                        table.columns.adjust().draw();
-                        if (table.fixedColumns) {
-                            table.fixedColumns().relayout();
-                        }
-                    }, 200);
                 }
             },
             columns: [
                 { data: 'manager' },
                 { data: 'opponent' },
-                { data: 'roster_link', sortable: false },
+                { data: 'roster_link', sortable: false, width: "30px" },
                 { data: 'week' },
                 { data: 'points' },
                 { data: 'oppPoints' },
@@ -1258,14 +1243,18 @@ include 'sidebar.html';
 </script>
 
 <style>
-    #datatable-currentStats_wrapper, #datatable-statsAgainst_wrapper {
-        max-width: 1100px;
-    }
+    /* Removed max-width constraint to allow tables to stretch */
     #datatable-drafted_wrapper {
         max-width: 800px;
     }
     #datatable-optimal_wrapper {
         max-width: 1465px;
+        overflow-x: hidden; /* Prevent double scrollbars */
+    }
+    
+    /* Fix for DataTables header alignment */
+    #datatable-optimal_wrapper .dataTables_scroll {
+        overflow: visible;
     }
     
     /* Ensure charts fit properly within their containers */

@@ -136,23 +136,6 @@ function showCard(cardId, updateUrl = true) {
         }, 100);
     }
 
-    // Adjust DataTables when showing top performers tab
-    if (cardId === 'top-performers') {
-        setTimeout(() => {
-            if (typeof $('#datatable-bestWeek').DataTable !== 'undefined') {
-                const table = $('#datatable-bestWeek').DataTable();
-                // Recalculate column widths
-                table.columns.adjust();
-                // Trigger redraw to ensure proper layout
-                table.draw();
-                // Relayout fixed columns if available
-                if (table.fixedColumns) {
-                    table.fixedColumns().relayout();
-                }
-            }
-        }, 150);
-    }
-
     // Adjust DataTables when showing player stats tab
     if (cardId === 'player-stats') {
         setTimeout(() => {

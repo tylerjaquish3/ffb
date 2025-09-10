@@ -28,11 +28,6 @@
         padding: 10px;
     }
 
-    .table-padding {
-        padding-left: 1px;
-        padding-right: 1px;
-    }
-
     li.nav-item.hidden-md-up.float-xs-right {
         display: none;
     }

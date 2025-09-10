@@ -12,6 +12,9 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - In regular_season_matchups table, lots of projections are wrong (looking at 2019)
 - start streaks on dashboard... maybe they started 4-0 3 times? put all years
 
+- Fix optimal lineups table alignment on current season page
+- update datatables to new version
+
 # Ideas
 
 - Profile page, line chart for points each season vs league average
@@ -25,14 +28,14 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - fewest points by position (all time, season)
     - most QB/RB/WR/etc points current season
 
-- fix yahoo api
 - fix navigation on tablet
 - mock schedule with dropdown (if we each played that manager's schedule)
 - strength of schedule ranks hardest to easiest schedule based on standings each week
 - current season, add line chart for top score, avg score, low score for each week
-- current season, add scheudle and link to newsletter
+- current season, add link to newsletter
 - fun fact finder page
 - allow people add comments/smack talk to profile
+- profile page, Head to Head tab, add column for each manager's record and rank at the time
 
 Notes:
 Rams moved to LA between 2015 & 2016

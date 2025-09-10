@@ -59,7 +59,7 @@ include 'sidebar.html';
 
 ?>
 
-<div class="app-content content container-fluid">
+<div class="app-content content">
     <div class="content-wrapper">
 
         <div class="content-body">
@@ -131,7 +131,7 @@ include 'sidebar.html';
                     <div class="col-sm-12 col-lg-6">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Week <?php echo $editWeek; ?> Recap</h4>
+                                <h4>Week <?php echo $editWeek - 1; ?> Recap</h4>
                             </div>
                             <div class="card-body" style="background: #fff;">
                                 <textarea name="recap" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the recap content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($recap); ?></textarea>

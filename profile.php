@@ -6,7 +6,6 @@ include 'sidebar.html';
 
 $versusSet = false;
 if (isset($_GET['id'])) {
-
     $managerName = $_GET['id'];
     $result = query("SELECT * FROM managers WHERE name = '" . $managerName . "'");
     while ($row = fetch_array($result)) {
@@ -824,10 +823,18 @@ if (isset($_GET['id'])) {
 <script type="text/javascript">
     $(document).ready(function() {
 
-        // Initialize the page with Overview tab active - delay to ensure showCard function is loaded
+        // Initialize the page with the correct tab active - delay to ensure showCard function is loaded
         setTimeout(function() {
             if (typeof showCard === 'function') {
-                showCard('overview');
+                // Check if a hash is present in the URL
+                if (window.location.hash) {
+                    // Remove the # from the hash
+                    const tabName = window.location.hash.substring(1);
+                    showCard(tabName);
+                } else {
+                    // Default to overview tab
+                    showCard('overview');
+                }
             }
         }, 100);
 
@@ -838,7 +845,7 @@ if (isset($_GET['id'])) {
         let managerName = "<?php echo $managerName; ?>";
         let baseUrl = "<?php echo $BASE_URL; ?>";
         $('#versus-select').change(function() {
-            window.location = baseUrl+'profile.php?id='+managerName+'&versus='+$('#versus-select').val();
+            window.location = baseUrl+'profile.php?id='+managerName+'&versus='+$('#versus-select').val()+'#head-to-head';
         });
 
         $('#oppRecordSelector').change(function() {

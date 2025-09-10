@@ -7,9 +7,8 @@ include 'sidebar.html';
 
 ?>
 
-<div class="app-content content container-fluid">
+<div class="app-content content">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
 
         <div class="content-body">
             <div class="row" style="direction: ltr;">
@@ -36,22 +35,22 @@ include 'sidebar.html';
             <div class="row mb-1">
                 <div class="col-sm-12">
                     <div class="tab-buttons-container">
-                        <button class="tab-button active" id="performance-stats-tab" onclick="showCard('performance-stats')">
+                        <button class="tab-button active" id="performance-stats-tab" onclick="showCard('performance-stats', true)">
                             Overview
                         </button>
-                        <button class="tab-button" id="top-performers-tab" onclick="showCard('top-performers')">
+                        <button class="tab-button" id="top-performers-tab" onclick="showCard('top-performers', true)">
                             Top Performers
                         </button>
-                        <button class="tab-button" id="player-stats-tab" onclick="showCard('player-stats')">
+                        <button class="tab-button" id="player-stats-tab" onclick="showCard('player-stats', true)">
                             Stats For
                         </button>
-                        <button class="tab-button" id="stats-against-tab" onclick="showCard('stats-against')">
+                        <button class="tab-button" id="stats-against-tab" onclick="showCard('stats-against', true)">
                             Stats Against
                         </button>
-                        <button class="tab-button" id="optimal-lineups-tab" onclick="showCard('optimal-lineups')">
+                        <button class="tab-button" id="optimal-lineups-tab" onclick="showCard('optimal-lineups', true)">
                             Optimal Lineups
                         </button>
-                        <button class="tab-button" id="draft-analysis-tab" onclick="showCard('draft-analysis')">
+                        <button class="tab-button" id="draft-analysis-tab" onclick="showCard('draft-analysis', true)">
                             Draft Analysis
                         </button>
                         <button class="tab-button" id="team-records-tab" onclick="showCard('team-records')">
@@ -441,31 +440,31 @@ include 'sidebar.html';
             </div>
 
             <div class="row card-section" id="optimal-lineups" style="display: none;">
-                <div class="col-sm-12" style="max-width: calc(100vw - 280px); overflow: hidden;">
-                    <div class="card" style="width: 100%; overflow: hidden; direction: ltr;">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Optimal Lineups</h4>
                         </div>
-                        <div class="card-body" style="padding: 0; overflow: hidden;">
-                            <div style="overflow-x: auto; overflow-y: hidden; padding: 1rem;">
-                            <table class="stripe nowrap row-border order-column full-width" id="datatable-optimal">
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive stripe nowrap" id="datatable-optimal">
                                 <thead>
-                                    <th>Manager</th>
-                                    <th>Opponent</th>
-                                    <th></th>
-                                    <th>Week</th>
-                                    <th>Actual Points</th>
-                                    <th>Opponent Score</th>
-                                    <th>Result</th>
-                                    <th>Optimal Points</th>
-                                    <th>Opponent Optimal</th>
-                                    <th>Actual Margin</th>
-                                    <th>Optimal Margin</th>
-                                    <th>Accuracy</th>
+                                    <tr>
+                                        <th>Manager</th>
+                                        <th>Opponent</th>
+                                        <th></th>
+                                        <th>Week</th>
+                                        <th>Actual Points</th>
+                                        <th>Opponent Score</th>
+                                        <th>Result</th>
+                                        <th>Optimal Points</th>
+                                        <th>Opponent Optimal</th>
+                                        <th>Actual Margin</th>
+                                        <th>Optimal Margin</th>
+                                        <th>Accuracy</th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -915,7 +914,7 @@ include 'sidebar.html';
         $('#datatable-optimal').DataTable({
             scrollX: "100%",
             scrollCollapse: true,
-            fixedColumns:   {
+            fixedColumns: {
                 leftColumns: 2
             },
             ajax: {
@@ -923,6 +922,16 @@ include 'sidebar.html';
                 data: function (d) {
                     d.dataType = 'optimal-lineups';
                     d.season = $('#year-select').val();
+                },
+                complete: function() {
+                    // Force layout recalculation after data is loaded
+                    setTimeout(function() {
+                        var table = $('#datatable-optimal').DataTable();
+                        table.columns.adjust().draw();
+                        if (table.fixedColumns) {
+                            table.fixedColumns().relayout();
+                        }
+                    }, 200);
                 }
             },
             columns: [

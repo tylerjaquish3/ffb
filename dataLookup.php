@@ -660,8 +660,8 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'weeks-by-year') {
     die;
 }
 
-// Get points by season for all managers
-if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-season-all-managers') {
+// Get points by week for all managers
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-week-all-managers') {
 
     $startWeek = explode('_', $_GET['startWeek'])[0];
     $startYear = explode('_', $_GET['startWeek'])[1];
@@ -672,13 +672,19 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-season-all-manag
     $managers = [];
     $weeks = [];
     
-    // Get all managers
-    $managerResult = query("SELECT id, name FROM managers ORDER BY name");
+    // Get all managers with their first year in the league
+    $managerResult = query("SELECT managers.id, managers.name, MIN(rsm.year) as first_year 
+                           FROM managers 
+                           JOIN regular_season_matchups rsm ON managers.id = rsm.manager1_id 
+                           GROUP BY managers.id, managers.name 
+                           ORDER BY managers.name");
     $managerIds = [];
     $managerNames = [];
+    $managerFirstYear = [];
     while ($row = fetch_array($managerResult)) {
         $managerIds[] = $row['id'];
         $managerNames[$row['id']] = $row['name'];
+        $managerFirstYear[$row['id']] = $row['first_year'];
         $managers[$row['name']] = [];
     }
 
@@ -697,22 +703,55 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-season-all-manag
 
     $result = query($sql);
     $weekTracker = [];
+    $managerWeeks = [];
     
     while ($row = fetch_array($result)) {
         $weekKey = 'Wk. '.$row['week_number'].' '.$row['year'];
         $managerName = $managerNames[$row['manager1_id']];
+        $managerId = $row['manager1_id'];
         
         // Track unique weeks
         if (!in_array($weekKey, $weekTracker)) {
             $weekTracker[] = $weekKey;
         }
         
-        // Add points for this manager and week
-        $managers[$managerName][] = (float)$row['points'];
+        // Only include points if the manager was in the league for this year
+        if ($row['year'] >= $managerFirstYear[$managerId]) {
+            // Keep track of which weeks we have data for each manager
+            if (!isset($managerWeeks[$managerName])) {
+                $managerWeeks[$managerName] = [];
+            }
+            $managerWeeks[$managerName][] = $weekKey;
+            
+            // Add points for this manager and week
+            $managers[$managerName][] = (float)$row['points'];
+        }
     }
     
     // Sort weeks chronologically
     $weeks = $weekTracker;
+    
+    // Now ensure all managers have proper array lengths by inserting nulls for weeks they weren't in the league
+    sort($weeks); // Sort chronologically
+    foreach ($managers as $managerName => &$pointsArray) {
+        // Create a new array with null values for all weeks
+        $newPointsArray = [];
+        $weekIndex = 0;
+        
+        foreach ($weeks as $week) {
+            // If this manager has data for this week, use it
+            if (isset($managerWeeks[$managerName]) && in_array($week, $managerWeeks[$managerName])) {
+                $newPointsArray[] = $pointsArray[$weekIndex++];
+            } else {
+                // Otherwise, insert null for weeks they weren't in the league
+                $newPointsArray[] = null;
+            }
+        }
+        
+        // Replace the original array with our properly aligned one
+        $pointsArray = $newPointsArray;
+    }
+    unset($pointsArray); // Remove reference
 
     echo json_encode([
         'managers' => $managers,

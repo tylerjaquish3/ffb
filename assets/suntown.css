@@ -374,6 +374,10 @@ tr.color-black td {
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
+div.dt-container div.dt-layout-row {
+    margin: 0 !important;
+}
+
 /* Top Weekly Performers table fixes */
 #datatable-bestWeek {
     width: 100% !important;
@@ -399,7 +403,7 @@ tr.color-black td {
 /* Optimal Lineups table fixes */
 #datatable-optimal {
     width: 100% !important;
-    table-layout: auto !important;
+    table-layout: fixed !important;
     border-collapse: collapse !important;
 }
 
@@ -408,7 +412,7 @@ tr.color-black td {
     white-space: nowrap !important;
     min-width: 100px !important;
     padding: 8px 12px !important;
-    vertical-align: top !important;
+    vertical-align: middle !important;
     border: 1px solid #ddd !important;
 }
 

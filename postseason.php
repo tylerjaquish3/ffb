@@ -158,7 +158,7 @@ include 'sidebar.html';
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <div class="table-container" style="overflow-x: auto;">
-                                <table class="table table-striped nowrap" id="datatable-records">
+                                <table class="table table-striped nowrap responsive" id="datatable-records">
                                 <thead>
                                     <th>Manager</th>
                                     <th>Quarter Wins</th>
@@ -215,91 +215,96 @@ include 'sidebar.html';
         }
 
         let postseasonTable = $('#datatable-postseason').DataTable({
-            "columnDefs": [{
-                "targets": [6],
-                "visible": false,
-                "searchable": false
+            columnDefs: [{
+                targets: [6],
+                visible: false,
+                searchable: false
             }],
-            "search": {
+            search: {
                 "caseInsensitive": false
             },
-            "order": [
+            order: [
                 [0, "desc"],
                 [6, "desc"]
             ]
         });
 
         $('#datatable-misc20').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [1, "asc"]
             ]
         });
         $('#datatable-misc21').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [3, "desc"]
             ]
         });
         $('#datatable-misc22').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [1, "desc"]
             ]
         });
         $('#datatable-misc23').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [4, "desc"]
             ]
         });
         $('#datatable-misc24').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [4, "desc"]
             ]
         });
         $('#datatable-misc25').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [3, "desc"]
             ]
         });
         $('#datatable-misc26').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [1, "desc"]
             ]
         });
 
         $('#datatable-records').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                leftColumns: 1
+            },
+            order: [
                 [9, "desc"]
             ]
         });
 
         $('#datatable-champions').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
                 [0, "desc"]
             ]
         });

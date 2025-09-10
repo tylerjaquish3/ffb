@@ -529,8 +529,6 @@ if ($previewRow && !empty($previewRow['preview'])) {
 
 <?php include 'footer.php'; ?>
 
-<script src="/assets/dataTables-fixedColumns.min.js" type="text/javascript"></script>
-
 <script type="text/javascript">
     $(document).ready(function() {
 

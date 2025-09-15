@@ -210,9 +210,14 @@ include 'sidebar.html';
                                             <option value="11">Draft Positions</option>
                                             <option value="12">Moves/Trades</option>
                                             <option value="13">Lineup Accuracy</option>
+                                            <option value="14">Points by Position</option>
+                                            <option value="15">Points by Position & Season</option>
+                                            <option value="16">Points by Position & Week</option>
                                         </select>
                                     </div>
-                                    <?php include 'regMiscStats.php'; ?>
+                                    <div style="direction: ltr;">
+                                        <?php include 'regMiscStats.php'; ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -226,237 +231,274 @@ include 'sidebar.html';
 <?php include 'footer.php'; ?>
 
 <script type="text/javascript">
-    $(document).ready(function() {
 
-        $('#regMiscStats').change(function() {
-            showRegTable($('#regMiscStats').val());
-        });
 
-        $('#postMiscStats').change(function() {
-            showPostTable($('#postMiscStats').val());
-        });
+    $('#regMiscStats').change(function() {
+        showRegTable($(this).val());
+    });
 
-        $('#datatable-wins').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
+    $('#postMiscStats').change(function() {
+        showPostTable($(this).val());
+    });
 
-        // Misc tables
-        $('#datatable-misc1').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc2').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc3').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc4').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc5').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc6').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc7').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc8').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc9').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc10').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc11').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "asc"]
-            ]
-        });
-        $('#datatable-misc12').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc13').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc20').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "asc"]
-            ]
-        });
-        $('#datatable-misc21').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc22').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc23').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [4, "desc"]
-            ]
-        });
-        $('#datatable-misc24').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [4, "desc"]
-            ]
-        });
-        $('#datatable-misc25').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc26').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
+    $('#datatable-wins').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
 
-        // Chart.defaults.global.defaultFontSize = 9;
-        var ctx = $('#postseasonChart');
+    // Misc tables
+    $('#datatable-misc1').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc2').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc3').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc4').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc5').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc6').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc7').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc8').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc9').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc10').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc11').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "asc"]
+        ]
+    });
+    $('#datatable-misc12').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc13').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc14').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc15').DataTable({
+        searching: false,
+        info: false,
+        // scrollX: "100%",
+        // scrollCollapse: true,
+        fixedColumns: {
+            left: 1
+        },
+        order: [
+            [2, "desc"]
+        ]
+    });
+    $('#datatable-misc16').DataTable({
+        searching: false,
+        info: true,
+        // scrollX: "100%",
+        scrollCollapse: true,
+        fixedColumns: {
+            leftColumns: 1
+        },
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc20').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        "order": [
+            [1, "asc"]
+        ]
+    });
+    $('#datatable-misc21').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc22').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc23').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [4, "desc"]
+        ]
+    });
+    $('#datatable-misc24').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [4, "desc"]
+        ]
+    });
+    $('#datatable-misc25').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc26').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
 
-        var stackedBar = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: <?php echo json_encode($postseasonChart['managers']); ?>,
-                datasets: [{
-                        label: 'Playoff Appearances',
-                        data: <?php echo json_encode($postseasonChart['appearances']); ?>,
-                        // backgroundColor: '#04015d'
-                        backgroundColor: '#297eff'
-                    },
-                    {
-                        label: 'Championship Appearances',
-                        data: <?php echo json_encode($postseasonChart['shipAppearances']); ?>,
-                    },
-                    {
-                        label: 'Championship Wins',
-                        data: <?php echo json_encode($postseasonChart['ships']); ?>,
-                        // backgroundColor: '#2eff37'
-                        backgroundColor: '#2eb82e'
-                    }
-                ]
-            },
-            options: {
-                indexAxis: 'y',
-                scales: {
-                    x: {
-                        stacked: true
-                    },
-                    y: {
-                        stacked: true
-                    }
+    // Chart.defaults.global.defaultFontSize = 9;
+    var ctx = $('#postseasonChart');
+
+    var stackedBar = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: <?php echo json_encode($postseasonChart['managers']); ?>,
+            datasets: [{
+                    label: 'Playoff Appearances',
+                    data: <?php echo json_encode($postseasonChart['appearances']); ?>,
+                    // backgroundColor: '#04015d'
+                    backgroundColor: '#297eff'
+                },
+                {
+                    label: 'Championship Appearances',
+                    data: <?php echo json_encode($postseasonChart['shipAppearances']); ?>,
+                },
+                {
+                    label: 'Championship Wins',
+                    data: <?php echo json_encode($postseasonChart['ships']); ?>,
+                    // backgroundColor: '#2eff37'
+                    backgroundColor: '#2eb82e'
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    stacked: true
+                },
+                y: {
+                    stacked: true
                 }
             }
-        });
+        }
     });
 
     function showRegTable(tableId) {
-        for (i = 1; i < 14; i++) {
+        for (i = 1; i < 20; i++) {
+            $('#datatable-misc' + i + '_wrapper').hide();
             $('#datatable-misc' + i).hide();
         }
+
         $('#datatable-misc' + tableId).show();
+        $('#datatable-misc' + tableId + '_wrapper').show();
     }
 
     function showPostTable(tableId) {
         for (i = 20; i < 27; i++) {
-            $('#datatable-misc' + i).hide();
+            $('#datatable-misc' + i + '_wrapper').hide();
         }
-        $('#datatable-misc' + tableId).show();
+        $('#datatable-misc' + tableId + '_wrapper').show();
     }
+
+    setTimeout(showRegTable(3), 1000);
+
 </script>

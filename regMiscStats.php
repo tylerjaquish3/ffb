@@ -74,7 +74,7 @@
 	</tfoot>
 </table>
 <!-- Total Points -->
-<table class="table table-responsive table-striped nowrap" id="datatable-misc2">
+<table class="table table-responsive table-striped nowrap" id="datatable-misc2" style="display:none;">
 	<thead>
 		<th>Manager</th>
 		<th>Points For</th>
@@ -725,6 +725,145 @@
 				<td><?php echo round($data['points'], 1); ?></td>
 				<td><?php echo round($data['optimal'], 1); ?></td>
 				<td><?php echo $accuracy; ?>%</td>
+									</tr>
+		<?php } ?>
+	</tbody>
+</table>
+
+<!-- Points by Position -->
+<table class="table table-responsive table-striped nowrap" id="datatable-misc14" style="display:none;">
+	<thead>
+		<th>Manager</th>
+		<th>QB</th>
+		<th>RB</th>
+		<th>WR</th>
+		<th>TE</th>
+		<th>K</th>
+		<th>DEF</th>
+		<th>BN</th>
+	</thead>
+	<tbody>
+		<?php
+		$result = query("SELECT 
+                r.manager, 
+                SUM(CASE WHEN r.position = 'QB' THEN r.points ELSE 0 END) AS qb_points,
+                SUM(CASE WHEN r.position = 'RB' THEN r.points ELSE 0 END) AS rb_points,
+                SUM(CASE WHEN r.position = 'WR' THEN r.points ELSE 0 END) AS wr_points,
+                SUM(CASE WHEN r.position = 'TE' THEN r.points ELSE 0 END) AS te_points,
+                SUM(CASE WHEN r.position = 'K' THEN r.points ELSE 0 END) AS k_points,
+                SUM(CASE WHEN r.position = 'DEF' THEN r.points ELSE 0 END) AS def_points,
+                SUM(CASE WHEN r.roster_spot = 'BN' THEN r.points ELSE 0 END) AS bn_points,
+                SUM(r.points) AS total_points
+            FROM rosters r
+            WHERE r.points IS NOT NULL
+            GROUP BY r.manager
+            ORDER BY total_points DESC");
+            
+		while ($row = fetch_array($result)) { ?>
+			<tr>
+				<td><?php echo $row['manager']; ?></td>
+				<td><?php echo number_format($row['qb_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['rb_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['wr_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['te_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['k_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['def_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['bn_points'], 2, '.', ','); ?></td>
+			</tr>
+		<?php } ?>
+	</tbody>
+</table>
+
+<!-- Points by Position by Season -->
+<table class="table table-responsive table-striped nowrap" id="datatable-misc15" style="display:none;">
+	<thead>
+		<th>Manager</th>
+		<th>Season</th>
+		<th>QB</th>
+		<th>RB</th>
+		<th>WR</th>
+		<th>TE</th>
+		<th>K</th>
+		<th>DEF</th>
+		<th>BN</th>
+	</thead>
+	<tbody>
+		<?php
+		$result = query("SELECT 
+                r.manager,
+                r.year, 
+                SUM(CASE WHEN r.position = 'QB' THEN r.points ELSE 0 END) AS qb_points,
+                SUM(CASE WHEN r.position = 'RB' THEN r.points ELSE 0 END) AS rb_points,
+                SUM(CASE WHEN r.position = 'WR' THEN r.points ELSE 0 END) AS wr_points,
+                SUM(CASE WHEN r.position = 'TE' THEN r.points ELSE 0 END) AS te_points,
+                SUM(CASE WHEN r.position = 'K' THEN r.points ELSE 0 END) AS k_points,
+                SUM(CASE WHEN r.position = 'DEF' THEN r.points ELSE 0 END) AS def_points,
+                SUM(CASE WHEN r.roster_spot = 'BN' THEN r.points ELSE 0 END) AS bn_points
+            FROM rosters r
+            WHERE r.points IS NOT NULL
+            GROUP BY r.manager, r.year
+            ORDER BY r.manager, r.year DESC");
+            
+		while ($row = fetch_array($result)) { ?>
+			<tr>
+				<td><?php echo $row['manager']; ?></td>
+				<td><?php echo $row['year']; ?></td>
+				<td><?php echo number_format($row['qb_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['rb_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['wr_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['te_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['k_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['def_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['bn_points'], 2, '.', ','); ?></td>
+			</tr>
+		<?php } ?>
+	</tbody>
+</table>
+
+<!-- Points by Year, Week and Position -->
+<table class="table table-responsive table-striped nowrap" id="datatable-misc16" style="display:none;">
+	<thead>
+		<th>Manager</th>
+		<th>Season</th>
+		<th>Week</th>
+		<th>QB</th>
+		<th>RB</th>
+		<th>WR</th>
+		<th>TE</th>
+		<th>K</th>
+		<th>DEF</th>
+		<th>BN</th>
+	</thead>
+	<tbody>
+		<?php
+		$result = query("SELECT 
+                r.year,
+                r.week,
+                r.manager, 
+                SUM(CASE WHEN r.position = 'QB' THEN r.points ELSE 0 END) AS qb_points,
+                SUM(CASE WHEN r.position = 'RB' THEN r.points ELSE 0 END) AS rb_points,
+                SUM(CASE WHEN r.position = 'WR' THEN r.points ELSE 0 END) AS wr_points,
+                SUM(CASE WHEN r.position = 'TE' THEN r.points ELSE 0 END) AS te_points,
+                SUM(CASE WHEN r.position = 'K' THEN r.points ELSE 0 END) AS k_points,
+                SUM(CASE WHEN r.position = 'DEF' THEN r.points ELSE 0 END) AS def_points,
+                SUM(CASE WHEN r.roster_spot = 'BN' THEN r.points ELSE 0 END) AS bn_points
+            FROM rosters r
+            WHERE r.points IS NOT NULL
+            GROUP BY r.year, r.week, r.manager
+            ORDER BY r.year DESC, r.week ASC");
+            
+		while ($row = fetch_array($result)) { ?>
+			<tr>
+				<td><?php echo $row['manager']; ?></td>
+				<td><?php echo $row['year']; ?></td>
+				<td><?php echo $row['week']; ?></td>
+				<td><?php echo number_format($row['qb_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['rb_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['wr_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['te_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['k_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['def_points'], 2, '.', ','); ?></td>
+				<td><?php echo number_format($row['bn_points'], 2, '.', ','); ?></td>
 			</tr>
 		<?php } ?>
 	</tbody>

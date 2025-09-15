@@ -1033,7 +1033,6 @@ include 'sidebar.html';
                 }, 50);
             }
         });
-        });
 
         $('#datatable-bestDraft').DataTable({
             scrollX: "100%",
@@ -1349,7 +1348,7 @@ include 'sidebar.html';
         
         // Make chart globally accessible
         window.weeklyScoresChart = weeklyScoresChart;
-    // });
+    });
 
     // Initialize the page with Performance Stats tab active
     document.addEventListener('DOMContentLoaded', function() {

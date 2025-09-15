@@ -25,11 +25,13 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - fewest points by position (all time, season)
     - most QB/RB/WR/etc points current season
 
-- fix navigation on tablet
 - fun fact finder page
 - allow people add comments/smack talk to profile
 - profile page, Head to Head tab, add column for each manager's record and rank at the time
-- regMiscStats, add points by position
+- update the meta data for the newsletter
+- big idea: log the history of managers holding records
+    - new db table to keep track of when the manager took over the record
+    - can find out who has held each record the most
 
 Notes:
 Rams moved to LA between 2015 & 2016

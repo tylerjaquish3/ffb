@@ -142,9 +142,6 @@ function query($sql)
 {
     global $conn, $DB_TYPE;
 
-    // Log SQL queries for debugging
-    file_put_contents('debug_sql.txt', date('Y-m-d H:i:s') . " - SQL Query: $sql\n", FILE_APPEND);
-
     if ($DB_TYPE == 'sqlite') {
         $sql = str_replace("if(", "iif(", $sql);
         $sql = str_replace("IF(", "IIF(", $sql);
@@ -152,19 +149,17 @@ function query($sql)
 
         try {
             $result = $conn->query($sql);
-            if (!$result) {
-                file_put_contents('debug_sql.txt', "SQLite Error on query\n\n", FILE_APPEND);
-            }
+
             return $result;
         } catch (Exception $e) {
-            file_put_contents('debug_sql.txt', "Exception in query: " . $e->getMessage() . "\n\n", FILE_APPEND);
+            dd("Exception in query: " . $e->getMessage());
             return false;
         }
     }
 
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents('debug_sql.txt', "MySQL Error: " . mysqli_error($conn) . "\n\n", FILE_APPEND);
+        dd("MySQL Error: " . mysqli_error($conn));
     }
     return $result;
 }

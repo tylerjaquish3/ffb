@@ -44,7 +44,7 @@ if( ! $request_token_url ) {
 
 ?>
 
-<div class="app-content content container-fluid">
+<div class="app-content content">
     <div class="content-wrapper">
 
         <div class="content-body">
@@ -81,7 +81,7 @@ if( ! $request_token_url ) {
                             <input type="checkbox" name="sections[]" value="matchups"> Matchups<br>
                             <input type="checkbox" name="sections[]" value="rosters"> Rosters<br>
                             <input type="checkbox" name="sections[]" value="trades"> Trades<br>
-                            <input type="checkbox" name="sections[]" value="fun_facts"> Fun Facts<br>
+                            <!-- <input type="checkbox" name="sections[]" value="fun_facts"> Fun Facts<br> -->
 
                             <h3>Weeks</h3>
                             <input type="checkbox" name="weeks[]" value="1"> 1<br>

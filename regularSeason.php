@@ -112,9 +112,15 @@ include 'sidebar.html';
                             <option value="10">Record Against Everyone</option>
                             <option value="11">Draft Positions</option>
                             <option value="12">Moves/Trades</option>
+                            <option value="13">Lineup Accuracy</option>
+                            <option value="14">Points by Position</option>
+                            <option value="15">Points by Position & Season</option>
+                            <option value="16">Points by Position & Week</option>
                         </select>
                     </div>
-                    <?php include 'regMiscStats.php'; ?>
+                    <div style="background: #fff; direction: ltr; clear: both; padding-top: 10px;">
+                        <?php include 'regMiscStats.php'; ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -898,114 +904,7 @@ include 'sidebar.html';
         });
         
         // Initialize with Season Points table (value 3) when page loads
-        $(document).ready(function() {
-            showRegTable('3');
-        });
-
-        function showRegTable(tableId) {
-            for (i = 1; i < 14; i++) {
-                $('#datatable-misc' + i).hide();
-            }
-            $('#datatable-misc' + tableId).show();
-        }
-
-        // Misc tables
-        $('#datatable-misc1').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc2').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc3').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc4').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc5').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc6').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc7').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc8').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc9').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc10').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc11').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "asc"]
-            ]
-        });
-        $('#datatable-misc12').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-            "order": [
-                [3, "desc"]
-            ]
-        });
+        setTimeout(showRegTable(3), 1000);
 
         table = $('#datatable-weeklyRanks').DataTable({
             pageLength: 10,

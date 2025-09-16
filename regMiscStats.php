@@ -746,18 +746,17 @@
 		<?php
 		$result = query("SELECT 
                 r.manager, 
-                SUM(CASE WHEN r.position = 'QB' THEN r.points ELSE 0 END) AS qb_points,
-                SUM(CASE WHEN r.position = 'RB' THEN r.points ELSE 0 END) AS rb_points,
-                SUM(CASE WHEN r.position = 'WR' THEN r.points ELSE 0 END) AS wr_points,
-                SUM(CASE WHEN r.position = 'TE' THEN r.points ELSE 0 END) AS te_points,
-                SUM(CASE WHEN r.position = 'K' THEN r.points ELSE 0 END) AS k_points,
-                SUM(CASE WHEN r.position = 'DEF' THEN r.points ELSE 0 END) AS def_points,
-                SUM(CASE WHEN r.roster_spot = 'BN' THEN r.points ELSE 0 END) AS bn_points,
-                SUM(r.points) AS total_points
+                SUM(CASE WHEN r.position = 'QB' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS qb_points,
+                SUM(CASE WHEN r.position = 'RB' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS rb_points,
+                SUM(CASE WHEN r.position = 'WR' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS wr_points,
+                SUM(CASE WHEN r.position = 'TE' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS te_points,
+                SUM(CASE WHEN r.position = 'K' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS k_points,
+                SUM(CASE WHEN r.position = 'DEF' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS def_points,
+                SUM(CASE WHEN r.roster_spot = 'BN' THEN r.points ELSE 0 END) AS bn_points
             FROM rosters r
             WHERE r.points IS NOT NULL
             GROUP BY r.manager
-            ORDER BY total_points DESC");
+            ORDER BY manager ASC");
             
 		while ($row = fetch_array($result)) { ?>
 			<tr>
@@ -792,12 +791,12 @@
 		$result = query("SELECT 
                 r.manager,
                 r.year, 
-                SUM(CASE WHEN r.position = 'QB' THEN r.points ELSE 0 END) AS qb_points,
-                SUM(CASE WHEN r.position = 'RB' THEN r.points ELSE 0 END) AS rb_points,
-                SUM(CASE WHEN r.position = 'WR' THEN r.points ELSE 0 END) AS wr_points,
-                SUM(CASE WHEN r.position = 'TE' THEN r.points ELSE 0 END) AS te_points,
-                SUM(CASE WHEN r.position = 'K' THEN r.points ELSE 0 END) AS k_points,
-                SUM(CASE WHEN r.position = 'DEF' THEN r.points ELSE 0 END) AS def_points,
+                SUM(CASE WHEN r.position = 'QB' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS qb_points,
+                SUM(CASE WHEN r.position = 'RB' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS rb_points,
+                SUM(CASE WHEN r.position = 'WR' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS wr_points,
+                SUM(CASE WHEN r.position = 'TE' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS te_points,
+                SUM(CASE WHEN r.position = 'K' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS k_points,
+                SUM(CASE WHEN r.position = 'DEF' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS def_points,
                 SUM(CASE WHEN r.roster_spot = 'BN' THEN r.points ELSE 0 END) AS bn_points
             FROM rosters r
             WHERE r.points IS NOT NULL
@@ -840,12 +839,12 @@
                 r.year,
                 r.week,
                 r.manager, 
-                SUM(CASE WHEN r.position = 'QB' THEN r.points ELSE 0 END) AS qb_points,
-                SUM(CASE WHEN r.position = 'RB' THEN r.points ELSE 0 END) AS rb_points,
-                SUM(CASE WHEN r.position = 'WR' THEN r.points ELSE 0 END) AS wr_points,
-                SUM(CASE WHEN r.position = 'TE' THEN r.points ELSE 0 END) AS te_points,
-                SUM(CASE WHEN r.position = 'K' THEN r.points ELSE 0 END) AS k_points,
-                SUM(CASE WHEN r.position = 'DEF' THEN r.points ELSE 0 END) AS def_points,
+                SUM(CASE WHEN r.position = 'QB' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS qb_points,
+                SUM(CASE WHEN r.position = 'RB' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS rb_points,
+                SUM(CASE WHEN r.position = 'WR' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS wr_points,
+                SUM(CASE WHEN r.position = 'TE' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS te_points,
+                SUM(CASE WHEN r.position = 'K' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS k_points,
+                SUM(CASE WHEN r.position = 'DEF' AND r.roster_spot != 'BN' THEN r.points ELSE 0 END) AS def_points,
                 SUM(CASE WHEN r.roster_spot = 'BN' THEN r.points ELSE 0 END) AS bn_points
             FROM rosters r
             WHERE r.points IS NOT NULL
@@ -868,3 +867,157 @@
 		<?php } ?>
 	</tbody>
 </table>
+
+<script src="/assets/datatables.js"></script>
+
+<script type="text/javascript">
+
+	function showRegTable(tableId) {
+        for (i = 1; i < 20; i++) {
+            $('#datatable-misc' + i + '_wrapper').hide();
+            $('#datatable-misc' + i).hide();
+        }
+
+        $('#datatable-misc' + tableId).show();
+        $('#datatable-misc' + tableId + '_wrapper').show();
+    }
+	
+	// Misc tables
+    $('#datatable-misc1').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc2').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc3').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc4').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc5').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc6').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc7').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc8').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc9').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc10').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc11').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "asc"]
+        ]
+    });
+    $('#datatable-misc12').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc13').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc14').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc15').DataTable({
+        searching: false,
+        info: false,
+        // scrollX: "100%",
+        // scrollCollapse: true,
+        fixedColumns: {
+            left: 1
+        },
+        order: [
+            [2, "desc"]
+        ]
+    });
+    $('#datatable-misc16').DataTable({
+        searching: false,
+        info: true,
+        // scrollX: "100%",
+        scrollCollapse: true,
+        fixedColumns: {
+            leftColumns: 1
+        },
+        order: [
+            [3, "desc"]
+        ]
+    });
+
+</script>

@@ -732,7 +732,24 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-week-all-manager
     $weeks = $weekTracker;
     
     // Now ensure all managers have proper array lengths by inserting nulls for weeks they weren't in the league
-    sort($weeks); // Sort chronologically
+    // Custom sort function to sort weeks numerically by year and week
+    usort($weeks, function($a, $b) {
+        // Extract week number and year from "Wk. X YYYY" format
+        preg_match('/Wk\. (\d+) (\d+)/', $a, $matchesA);
+        preg_match('/Wk\. (\d+) (\d+)/', $b, $matchesB);
+        
+        $weekA = intval($matchesA[1]);
+        $yearA = intval($matchesA[2]);
+        $weekB = intval($matchesB[1]);
+        $yearB = intval($matchesB[2]);
+        
+        // Sort by year first, then by week
+        if ($yearA != $yearB) {
+            return $yearA - $yearB;
+        }
+        
+        return $weekA - $weekB;
+    });
     foreach ($managers as $managerName => &$pointsArray) {
         // Create a new array with null values for all weeks
         $newPointsArray = [];

@@ -628,13 +628,16 @@ if (isset($_GET['id'])) {
                                                     WHERE (manager1_id = $versus AND manager2_id = $managerId)
                                                     ORDER BY YEAR
                                                 ) a
-                                                ORDER BY YEAR desc, CASE WHEN (week_number <> '0' AND CAST(week_number AS SIGNED) <> 0) THEN CAST(week_number AS SIGNED) ELSE 9999 END DESC
+                                                ORDER BY YEAR DESC, CASE 
+                                                    WHEN week_number = '0' THEN 9999
+                                                    ELSE CAST(week_number AS INTEGER) 
+                                                END DESC
                                                 "
                                             );
                                             while ($array = fetch_array($result)) {
                                                 echo '<tr class="highlight">
                                                     <td>'.$array["year"].'</td>
-                                                    <td>'.$array["week_number"].'</td>';
+                                                    <td>'.(int)$array["week_number"].'</td>';
                                                     if ($array['winning_manager_id'] == $managerId) {
                                                         echo '<td><span class="badge badge-primary">'.$managerName.'</span></td>';
                                                     } else {
@@ -944,7 +947,8 @@ if (isset($_GET['id'])) {
             paging: false,
             info: false,
             order: [
-                [0, "desc"]
+                [0, "desc"],
+                [1, "desc"]
             ]
         });
 

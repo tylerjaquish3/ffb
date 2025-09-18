@@ -57,6 +57,7 @@ if( ! $request_token_url ) {
                             <!-- 2. Direct user to Yahoo! for authorization (retrieve verifier) -->
                             <h2>First click Verify and then come back and enter the code</h2>
                             <a class="btn btn-secondary" href="<?php echo $request_token_url; ?>" target="_blank">Verify</a>
+                            <a class="btn btn-secondary" href="/editNewsletter.php" target="_blank">Edit Newsletter</a>
                         </div>
                     </div>
                 </div>

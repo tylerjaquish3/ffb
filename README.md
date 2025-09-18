@@ -12,6 +12,8 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - In regular_season_matchups table, lots of projections are wrong (looking at 2019)
 - start streaks on dashboard... maybe they started 4-0 3 times? put all years
 
+- record log says new leader if its week 1 but doesnt look at the end of last year
+
 # Ideas
 
 - Profile page, line chart for points each season vs league average
@@ -30,8 +32,9 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - profile page, Head to Head tab, add column for each manager's record and rank at the time
 - update the meta data for the newsletter
 - big idea: log the history of managers holding records
-    - new db table to keep track of when the manager took over the record
     - can find out who has held each record the most
+    - count weeks leading the record instead of showing each week
+- datatables hover: true
 
 Notes:
 Rams moved to LA between 2015 & 2016

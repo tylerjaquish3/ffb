@@ -102,9 +102,8 @@ function lookupGameTime(?int $id) {
 }
 ?>
 
-<div class="app-content content container-fluid">
+<div class="app-content content">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
 
         <div class="content-body">
             <div class="row">

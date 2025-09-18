@@ -94,7 +94,7 @@ class UpdateWeeklyRecords implements ShouldQueue
             } 
             // If just a year was provided, process all weeks in that year
             else if ($this->year) {
-                $maxWeek = ($this->year == $this->currentYear) ? $this->currentWeek : 17;
+                $maxWeek = ($this->year == $this->currentYear) ? $this->currentWeek : $this->getMaxWeek($this->year);
                 for ($week = 1; $week <= $maxWeek; $week++) {
                     $this->processYearWeek($this->year, $week);
                 }
@@ -111,7 +111,7 @@ class UpdateWeeklyRecords implements ShouldQueue
                 // Process in strict chronological order
                 for ($year = $this->startYear; $year <= $this->currentYear; $year++) {
                     echo "Processing year {$year}" . PHP_EOL;
-                    $maxWeek = ($year == $this->currentYear) ? $this->currentWeek : 17;
+                    $maxWeek = ($year == $this->currentYear) ? $this->currentWeek : $this->getMaxWeek($year);
                     
                     for ($week = 1; $week <= $maxWeek; $week++) {
                         echo "Processing week {$week} of {$year}" . PHP_EOL;
@@ -203,7 +203,7 @@ class UpdateWeeklyRecords implements ShouldQueue
                 $this->recordSingleFunFact($year, $week, $funFact, $leader);
             }
         } else {
-            echo "WARNING: No leader found for fun fact {$funFact->id} at {$year}-W{$week}" . PHP_EOL;
+            // echo "WARNING: No leader found for fun fact {$funFact->id} at {$year}-W{$week}" . PHP_EOL;
         }
     }
     
@@ -229,15 +229,51 @@ class UpdateWeeklyRecords implements ShouldQueue
         
         // If no previous record in current season, check end of previous season
         if (!$previousRecord && $year > $this->startYear) {
-            $previousRecord = RecordLog::where([
+            // Find the last available record from the previous year (could be regular season or playoff round)
+            // Need to order chronologically, not lexicographically
+            $previousYearRecords = RecordLog::where([
                 'year' => $year - 1,
-                'week' => 17, // Assume 17-week season
                 'fun_fact_id' => $funFact->id
-            ])->first();
+            ])->get();
+            
+            if ($previousYearRecords->count() > 0) {
+                // Sort records chronologically using custom logic
+                $previousRecord = $previousYearRecords->sortBy(function($record) use ($year) {
+                    $week = $record->week;
+                    
+                    // Convert week/round to chronological order value
+                    if (is_numeric($week)) {
+                        return (int)$week; // Regular season weeks: 1, 2, 3, ... (13 pre-2021, 14+ from 2021)
+                    } else {
+                        // Playoff rounds come after regular season
+                        switch ($week) {
+                            case 'Quarterfinal':
+                                return 100; // After regular season
+                            case 'Semifinal':
+                                return 101; // After Quarterfinal
+                            case 'Final':
+                                return 102; // After Semifinal
+                            default:
+                                return 999; // Unknown, put at end
+                        }
+                    }
+                })->last(); // Get the chronologically last record
+            }
         }
         
-        // If this is the very first week of the first season, or we have a new leader
-        $isNewLeader = !$previousRecord || (int)$previousRecord->manager_id !== (int)$leader['manager_id'];
+        // For new leader detection with ties, we need to check if this manager was among the previous leaders
+        $isNewLeader = true;
+        if ($previousRecord) {
+            // Get all managers who were tied leaders in the previous period
+            $previousLeaders = RecordLog::where([
+                'year' => $previousRecord->year,
+                'week' => $previousRecord->week,
+                'fun_fact_id' => $funFact->id
+            ])->pluck('manager_id')->toArray();
+            
+            // If current leader was among the previous tied leaders, they are continuing, not new
+            $isNewLeader = !in_array((int)$leader['manager_id'], array_map('intval', $previousLeaders));
+        }
         
         // Special case for first week of first season - everyone is a new leader
         if ($year == $this->startYear && $week == 1) {
@@ -250,15 +286,15 @@ class UpdateWeeklyRecords implements ShouldQueue
             'year' => $year,
             'week' => $weekOrRound,
             'fun_fact_id' => $funFact->id,
-        ], [
             'manager_id' => $leader['manager_id'],
+        ], [
             'value' => $leader['value'],
             'note' => $leader['note'] ?? null,
             'new_leader' => $isNewLeader,
         ]);
         
-        echo "Recorded fun fact {$funFact->id} for {$year}-W{$week}: {$leader['manager_id']} " . 
-             ($isNewLeader ? "(NEW LEADER)" : "(continuing leader)") . PHP_EOL;
+        // echo "Recorded fun fact {$funFact->id} for {$year}-W{$week}: {$leader['manager_id']} " . 
+        //      ($isNewLeader ? "(NEW LEADER)" : "(continuing leader)") . PHP_EOL;
         
         // Update the last leader for this fun fact in our memory cache
         $this->lastLeaders[$funFact->id] = $leader['manager_id'];
@@ -407,9 +443,9 @@ class UpdateWeeklyRecords implements ShouldQueue
             // ID 32: Least championships
             32 => 'leastChampionships',
             // IDs 33-36: Average Points
-            33 => 'averagePoints',
+            // 33 => 'averagePoints',
             34 => 'averagePoints',
-            35 => 'averagePoints',
+            // 35 => 'averagePoints',
             36 => 'averagePoints',
             // IDs 39-40: Streaks
             39 => 'streaks',
@@ -452,10 +488,6 @@ class UpdateWeeklyRecords implements ShouldQueue
             // IDs 71-72: Draft
             71 => 'draft',
             72 => 'draft',
-            // IDs 73-75: Moves
-            73 => 'moves',
-            74 => 'moves',
-            75 => 'moves',
             // IDs 76-80: Current Season Stats
             76 => 'currentSeasonStats',
             77 => 'currentSeasonStats',
@@ -578,6 +610,10 @@ class UpdateWeeklyRecords implements ShouldQueue
                 // For playoff matchups - include games from previous years
                 // For historical calculations during playoff weeks, also include current year playoff data
                 // but only up to the current playoff round (since those specific rounds have been completed)
+                // Also include current year playoff data for season-based fun facts that need complete season info
+                $seasonBasedFunFacts = [8, 14, 33, 35, 90, 95, 99, 103, 104];
+                $needsCurrentYearPlayoffs = in_array($funFactId, $seasonBasedFunFacts);
+                
                 if ($isPlayoffWeek) {
                     $currentRound = $this->getPlayoffRound($year, $week);
                     $roundsToInclude = [];
@@ -598,7 +634,12 @@ class UpdateWeeklyRecords implements ShouldQueue
                         $playoffFilter = "year < {$year}";
                     }
                 } else {
-                    $playoffFilter = "year < {$year}";
+                    // For season-based fun facts, always include current year playoff data
+                    if ($needsCurrentYearPlayoffs) {
+                        $playoffFilter = "year <= {$year}";
+                    } else {
+                        $playoffFilter = "year < {$year}";
+                    }
                 }
                 
                 DB::statement("
@@ -804,11 +845,14 @@ class UpdateWeeklyRecords implements ShouldQueue
         
         $week = $currentWeekOfYear - $nflStartWeek + 1;
         
+        $currentYear = (int)date('Y');
+        $maxWeekForCurrentYear = $this->getMaxWeek($currentYear);
+        
         // Ensure week is within valid range
         if ($week < 1) {
             $week = 1;
-        } elseif ($week > 17) {
-            $week = 17;
+        } elseif ($week > $maxWeekForCurrentYear) {
+            $week = $maxWeekForCurrentYear;
         }
         
         return $week;
@@ -887,6 +931,26 @@ class UpdateWeeklyRecords implements ShouldQueue
     {
         $updateFunFacts = new UpdateFunFacts($this->currentYear, $this->currentWeek);
         $updateFunFacts->trackTopPositionPerformances();
+    }
+
+    /**
+     * Get the maximum regular season week for a given year
+     */
+    protected function getMaxRegularSeasonWeek($year)
+    {
+        // Prior to 2021, regular season was 13 weeks (weeks 1-13), playoffs started at week 14
+        // Starting in 2021, regular season expanded to 14 weeks (weeks 1-14), playoffs start at week 15
+        return ($year >= 2021) ? 14 : 13;
+    }
+
+    /**
+     * Get the maximum week (including playoffs) for a given year
+     */
+    protected function getMaxWeek($year)
+    {
+        // Pre-2021: Regular season weeks 1-13, playoffs weeks 14-16 (max week 16)
+        // 2021+: Regular season weeks 1-14, playoffs weeks 15-17 (max week 17)
+        return ($year >= 2021) ? 17 : 16;
     }
 
     /**

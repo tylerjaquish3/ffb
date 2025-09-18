@@ -606,52 +606,214 @@ if (isset($_GET['id'])) {
                                             <th>Score</th>
                                             <th>Opponent</th>
                                             <th>Margin</th>
+                                            <th>Records/Seeds</th>
                                         </thead>
                                         <tbody>
                                             <?php
-                                            $result = query(
-                                                "SELECT * FROM (
-                                                    SELECT year, week_number, manager1_id AS man1, manager2_id AS man2,
-                                                    manager1_score AS man1score, manager2_score AS man2score, winning_manager_id
-                                                    FROM regular_season_matchups
-                                                    WHERE manager1_id = $managerId
-                                                    AND manager2_id = $versus
-                                                UNION
-                                                    SELECT year, round, manager1_id AS man1, manager2_id AS man2,
-                                                    manager1_score AS man1score, manager2_score AS man2score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END
-                                                    FROM playoff_matchups
-                                                    WHERE (manager1_id = $managerId AND manager2_id = $versus)
-                                                UNION
-                                                    SELECT year, round, manager2_id AS man2, manager1_id AS man1,
-                                                    manager2_score AS man1score, manager1_score AS man2score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END
-                                                    FROM playoff_matchups
-                                                    WHERE (manager1_id = $versus AND manager2_id = $managerId)
-                                                    ORDER BY YEAR
-                                                ) a
-                                                ORDER BY YEAR DESC, CASE 
-                                                    WHEN week_number = '0' THEN 9999
-                                                    ELSE CAST(week_number AS INTEGER) 
-                                                END DESC
-                                                "
+                                            // Function to calculate records up to a specific week
+                                            function getRecordBeforeWeek($manager_id, $year, $week) {
+                                                // Don't show record for week 1
+                                                if ($week <= 1) {
+                                                    return '-';
+                                                }
+                                                
+                                                $wins = 0;
+                                                $losses = 0;
+                                                
+                                                $result = query("SELECT winning_manager_id, losing_manager_id FROM regular_season_matchups 
+                                                    WHERE year = $year AND week_number < $week 
+                                                    AND (manager1_id = $manager_id OR manager2_id = $manager_id)
+                                                    AND manager1_id < manager2_id");
+                                                
+                                                while ($row = fetch_array($result)) {
+                                                    if ($row['winning_manager_id'] == $manager_id) {
+                                                        $wins++;
+                                                    } else if ($row['losing_manager_id'] == $manager_id) {
+                                                        $losses++;
+                                                    }
+                                                }
+                                                
+                                                return "$wins-$losses";
+                                            }
+
+                                            // Function to get rank before a specific week
+                                            function getRankBeforeWeek($manager_id, $year, $week) {
+                                                // Don't show rank for week 1
+                                                if ($week <= 1) {
+                                                    return '-';
+                                                }
+                                                
+                                                // Get all managers' records before this week
+                                                $managers = array();
+                                                $managerResult = query("SELECT DISTINCT manager1_id as mid FROM regular_season_matchups WHERE year = $year
+                                                    UNION SELECT DISTINCT manager2_id as mid FROM regular_season_matchups WHERE year = $year");
+                                                
+                                                while ($managerRow = fetch_array($managerResult)) {
+                                                    $mid = $managerRow['mid'];
+                                                    $wins = 0;
+                                                    $losses = 0;
+                                                    $totalPoints = 0;
+                                                    
+                                                    $recordResult = query("SELECT winning_manager_id, losing_manager_id, 
+                                                        CASE WHEN manager1_id = $mid THEN manager1_score ELSE manager2_score END as score
+                                                        FROM regular_season_matchups 
+                                                        WHERE year = $year AND week_number < $week 
+                                                        AND (manager1_id = $mid OR manager2_id = $mid)
+                                                        AND manager1_id < manager2_id");
+                                                    
+                                                    while ($recordRow = fetch_array($recordResult)) {
+                                                        $totalPoints += $recordRow['score'];
+                                                        if ($recordRow['winning_manager_id'] == $mid) {
+                                                            $wins++;
+                                                        } else if ($recordRow['losing_manager_id'] == $mid) {
+                                                            $losses++;
+                                                        }
+                                                    }
+                                                    
+                                                    $managers[] = array(
+                                                        'id' => $mid,
+                                                        'wins' => $wins,
+                                                        'losses' => $losses,
+                                                        'points' => $totalPoints
+                                                    );
+                                                }
+                                                
+                                                // Sort by wins (desc), then by points (desc)
+                                                usort($managers, function($a, $b) {
+                                                    if ($a['wins'] != $b['wins']) {
+                                                        return $b['wins'] - $a['wins'];
+                                                    }
+                                                    return $b['points'] - $a['points'];
+                                                });
+                                                
+                                                // Find the rank of our manager
+                                                for ($i = 0; $i < count($managers); $i++) {
+                                                    if ($managers[$i]['id'] == $manager_id) {
+                                                        return $i + 1;
+                                                    }
+                                                }
+                                                
+                                                return '-';
+                                            }
+
+                                            // Get regular season matchups with records (avoiding duplicates)
+                                            $regularSeasonResult = query(
+                                                "SELECT year, week_number, manager1_id, manager2_id,
+                                                manager1_score, manager2_score, winning_manager_id,
+                                                'regular' as matchup_type
+                                                FROM regular_season_matchups
+                                                WHERE ((manager1_id = $managerId AND manager2_id = $versus)
+                                                   OR (manager1_id = $versus AND manager2_id = $managerId))
+                                                   AND manager1_id < manager2_id
+                                                ORDER BY year DESC, week_number DESC"
                                             );
-                                            while ($array = fetch_array($result)) {
+
+                                            // Get playoff matchups with seeds
+                                            $playoffResult = query(
+                                                "SELECT year, round as week_number, manager1_id AS man1, manager2_id AS man2,
+                                                manager1_score AS man1score, manager2_score AS man2score, 
+                                                CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winning_manager_id,
+                                                manager1_seed, manager2_seed, 'playoff' as matchup_type
+                                                FROM playoff_matchups
+                                                WHERE (manager1_id = $managerId AND manager2_id = $versus)
+                                                   OR (manager1_id = $versus AND manager2_id = $managerId)
+                                                ORDER BY year DESC, 
+                                                CASE round 
+                                                    WHEN 'Final' THEN 3
+                                                    WHEN 'Semifinal' THEN 2  
+                                                    WHEN 'Quarterfinal' THEN 1
+                                                    ELSE 0 
+                                                END DESC"
+                                            );
+
+                                            $allMatchups = array();
+                                            
+                                            // Process regular season matchups (avoiding duplicates)
+                                            while ($array = fetch_array($regularSeasonResult)) {
+                                                // Convert to consistent format with man1 and man2score
+                                                $array['man1'] = $array['manager1_id'];
+                                                $array['man2'] = $array['manager2_id'];
+                                                $array['man1score'] = $array['manager1_score'];
+                                                $array['man2score'] = $array['manager2_score'];
+                                                $allMatchups[] = $array;
+                                            }
+                                            
+                                            // Process playoff matchups
+                                            while ($array = fetch_array($playoffResult)) {
+                                                $allMatchups[] = $array;
+                                            }
+                                            
+                                            // Sort all matchups by year desc, then week desc
+                                            usort($allMatchups, function($a, $b) {
+                                                if ($a['year'] != $b['year']) {
+                                                    return $b['year'] - $a['year'];
+                                                }
+                                                
+                                                if ($a['matchup_type'] == 'playoff' && $b['matchup_type'] == 'regular') {
+                                                    return -1; // Playoff comes after regular season
+                                                }
+                                                if ($a['matchup_type'] == 'regular' && $b['matchup_type'] == 'playoff') {
+                                                    return 1;
+                                                }
+                                                
+                                                if ($a['matchup_type'] == 'regular' && $b['matchup_type'] == 'regular') {
+                                                    return $b['week_number'] - $a['week_number'];
+                                                }
+                                                
+                                                // For playoff matchups, Final > Semifinal > Quarterfinal
+                                                $aRoundValue = ($a['week_number'] == 'Final') ? 3 : (($a['week_number'] == 'Semifinal') ? 2 : 1);
+                                                $bRoundValue = ($b['week_number'] == 'Final') ? 3 : (($b['week_number'] == 'Semifinal') ? 2 : 1);
+                                                return $bRoundValue - $aRoundValue;
+                                            });
+
+                                            foreach ($allMatchups as $array) {
+                                                // Determine which manager is which in the display
+                                                $isManagerFirst = ($array['man1'] == $managerId);
+                                                $managerScore = $isManagerFirst ? $array['man1score'] : $array['man2score'];
+                                                $opponentScore = $isManagerFirst ? $array['man2score'] : $array['man1score'];
+                                                
                                                 echo '<tr class="highlight">
                                                     <td>'.$array["year"].'</td>
                                                     <td>'.($array["week_number"] == '0' || !is_numeric($array["week_number"]) ? $array["week_number"] : (int)$array["week_number"]).'</td>';
-                                                    if ($array['winning_manager_id'] == $managerId) {
-                                                        echo '<td><span class="badge badge-primary">'.$managerName.'</span></td>';
+                                                    
+                                                if ($array['winning_manager_id'] == $managerId) {
+                                                    echo '<td><span class="badge badge-primary">'.$managerName.'</span></td>';
+                                                } else {
+                                                    echo '<td><span class="badge badge-secondary">'.$managerName.'</span></td>';
+                                                }
+                                                
+                                                echo '<td><a href="/rosters.php?year='.$array["year"].'&week='.$array["week_number"].'&manager='.$managerName.'">'.
+                                                    $managerScore.' - '.$opponentScore.'</a></td>';
+                                                    
+                                                if ($array['winning_manager_id'] == $versus) {
+                                                    echo '<td><span class="badge badge-primary">' . $versusName.'</span></td>';
+                                                } else {
+                                                    echo '<td><span class="badge badge-secondary">' . $versusName.'</span></td>';
+                                                }
+                                                
+                                                echo '<td>'.round(abs($managerScore - $opponentScore), 2).'</td>';
+                                                
+                                                // Records/Seeds column - different for regular season vs playoff
+                                                if ($array['matchup_type'] == 'regular') {
+                                                    $managerRecord = getRecordBeforeWeek($managerId, $array['year'], $array['week_number']);
+                                                    $opponentRecord = getRecordBeforeWeek($versus, $array['year'], $array['week_number']);
+                                                    
+                                                    if ($managerRecord == '-') {
+                                                        echo '<td><small>0-0</small></td>';
                                                     } else {
-                                                        echo '<td><span class="badge badge-secondary">'.$managerName.'</span></td>';
+                                                        $managerRank = getRankBeforeWeek($managerId, $array['year'], $array['week_number']);
+                                                        $opponentRank = getRankBeforeWeek($versus, $array['year'], $array['week_number']);
+                                                        echo '<td><small>'.$managerRecord.' (#'.$managerRank.') vs '.$opponentRecord.' (#'.$opponentRank.')</small></td>';
                                                     }
-                                                    echo '<td><a href="/rosters.php?year='.$array["year"].'&week='.$array["week_number"].'&manager='.$managerName.'">'.
-                                                        $array['man1score'].' - '.$array['man2score'].'</a></td>';
-                                                    if ($array['winning_manager_id'] == $versus) {
-                                                        echo '<td><span class="badge badge-primary">' . $versusName.'</span></td>';
-                                                    } else {
-                                                        echo '<td><span class="badge badge-secondary">' . $versusName.'</span></td>';
-                                                    }
-                                                    echo '<td>'.round(abs($array['man1score'] - $array['man2score']), 2).'</td>
-                                                </tr>';
+                                                } else {
+                                                    // Playoff - show seeds
+                                                    $managerSeed = $isManagerFirst ? $array['manager1_seed'] : $array['manager2_seed'];
+                                                    $opponentSeed = $isManagerFirst ? $array['manager2_seed'] : $array['manager1_seed'];
+
+                                                    echo '<td><small>'.$managerSeed.' Seed vs '.$opponentSeed.' Seed</small></td>';
+                                                }
+                                                
+                                                echo '</tr>';
                                             } ?>
                                         </tbody>
                                     </table>

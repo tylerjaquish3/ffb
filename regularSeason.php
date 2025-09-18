@@ -395,41 +395,53 @@ include 'sidebar.html';
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <div class="card-block">
                                 <div class="row">
-                                    <div class="col-sm-12" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 20px;">
-                                        <button class="btn btn-primary" id="allSeasonsRegular">All Seasons</button>
-                                        <button class="btn btn-primary" id="currentSeasonRegular">Current Season</button>
-                                        <button class="btn btn-primary" id="lastSeasonRegular">Last Season</button>
-                                        <button class="btn btn-primary" id="lastFiveSeasonsRegular">Last 5 Seasons</button>
-                                        <label style="margin: 0;"><strong>Start:</strong></label>
-                                        <select id="startWeekRegular" class="dropdown form-control" style="width: auto;">
-                                            <?php
-                                            foreach ($allWeeks as $week) {
-                                                echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
-                                            }
-                                            ?>
-                                        </select>
-                                        <label style="margin: 0;"><strong>End:</strong></label>
-                                        <select id="endWeekRegular" class="dropdown form-control" style="width: auto;">
-                                            <?php
-                                            foreach ($allWeeks as $week) {
-                                                // if last, select it
-                                                if ($week['week_id'] == $allWeeks[count($allWeeks)-1]['week_id']) {
-                                                    echo '<option selected value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
-                                                } else {
-                                                    echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
-                                                }
-                                            }
-                                            ?>
-                                        </select>
-                                        <label style="margin: 0;"><strong>Week:</strong></label>
-                                        <select id="onlyWeekRegular" class="dropdown form-control" style="width: auto;">
-                                            <option value="0">All Weeks</option>
-                                            <?php
-                                            for ($i = 1; $i <= 14; $i++) {
-                                                echo '<option value="'.$i.'">Week '.$i.'</option>';
-                                            }
-                                            ?>
-                                        </select>
+                                    <div class="col-sm-12" style="margin-bottom: 20px;">
+                                        <!-- Button row for mobile-friendly layout -->
+                                        <div class="btn-group-mobile" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+                                            <button class="btn btn-primary btn-mobile" id="allSeasonsRegular">All Seasons</button>
+                                            <button class="btn btn-primary btn-mobile" id="currentSeasonRegular">Current Season</button>
+                                            <button class="btn btn-primary btn-mobile" id="lastSeasonRegular">Last Season</button>
+                                            <button class="btn btn-primary btn-mobile" id="lastFiveSeasonsRegular">Last 5 Seasons</button>
+                                        </div>
+                                        <!-- Filter controls row -->
+                                        <div class="filter-controls" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+                                            <div class="form-group-inline" style="display: flex; align-items: center; gap: 5px;">
+                                                <label style="margin: 0; white-space: nowrap;"><strong>Start:</strong></label>
+                                                <select id="startWeekRegular" class="dropdown form-control" style="width: auto; min-width: 120px;">
+                                                    <?php
+                                                    foreach ($allWeeks as $week) {
+                                                        echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                            <div class="form-group-inline" style="display: flex; align-items: center; gap: 5px;">
+                                                <label style="margin: 0; white-space: nowrap;"><strong>End:</strong></label>
+                                                <select id="endWeekRegular" class="dropdown form-control" style="width: auto; min-width: 120px;">
+                                                    <?php
+                                                    foreach ($allWeeks as $week) {
+                                                        // if last, select it
+                                                        if ($week['week_id'] == $allWeeks[count($allWeeks)-1]['week_id']) {
+                                                            echo '<option selected value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
+                                                        } else {
+                                                            echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
+                                                        }
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                            <div class="form-group-inline" style="display: flex; align-items: center; gap: 5px;">
+                                                <label style="margin: 0; white-space: nowrap;"><strong>Week:</strong></label>
+                                                <select id="onlyWeekRegular" class="dropdown form-control" style="width: auto; min-width: 100px;">
+                                                    <option value="0">All Weeks</option>
+                                                    <?php
+                                                    for ($i = 1; $i <= 14; $i++) {
+                                                        echo '<option value="'.$i.'">Week '.$i.'</option>';
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -571,6 +583,66 @@ include 'sidebar.html';
     /* Reduce spacing for tab navigation */
     .tab-buttons-container {
         padding: 10px 0 !important;
+    }
+    
+    /* Mobile-friendly button styles */
+    .btn-mobile {
+        min-width: 120px;
+        padding: 8px 12px;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+    
+    .btn-group-mobile {
+        justify-content: flex-start;
+    }
+    
+    .filter-controls {
+        justify-content: flex-start;
+    }
+    
+    .form-group-inline {
+        margin-bottom: 10px;
+    }
+    
+    /* Mobile responsive styles */
+    @media (max-width: 768px) {
+        .btn-mobile {
+            flex: 1;
+            min-width: 0;
+            max-width: 48%;
+        }
+        
+        .btn-group-mobile {
+            justify-content: space-between;
+        }
+        
+        .filter-controls {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 15px !important;
+        }
+        
+        .form-group-inline {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .form-group-inline select {
+            min-width: 150px !important;
+        }
+    }
+    
+    /* Extra small mobile screens */
+    @media (max-width: 480px) {
+        .btn-mobile {
+            max-width: 100%;
+            width: 100%;
+        }
+        
+        .btn-group-mobile {
+            flex-direction: column;
+        }
     }
 </style>
 

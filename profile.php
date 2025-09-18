@@ -942,6 +942,21 @@ if (isset($_GET['id'])) {
             ]
         });
 
+        // Custom sorting function for week column (handles both numeric weeks and playoff rounds)
+        $.fn.dataTable.ext.type.order['week-pre'] = function (data) {
+            // Remove any HTML tags and get the text content
+            var week = data.replace(/<[^>]*>/g, '');
+            
+            // Handle playoff rounds with high numeric values to sort them after regular weeks
+            if (week === 'Quarterfinal') return 20;
+            if (week === 'Semifinal') return 21;
+            if (week === 'Final') return 22;
+            
+            // For numeric weeks, convert to integer
+            var num = parseInt(week);
+            return isNaN(num) ? 0 : num;
+        };
+
         $('#datatable-versus').DataTable({
             searching: false,
             paging: false,
@@ -949,7 +964,11 @@ if (isset($_GET['id'])) {
             order: [
                 [0, "desc"],
                 [1, "desc"]
-            ]
+            ],
+            columnDefs: [{
+                type: 'week',
+                targets: 1  // Week column
+            }]
         });
 
         var ctx = $('#finishesChart');

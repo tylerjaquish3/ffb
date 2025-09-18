@@ -538,16 +538,21 @@ class UpdateFunFacts implements ShouldQueue
         
         // Least PA (Season)
         $query = RegularSeasonMatchup::selectRaw('regular_season_matchups.manager1_id, regular_season_matchups.year, SUM(regular_season_matchups.manager2_score) as pts')
-            ->join('playoff_matchups', function($join) {
-                $join->on('playoff_matchups.year', '=', 'regular_season_matchups.year');
+            ->whereExists(function($query) {
+                $query->select(DB::raw(1))
+                    ->from('playoff_matchups')
+                    ->whereColumn('playoff_matchups.year', 'regular_season_matchups.year');
                 if ($this->isHistoricalCalculation) {
-                    $join->where('playoff_matchups.year', '<=', $this->asOfYear);
+                    $query->where('playoff_matchups.year', '<=', $this->asOfYear);
                 }
             })
             ->orderBy('pts', 'asc')
             ->groupBy('regular_season_matchups.manager1_id', 'regular_season_matchups.year');
             
-        $this->applyHistoricalFilter($query, 'regular_season_matchups.year', 'regular_season_matchups.week_number');
+        // For season-based calculations, filter by years (not weeks) to ensure we get individual seasons
+        if ($this->isHistoricalCalculation) {
+            $query->where('regular_season_matchups.year', '<=', $this->asOfYear);
+        }
         $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'pts');
@@ -576,16 +581,21 @@ class UpdateFunFacts implements ShouldQueue
         
         // Most PA (Season)
         $query = RegularSeasonMatchup::selectRaw('regular_season_matchups.manager1_id, regular_season_matchups.year, SUM(regular_season_matchups.manager2_score) as pts')
-            ->join('playoff_matchups', function($join) {
-                $join->on('playoff_matchups.year', '=', 'regular_season_matchups.year');
+            ->whereExists(function($query) {
+                $query->select(DB::raw(1))
+                    ->from('playoff_matchups')
+                    ->whereColumn('playoff_matchups.year', 'regular_season_matchups.year');
                 if ($this->isHistoricalCalculation) {
-                    $join->where('playoff_matchups.year', '<=', $this->asOfYear);
+                    $query->where('playoff_matchups.year', '<=', $this->asOfYear);
                 }
             })
             ->orderBy('pts', 'desc')
             ->groupBy('regular_season_matchups.manager1_id', 'regular_season_matchups.year');
             
-        $this->applyHistoricalFilter($query, 'regular_season_matchups.year', 'regular_season_matchups.week_number');
+        // For season-based calculations, filter by years (not weeks) to ensure we get individual seasons
+        if ($this->isHistoricalCalculation) {
+            $query->where('regular_season_matchups.year', '<=', $this->asOfYear);
+        }
         $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'pts');
@@ -3088,7 +3098,7 @@ class UpdateFunFacts implements ShouldQueue
 
     public function trackTopPositionPerformances()
     {
-        echo 'Top QB Performances'.PHP_EOL;
+        // echo 'Top QB Performances'.PHP_EOL;
         // Use the helper function to track QB performance across current season
         $this->trackTopPerformanceByPosition(['QB'], $this->currentSeason, 149);
         // get best season
@@ -3096,7 +3106,7 @@ class UpdateFunFacts implements ShouldQueue
         // get all seasons
         $this->trackTopPerformanceByPosition(['QB'], null, 147);
 
-        echo 'Top RB Performances'.PHP_EOL;
+        // echo 'Top RB Performances'.PHP_EOL;
         // Use the helper function to track RB performance across current season
         $this->trackTopPerformanceByPosition(['RB'], $this->currentSeason, 152);
         // get best season
@@ -3104,7 +3114,7 @@ class UpdateFunFacts implements ShouldQueue
         // get all seasons
         $this->trackTopPerformanceByPosition(['RB'], null, 150);
 
-        echo 'Top WR Performances'.PHP_EOL;
+        // echo 'Top WR Performances'.PHP_EOL;
         // Use the helper function to track WR performance across current season
         $this->trackTopPerformanceByPosition(['WR'], $this->currentSeason, 155);
         // get best season
@@ -3112,7 +3122,7 @@ class UpdateFunFacts implements ShouldQueue
         // get all seasons
         $this->trackTopPerformanceByPosition(['WR'], null, 153);
 
-        echo 'Top TE Performances'.PHP_EOL;
+        // echo 'Top TE Performances'.PHP_EOL;
         // Use the helper function to track TE performance across current season
         $this->trackTopPerformanceByPosition(['TE'], $this->currentSeason, 158);
         // get best season
@@ -3120,7 +3130,7 @@ class UpdateFunFacts implements ShouldQueue
         // get all seasons
         $this->trackTopPerformanceByPosition(['TE'], null, 156);
 
-        echo 'Top K Performances'.PHP_EOL;
+        // echo 'Top K Performances'.PHP_EOL;
         // Use the helper function to track K performance across current season
         $this->trackTopPerformanceByPosition(['K'], $this->currentSeason, 161);
         // get best season
@@ -3128,7 +3138,7 @@ class UpdateFunFacts implements ShouldQueue
         // get all seasons
         $this->trackTopPerformanceByPosition(['K'], null, 159);
 
-        echo 'Top DEF Performances'.PHP_EOL;
+        // echo 'Top DEF Performances'.PHP_EOL;
         // Use the helper function to track DEF performance across current season
         $this->trackTopPerformanceByPosition(['DEF'], $this->currentSeason, 164);
         // get best season

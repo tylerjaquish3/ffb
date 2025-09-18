@@ -637,7 +637,7 @@ if (isset($_GET['id'])) {
                                             while ($array = fetch_array($result)) {
                                                 echo '<tr class="highlight">
                                                     <td>'.$array["year"].'</td>
-                                                    <td>'.(int)$array["week_number"].'</td>';
+                                                    <td>'.($array["week_number"] == '0' || !is_numeric($array["week_number"]) ? $array["week_number"] : (int)$array["week_number"]).'</td>';
                                                     if ($array['winning_manager_id'] == $managerId) {
                                                         echo '<td><span class="badge badge-primary">'.$managerName.'</span></td>';
                                                     } else {

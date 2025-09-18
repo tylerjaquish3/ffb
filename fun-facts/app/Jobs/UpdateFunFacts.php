@@ -25,6 +25,86 @@ class UpdateFunFacts implements ShouldQueue
 
     protected $currentSeason = "";
     protected $lastSeason = "";
+    protected $currentWeek = null;
+    protected $asOfYear = null;
+    protected $asOfWeek = null;
+    protected $isHistoricalCalculation = false;
+    
+    /**
+     * Apply historical filters to a query builder based on the current asOfYear and asOfWeek
+     */
+    protected function applyHistoricalFilter($query, $yearColumn = 'year', $weekColumn = null)
+    {
+        if ($this->isHistoricalCalculation) {
+            // Always filter by year
+            $query->where($yearColumn, '<=', $this->asOfYear);
+            
+            // If week is provided and we have a week column, also filter by week
+            if ($this->asOfWeek !== null && $weekColumn !== null) {
+                $query->where(function($q) use ($yearColumn, $weekColumn) {
+                    $q->where($yearColumn, '<', $this->asOfYear)
+                      ->orWhere(function($q2) use ($yearColumn, $weekColumn) {
+                          $q2->where($yearColumn, '=', $this->asOfYear)
+                             ->where($weekColumn, '<=', $this->asOfWeek);
+                      });
+                });
+            }
+        }
+        
+        return $query;
+    }
+    
+    /**
+     * Get SQL WHERE clause for historical filtering
+     */
+    protected function getHistoricalFilterSql($tableAlias = '', $yearColumn = 'year', $weekColumn = null)
+    {
+        if (!$this->isHistoricalCalculation) {
+            return '';
+        }
+        
+        $prefix = $tableAlias ? "$tableAlias." : '';
+        $yearCol = $prefix . $yearColumn;
+        
+        if ($this->asOfWeek !== null && $weekColumn !== null) {
+            $weekCol = $prefix . $weekColumn;
+            return " AND ($yearCol < {$this->asOfYear} OR ($yearCol = {$this->asOfYear} AND $weekCol <= {$this->asOfWeek})) ";
+        } else {
+            return " AND $yearCol <= {$this->asOfYear} ";
+        }
+    }
+
+    /**
+     * Create a new job instance.
+     */
+    public function __construct($asOfYear = null, $asOfWeek = null)
+    {
+        $this->asOfYear = $asOfYear;
+        $this->asOfWeek = $asOfWeek;
+        $this->isHistoricalCalculation = ($asOfYear !== null);
+    }
+    
+    /**
+     * Get a description of the historical point in time for logging
+     */
+    protected function getHistoricalPointDescription()
+    {
+        if ($this->isHistoricalCalculation) {
+            return "Year: {$this->asOfYear}, Week: " . ($this->asOfWeek ?? 'ALL');
+        } else {
+            return "CURRENT";
+        }
+    }
+    
+    /**
+     * Report progress for historical calculations
+     */
+    protected function updateProgress($method)
+    {
+        if ($this->isHistoricalCalculation) {
+            echo "Completed {$method} for " . $this->getHistoricalPointDescription() . PHP_EOL;
+        }
+    }
 
     /**
      * Execute the job.
@@ -34,13 +114,21 @@ class UpdateFunFacts implements ShouldQueue
         $success = true;
         $message = "";
 
-        $this->currentSeason = date('Y');
-        $this->lastSeason = $this->currentSeason - 1;
+        if ($this->isHistoricalCalculation) {
+            $this->currentSeason = $this->asOfYear;
+            $this->lastSeason = $this->currentSeason - 1;
+            echo "Running historical calculation as of " . $this->getHistoricalPointDescription() . PHP_EOL;
+        } else {
+            $this->currentSeason = date('Y');
+            $this->lastSeason = $this->currentSeason - 1;
+        }
 
         try {
-            echo 'Fetching game times'.PHP_EOL;
-            // Fetch game times after
-            FetchGameTimes::dispatchSync();
+            // Only fetch game times for current calculations, not historical
+            if (!$this->isHistoricalCalculation) {
+                echo 'Fetching game times'.PHP_EOL;
+                FetchGameTimes::dispatchSync();
+            }
 
             // 1,2,3
             $this->mostPointsFor();
@@ -120,7 +208,17 @@ class UpdateFunFacts implements ShouldQueue
         }
 
         if ($success) {
-            echo 'Finished!'.PHP_EOL;
+            if ($this->isHistoricalCalculation) {
+                echo "============================================" . PHP_EOL;
+                echo "Finished historical calculation as of " . $this->getHistoricalPointDescription() . PHP_EOL;
+                echo "============================================" . PHP_EOL;
+                
+                // Display the number of fun facts updated
+                $count = DB::table('manager_fun_facts')->count();
+                echo "Total fun facts in database: {$count}" . PHP_EOL;
+            } else {
+                echo 'Finished current calculation!'.PHP_EOL;
+            }
         }
 
         echo $message;
@@ -192,9 +290,9 @@ class UpdateFunFacts implements ShouldQueue
             
         } else {
 
-            // if $tops array doesnt have element 0, dd() it
+            // if $tops array doesnt have element 0, skip it
             if (!isset($tops[0])) {
-                dd($tops);
+                return;
             }
 
             // One manager has the top spot on their own
@@ -250,30 +348,40 @@ class UpdateFunFacts implements ShouldQueue
     {
         echo 'Most Points For'.PHP_EOL;
         // Most PF (All Time)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager1_score) as pts')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager1_score) as pts')
             ->orderBy('pts', 'desc')
-            ->groupBy('manager1_id')
-            ->get();
+            ->groupBy('manager1_id');
+        
+        // Apply historical filter if needed
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'pts');
         $this->insertFunFact(1, 'manager1_id', 'pts', [], $tops);
 
         // Most PF (Season)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, year, SUM(manager1_score) as pts')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, year, SUM(manager1_score) as pts')
             ->orderBy('pts', 'desc')
-            ->groupBy('manager1_id', 'year')
-            ->get();
+            ->groupBy('manager1_id', 'year');
+            
+        // Apply historical filter if needed
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'pts');
         $this->insertFunFact(2, 'manager1_id', 'pts', ['year'], $tops);
         
         // Most PF (Week)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, manager1_score, week_number, year')
-            ->orderBy('manager1_score', 'desc')
-            ->get();
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, manager1_score, week_number, year')
+            ->orderBy('manager1_score', 'desc');
+            
+        // Apply historical filter if needed
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'manager1_score');
         $this->insertFunFact(3, 'manager1_id', 'manager1_score', ['Wk','week_number','year'], $tops);
+        $this->updateProgress("Most Points For");
     }
 
     // 4,5,6
@@ -281,33 +389,61 @@ class UpdateFunFacts implements ShouldQueue
     {
         echo 'Most Postseason Points For'.PHP_EOL;
         // Most PF (All Time)
-        $i = DB::select('SELECT managers.id, ptsTop+ptsBottom AS pts, gamest+gamesb
+        
+        // When in historical calculation mode, the data is already filtered by table swapping
+        // so we don't need additional WHERE filters
+        $sqlWhere = $this->isHistoricalCalculation ? '' : $this->getHistoricalFilterSql('i');
+        
+        $i = DB::select("SELECT managers.id, 
+                COALESCE(ptsTop, 0) + COALESCE(ptsBottom, 0) AS pts, 
+                COALESCE(gamest, 0) + COALESCE(gamesb, 0) as games
             FROM managers
             LEFT JOIN (
             SELECT COUNT(id) as gamest, SUM(manager1_score) AS ptsTop, manager1_id FROM playoff_matchups i
+            WHERE 1=1 {$sqlWhere}
             GROUP BY manager1_id
             ) w ON w.manager1_id = managers.id
             LEFT JOIN (
             SELECT COUNT(id) as gamesb, SUM(manager2_score) AS ptsBottom, manager2_id FROM playoff_matchups i
+            WHERE 1=1 {$sqlWhere}
             GROUP BY manager2_id
             ) l ON l.manager2_id = managers.id
-            ORDER BY pts desc');
-
+            ORDER BY pts desc");
         $i = collect($i);
 
         $tops = $this->checkMultiple($i, 'pts');
         $this->insertFunFact(4, 'id', 'pts', [], $tops);
 
         // Most PF (Season)
-        $i = PlayoffMatchup::selectRaw('manager1_id, year, SUM(manager1_score) as pts')
-            ->orderBy('pts', 'desc')
-            ->groupBy('manager1_id', 'year')
-            ->get();
+        // When in historical calculation mode, the data is already filtered by table swapping
+        // so we can use regular Eloquent models without additional filtering
+        if ($this->isHistoricalCalculation) {
+            // Use Eloquent without additional filtering (data already filtered by table swap)
+            $query = PlayoffMatchup::selectRaw('manager1_id, year, SUM(manager1_score) as pts')
+                ->orderBy('pts', 'desc')
+                ->groupBy('manager1_id', 'year');
+            $i = $query->get();
 
-        $j = PlayoffMatchup::selectRaw('manager2_id, year, SUM(manager2_score) as pts')
-            ->orderBy('pts', 'desc')
-            ->groupBy('manager2_id', 'year')
-            ->get();
+            $query2 = PlayoffMatchup::selectRaw('manager2_id, year, SUM(manager2_score) as pts')
+                ->orderBy('pts', 'desc')
+                ->groupBy('manager2_id', 'year');
+            $j = $query2->get();
+        } else {
+            // Use Eloquent with historical filtering for current calculations
+            $query = PlayoffMatchup::selectRaw('manager1_id, year, SUM(manager1_score) as pts')
+                ->orderBy('pts', 'desc')
+                ->groupBy('manager1_id', 'year');
+            
+            $this->applyHistoricalFilter($query, 'year');
+            $i = $query->get();
+
+            $query2 = PlayoffMatchup::selectRaw('manager2_id, year, SUM(manager2_score) as pts')
+                ->orderBy('pts', 'desc')
+                ->groupBy('manager2_id', 'year');
+                
+            $this->applyHistoricalFilter($query2, 'year');
+            $j = $query2->get();
+        }
 
         $end = [];
 
@@ -349,25 +485,40 @@ class UpdateFunFacts implements ShouldQueue
         ]);
 
         // Most PF (Week)
-        $i = PlayoffMatchup::orderBy('manager1_score', 'desc')
-            ->first();
+        // When in historical calculation mode, the data is already filtered by table swapping
+        if ($this->isHistoricalCalculation) {
+            // Use Eloquent without additional filtering (data already filtered by table swap)
+            $query1 = PlayoffMatchup::orderBy('manager1_score', 'desc');
+            $i = $query1->first();
 
-        $j = PlayoffMatchup::orderBy('manager2_score', 'desc')
-            ->first();
+            $query2 = PlayoffMatchup::orderBy('manager2_score', 'desc');
+            $j = $query2->first();
+        } else {
+            // Use Eloquent with historical filtering for current calculations
+            $query1 = PlayoffMatchup::orderBy('manager1_score', 'desc');
+            $this->applyHistoricalFilter($query1, 'year');
+            $i = $query1->first();
+
+            $query2 = PlayoffMatchup::orderBy('manager2_score', 'desc');
+            $this->applyHistoricalFilter($query2, 'year');
+            $j = $query2->first();
+        }
 
         $bestTop = true;
-        if ($i->manager1_score < $j->manager2_score) {
+        if ($i && $j && $i->manager1_score < $j->manager2_score) {
             $bestTop = false;
         }
 
-        ManagerFunFact::updateOrCreate([
-            'fun_fact_id' => 6,
-        ],[
-            'manager_id' => $bestTop ? $i->manager1_id : $j->manager2_id,
-            'value' => $bestTop ? round($i->manager1_score,2) : round($j->manager2_score,2),
-            'rank' => 1,
-            'note' => $bestTop ? $i->round.' '.$i->year : $j->round.' '.$j->year
-        ]);
+        if ($i || $j) {
+            ManagerFunFact::updateOrCreate([
+                'fun_fact_id' => 6,
+            ],[
+                'manager_id' => $bestTop ? $i->manager1_id : $j->manager2_id,
+                'value' => $bestTop ? round($i->manager1_score,2) : round($j->manager2_score,2),
+                'rank' => 1,
+                'note' => $bestTop ? $i->round.' '.$i->year : $j->round.' '.$j->year
+            ]);
+        }
     }
 
     // 7,8,9,89,90,91
@@ -375,109 +526,143 @@ class UpdateFunFacts implements ShouldQueue
     {
         echo 'Least Points Against'.PHP_EOL;
         // Least PA (All Time)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager2_score) as pts')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager2_score) as pts')
             ->orderBy('pts', 'asc')
-            ->groupBy('manager1_id')
-            ->get();
+            ->groupBy('manager1_id');
+            
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'pts');
         $this->insertFunFact(7, 'manager1_id', 'pts', [], $tops);
         
         // Least PA (Season)
-        $i = RegularSeasonMatchup::selectRaw('regular_season_matchups.manager1_id, regular_season_matchups.year, SUM(regular_season_matchups.manager2_score) as pts')
-            ->join('playoff_matchups', 'playoff_matchups.year', '=', 'regular_season_matchups.year')
+        $query = RegularSeasonMatchup::selectRaw('regular_season_matchups.manager1_id, regular_season_matchups.year, SUM(regular_season_matchups.manager2_score) as pts')
+            ->join('playoff_matchups', function($join) {
+                $join->on('playoff_matchups.year', '=', 'regular_season_matchups.year');
+                if ($this->isHistoricalCalculation) {
+                    $join->where('playoff_matchups.year', '<=', $this->asOfYear);
+                }
+            })
             ->orderBy('pts', 'asc')
-            ->groupBy('regular_season_matchups.manager1_id', 'regular_season_matchups.year')
-            ->get();
+            ->groupBy('regular_season_matchups.manager1_id', 'regular_season_matchups.year');
+            
+        $this->applyHistoricalFilter($query, 'regular_season_matchups.year', 'regular_season_matchups.week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'pts');
         $this->insertFunFact(8, 'manager1_id', 'pts', ['year'], $tops);
 
         // Least PA (Week)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, manager2_score, week_number, year')
-            ->orderBy('manager2_score', 'asc')
-            ->get();
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, manager2_score, week_number, year')
+            ->orderBy('manager2_score', 'asc');
+            
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'manager2_score');
         $this->insertFunFact(9, 'manager1_id', 'manager2_score', ['Wk','week_number','year'], $tops);
 
         // Most PA (All Time)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager2_score) as pts')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager2_score) as pts')
             ->orderBy('pts', 'desc')
-            ->groupBy('manager1_id')
-            ->get();
+            ->groupBy('manager1_id');
+            
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'pts');
         $this->insertFunFact(89, 'manager1_id', 'pts', [], $tops);
         
         // Most PA (Season)
-        $i = RegularSeasonMatchup::selectRaw('regular_season_matchups.manager1_id, regular_season_matchups.year, SUM(regular_season_matchups.manager2_score) as pts')
-            ->join('playoff_matchups', 'playoff_matchups.year', '=', 'regular_season_matchups.year')
+        $query = RegularSeasonMatchup::selectRaw('regular_season_matchups.manager1_id, regular_season_matchups.year, SUM(regular_season_matchups.manager2_score) as pts')
+            ->join('playoff_matchups', function($join) {
+                $join->on('playoff_matchups.year', '=', 'regular_season_matchups.year');
+                if ($this->isHistoricalCalculation) {
+                    $join->where('playoff_matchups.year', '<=', $this->asOfYear);
+                }
+            })
             ->orderBy('pts', 'desc')
-            ->groupBy('regular_season_matchups.manager1_id', 'regular_season_matchups.year')
-            ->get();
+            ->groupBy('regular_season_matchups.manager1_id', 'regular_season_matchups.year');
+            
+        $this->applyHistoricalFilter($query, 'regular_season_matchups.year', 'regular_season_matchups.week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'pts');
         $this->insertFunFact(90, 'manager1_id', 'pts', ['year'], $tops);
 
         // Most PA (Week)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, manager2_score, week_number, year')
-            ->orderBy('manager2_score', 'desc')
-            ->get();
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, manager2_score, week_number, year')
+            ->orderBy('manager2_score', 'desc');
+            
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'manager2_score');
         $this->insertFunFact(91, 'manager1_id', 'manager2_score', ['Wk','week_number','year'], $tops);
+        $this->updateProgress("Least/Most Points Against");
     }
 
     private function mostWins()
     {
         echo 'Most Wins'.PHP_EOL;
         // Most Wins (All time)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, count(id) as wins')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, count(id) as wins')
             ->whereRaw('manager1_score > manager2_score')
             ->groupBy('manager1_id')
-            ->orderBy('wins', 'desc')
-            ->get();
+            ->orderBy('wins', 'desc');
+            
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'wins');
         $this->insertFunFact(10, 'manager1_id', 'wins', [], $tops);
         
         // Most Wins (Season)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, count(id) as wins, year')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, count(id) as wins, year')
             ->whereRaw('manager1_score > manager2_score')
             ->groupBy('manager1_id', 'year')
-            ->orderBy('wins', 'desc')
-            ->get();
+            ->orderBy('wins', 'desc');
+            
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'wins');;
         $this->insertFunFact(11, 'manager1_id', 'wins', ['year'], $tops);
+        $this->updateProgress("Most Wins");
     }
 
     private function leastPointsFor()
     {
         echo 'Least Points For'.PHP_EOL;
         // Least PF (All Time)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager1_score) as pts')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, SUM(manager1_score) as pts')
             ->orderBy('pts', 'asc')
-            ->groupBy('manager1_id')
-            ->get();
+            ->groupBy('manager1_id');
+            
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'pts');;
         $this->insertFunFact(13, 'manager1_id', 'pts', [], $tops);
 
         // Least PF (Season)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, year, SUM(manager1_score) as pts')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, year, SUM(manager1_score) as pts')
             ->orderBy('pts', 'asc')
-            ->groupBy('manager1_id', 'year')
-            ->get();
+            ->groupBy('manager1_id', 'year');
+            
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
             
         $tops = $this->checkMultiple($i, 'pts');;
         $this->insertFunFact(14, 'manager1_id', 'pts', ['year'], $tops);
 
         // Least PF (Week)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, manager1_score, week_number, year')
-            ->orderBy('manager1_score', 'asc')
-            ->get();
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, manager1_score, week_number, year')
+            ->orderBy('manager1_score', 'asc');
+            
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'manager1_score');
         $this->insertFunFact(15, 'manager1_id', 'manager1_score', ['Wk','week_number','year'], $tops);
@@ -487,22 +672,26 @@ class UpdateFunFacts implements ShouldQueue
     {
         echo 'Most Losses'.PHP_EOL;
         // Most Losses (All time)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, count(id) as losses')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, count(id) as losses')
             ->whereRaw('manager1_score < manager2_score')
             ->groupBy('manager1_id')
-            ->orderBy('losses', 'desc')
-            ->get();
+            ->orderBy('losses', 'desc');
+            
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'losses');
         $this->insertFunFact(16, 'manager1_id', 'losses', [], $tops);
 
         // Most Losses (Season)
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, count(id) as losses, year')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, count(id) as losses, year')
             ->whereRaw('manager1_score < manager2_score')
             ->groupBy('manager1_id', 'year')
             ->orderBy('losses', 'desc')
-            ->limit(50)
-            ->get();
+            ->limit(50);
+            
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'losses');
         $this->insertFunFact(17, 'manager1_id', 'losses', ['year'], $tops);
@@ -511,7 +700,14 @@ class UpdateFunFacts implements ShouldQueue
     private function postseasonRecords()
     {
         echo 'Postseason Records'.PHP_EOL;
-        $p = PlayoffMatchup::all();
+        
+        $query = PlayoffMatchup::query();
+        
+        if ($this->isHistoricalCalculation) {
+            $query->where('year', '<=', $this->asOfYear);
+        }
+        
+        $p = $query->get();
 
         $types = ['total', 'topSeedLoss', 'underdogWin'];
         for ($x = 1; $x < 11; $x++) {
@@ -688,26 +884,38 @@ class UpdateFunFacts implements ShouldQueue
     private function highestSeeds()
     {
         echo 'Highest Seeds'.PHP_EOL;
-        $i = PlayoffMatchup::selectRaw('manager1_id, count(id) as num1')
+        $query1 = PlayoffMatchup::selectRaw('manager1_id, count(id) as num1')
             ->where('round', 'Semifinal')
             ->where('manager1_seed', 1)
             ->groupBy('manager1_id')
-            ->orderBy('num1', 'desc')
-            ->get();
+            ->orderBy('num1', 'desc');
+            
+        if ($this->isHistoricalCalculation) {
+            $query1->where('year', '<=', $this->asOfYear);
+        }
+        $i = $query1->get();
 
-        $j = PlayoffMatchup::selectRaw('manager1_id, count(id) as num2')
+        $query2 = PlayoffMatchup::selectRaw('manager1_id, count(id) as num2')
             ->where('round', 'Semifinal')
             ->where('manager1_seed', 2)
             ->groupBy('manager1_id')
-            ->orderBy('num2', 'desc')
-            ->get();
+            ->orderBy('num2', 'desc');
+            
+        if ($this->isHistoricalCalculation) {
+            $query2->where('year', '<=', $this->asOfYear);
+        }
+        $j = $query2->get();
 
-        $k = PlayoffMatchup::selectRaw('manager2_id, count(id) as num2')
+        $query3 = PlayoffMatchup::selectRaw('manager2_id, count(id) as num2')
             ->where('round', 'Semifinal')
             ->where('manager2_seed', 2)
             ->groupBy('manager2_id')
-            ->orderBy('num2', 'desc')
-            ->get();
+            ->orderBy('num2', 'desc');
+            
+        if ($this->isHistoricalCalculation) {
+            $query3->where('year', '<=', $this->asOfYear);
+        }
+        $k = $query3->get();
 
         for ($x = 1; $x < 11; $x++) {
             $all[$x] = [
@@ -772,42 +980,50 @@ class UpdateFunFacts implements ShouldQueue
     private function singleOpponent()
     {
         echo 'Single Opponent'.PHP_EOL;
-        $i = RegularSeasonMatchup::selectRaw('name, manager2_id, SUM(manager2_score) as pts, COUNT(regular_season_matchups.id) as gms')
+        $query = RegularSeasonMatchup::selectRaw('name, manager2_id, SUM(manager2_score) as pts, COUNT(regular_season_matchups.id) as gms')
             ->join('managers', 'managers.id', '=', 'regular_season_matchups.manager1_id')
             ->orderBy('pts', 'desc')
-            ->groupBy('manager1_id', 'manager2_id')
-            ->get();
+            ->groupBy('manager1_id', 'manager2_id');
+            
+        $this->applyHistoricalFilter($query, 'regular_season_matchups.year', 'regular_season_matchups.week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'pts');
         $this->insertFunFact(67, 'manager2_id', 'pts', ['gms','matchups vs.','name'], $tops);
 
-        $i = RegularSeasonMatchup::selectRaw('name, manager2_id, SUM(manager2_score) as pts, COUNT(regular_season_matchups.id) as gms')
+        $query = RegularSeasonMatchup::selectRaw('name, manager2_id, SUM(manager2_score) as pts, COUNT(regular_season_matchups.id) as gms')
             ->join('managers', 'managers.id', '=', 'regular_season_matchups.manager1_id')
             ->orderBy('pts', 'asc')
-            ->groupBy('manager1_id', 'manager2_id')
-            ->get();
+            ->groupBy('manager1_id', 'manager2_id');
+            
+        $this->applyHistoricalFilter($query, 'regular_season_matchups.year', 'regular_season_matchups.week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'pts');
         $this->insertFunFact(68, 'manager2_id', 'pts', ['gms','matchups vs.','name'], $tops);
 
         // Wins/losses vs single opponent
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, manager2_id, m1.name as m1name, m2.name as m2name, SUM(CASE WHEN winning_manager_id = manager1_id THEN 1 ELSE 0 END) as wins')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, manager2_id, m1.name as m1name, m2.name as m2name, SUM(CASE WHEN winning_manager_id = manager1_id THEN 1 ELSE 0 END) as wins')
             ->join('managers as m1', 'm1.id', '=', 'regular_season_matchups.manager1_id')
             ->join('managers as m2', 'm2.id', '=', 'regular_season_matchups.manager2_id')
             ->orderBy('wins', 'desc')
-            ->groupBy('manager1_id', 'manager2_id')
-            ->get();
+            ->groupBy('manager1_id', 'manager2_id');
+            
+        $this->applyHistoricalFilter($query, 'regular_season_matchups.year', 'regular_season_matchups.week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'wins');
         $this->insertFunFact(29, 'manager1_id', 'wins', ['vs.','m2name'], $tops);
         $this->insertFunFact(30, 'manager2_id', 'wins', ['vs.','m1name'], $tops);
 
-        $i = RegularSeasonMatchup::selectRaw('manager1_id, manager2_id, m1.name as m1name, m2.name as m2name, SUM(CASE WHEN winning_manager_id = manager1_id THEN 1 ELSE 0 END) as wins')
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, manager2_id, m1.name as m1name, m2.name as m2name, SUM(CASE WHEN winning_manager_id = manager1_id THEN 1 ELSE 0 END) as wins')
             ->join('managers as m1', 'm1.id', '=', 'regular_season_matchups.manager1_id')
             ->join('managers as m2', 'm2.id', '=', 'regular_season_matchups.manager2_id')
             ->orderBy('wins', 'asc')
-            ->groupBy('manager1_id', 'manager2_id')
-            ->get();
+            ->groupBy('manager1_id', 'manager2_id');
+            
+        $this->applyHistoricalFilter($query, 'regular_season_matchups.year', 'regular_season_matchups.week_number');
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'wins');
         $this->insertFunFact(69, 'manager1_id', 'wins', ['vs.','m2name'], $tops);
@@ -818,10 +1034,15 @@ class UpdateFunFacts implements ShouldQueue
     private function leastChampionships()
     {
         echo 'Least Championships'.PHP_EOL;
-        $finishes = Finish::selectRaw('manager_id, SUM(CASE WHEN finish = 1 THEN 1 ELSE 0 END) as wins')
+        $query = Finish::selectRaw('manager_id, SUM(CASE WHEN finish = 1 THEN 1 ELSE 0 END) as wins')
             ->orderBy('wins', 'asc')
-            ->groupBy('manager_id')
-            ->get();
+            ->groupBy('manager_id');
+            
+        if ($this->isHistoricalCalculation) {
+            $query->where('year', '<=', $this->asOfYear);
+        }
+        
+        $finishes = $query->get();
 
         $tops = $this->checkMultiple($finishes, 'wins');
         $this->insertFunFact(32, 'manager_id', 'wins', [], $tops);
@@ -831,9 +1052,14 @@ class UpdateFunFacts implements ShouldQueue
     private function postseasonMargin()
     {
         echo 'Postseason Margin'.PHP_EOL;
-        $i = PlayoffMatchup::selectRaw('manager1_id, manager2_id, year, round, ABS(manager1_score - manager2_score) as diff, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner')
-            ->orderBy('diff', 'desc')
-            ->get();
+        $query = PlayoffMatchup::selectRaw('manager1_id, manager2_id, year, round, ABS(manager1_score - manager2_score) as diff, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner')
+            ->orderBy('diff', 'desc');
+            
+        if ($this->isHistoricalCalculation) {
+            $query->where('year', '<=', $this->asOfYear);
+        }
+        
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'diff');
         $this->insertFunFact(50, 'winner', 'diff', ['year','round'], $tops);
@@ -877,7 +1103,21 @@ class UpdateFunFacts implements ShouldQueue
         $longestWin = $longestLose = 0;
 
         for ($x = 1; $x < 11; $x++) {
-            $rsm = RegularSeasonMatchup::where('manager1_id', $x)->orderBy('year', 'asc')->orderBy('week_number', 'asc')->get();
+            $query = RegularSeasonMatchup::where('manager1_id', $x)
+                ->orderBy('year', 'asc')
+                ->orderBy('week_number', 'asc');
+                
+            if ($this->isHistoricalCalculation) {
+                $query->where(function($q) {
+                    $q->where('year', '<', $this->asOfYear)
+                      ->orWhere(function($q2) {
+                          $q2->where('year', '=', $this->asOfYear)
+                             ->where('week_number', '<=', $this->asOfWeek ?: 17);
+                      });
+                });
+            }
+                
+            $rsm = $query->get();
 
             $myStreakWin = $myLongestWin = $myStreakLose = $myLongestLose = 0;
             foreach ($rsm as $m) {
@@ -1087,20 +1327,30 @@ class UpdateFunFacts implements ShouldQueue
     private function draft()
     {
         echo 'Draft'.PHP_EOL;
-        $i = Draft::selectRaw('manager_id, AVG(round_pick) as avg_pick')
+        $query = Draft::selectRaw('manager_id, AVG(round_pick) as avg_pick')
             ->where('round', 1)
             ->groupBy('manager_id')
-            ->orderBy('avg_pick', 'asc')
-            ->get();
+            ->orderBy('avg_pick', 'asc');
+            
+        if ($this->isHistoricalCalculation) {
+            $query->where('year', '<=', $this->asOfYear);
+        }
+        
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'avg_pick');
         $this->insertFunFact(62, 'manager_id', 'avg_pick', [], $tops);
 
-        $i = Draft::selectRaw('manager_id, AVG(round_pick) as avg_pick')
+        $query = Draft::selectRaw('manager_id, AVG(round_pick) as avg_pick')
             ->where('round', 1)
             ->groupBy('manager_id')
-            ->orderBy('avg_pick', 'desc')
-            ->get();
+            ->orderBy('avg_pick', 'desc');
+            
+        if ($this->isHistoricalCalculation) {
+            $query->where('year', '<=', $this->asOfYear);
+        }
+        
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'avg_pick');
         $this->insertFunFact(63, 'manager_id', 'avg_pick', [], $tops);
@@ -1123,15 +1373,17 @@ class UpdateFunFacts implements ShouldQueue
             ->get();
 
         // This is to handle the managers that have 0
-        $ones = DB::select('SELECT managers.id, COALESCE(post_count, 0) AS num1
+        $sqlWhere = $this->getHistoricalFilterSql('d');
+        
+        $ones = DB::select("SELECT managers.id, COALESCE(post_count, 0) AS num1
             FROM managers
             LEFT JOIN (
-                SELECT manager_id, SUM(CASE WHEN draft.manager_id is not null THEN 1 ELSE 0 END) AS post_count
-                FROM draft
-                WHERE `round` = 1 and `round_pick` = 1 
+                SELECT manager_id, SUM(CASE WHEN d.manager_id is not null THEN 1 ELSE 0 END) AS post_count
+                FROM draft d
+                WHERE `round` = 1 and `round_pick` = 1 {$sqlWhere}
                 GROUP BY manager_id
             ) post_counts ON post_counts.manager_id = managers.id
-            ORDER BY num1 asc');
+            ORDER BY num1 asc");
         $ones = collect($ones);
 
         $tops = $this->checkMultiple($ones, 'num1');
@@ -1142,23 +1394,33 @@ class UpdateFunFacts implements ShouldQueue
     private function moves()
     {
         echo 'Moves'.PHP_EOL;
-        $i = TeamName::selectRaw('manager_id, sum(trades) as trades')
+        $query = TeamName::selectRaw('manager_id, sum(trades) as trades')
             ->orderBy('trades', 'desc')
-            ->groupBy('manager_id')
-            ->get();
+            ->groupBy('manager_id');
+            
+        if ($this->isHistoricalCalculation) {
+            $query->where('year', '<=', $this->asOfYear);
+        }
+        
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'trades');
         $this->insertFunFact(73, 'manager_id', 'trades', [], $tops);
 
-        $i = TeamName::selectRaw('manager_id, sum(moves) as moves')
+        $query = TeamName::selectRaw('manager_id, sum(moves) as moves')
             ->orderBy('moves', 'desc')
-            ->groupBy('manager_id')
-            ->get();
+            ->groupBy('manager_id');
+            
+        if ($this->isHistoricalCalculation) {
+            $query->where('year', '<=', $this->asOfYear);
+        }
+        
+        $i = $query->get();
 
         $tops = $this->checkMultiple($i, 'moves');
         $this->insertFunFact(74, 'manager_id', 'moves', [], $tops);
 
-        $i = TeamName::selectRaw('manager_id, sum(moves) as moves')
+        $query = TeamName::selectRaw('manager_id, sum(moves) as moves')
             ->orderBy('moves', 'asc')
             ->groupBy('manager_id')
             ->get();
@@ -1171,22 +1433,38 @@ class UpdateFunFacts implements ShouldQueue
     private function currentSeasonStats()
     {
         echo 'Current Season Stats'.PHP_EOL;
-        $r = Roster::selectRaw('managers.id, sum(points) as pts')
+        
+        // Use the current season or asOfYear if in historical mode
+        $seasonToUse = $this->isHistoricalCalculation ? $this->asOfYear : $this->currentSeason;
+        
+        $query = Roster::selectRaw('managers.id, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->where('roster_spot', 'BN')
-            ->where('year', $this->currentSeason)
+            ->where('year', $seasonToUse)
             ->orderBy('pts', 'desc')
-            ->groupBy('managers.id')
-            ->get();
+            ->groupBy('managers.id');
+            
+        // If we're in historical mode with a specific week
+        if ($this->isHistoricalCalculation && $this->asOfWeek !== null) {
+            $query->where('week', '<=', $this->asOfWeek);
+        }
+        
+        $r = $query->get();
 
         $tops = $this->checkMultiple($r, 'pts');
         $this->insertFunFact(80, 'id', 'pts', [], $tops);
 
-        $r = Roster::with('stat')
+        $query = Roster::with('stat')
             ->where('roster_spot', '!=', 'BN')
             ->where('roster_spot', '!=', 'IR')
-            ->where('year', $this->currentSeason)
-            ->get();
+            ->where('year', $seasonToUse);
+            
+        // If we're in historical mode with a specific week
+        if ($this->isHistoricalCalculation && $this->asOfWeek !== null) {
+            $query->where('week', '<=', $this->asOfWeek);
+        }
+        
+        $r = $query->get();
 
         $t = $r->groupBy('manager');
 
@@ -1419,7 +1697,7 @@ class UpdateFunFacts implements ShouldQueue
         $best = 0;
         $worst = 417;
         foreach ($all as $man => $match) {
-            $pct = ($match['wins'] / $match['matchups']) * 100;
+            $pct = ($match['matchups'] > 0) ? ($match['wins'] / $match['matchups']) * 100 : 0;
             
             if ($pct > $best) {                
                 $best = $pct;
@@ -1432,7 +1710,7 @@ class UpdateFunFacts implements ShouldQueue
         // Put in arrays to handle case when managers are tied
         $besta = $worsta = [];
         foreach ($all as $man => $match) {
-            $pct = ($match['wins'] / $match['matchups']) * 100;
+            $pct = ($match['matchups'] > 0) ? ($match['wins'] / $match['matchups']) * 100 : 0;
 
             if ($pct == $best) {
                 $besta[] = (object)['man' => $man, 'val' => $pct];
@@ -1456,11 +1734,18 @@ class UpdateFunFacts implements ShouldQueue
     private function currentSeasonPoints()
     {
         echo 'Current Season Points'.PHP_EOL;
+        
+        // Get current week from calculateLeaderForFunFact
+        $currentWeek = $this->currentWeek ?? PHP_INT_MAX; // Default to max if not set
+        
         // Most points in week
         $r = Roster::selectRaw('managers.id, week, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->where('roster_spot', '!=', 'BN')
             ->where('year', $this->currentSeason)
+            ->when($currentWeek < PHP_INT_MAX, function($query) use ($currentWeek) {
+                return $query->where('week', '<=', $currentWeek);
+            })
             ->orderBy('pts', 'desc')
             ->groupBy('week','managers.id')
             ->get();
@@ -1473,6 +1758,9 @@ class UpdateFunFacts implements ShouldQueue
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->where('roster_spot', '!=', 'BN')
             ->where('year', $this->currentSeason)
+            ->when($currentWeek < PHP_INT_MAX, function($query) use ($currentWeek) {
+                return $query->where('week', '<=', $currentWeek);
+            })
             ->orderBy('pts', 'asc')
             ->groupBy('week','managers.id')
             ->get();
@@ -1485,6 +1773,9 @@ class UpdateFunFacts implements ShouldQueue
             CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner, 
             CASE WHEN manager1_score > manager2_score THEN manager2_id ELSE manager1_id END as loser')
             ->where('year', $this->currentSeason)
+            ->when($currentWeek < PHP_INT_MAX, function($query) use ($currentWeek) {
+                return $query->where('week_number', '<=', $currentWeek);
+            })
             ->groupBy('winner', 'loser', 'year', 'week_number')
             ->orderBy('diff', 'desc')
             ->limit(50)
@@ -1498,6 +1789,9 @@ class UpdateFunFacts implements ShouldQueue
             CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner, 
             CASE WHEN manager1_score > manager2_score THEN manager2_id ELSE manager1_id END as loser')
             ->where('year', $this->currentSeason)
+            ->when($currentWeek < PHP_INT_MAX, function($query) use ($currentWeek) {
+                return $query->where('week_number', '<=', $currentWeek);
+            })
             ->groupBy('winner', 'loser', 'year', 'week_number')
             ->orderBy('diff', 'asc')
             ->limit(50)
@@ -1807,17 +2101,21 @@ class UpdateFunFacts implements ShouldQueue
         ];
 
         foreach ($all as $key => $pos) {
-            $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
+            $query = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
                 ->join('managers', 'managers.name', '=', 'rosters.manager')
                 ->where('position', $pos)
                 ->whereNotIn('roster_spot', ['BN', 'IR'])
                 ->groupBy('managers.id')
                 ->orderBy('pts', 'desc')
-                ->limit(3)
-                ->get();
+                ->limit(3);
 
+            // Apply historical filter if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+            }
+            
+            $top = $query->get();
             $tops = $this->checkMultiple($top, 'pts');
-
             $this->insertFunFact($key, 'manager_id', 'pts', [], $tops);
         }
 
@@ -1825,36 +2123,51 @@ class UpdateFunFacts implements ShouldQueue
         $this->groupByWeek($all);
 
         // Do the same for bench points now
-        $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
+        $query = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->whereIn('roster_spot', ['BN', 'IR'])
             ->groupBy('managers.id')
             ->orderBy('pts', 'desc')
-            ->limit(3)
-            ->get();
+            ->limit(3);
 
+        // Apply historical filter if in historical calculation mode
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+        }
+        
+        $top = $query->get();
         $tops = $this->checkMultiple($top, 'pts');
         $this->insertFunFact(129, 'manager_id', 'pts', [], $tops);
 
-        $top = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
+        $query = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->whereIn('roster_spot', ['BN', 'IR'])
             ->groupBy('managers.id', 'year')
             ->orderBy('pts', 'desc')
-            ->limit(3)
-            ->get();
+            ->limit(3);
 
+        // Apply historical filter if in historical calculation mode
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+        }
+        
+        $top = $query->get();
         $tops = $this->checkMultiple($top, 'pts');
         $this->insertFunFact(130, 'manager_id', 'pts', ['year'], $tops);
 
-        $top = Roster::selectRaw('manager, managers.id as manager_id, year, week, sum(points) as pts')
+        $query = Roster::selectRaw('manager, managers.id as manager_id, year, week, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->whereIn('roster_spot', ['BN', 'IR'])
             ->groupBy('managers.id', 'year', 'week')
             ->orderBy('pts', 'desc')
-            ->limit(3)
-            ->get();
+            ->limit(3);
 
+        // Apply historical filter if in historical calculation mode
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+        }
+        
+        $top = $query->get();
         $tops = $this->checkMultiple($top, 'pts');
         $this->insertFunFact(131, 'manager_id', 'pts', ['Wk','week', 'year'], $tops);
     }
@@ -1863,17 +2176,21 @@ class UpdateFunFacts implements ShouldQueue
     {
         foreach ($all as $key => $pos) {
             $ffId = $key-1;
-            $top = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
+            $query = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
                 ->join('managers', 'managers.name', '=', 'rosters.manager')
                 ->where('position', $pos)
                 ->whereNotIn('roster_spot', ['BN', 'IR'])
                 ->groupBy('managers.id', 'year')
                 ->orderBy('pts', 'desc')
-                ->limit(3)
-                ->get();
+                ->limit(3);
 
+            // Apply historical filter if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+            }
+
+            $top = $query->get();
             $tops = $this->checkMultiple($top, 'pts');
-
             $this->insertFunFact($ffId, 'manager_id', 'pts', ['year'], $tops);
         }
     }
@@ -1882,17 +2199,21 @@ class UpdateFunFacts implements ShouldQueue
     {
         foreach ($all as $key => $pos) {
             $ffId = $key-2;
-            $top = Roster::selectRaw('manager, managers.id as manager_id, year, week, sum(points) as pts')
+            $query = Roster::selectRaw('manager, managers.id as manager_id, year, week, sum(points) as pts')
                 ->join('managers', 'managers.name', '=', 'rosters.manager')
                 ->where('position', $pos)
                 ->whereNotIn('roster_spot', ['BN', 'IR'])
                 ->groupBy('managers.id', 'year', 'week')
                 ->orderBy('pts', 'desc')
-                ->limit(5)
-                ->get();
+                ->limit(5);
 
+            // Apply historical filter if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+            }
+
+            $top = $query->get();
             $tops = $this->checkMultiple($top, 'pts');
-
             $this->insertFunFact($ffId, 'manager_id', 'pts', ['Wk', 'week', 'year'], $tops);
         }
     }
@@ -1915,15 +2236,20 @@ class UpdateFunFacts implements ShouldQueue
         ];
 
         foreach ($all as $key => $slot) {
-            $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
+            $query = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
                 ->join('managers', 'managers.name', '=', 'rosters.manager')
                 ->where('game_slot', $slot)
                 ->whereNotIn('roster_spot', ['BN', 'IR'])
                 ->groupBy('managers.id')
                 ->orderBy('pts', 'desc')
-                ->limit(3)
-                ->get();
+                ->limit(3);
 
+            // Apply historical filter if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+            }
+
+            $top = $query->get();
             $tops = $this->checkMultiple($top, 'pts');
             $this->insertFunFact($key, 'manager_id', 'pts', [], $tops);
         }
@@ -1937,15 +2263,20 @@ class UpdateFunFacts implements ShouldQueue
         ];
 
         foreach ($all as $key => $slot) {
-            $top = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
+            $query = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
                 ->join('managers', 'managers.name', '=', 'rosters.manager')
                 ->where('game_slot', $slot)
                 ->whereNotIn('roster_spot', ['BN', 'IR'])
                 ->groupBy('managers.id', 'year')
                 ->orderBy('pts', 'desc')
-                ->limit(3)
-                ->get();
+                ->limit(3);
 
+            // Apply historical filter if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+            }
+
+            $top = $query->get();
             $tops = $this->checkMultiple($top, 'pts');
             $this->insertFunFact($key, 'manager_id', 'pts', ['year'], $tops);
         }
@@ -1959,15 +2290,20 @@ class UpdateFunFacts implements ShouldQueue
         ];
 
         foreach ($all as $key => $slot) {
-            $top = Roster::selectRaw('manager, managers.id as manager_id, year, week, sum(points) as pts')
+            $query = Roster::selectRaw('manager, managers.id as manager_id, year, week, sum(points) as pts')
                 ->join('managers', 'managers.name', '=', 'rosters.manager')
                 ->where('game_slot', $slot)
                 ->whereNotIn('roster_spot', ['BN', 'IR'])
                 ->groupBy('managers.id', 'year', 'week')
                 ->orderBy('pts', 'desc')
-                ->limit(3)
-                ->get();
+                ->limit(3);
 
+            // Apply historical filter if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+            }
+
+            $top = $query->get();
             $tops = $this->checkMultiple($top, 'pts');
             $this->insertFunFact($key, 'manager_id', 'pts', ['Wk', 'week', 'year'], $tops);
         }
@@ -1981,15 +2317,20 @@ class UpdateFunFacts implements ShouldQueue
         ];
 
         foreach ($all as $key => $slot) {
-            $top = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
+            $query = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
                 ->join('managers', 'managers.name', '=', 'rosters.manager')
                 ->where('game_slot', $slot)
                 ->whereNotIn('roster_spot', ['BN', 'IR'])
                 ->groupBy('managers.id')
                 ->orderBy('pts', 'asc')
-                ->limit(3)
-                ->get();
+                ->limit(3);
 
+            // Apply historical filter if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+            }
+
+            $top = $query->get();
             $tops = $this->checkMultiple($top, 'pts');
             $this->insertFunFact($key, 'manager_id', 'pts', [], $tops);
         }
@@ -2003,15 +2344,20 @@ class UpdateFunFacts implements ShouldQueue
         ];
 
         foreach ($all as $key => $slot) {
-            $top = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
+            $query = Roster::selectRaw('manager, managers.id as manager_id, year, sum(points) as pts')
                 ->join('managers', 'managers.name', '=', 'rosters.manager')
                 ->where('game_slot', $slot)
                 ->whereNotIn('roster_spot', ['BN', 'IR'])
                 ->groupBy('managers.id', 'year')
                 ->orderBy('pts', 'asc')
-                ->limit(3)
-                ->get();
+                ->limit(3);
 
+            // Apply historical filter if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+            }
+
+            $top = $query->get();
             $tops = $this->checkMultiple($top, 'pts');
             $this->insertFunFact($key, 'manager_id', 'pts', ['year'], $tops);
         }
@@ -2075,26 +2421,34 @@ class UpdateFunFacts implements ShouldQueue
             }
         }
 
-        usort($response, function($a, $b) {
-            return $b['score'] <=> $a['score'];
-        });
+        if (!empty($response)) {
+            usort($response, function($a, $b) {
+                return $b['score'] <=> $a['score'];
+            });
 
-        $best = (object) $response[0];
-        $this->insertFunFact(108, 'manager_id', 'points', ['year', 'player'], [$best]);
+            $best = (object) $response[0];
+            $this->insertFunFact(108, 'manager_id', 'points', ['year', 'player'], [$best]);
 
-        usort($response, function($a, $b) {
-            return $a['score'] <=> $b['score'];
-        });
-        
-        $worst = (object) $response[0];
-        $this->insertFunFact(98, 'manager_id', 'points', ['year', 'player'], [$worst]);
+            usort($response, function($a, $b) {
+                return $a['score'] <=> $b['score'];
+            });
+            
+            $worst = (object) $response[0];
+            $this->insertFunFact(98, 'manager_id', 'points', ['year', 'player'], [$worst]);
+        } else {
+            echo "No responses found for best/worst draft picks".PHP_EOL;
+        }
 
-        usort($yearResponse, function($a, $b) {
-            return $b['score'] <=> $a['score'];
-        });
+        if (!empty($yearResponse)) {
+            usort($yearResponse, function($a, $b) {
+                return $b['score'] <=> $a['score'];
+            });
 
-        $best = (object) $yearResponse[0];
-        $this->insertFunFact(107, 'manager_id', 'points', ['player'], [$best]);
+            $best = (object) $yearResponse[0];
+            $this->insertFunFact(107, 'manager_id', 'points', ['player'], [$best]);
+        } else {
+            echo "No responses found for current year draft picks".PHP_EOL;
+        }
 
         usort($yearResponse, function($a, $b) {
             return $a['score'] <=> $b['score'];
@@ -2214,15 +2568,29 @@ class UpdateFunFacts implements ShouldQueue
     public function comeback()
     {
         echo 'Comeback'.PHP_EOL;
-        // Get points before MNF
-        $r = Roster::selectRaw('rosters.year, week, manager, managers.id, sum(points) as pts')
+        // Get points before MNF with historical filtering
+        $query = Roster::selectRaw('rosters.year, week, manager, managers.id, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->whereNotIn('roster_spot', ['BN', 'IR'])
             ->where('game_slot', '<', 6)
-            ->groupBy(['rosters.year', 'week', 'manager'])
-            ->get();
+            ->groupBy(['rosters.year', 'week', 'manager']);
+        
+        // Apply historical filter if in historical calculation mode
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+        }
+        $r = $query->get();
 
-        $allMatchups = RegularSeasonMatchup::all();
+        // Get matchups with historical filtering
+        $matchupQuery = RegularSeasonMatchup::query();
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($matchupQuery, 'year', 'week_number');
+        }
+        $allMatchups = $matchupQuery->get();
+        
+        // if ($this->isHistoricalCalculation) {
+        //     echo "DEBUG: Found " . $r->count() . " roster records and " . $allMatchups->count() . " matchup records for historical calculation\n";
+        // }
 
         $response = [];
         foreach ($r as $row) {
@@ -2256,6 +2624,10 @@ class UpdateFunFacts implements ShouldQueue
                 'year' => $row->year,
                 'diff' => abs($diff)
             ];
+            
+            // if ($this->isHistoricalCalculation) {
+            //     echo "DEBUG: Found comeback - Manager {$row->id} in {$row->year} Week {$row->week} with diff {$diff}\n";
+            // }
         }
 
         // sort responses by comeback
@@ -2263,25 +2635,46 @@ class UpdateFunFacts implements ShouldQueue
             return $b->diff <=> $a->diff;
         });
 
-        $best = (object) $response[0];
-        $this->insertFunFact(135, 'manager', 'diff', ['Wk', 'week', 'year'], [$best]);
+        // Check if there are any comebacks before trying to access the first element
+        if (!empty($response)) {
+            $best = (object) $response[0];
+            $this->insertFunFact(135, 'manager', 'diff', ['Wk', 'week', 'year'], [$best]);
+            
+            // if ($this->isHistoricalCalculation) {
+            //     echo "DEBUG: Best comeback - Manager {$best->manager} in {$best->year} Week {$best->week} with diff {$best->diff}\n";
+            // }
+        } else {
+            echo "No comebacks found for the current period".PHP_EOL;
+        }
     }
 
     public function freeAgent()
     {
         echo 'Free Agent'.PHP_EOL;
-        $r = Roster::selectRaw('year, manager, managers.id as manager_id, player, sum(points) as pts')
+        
+        // Get rosters with historical filtering
+        $query = Roster::selectRaw('year, manager, managers.id as manager_id, player, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->groupBy(['player', 'year'])
-            ->orderBy('pts', 'desc')
-            ->get();
+            ->orderBy('pts', 'desc');
+            
+        // Apply historical filter if in historical calculation mode
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
+        }
+        $r = $query->get();
 
         $response = [];
         // Check if that player was drafted
         foreach ($r as $row) {
-            $drafted = Draft::where('player', 'LIKE', $row->player.'%')
-                ->where('year', $row->year)
-                ->first();
+            $draftQuery = Draft::where('player', 'LIKE', $row->player.'%')
+                ->where('year', $row->year);
+            
+            // Apply historical filter if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                $this->applyHistoricalFilter($draftQuery, 'year');
+            }
+            $drafted = $draftQuery->first();
 
             if ($drafted) {
                 continue;
@@ -2289,8 +2682,12 @@ class UpdateFunFacts implements ShouldQueue
             $response[] = $row; 
         }
 
-        $best = (object) $response[0];
-        $this->insertFunFact(139, 'manager_id', 'pts', ['year', 'player'], [$best]);
+        if (!empty($response)) {
+            $best = (object) $response[0];
+            $this->insertFunFact(139, 'manager_id', 'pts', ['year', 'player'], [$best]);
+        } else {
+            echo "No free agents found for any season".PHP_EOL;
+        }
 
         $response = [];
         // Check if that player was drafted
@@ -2299,9 +2696,14 @@ class UpdateFunFacts implements ShouldQueue
                 continue;
             }
 
-            $drafted = Draft::where('player', 'LIKE', $row->player.'%')
-                ->where('year', $row->year)
-                ->first();
+            $draftQuery = Draft::where('player', 'LIKE', $row->player.'%')
+                ->where('year', $row->year);
+                
+            // Apply historical filter if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                $this->applyHistoricalFilter($draftQuery, 'year');
+            }
+            $drafted = $draftQuery->first();
 
             if ($drafted) {
                 continue;
@@ -2309,14 +2711,24 @@ class UpdateFunFacts implements ShouldQueue
             $response[] = $row; 
         }
 
-        $best = (object) $response[0];
-        $this->insertFunFact(138, 'manager_id', 'pts', ['player'], [$best]);
+        if (!empty($response)) {
+            $best = (object) $response[0];
+            $this->insertFunFact(138, 'manager_id', 'pts', ['player'], [$best]);
+        } else {
+            echo "No free agents found for current season".PHP_EOL;
+        }
     }
 
     public function pointsInWinLoss()
     {
         echo 'Points In Win Loss'.PHP_EOL;
-        $r = RegularSeasonMatchup::orderBy('manager1_score', 'desc')->get();
+        
+        // Get matchups with historical filtering for highest scoring loss
+        $query1 = RegularSeasonMatchup::orderBy('manager1_score', 'desc');
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($query1, 'year', 'week_number');
+        }
+        $r = $query1->get();
 
         $response = [];
         foreach ($r as $row) {
@@ -2333,10 +2745,19 @@ class UpdateFunFacts implements ShouldQueue
             break;
         }
 
-        $best = (object) $response[0];
-        $this->insertFunFact(136, 'manager', 'points', ['Wk', 'week', 'year'], [$best]);
+        if (!empty($response)) {
+            $best = (object) $response[0];
+            $this->insertFunFact(136, 'manager', 'points', ['Wk', 'week', 'year'], [$best]);
+        } else {
+            echo "No high scoring losses found".PHP_EOL;
+        }
         
-        $r = RegularSeasonMatchup::orderBy('manager1_score', 'asc')->get();
+        // Get matchups with historical filtering for lowest scoring win
+        $query2 = RegularSeasonMatchup::orderBy('manager1_score', 'asc');
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($query2, 'year', 'week_number');
+        }
+        $r = $query2->get();
 
         $response = [];
         foreach ($r as $row) {
@@ -2353,33 +2774,50 @@ class UpdateFunFacts implements ShouldQueue
             break;
         }
 
-        $best = (object) $response[0];
-        $this->insertFunFact(137, 'manager', 'points', ['Wk', 'week', 'year'], [$best]);
+        if (!empty($response)) {
+            $best = (object) $response[0];
+            $this->insertFunFact(137, 'manager', 'points', ['Wk', 'week', 'year'], [$best]);
+        } else {
+            echo "No low scoring wins found".PHP_EOL;
+        }
     }
 
     // 140,141
     public function irPlayers()
     {
         echo 'IR Players'.PHP_EOL;
-        $top = Roster::selectRaw('manager, managers.id as manager_id, count(rosters.id) as cnt')
+        
+        // All-time IR players with historical filtering
+        $query1 = Roster::selectRaw('manager, managers.id as manager_id, count(rosters.id) as cnt')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->where('roster_spot', 'IR')
             ->groupBy('managers.id')
             ->orderBy('cnt', 'desc')
-            ->limit(5)
-            ->get();
+            ->limit(5);
+            
+        // Apply historical filter if in historical calculation mode
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($query1, 'rosters.year', 'rosters.week');
+        }
+        $top = $query1->get();
 
         $tops = $this->checkMultiple($top, 'cnt');
         $this->insertFunFact(140, 'manager_id', 'cnt', [], $tops);
         
-        $top = Roster::selectRaw('manager, managers.id as manager_id, count(rosters.id) as cnt')
+        // Current season IR players with historical filtering
+        $query2 = Roster::selectRaw('manager, managers.id as manager_id, count(rosters.id) as cnt')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->where('roster_spot', 'IR')
-            ->where('year', $this->currentSeason)
+            ->where('rosters.year', $this->currentSeason)
             ->groupBy('managers.id')
             ->orderBy('cnt', 'desc')
-            ->limit(5)
-            ->get();
+            ->limit(5);
+            
+        // Apply historical filter if in historical calculation mode
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($query2, 'rosters.year', 'rosters.week');
+        }
+        $top = $query2->get();
 
         $tops = $this->checkMultiple($top, 'cnt');
         $this->insertFunFact(141, 'manager_id', 'cnt', [], $tops);
@@ -2423,16 +2861,36 @@ class UpdateFunFacts implements ShouldQueue
         // Build position filter
         $positionFilter = implode("','", $positions);
         
-        // Get years to process
+        // Get years to process with historical filtering
         $yearsQuery = Roster::whereIn('position', $positions);
         if ($year !== null) {
             $yearsQuery->where('year', $year);
+        }
+        
+        // Apply historical filter if in historical calculation mode
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($yearsQuery, 'year', 'week');
         }
         $years = $yearsQuery->distinct()->pluck('year');
         
         foreach ($years as $yearValue) {
             // Find top performers by position for all weeks using a single efficient query
             // Get the max points per position per week and find all players who scored those points
+            $whereClause = "year = ? AND position IN ('$positionFilter') AND roster_spot NOT IN ('BN', 'IR')";
+            
+            // Add historical filtering to the WHERE clause if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                if ($yearValue < $this->asOfYear) {
+                    // Year is before our cutoff, include all weeks
+                } else if ($yearValue == $this->asOfYear && $this->asOfWeek !== null) {
+                    // Year matches our cutoff, only include weeks up to asOfWeek
+                    $whereClause .= " AND week <= {$this->asOfWeek}";
+                } else if ($yearValue > $this->asOfYear) {
+                    // Year is after our cutoff, skip this year entirely
+                    continue;
+                }
+            }
+            
             $query = "
                 WITH MaxPoints AS (
                     SELECT 
@@ -2440,9 +2898,7 @@ class UpdateFunFacts implements ShouldQueue
                         week, 
                         MAX(points) as max_points
                     FROM rosters
-                    WHERE year = ? 
-                      AND position IN ('$positionFilter')
-                      AND roster_spot NOT IN ('BN', 'IR')
+                    WHERE $whereClause
                     GROUP BY position, week
                 )
                 SELECT 
@@ -2457,6 +2913,13 @@ class UpdateFunFacts implements ShouldQueue
                 WHERE r.year = ?
                   AND r.roster_spot NOT IN ('BN', 'IR')
             ";
+            
+            // Add the same historical filtering to the main query WHERE clause if in historical calculation mode
+            if ($this->isHistoricalCalculation) {
+                if ($yearValue == $this->asOfYear && $this->asOfWeek !== null) {
+                    $query .= " AND r.week <= {$this->asOfWeek}";
+                }
+            }
             
             $topPerformers = DB::select($query, [$yearValue, $yearValue]);
             
@@ -2503,8 +2966,12 @@ class UpdateFunFacts implements ShouldQueue
         $bestSeasonCounts = [];
         $managers = Manager::pluck('name', 'id')->toArray();
         
-        // Get all seasons
-        $allSeasons = Roster::select('year')->distinct()->pluck('year')->toArray();
+        // Get all seasons with historical filtering
+        $seasonsQuery = Roster::select('year')->distinct();
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($seasonsQuery, 'year', 'week');
+        }
+        $allSeasons = $seasonsQuery->pluck('year')->toArray();
         
         // For each season, calculate the counts
         foreach ($allSeasons as $season) {
@@ -2517,13 +2984,25 @@ class UpdateFunFacts implements ShouldQueue
             
             // Use a single query to find top performers for each position and week in this season
             foreach ($positions as $position) {
+                // Build historical filtering for this season if in historical calculation mode
+                $weekFilter = "";
+                if ($this->isHistoricalCalculation) {
+                    if ($season > $this->asOfYear) {
+                        // Season is after cutoff, skip
+                        continue;
+                    } else if ($season == $this->asOfYear && $this->asOfWeek !== null) {
+                        // Season matches cutoff, limit to weeks
+                        $weekFilter = " AND week <= {$this->asOfWeek}";
+                    }
+                }
+                
                 // First, get the max points for each week for this position
                 $maxPointsPerWeekQuery = "
                     SELECT 
                         week, 
                         MAX(points) as max_points
                     FROM rosters
-                    WHERE year = ? AND position = ? AND roster_spot NOT IN ('BN', 'IR')
+                    WHERE year = ? AND position = ? AND roster_spot NOT IN ('BN', 'IR')$weekFilter
                     GROUP BY week
                 ";
                 
@@ -2599,6 +3078,14 @@ class UpdateFunFacts implements ShouldQueue
      * Updated to use the trackTopPerformanceByPosition helper function
      * 147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164
      */
+    /**
+     * Alias method for trackTopPositionPerformances to match the method map in UpdateWeeklyRecords
+     */
+    public function weeklyPositionPerformance()
+    {
+        return $this->trackTopPositionPerformances();
+    }
+
     public function trackTopPositionPerformances()
     {
         echo 'Top QB Performances'.PHP_EOL;
@@ -2699,10 +3186,13 @@ class UpdateFunFacts implements ShouldQueue
         echo 'Most Picks By Position'.PHP_EOL;
 
         // Most TE picks in the first round (165)
-        $i = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
+        $query = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
             ->where('position', 'TE')
-            ->where('round', 1)
-            ->groupBy('manager_id')
+            ->where('round', 1);
+            
+        $this->applyHistoricalFilter($query, 'year');
+        
+        $i = $query->groupBy('manager_id')
             ->orderBy('pick_count', 'desc')
             ->get();
 
@@ -2710,10 +3200,13 @@ class UpdateFunFacts implements ShouldQueue
         $this->insertFunFact(165, 'manager_id', 'pick_count', [], $tops);
 
         // Most WR picks in the first round (166)
-        $i = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
+        $query = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
             ->where('position', 'WR')
-            ->where('round', 1)
-            ->groupBy('manager_id')
+            ->where('round', 1);
+            
+        $this->applyHistoricalFilter($query, 'year');
+        
+        $i = $query->groupBy('manager_id')
             ->orderBy('pick_count', 'desc')
             ->get();
 
@@ -2721,10 +3214,13 @@ class UpdateFunFacts implements ShouldQueue
         $this->insertFunFact(166, 'manager_id', 'pick_count', [], $tops);
 
         // Most RB picks in the first round (167)
-        $i = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
+        $query = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
             ->where('position', 'RB')
-            ->where('round', 1)
-            ->groupBy('manager_id')
+            ->where('round', 1);
+            
+        $this->applyHistoricalFilter($query, 'year');
+        
+        $i = $query->groupBy('manager_id')
             ->orderBy('pick_count', 'desc')
             ->get();
 
@@ -2732,10 +3228,13 @@ class UpdateFunFacts implements ShouldQueue
         $this->insertFunFact(167, 'manager_id', 'pick_count', [], $tops);
 
         // Most QB picks in the first round (168)
-        $i = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
+        $query = Draft::selectRaw('manager_id, COUNT(*) as pick_count')
             ->where('position', 'QB')
-            ->where('round', 1)
-            ->groupBy('manager_id')
+            ->where('round', 1);
+            
+        $this->applyHistoricalFilter($query, 'year');
+        
+        $i = $query->groupBy('manager_id')
             ->orderBy('pick_count', 'desc')
             ->get();
 
@@ -2749,16 +3248,23 @@ class UpdateFunFacts implements ShouldQueue
         echo 'Seahawks Drafted'.PHP_EOL;
 
         // Fewest Seahawks drafted all time (169)
-        $i = Draft::selectRaw('draft.manager_id, COUNT(*) as pick_count')
+        $query = Draft::selectRaw('draft.manager_id, COUNT(*) as pick_count')
             ->join('managers', 'managers.id', '=', 'draft.manager_id')
             ->join('rosters', function($join) {
                 $join->on('rosters.player', 'LIKE', DB::raw("CONCAT(draft.player, '%')"))
                      ->on('rosters.year', '=', 'draft.year')
                      ->on('rosters.manager', '=', 'managers.name');
+                     
+                if ($this->isHistoricalCalculation) {
+                    $join->where('rosters.year', '<=', $this->asOfYear);
+                }
             })
             ->where('rosters.week', 1)
-            ->where('rosters.team', 'SEA')
-            ->groupBy('draft.manager_id')
+            ->where('rosters.team', 'SEA');
+            
+        $this->applyHistoricalFilter($query, 'draft.year');
+        
+        $i = $query->groupBy('draft.manager_id')
             ->orderBy('pick_count', 'asc')
             ->get();
 
@@ -2766,16 +3272,23 @@ class UpdateFunFacts implements ShouldQueue
         $this->insertFunFact(169, 'manager_id', 'pick_count', [], $tops);
 
         // Most Seahawks drafted all time (170)
-        $i = Draft::selectRaw('draft.manager_id, COUNT(*) as pick_count')
+        $query = Draft::selectRaw('draft.manager_id, COUNT(*) as pick_count')
             ->join('managers', 'managers.id', '=', 'draft.manager_id')
             ->join('rosters', function($join) {
                 $join->on('rosters.player', 'LIKE', DB::raw("CONCAT(draft.player, '%')"))
                      ->on('rosters.year', '=', 'draft.year')
                      ->on('rosters.manager', '=', 'managers.name');
+                     
+                if ($this->isHistoricalCalculation) {
+                    $join->where('rosters.year', '<=', $this->asOfYear);
+                }
             })
             ->where('rosters.week', 1)
-            ->where('rosters.team', 'SEA')
-            ->groupBy('draft.manager_id')
+            ->where('rosters.team', 'SEA');
+            
+        $this->applyHistoricalFilter($query, 'draft.year');
+        
+        $i = $query->groupBy('draft.manager_id')
             ->orderBy('pick_count', 'desc')
             ->get();
 

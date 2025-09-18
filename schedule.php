@@ -297,10 +297,12 @@ if (isset($_GET['id'])) {
             $.ajax({
                 url: baseUrl + 'dataLookup.php',
                 type: 'GET',
+                cache: false,
                 data: {
                     dataType: 'mockSchedule',
                     year: selectedSeason,
-                    scheduleManagerId: selectedManagerId
+                    scheduleManagerId: selectedManagerId,
+                    _t: new Date().getTime() // Cache busting timestamp
                 },
                 success: function(response) {
                     // Hide the initial message and show the table
@@ -310,18 +312,6 @@ if (isset($_GET['id'])) {
                     
                     // Update the table body with the data
                     $('#mock-schedule-tbody').html(response);
-                    
-                    // Initialize DataTable after data is loaded
-                    setTimeout(function() {
-                        if ($.fn.DataTable.isDataTable('#mock-schedule-table')) {
-                            $('#mock-schedule-table').DataTable().destroy();
-                        }
-                        $('#mock-schedule-table').DataTable({
-                            searching: false,
-                            paging: false,
-                            info: false
-                        });
-                    }, 100);
                 },
                 error: function() {
                     $('.initial-message').html('<div class="alert alert-danger">Error loading mock schedule data.</div>');

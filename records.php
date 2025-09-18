@@ -130,7 +130,7 @@
                                         
                                         <!-- Detailed View Table -->
                                         <div id="detailed-view" class="table-responsive" style="display: none;">
-                                            <table class="table table-bordered table-striped table-hover table-compact" id="record-logs-table">
+                                            <table class="table table-bordered table-striped table-hover table-responsive" id="record-logs-table">
                                                 <thead>
                                                     <tr>
                                                         <th>Year</th>
@@ -167,7 +167,7 @@
                                         
                                         <!-- Summary View Table -->
                                         <div id="summary-view" class="table-responsive">
-                                            <table class="table table-bordered table-striped table-hover" id="summary-logs-table">
+                                            <table class="table table-bordered table-striped table-hover table-responsive" id="summary-logs-table">
                                                 <thead>
                                                     <tr>
                                                         <th>Manager(s)</th>

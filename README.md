@@ -27,8 +27,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 
 - fun fact finder page
 - allow people add comments/smack talk to profile
-- profile page, Head to Head tab, add column for each manager's record and rank at the time
-- update the meta data for the newsletter
 - datatables hover: true
 - update laravel?
 

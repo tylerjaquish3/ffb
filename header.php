@@ -7,13 +7,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 
     <title><?php echo isset($pageName) ? $pageName. ' | Suntown FFB' : 'Suntown FFB'; ?></title>
-    <?php $version = "v5.0.1"; 
+    <?php $version = "v5.0.2"; 
     $vDate = "(9/18/25)"; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">
 
-    <meta property="og:title" content="Suntown Fantasy Football League" />
-    <meta property="og:description" content="The best league in all the land" />
+    <?php 
+    // Use custom meta properties if they're set (e.g., from newsletter.php), otherwise use defaults
+    $ogTitle = isset($customMetaTitle) ? $customMetaTitle : "Suntown Fantasy Football League";
+    $ogDescription = isset($customMetaDescription) ? $customMetaDescription : "The best league in all the land";
+    ?>
+    <meta property="og:title" content="<?php echo htmlspecialchars($ogTitle); ?>" />
+    <meta property="og:description" content="<?php echo htmlspecialchars($ogDescription); ?>" />
     <meta property="og:url" content="http://suntownffb.us" />
     <meta property="og:image" content="http://suntownffb.us/images/football.ico" />
 

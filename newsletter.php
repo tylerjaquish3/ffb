@@ -1,8 +1,9 @@
 <?php
 
 $pageName = "Newsletter";
-include 'header.php';
-include 'sidebar.html';
+
+// Include functions first to have access to database functions
+include_once 'functions.php';
 
 // Set default year and week if not provided in GET parameters
 $currentYear = date('Y');
@@ -24,6 +25,28 @@ if (!isset($_GET['week'])) {
 } else {
     $selectedWeek = $_GET['week'];
 }
+
+// Set up custom meta properties for newsletter before including header
+$customMetaTitle = "Week $selectedWeek Newsletter | $selectedSeason Suntown FFB";
+$customMetaDescription = "The best league in all the land";
+
+// Try to get preview content for meta description
+$previewQuery = query("SELECT preview FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
+$previewRow = fetch_array($previewQuery);
+if ($previewRow && !empty($previewRow['preview'])) {
+    // Clean the preview content for meta description - remove HTML, limit length
+    $cleanPreview = strip_tags($previewRow['preview']);
+    $cleanPreview = preg_replace('/\s+/', ' ', trim($cleanPreview)); // Normalize whitespace
+    if (strlen($cleanPreview) > 160) {
+        $cleanPreview = substr($cleanPreview, 0, 157) . '...';
+    }
+    if (!empty($cleanPreview)) {
+        $customMetaDescription = $cleanPreview;
+    }
+}
+
+include 'header.php';
+include 'sidebar.html';
 
 // Check for rosters with the selected year and week
 $rosterQuery = query("SELECT * FROM rosters WHERE year = $selectedSeason AND week = $selectedWeek-1");
@@ -65,7 +88,6 @@ if ($previewRow && !empty($previewRow['preview'])) {
 
 <div class="app-content content">
     <div class="content-wrapper">
-
         <div class="content-body">
             
             <!-- Dropdown selections -->

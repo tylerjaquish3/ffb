@@ -32,19 +32,30 @@ class UpdateWeeklyRecords implements ShouldQueue
     protected $testMode = false;
 
     /**
+     * The specific fun fact ID to process. If null, will process all fun facts.
+     */
+    protected $funFactId;
+
+    /**
      * Create a new job instance.
      */
-    public function __construct($year, $week = null, $testMode = false)
+    public function __construct($year, $week = null, $testMode = false, $funFactId = null)
     {
         $this->year = $year;
         $this->week = $week;
         $this->testMode = $testMode;
+        $this->funFactId = $funFactId;
     }
 
     /**
      * Keep track of last leaders for each fun fact
      */
     protected $lastLeaders = [];
+
+    /**
+     * Keep track of the last processed year to detect new season starts
+     */
+    protected $lastProcessedYear = null;
 
     /**
      * Starting year for the league
@@ -77,7 +88,7 @@ class UpdateWeeklyRecords implements ShouldQueue
             }
             
             echo "=============================================" . PHP_EOL;
-            echo "Starting to update weekly records for year: {$this->year}" . ($this->week ? ", week: {$this->week}" : "") . PHP_EOL;
+            echo "Starting to update weekly records for year: {$this->year}" . ($this->week ? ", week: {$this->week}" : "") . ($this->funFactId ? ", fun fact ID: {$this->funFactId}" : "") . PHP_EOL;
             echo "=============================================" . PHP_EOL;
             
             $this->currentYear = date('Y');
@@ -87,6 +98,7 @@ class UpdateWeeklyRecords implements ShouldQueue
             
             // Reset any cached state
             $this->lastLeaders = [];
+            $this->lastProcessedYear = null;
             
             // If a specific year/week was provided, only process that one
             if ($this->year && $this->week) {
@@ -101,11 +113,16 @@ class UpdateWeeklyRecords implements ShouldQueue
             } 
             // If nothing was provided, process the entire league history in chronological order
             else {
-                // First, clear all existing records if we're doing a full reprocessing
+                // First, clear existing records if we're doing a full reprocessing
                 // This ensures data consistency when processing the entire history
                 if (!$this->year && !$this->week) {
-                    echo "Clearing all existing record logs for full reprocessing" . PHP_EOL;
-                    RecordLog::query()->delete();
+                    if ($this->funFactId) {
+                        echo "Clearing existing record logs for fun fact ID {$this->funFactId} for full reprocessing" . PHP_EOL;
+                        RecordLog::where('fun_fact_id', $this->funFactId)->delete();
+                    } else {
+                        echo "Clearing all existing record logs for full reprocessing" . PHP_EOL;
+                        RecordLog::query()->delete();
+                    }
                 }
                 
                 // Process in strict chronological order
@@ -144,11 +161,51 @@ class UpdateWeeklyRecords implements ShouldQueue
     {
         echo "Processing records for Year {$year}, Week {$week}" . PHP_EOL;
         
-        // Get all fun facts
-        $funFacts = FunFact::all();
+        // Check if we're starting a new year (and not the first year ever)
+        if ($this->lastProcessedYear !== null && $year > $this->lastProcessedYear && $week == 1) {
+            $this->resetCurrentSeasonRecords($year);
+        }
+        $this->lastProcessedYear = $year;
+        
+        // Get fun facts - either all or just the specific one if funFactId is provided
+        if ($this->funFactId) {
+            $funFacts = FunFact::where('id', $this->funFactId)->get();
+            if ($funFacts->isEmpty()) {
+                echo "WARNING: Fun fact ID {$this->funFactId} not found" . PHP_EOL;
+                return;
+            }
+        } else {
+            $funFacts = FunFact::all();
+        }
         
         foreach ($funFacts as $funFact) {
             $this->processRecord($year, $week, $funFact);
+        }
+    }
+
+    /**
+     * Reset records for fun facts with type "current" when starting a new season
+     */
+    protected function resetCurrentSeasonRecords($newYear)
+    {
+        echo "Starting new season {$newYear} - resetting current season records" . PHP_EOL;
+        
+        // Get all fun facts with type "current", or just the specific one if funFactId is provided
+        $query = FunFact::where('type', 'current');
+        if ($this->funFactId) {
+            $query = $query->where('id', $this->funFactId);
+        }
+        $currentSeasonFunFacts = $query->get();
+        
+        if ($currentSeasonFunFacts->count() > 0) {
+            $funFactIds = $currentSeasonFunFacts->pluck('id')->toArray();
+            
+            // Delete all existing records for these fun facts from previous seasons
+            $deletedCount = RecordLog::whereIn('fun_fact_id', $funFactIds)
+                ->where('year', '<', $newYear)
+                ->delete();
+                
+            echo "Reset {$deletedCount} records for " . $currentSeasonFunFacts->count() . " current season fun facts" . PHP_EOL;
         }
     }
     

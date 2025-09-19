@@ -182,50 +182,78 @@ if (isset($_GET['id'])) {
                             <h4 class="card-title"><a href="awards.php">Awards</a></h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr;">
-                            <div class="row">
-                                <div class="col-lg-6 col-sm-12">
-                                    <?php
-                                    $result = query(
-                                        "SELECT * FROM manager_fun_facts mff
-                                        JOIN fun_facts ff ON mff.fun_fact_id = ff.id
-                                        JOIN managers ON managers.id = mff.manager_id
-                                        WHERE is_positive = 1 and manager_id = $managerId"
-                                    );
-                                    while ($row = fetch_array($result)) { 
-                                        $value = $row['value'];
-                                        if (isfloat($row['value']) && isDecimal($row['value'])) {
-                                            $value = number_format($row['value'], 2, '.', ',');
-                                        }
-                                        echo '<div class="col-md-6 col-lg-4"><div class="award good">';
-                                        if ($row['new_leader']) {
-                                            echo '<i class="icon-warning" style="font-size: 15px"></i>';
-                                        }
-                                        echo '<strong>'.$row['fact'].'</strong><br />'.$value.'<br />'.$row['note'];
-                                        echo '</div></div>';
-                                    } ?>
-                                </div>
-                                <div class="col-lg-6 col-sm-12">
-                                    <?php
-                                    $result = query(
-                                        "SELECT * FROM manager_fun_facts mff
-                                        JOIN fun_facts ff ON mff.fun_fact_id = ff.id
-                                        JOIN managers ON managers.id = mff.manager_id
-                                        WHERE is_positive = 0 and manager_id = $managerId"
-                                    );
-                                    while ($row = fetch_array($result)) { 
-                                        $value = $row['value'];
-                                        if (isfloat($row['value']) && isDecimal($row['value'])) {
-                                            $value = number_format($row['value'], 2, '.', ',');
-                                        } 
-                                        echo '<div class="col-md-6 col-lg-4"><div class="award bad">';
-                                        if ($row['new_leader']) {
-                                            echo '<i class="icon-warning" style="font-size: 15px"></i>';
-                                        }
-                                        echo '<strong>'.$row['fact'].'</strong><br />'.$value.'<br />'.$row['note'];
-                                        echo '</div></div>';
-                                    } ?>
-                                </div>
-                            </div>
+                            <?php
+                            // Collect awards for this manager
+                            $manager_awards = [];
+                            
+                            // Get positive awards
+                            $query = "SELECT * FROM manager_fun_facts mff
+                                JOIN fun_facts ff ON mff.fun_fact_id = ff.id
+                                JOIN managers ON managers.id = mff.manager_id
+                                WHERE is_positive = 1 AND manager_id = $managerId
+                                ORDER BY ff.sort_order";
+                            
+                            $result = query($query);
+                            while ($row = fetch_array($result)) {
+                                $value = $row['value'];
+                                if (isfloat($row['value']) && isDecimal($row['value'])) {
+                                    $value = number_format($row['value'], 2, '.', ',');
+                                }
+                                
+                                $manager_awards[] = [
+                                    'fact' => $row['fact'],
+                                    'value' => $value,
+                                    'note' => $row['note'],
+                                    'new_leader' => $row['new_leader'],
+                                    'is_positive' => true
+                                ];
+                            }
+                            
+                            // Get negative awards
+                            $query = "SELECT * FROM manager_fun_facts mff
+                                JOIN fun_facts ff ON mff.fun_fact_id = ff.id
+                                JOIN managers ON managers.id = mff.manager_id
+                                WHERE is_positive = 0 AND manager_id = $managerId
+                                ORDER BY ff.sort_order";
+                            
+                            $result = query($query);
+                            while ($row = fetch_array($result)) { 
+                                $value = $row['value'];
+                                if (isfloat($row['value']) && isDecimal($row['value'])) {
+                                    $value = number_format($row['value'], 2, '.', ',');
+                                }
+                                
+                                $manager_awards[] = [
+                                    'fact' => $row['fact'],
+                                    'value' => $value,
+                                    'note' => $row['note'],
+                                    'new_leader' => $row['new_leader'],
+                                    'is_positive' => false
+                                ];
+                            }
+                            
+                            // Display awards in the new grid format
+                            if (!empty($manager_awards)) {
+                                echo '<div class="awards-grid">';
+                                foreach ($manager_awards as $award) {
+                                    $award_class = $award['is_positive'] ? 'award-badge positive' : 'award-badge negative';
+                                    $new_leader_icon = $award['new_leader'] ? '<i class="icon-warning award-new-icon" title="New Leader"></i>' : '';
+                                    
+                                    echo '<div class="' . $award_class . '">';
+                                    echo '<div class="award-header-badge">';
+                                    echo '</div>';
+                                    echo '<div class="award-title">' . htmlspecialchars($award['fact']) . '</div>';
+                                    echo '<div class="award-value">' . htmlspecialchars($award['value']) . ' ' . $new_leader_icon . '</div>';
+                                    if (!empty($award['note'])) {
+                                        echo '<div class="award-note">' . htmlspecialchars($award['note']) . '</div>';
+                                    }
+                                    echo '</div>';
+                                }
+                                echo '</div>';
+                            } else {
+                                echo '<p class="text-center">No awards found for this manager.</p>';
+                            }
+                            ?>
                         </div>
                     </div>
                 </div>

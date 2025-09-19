@@ -237,6 +237,207 @@ span.seed {
     border-style: groove;
 }
 
+/* New Award Badge Styles */
+.manager-section {
+    margin-bottom: 40px;
+    border: 2px solid #e0e0e0;
+    background: #f8f9fa;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.manager-section:last-child {
+    margin-bottom: 20px;
+}
+
+.manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #2eb82e;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.manager-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.manager-header h3 a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.manager-header h3 a:hover {
+    color: #2eb82e;
+    text-decoration: underline;
+}
+
+.award-count {
+    background: #2eb82e;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.awards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    padding: 0;
+}
+
+.award-badge {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+.award-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.award-badge.positive {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+}
+
+.award-badge.negative {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
+}
+
+.award-header-badge {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.award-new-icon {
+    color: #ffc107;
+    font-size: 16px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.award-title {
+    font-weight: bold;
+    font-size: 15px;
+    color: #212529;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    text-align: center;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.award-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #495057;
+    text-align: center;
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.award-note {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+    line-height: 1.2;
+    margin-top: auto;
+    font-style: italic;
+}
+
+/* Mobile responsiveness for awards grid */
+@media (max-width: 768px) {
+    .manager-section {
+        margin-bottom: 30px;
+        padding: 15px;
+    }
+    
+    .manager-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+        padding: 12px 15px;
+    }
+    
+    .manager-header h3 {
+        font-size: 20px;
+    }
+    
+    .award-count {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    
+    .awards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 12px;
+    }
+    
+    .award-badge {
+        min-height: 120px;
+        padding: 12px;
+    }
+    
+    .award-title {
+        font-size: 14px;
+        min-height: 35px;
+    }
+    
+    .award-value {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .awards-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .manager-header {
+        padding: 10px;
+    }
+    
+    .manager-header h3 {
+        font-size: 18px;
+    }
+}
+
 .good {
     background: #acf0ac;
 }

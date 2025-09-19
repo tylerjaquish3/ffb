@@ -17,14 +17,17 @@
                             <div class="card-block">
                                 <form method="get" id="fun-fact-form">
                                     <div class="form-group">
-                                        <label for="season-type">Season Type:</label>
-                                        <select class="form-control" name="season-type" id="season-type" onchange="updateFunFactOptions()">
-                                            <option value="">All Season Types</option>
+                                        <label for="record-type">Record Type:</label>
+                                        <select class="form-control" name="record-type" id="record-type" onchange="updateFunFactOptions()">
+                                            <option value="">All Record Types</option>
                                             <?php
-                                            $selected_season_type = isset($_GET['season-type']) ? $_GET['season-type'] : '';
+                                            $selected_season_type = isset($_GET['record-type']) ? $_GET['record-type'] : '';
                                             ?>
                                             <option value="regular" <?php echo ($selected_season_type == 'regular') ? 'selected' : ''; ?>>Regular Season</option>
                                             <option value="post" <?php echo ($selected_season_type == 'post') ? 'selected' : ''; ?>>Postseason</option>
+                                            <option value="current" <?php echo ($selected_season_type == 'current') ? 'selected' : ''; ?>>Current Season</option>
+                                            <option value="draft" <?php echo ($selected_season_type == 'draft') ? 'selected' : ''; ?>>Draft</option>
+                                            <option value="roster" <?php echo ($selected_season_type == 'roster') ? 'selected' : ''; ?>>Roster</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
@@ -55,6 +58,35 @@
                                         </select>
                                     </div>
                                 </form>
+                                
+                                <!-- OR Section -->
+                                <div style="text-align: center; margin: 20px 0;">
+                                    <hr style="width: 40%; display: inline-block; margin: 0;">
+                                    <span style="margin: 0 10px; font-weight: bold; color: #666;">OR</span>
+                                    <hr style="width: 40%; display: inline-block; margin: 0;">
+                                </div>
+                                
+                                <!-- Manager Search Section -->
+                                <form method="get" id="manager-search-form">
+                                    <div class="form-group">
+                                        <label for="manager-id">Search by Manager:</label>
+                                        <select class="form-control" name="manager-id" id="manager-id" onchange="this.form.submit()">
+                                            <option value="">Select a Manager</option>
+                                            <?php
+                                            $selected_manager_id = isset($_GET['manager-id']) ? $_GET['manager-id'] : '';
+                                            
+                                            // Get all managers
+                                            $manager_query = "SELECT id, name FROM managers ORDER BY name ASC";
+                                            $manager_result = query($manager_query);
+                                            
+                                            while ($manager_row = fetch_array($manager_result)) {
+                                                $selected = ($selected_manager_id == $manager_row['id']) ? 'selected' : '';
+                                                echo "<option value=\"{$manager_row['id']}\" {$selected}>{$manager_row['name']}</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -74,6 +106,14 @@
                                     $fun_fact_name = $fun_fact_row ? $fun_fact_row['fact'] : 'Unknown';
 
                                     echo "<h4 class=\"card-title\">Record History for: {$fun_fact_name}</h4>";
+                                } elseif (!empty($selected_manager_id)) {
+                                    // Get the manager name
+                                    $manager_query = "SELECT name FROM managers WHERE id = $selected_manager_id";
+                                    $manager_result = query($manager_query);
+                                    $manager_row = fetch_array($manager_result);
+                                    $manager_name = $manager_row ? $manager_row['name'] : 'Unknown';
+
+                                    echo "<h4 class=\"card-title\">Records held by: {$manager_name}</h4>";
                                 }
                             ?>
                         </div>
@@ -263,6 +303,126 @@
                                     } else {
                                         echo "<p>No record history found for this fun fact.</p>";
                                     }
+                                } elseif (!empty($selected_manager_id)) {
+                                    // Manager search logic
+                                    
+                                    // Get all fun facts where this manager has been a leader
+                                    $manager_records_query = "
+                                        SELECT DISTINCT
+                                            f.id as fun_fact_id,
+                                            f.fact as fun_fact_name,
+                                            f.type as season_type
+                                        FROM record_log r
+                                        LEFT JOIN fun_facts f ON r.fun_fact_id = f.id
+                                        WHERE r.manager_id = $selected_manager_id
+                                        ORDER BY f.sort_order ASC
+                                    ";
+                                    $manager_records_result = query($manager_records_query);
+                                    
+                                    $manager_records = [];
+                                    while ($row = fetch_array($manager_records_result)) {
+                                        $manager_records[] = $row;
+                                    }
+                                    
+                                    if (!empty($manager_records)) {
+                                        ?>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-striped table-hover" id="manager-records-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Fun Fact</th>
+                                                        <th>Duration as Leader</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php 
+                                                    foreach ($manager_records as $fun_fact_record) :
+                                                        $fun_fact_id = $fun_fact_record['fun_fact_id'];
+                                                        
+                                                        // Get all periods where this manager was leader for this fun fact
+                                                        $periods_query = "
+                                                            SELECT 
+                                                                r.year,
+                                                                r.week,
+                                                                r.value,
+                                                                r.note
+                                                            FROM record_log r
+                                                            WHERE r.fun_fact_id = $fun_fact_id 
+                                                            AND r.manager_id = $selected_manager_id
+                                                            ORDER BY r.year ASC, 
+                                                                    CASE 
+                                                                        WHEN r.week = 'Quarterfinal' THEN 20
+                                                                        WHEN r.week = 'Semifinal' THEN 21
+                                                                        WHEN r.week = 'Final' THEN 22
+                                                                        ELSE CAST(r.week AS INTEGER)
+                                                                    END ASC
+                                                        ";
+                                                        $periods_result = query($periods_query);
+                                                        
+                                                        $periods = [];
+                                                        while ($period_row = fetch_array($periods_result)) {
+                                                            $periods[] = $period_row;
+                                                        }
+                                                        
+                                                        // Count periods and calculate duration
+                                                        $period_count = count($periods);
+                                                        
+                                                        // Create years/weeks display
+                                                        $years_weeks_display = [];
+                                                        foreach ($periods as $period) {
+                                                            $years_weeks_display[] = $period['year'] . ' Wk' . $period['week'];
+                                                        }
+                                                        $years_weeks_text = implode(', ', $years_weeks_display);
+                                                        
+                                                        // Check if current leader
+                                                        $current_leader_query = "
+                                                            SELECT r.manager_id, m.name 
+                                                            FROM record_log r
+                                                            LEFT JOIN managers m ON r.manager_id = m.id
+                                                            WHERE r.fun_fact_id = $fun_fact_id
+                                                            ORDER BY r.year DESC, 
+                                                                    CASE 
+                                                                        WHEN r.week = 'Quarterfinal' THEN 20
+                                                                        WHEN r.week = 'Semifinal' THEN 21
+                                                                        WHEN r.week = 'Final' THEN 22
+                                                                        ELSE CAST(r.week AS INTEGER)
+                                                                    END DESC
+                                                            LIMIT 1
+                                                        ";
+                                                        $current_leader_result = query($current_leader_query);
+                                                        $current_leader_row = fetch_array($current_leader_result);
+                                                        $is_current_leader = ($current_leader_row && $current_leader_row['manager_id'] == $selected_manager_id);
+                                                        
+                                                        ?>
+                                                        <tr>
+                                                            <td>
+                                                                <strong><?php echo htmlspecialchars($fun_fact_record['fun_fact_name']); ?></strong>
+                                                                <br><small class="text-muted"><?php echo ucfirst($fun_fact_record['season_type']); ?> Season</small>
+                                                            </td>
+                                                            <td>
+                                                                <?php 
+                                                                if ($period_count == 1) {
+                                                                    echo "1 period";
+                                                                } else {
+                                                                    echo "$period_count periods";
+                                                                }
+                                                                ?>
+                                                            </td>
+                                                            <td>
+                                                                <?php if ($is_current_leader) : ?>
+                                                                    <span class="badge badge-primary">Current Leader</span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <?php
+                                    } else {
+                                        echo "<p>This manager has never been a leader in any fun fact.</p>";
+                                    }
                                 }
                                 ?>
                             </div>
@@ -350,6 +510,26 @@
                 }
             ],
         });
+        
+        // Initialize manager records table
+        $('#manager-records-table').DataTable({
+            "order": [[0, "asc"]], // Order by Fun Fact name
+            "pageLength": 25,
+            "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+            "searching": true,
+            "responsive": true,
+            "autoWidth": false,
+            "columnDefs": [
+                { 
+                    "targets": [1], // Duration column
+                    "className": "text-center"
+                },
+                { 
+                    "targets": [2], // Current Leader column
+                    "className": "text-center"
+                }
+            ],
+        });
     });
     
     function showDetailedView() {
@@ -378,7 +558,7 @@
     }
 
     function updateFunFactOptions() {
-        const seasonType = document.getElementById('season-type').value;
+        const seasonType = document.getElementById('record-type').value;
         const funFactSelect = document.getElementById('fun-fact-id');
         
         // Reset fun fact selection

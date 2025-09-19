@@ -10,7 +10,7 @@ class WeeklyRecords extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'weekly:records {year?} {week?} {--test : Run in test mode for debugging} {--sync : Run synchronously instead of queueing}';
+    protected $signature = 'weekly:records {year?} {week?} {--fun-fact-id= : Process only this specific fun fact ID} {--test : Run in test mode for debugging} {--sync : Run synchronously instead of queueing}';
     
 
     /**
@@ -33,31 +33,34 @@ class WeeklyRecords extends Command
     {
         $year = $this->argument('year') ?: null;
         $week = $this->argument('week') ?: null;
+        $funFactId = $this->option('fun-fact-id') ?: null;
         $testMode = $this->option('test');
         $syncMode = $this->option('sync');
         
         if ($testMode) {
             $this->info("Running weekly records in TEST MODE for debugging");
             $yearText = $year ? "year: $year" : "all years (full history)";
-            $this->info("Using $yearText" . ($week ? ", week: $week" : " (no specific week)"));
+            $funFactText = $funFactId ? ", fun fact ID: $funFactId" : "";
+            $this->info("Using $yearText" . ($week ? ", week: $week" : " (no specific week)") . $funFactText);
             
             // Run the job synchronously for immediate feedback
-            (new UpdateWeeklyRecords($year, $week, true))->handle();
+            (new UpdateWeeklyRecords($year, $week, true, $funFactId))->handle();
             
             $this->info('Test completed.');
         } else {
             $yearText = $year ? "year: $year" : "all years (full history)";
-            $this->info("Updating weekly records for $yearText" . ($week ? ", week: $week" : ""));
+            $funFactText = $funFactId ? ", fun fact ID: $funFactId" : "";
+            $this->info("Updating weekly records for $yearText" . ($week ? ", week: $week" : "") . $funFactText);
             
             if ($syncMode) {
                 $this->info("Running synchronously (this may take a while)...");
                 // Run the job synchronously for immediate execution
-                $result = (new UpdateWeeklyRecords($year, $week))->handle();
+                $result = (new UpdateWeeklyRecords($year, $week, false, $funFactId))->handle();
                 $status = ($result === 0) ? 'completed successfully' : 'failed';
                 $this->info("Weekly records update $status.");
             } else {
                 // Dispatch the job to update weekly records
-                dispatch(new UpdateWeeklyRecords($year, $week));
+                dispatch(new UpdateWeeklyRecords($year, $week, false, $funFactId));
                 $this->info('Weekly records update job dispatched successfully.');
             }
         }

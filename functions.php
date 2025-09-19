@@ -20,8 +20,19 @@ function query($sql)
 function draft_query($sql)
 {
     global $conn2;
+    
+    // Check if connection exists
+    if ($conn2 === null) {
+        return false;
+    }
 
-    return $conn2->query($sql);
+    try {
+        return $conn2->query($sql);
+    } catch (\Exception $e) {
+        // Log the error and return false instead of throwing
+        error_log("Draft query error: " . $e->getMessage());
+        return false;
+    }
 }
 
 function fetch_array($result)

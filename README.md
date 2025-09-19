@@ -27,10 +27,10 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 
 - fun fact finder page
 - allow people add comments/smack talk to profile
-- datatables hover: true
 - update laravel?
 
 Notes:
+Moved to 18 week schedule in 2021
 Rams moved to LA between 2015 & 2016
 Chargers moved to LA between 2016 & 2017
 Raiders moved to LV between 2019 & 2020

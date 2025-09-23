@@ -131,6 +131,11 @@ if ($pageName == 'Rosters') {
     $posPointsChart = getPositionPointsChartNumbers();
     $gameTimeChart = getGameTimeChartNumbers();
 }
+if ($pageName == 'Fact Finder') {
+    $factFinderData = getFactFinderData();
+    $availableWeeks = $factFinderData['availableWeeks'];
+    $currentMatchups = $factFinderData['currentMatchups'];
+}
 if ($pageName == 'Newsletter') {
     $selectedSeason = isset($_GET['year']) ? $_GET['year'] : $season;
     $selectedWeek = isset($_GET['week']) ? $_GET['week'] : $week+1;
@@ -3700,8 +3705,6 @@ function getWeeklyScoresData()
 
 /**
  * Calculate strength of schedule data for all managers in a season
- * @param int $season The season year
- * @return array Array of strength of schedule data
  */
 function getStrengthOfSchedule($season) {
     $managers = [];
@@ -3799,47 +3802,51 @@ function getStrengthOfSchedule($season) {
             $managers[$managerId]['points'] = $points;
         }
         
-        // Now process the strength of schedule
+        // Now process the strength of schedule for current season
         foreach ($managers as $managerId => $managerData) {
-            // Reset the processed matchups tracking for SOS calculation
-            $processedMatchups = [];
+            $uniqueOpponents = [];
+            $totalOpponentPoints = 0;
+            $gameCount = 0;
             
-            // Get all opponents for this manager (using DISTINCT to avoid duplicates)
+            // Get all matchups for this manager to collect opponent points
             $result = query("
-                SELECT DISTINCT week_number, manager1_id, manager2_id
+                SELECT DISTINCT week_number, manager1_id, manager2_id, manager1_score, manager2_score
                 FROM regular_season_matchups 
                 WHERE year = $season 
                 AND week_number <= $lastCompletedWeek
                 AND (manager1_id = $managerId OR manager2_id = $managerId)
             ");
             
-            // Reset games played counter and other opponent stats
-            $managers[$managerId]['games_played'] = 0;
+            // Reset opponent stats
             $managers[$managerId]['opponent_wins'] = 0;
             $managers[$managerId]['opponent_losses'] = 0;
             $managers[$managerId]['opponent_points'] = 0;
+            $managers[$managerId]['games_played'] = 0;
             
             while ($row = fetch_array($result)) {
                 $opponentId = ($row['manager1_id'] == $managerId) ? $row['manager2_id'] : $row['manager1_id'];
+                $opponentScore = ($row['manager1_id'] == $managerId) ? $row['manager2_score'] : $row['manager1_score'];
                 
-                // Create a unique key for this matchup
-                $matchupKey = $season . '-' . $row['week_number'] . '-' . min($managerId, $opponentId) . '-' . max($managerId, $opponentId);
+                // Add opponent's score from this specific game
+                $totalOpponentPoints += $opponentScore;
+                $gameCount++;
                 
-                // Skip if we've already processed this matchup
-                if (in_array($matchupKey, $processedMatchups)) {
-                    continue;
+                // Track unique opponents for record calculation
+                if (!in_array($opponentId, $uniqueOpponents)) {
+                    $uniqueOpponents[] = $opponentId;
                 }
-                
-                // Mark this matchup as processed
-                $processedMatchups[] = $matchupKey;
-                
+            }
+            
+            // Calculate combined opponent record (each opponent counted once)
+            foreach ($uniqueOpponents as $opponentId) {
                 if (isset($managers[$opponentId])) {
                     $managers[$managerId]['opponent_wins'] += $managers[$opponentId]['wins'];
                     $managers[$managerId]['opponent_losses'] += $managers[$opponentId]['losses'];
-                    $managers[$managerId]['opponent_points'] += $managers[$opponentId]['points'];
-                    $managers[$managerId]['games_played']++;
                 }
             }
+            
+            $managers[$managerId]['opponent_points'] = $totalOpponentPoints;
+            $managers[$managerId]['games_played'] = $gameCount;
         }
     } else {
         // For past seasons, use a completely different approach focused on actual matchups
@@ -3939,31 +3946,45 @@ function getStrengthOfSchedule($season) {
         // Now calculate strength of schedule for each manager
         for ($managerId = 1; $managerId <= 10; $managerId++) {
             if (isset($managers[$managerId])) {
-                // Track opponents we've already counted for record
-                $countedOpponents = [];
+                // Track all unique opponents faced and their combined records
+                $uniqueOpponents = [];
+                $totalOpponentWins = 0;
+                $totalOpponentLosses = 0;
+                $totalOpponentPoints = 0;
+                $gameCount = 0;
                 
+                // Go through each week and collect opponent data
                 for ($week = 1; $week <= $totalWeeks; $week++) {
                     if (isset($managers[$managerId]['opponents_faced'][$week])) {
                         $opponentId = $managers[$managerId]['opponents_faced'][$week];
                         
-                        // Only count if there's an opponent with valid stats
-                        if (isset($managerRecords[$opponentId]) && $managerRecords[$opponentId]['games'] > 0) {
-                            // Store opponent's weekly score
-                            if (isset($weeklyScores[$opponentId][$week])) {
-                                $managers[$managerId]['weekly_opponent_points'][] = $weeklyScores[$opponentId][$week];
-                                $managers[$managerId]['opponent_points'] += $weeklyScores[$opponentId][$week];
-                            }
-                            
-                            // For opponent record, we only want to count each opponent's season record once
-                            if (!in_array($opponentId, $countedOpponents)) {
-                                $managers[$managerId]['opponent_wins'] += $managerRecords[$opponentId]['wins'];
-                                $managers[$managerId]['opponent_losses'] += $managerRecords[$opponentId]['losses'];
-                                $managers[$managerId]['games_played']++;
-                                $countedOpponents[] = $opponentId;
-                            }
+                        // Store opponent's weekly score for this specific game
+                        if (isset($weeklyScores[$opponentId][$week])) {
+                            $managers[$managerId]['weekly_opponent_points'][] = $weeklyScores[$opponentId][$week];
+                            $totalOpponentPoints += $weeklyScores[$opponentId][$week];
+                            $gameCount++;
+                        }
+                        
+                        // Track unique opponents for record calculation
+                        if (!in_array($opponentId, $uniqueOpponents)) {
+                            $uniqueOpponents[] = $opponentId;
                         }
                     }
                 }
+                
+                // Calculate combined opponent record (each opponent counted once)
+                foreach ($uniqueOpponents as $opponentId) {
+                    if (isset($managerRecords[$opponentId])) {
+                        $totalOpponentWins += $managerRecords[$opponentId]['wins'];
+                        $totalOpponentLosses += $managerRecords[$opponentId]['losses'];
+                    }
+                }
+                
+                // Store the calculated values
+                $managers[$managerId]['opponent_wins'] = $totalOpponentWins;
+                $managers[$managerId]['opponent_losses'] = $totalOpponentLosses;
+                $managers[$managerId]['opponent_points'] = $totalOpponentPoints;
+                $managers[$managerId]['games_played'] = $gameCount;
             }
         }
     }
@@ -4042,3 +4063,245 @@ function getStrengthOfSchedule($season) {
     return $strengthData;
 }
 
+/**
+ * Get data needed for the Fact Finder page
+ */
+function getFactFinderData() {
+    global $season, $week;
+    
+    // Always use the current season from global variable
+    $selectedYear = $season;
+    
+    // Get selected week from URL parameters, defaulting to current week + 1
+    $selectedWeek = isset($_GET['week']) ? (int)$_GET['week'] : ($week + 1);
+    
+    // Get available weeks for current season (1-17 for regular season)
+    $availableWeeks = [];
+    for ($i = 1; $i <= 17; $i++) {
+        $availableWeeks[] = $i;
+    }
+    
+    // Get current season matchups for the selected week
+    $currentMatchups = [];
+    if ($selectedWeek) {
+        $matchupsQuery = query("SELECT s.manager1_id, s.manager2_id, m1.name as manager1_name, m2.name as manager2_name 
+                              FROM schedule s 
+                              JOIN managers m1 ON s.manager1_id = m1.id 
+                              JOIN managers m2 ON s.manager2_id = m2.id 
+                              WHERE s.year = $selectedYear AND s.week = $selectedWeek");
+        while ($row = fetch_array($matchupsQuery)) {
+            $currentMatchups[] = [
+                'manager1_id' => $row['manager1_id'],
+                'manager2_id' => $row['manager2_id'],
+                'manager1_name' => $row['manager1_name'],
+                'manager2_name' => $row['manager2_name']
+            ];
+        }
+    }
+    
+    return [
+        'availableWeeks' => $availableWeeks,
+        'currentMatchups' => $currentMatchups,
+        'selectedYear' => $selectedYear,
+        'selectedWeek' => $selectedWeek
+    ];
+}
+
+/**
+ * Get head-to-head fun facts between two managers
+ */
+function getHeadToHeadFacts($manager1_id, $manager2_id, $manager1_name, $manager2_name) {
+    global $season;
+    $facts = [];
+    
+    // Get all-time head-to-head record (avoid double counting by using manager1_id < manager2_id)
+    $h2hQuery = query("SELECT 
+        SUM(CASE WHEN (manager1_id = $manager1_id AND manager1_score > manager2_score) OR 
+                     (manager1_id = $manager2_id AND manager2_score > manager1_score) THEN 1 ELSE 0 END) as manager1_wins,
+        SUM(CASE WHEN (manager1_id = $manager2_id AND manager1_score > manager2_score) OR 
+                     (manager1_id = $manager1_id AND manager2_score > manager1_score) THEN 1 ELSE 0 END) as manager2_wins,
+        COUNT(*) as total_games
+        FROM regular_season_matchups 
+        WHERE ((manager1_id = $manager1_id AND manager2_id = $manager2_id) OR 
+               (manager1_id = $manager2_id AND manager2_id = $manager1_id))
+        AND manager1_id < manager2_id");
+    
+    $h2hRow = fetch_array($h2hQuery);
+    if ($h2hRow && $h2hRow['total_games'] > 0) {
+        $facts[] = "All-time record: {$manager1_name} {$h2hRow['manager1_wins']}-{$h2hRow['manager2_wins']} vs {$manager2_name}";
+    }
+    
+    // Get highest scoring game between these managers (avoid duplicates)
+    $highScoreQuery = query("SELECT year, week_number, manager1_score, manager2_score,
+        (manager1_score + manager2_score) as total_points
+        FROM regular_season_matchups 
+        WHERE ((manager1_id = $manager1_id AND manager2_id = $manager2_id) OR 
+               (manager1_id = $manager2_id AND manager2_id = $manager1_id))
+        AND manager1_id < manager2_id
+        ORDER BY total_points DESC LIMIT 1");
+    
+    $highScoreRow = fetch_array($highScoreQuery);
+    if ($highScoreRow) {
+        // Determine which score belongs to which manager
+        if ($manager1_id < $manager2_id) {
+            $score1 = $highScoreRow['manager1_score'];
+            $score2 = $highScoreRow['manager2_score'];
+        } else {
+            $score1 = $highScoreRow['manager2_score'];
+            $score2 = $highScoreRow['manager1_score'];
+        }
+        $facts[] = "Highest-scoring H2H game: {$score1}-{$score2} ({$highScoreRow['year']} Week {$highScoreRow['week_number']})";
+    }
+    
+    // Get biggest margin of victory for manager1 (avoid duplicates)
+    $biggestWinQuery = query("SELECT year, week_number, manager1_score, manager2_score,
+        ABS(manager1_score - manager2_score) as margin
+        FROM regular_season_matchups 
+        WHERE ((manager1_id = $manager1_id AND manager2_id = $manager2_id AND manager1_score > manager2_score) OR 
+               (manager1_id = $manager2_id AND manager2_id = $manager1_id AND manager2_score > manager1_score))
+        AND manager1_id < manager2_id
+        ORDER BY margin DESC LIMIT 1");
+    
+    $biggestWinRow = fetch_array($biggestWinQuery);
+    if ($biggestWinRow) {
+        // Determine winner and scores based on manager IDs
+        if ($manager1_id < $manager2_id) {
+            $winner_score = $biggestWinRow['manager1_score'];
+            $loser_score = $biggestWinRow['manager2_score'];
+            $winner_name = $biggestWinRow['manager1_score'] > $biggestWinRow['manager2_score'] ? $manager1_name : $manager2_name;
+        } else {
+            $winner_score = $biggestWinRow['manager2_score'];
+            $loser_score = $biggestWinRow['manager1_score'];
+            $winner_name = $biggestWinRow['manager2_score'] > $biggestWinRow['manager1_score'] ? $manager1_name : $manager2_name;
+        }
+        $facts[] = "{$winner_name}'s biggest win: {$winner_score}-{$loser_score} (margin: {$biggestWinRow['margin']})";
+    }
+    
+    // Check for recent trends (last 3 years) - avoid double counting
+    $recentYears = $season - 2;
+    $recentTrendQuery = query("SELECT 
+        SUM(CASE WHEN (manager1_id = $manager1_id AND manager1_score > manager2_score) OR 
+                     (manager1_id = $manager2_id AND manager2_score > manager1_score) THEN 1 ELSE 0 END) as recent_wins,
+        COUNT(*) as recent_games
+        FROM regular_season_matchups 
+        WHERE ((manager1_id = $manager1_id AND manager2_id = $manager2_id) OR 
+               (manager1_id = $manager2_id AND manager2_id = $manager1_id))
+        AND manager1_id < manager2_id
+        AND year >= $recentYears");
+    
+    $recentRow = fetch_array($recentTrendQuery);
+    if ($recentRow && $recentRow['recent_games'] > 0) {
+        $recent_losses = $recentRow['recent_games'] - $recentRow['recent_wins'];
+        if ($recentRow['recent_wins'] > $recent_losses) {
+            $facts[] = "Recent dominance: {$manager1_name} won {$recentRow['recent_wins']} of last {$recentRow['recent_games']} games vs {$manager2_name}";
+        } elseif ($recent_losses > $recentRow['recent_wins']) {
+            $facts[] = "Recent dominance: {$manager2_name} won {$recent_losses} of last {$recentRow['recent_games']} games vs {$manager1_name}";
+        }
+    }
+    
+    // Check for playoff history (avoid double counting)
+    $playoffQuery = query("SELECT COUNT(*) as playoff_meetings, 
+        SUM(CASE WHEN (manager1_id = $manager1_id AND manager1_score > manager2_score) OR 
+                     (manager1_id = $manager2_id AND manager2_score > manager1_score) THEN 1 ELSE 0 END) as playoff_wins
+        FROM playoff_matchups 
+        WHERE ((manager1_id = $manager1_id AND manager2_id = $manager2_id) OR 
+               (manager1_id = $manager2_id AND manager2_id = $manager1_id))
+        AND manager1_id < manager2_id");
+    
+    $playoffRow = fetch_array($playoffQuery);
+    if ($playoffRow && $playoffRow['playoff_meetings'] > 0) {
+        $playoff_losses = $playoffRow['playoff_meetings'] - $playoffRow['playoff_wins'];
+        $facts[] = "Playoff history: {$manager1_name} {$playoffRow['playoff_wins']}-{$playoff_losses} vs {$manager2_name}";
+    }
+    
+    // Check for revenge scenarios (if they met in playoffs last year)
+    $lastYear = $season - 1;
+    $revengeQuery = query("SELECT COUNT(*) as revenge_count, round
+        FROM playoff_matchups 
+        WHERE ((manager1_id = $manager1_id AND manager2_id = $manager2_id) OR 
+               (manager1_id = $manager2_id AND manager2_id = $manager1_id))
+        AND manager1_id < manager2_id
+        AND year = $lastYear");
+    
+    $revengeRow = fetch_array($revengeQuery);
+    if ($revengeRow && $revengeRow['revenge_count'] > 0) {
+        $facts[] = "Revenge game! These teams met in the {$revengeRow['round']} last year";
+    }
+    
+    // Check if either manager appears in notable categories against each other
+    $foesData = getManagerVsManagerStats($manager1_id, $manager2_id, $manager1_name, $manager2_name);
+    
+    // Add foes-based facts
+    if (!empty($foesData)) {
+        // Check for extreme records
+        if (isset($foesData['overall_win_pct']) && $foesData['overall_win_pct'] >= 80) {
+            $leader = $foesData['overall_win_pct'] > 50 ? $manager1_name : $manager2_name;
+            $facts[] = "Domination alert: {$leader} has a {$foesData['overall_win_pct']}% win rate in this matchup";
+        }
+        
+        // Check for high-scoring averages
+        if (isset($foesData['average_combined']) && $foesData['average_combined'] > 250) {
+            $facts[] = "High-scoring rivalry: These teams average {$foesData['average_combined']} combined points";
+        }
+        
+        // Check for extreme margins
+        if (isset($foesData['biggest_blowout']) && $foesData['biggest_blowout'] > 50) {
+            $facts[] = "Historic blowout: Largest margin of victory was {$foesData['biggest_blowout']} points";
+        }
+        
+        // Check for nail-biters
+        if (isset($foesData['closest_game']) && $foesData['closest_game'] < 5) {
+            $facts[] = "Nail-biter history: Closest game decided by only {$foesData['closest_game']} points";
+        }
+    }
+    
+    return $facts;
+}
+
+/**
+ * Get specific head-to-head stats between two managers (similar to getFoesArray but for any two managers)
+ */
+function getManagerVsManagerStats($manager1_id, $manager2_id, $manager1_name, $manager2_name) {
+    $stats = [];
+    
+    // Get all matchups between these two managers
+    $matchupQuery = query("SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score,
+        ABS(manager1_score - manager2_score) as margin,
+        (manager1_score + manager2_score) as total_points
+        FROM regular_season_matchups 
+        WHERE ((manager1_id = $manager1_id AND manager2_id = $manager2_id) OR 
+               (manager1_id = $manager2_id AND manager2_id = $manager1_id))
+        AND manager1_id < manager2_id");
+    
+    $games = [];
+    while ($row = fetch_array($matchupQuery)) {
+        $games[] = $row;
+    }
+    
+    if (count($games) > 0) {
+        $manager1_wins = 0;
+        $total_points = 0;
+        $margins = [];
+        
+        foreach ($games as $game) {
+            // Determine who won based on the actual manager IDs in the game
+            if (($game['manager1_id'] == $manager1_id && $game['manager1_score'] > $game['manager2_score']) ||
+                ($game['manager1_id'] == $manager2_id && $game['manager2_score'] > $game['manager1_score'])) {
+                $manager1_wins++;
+            }
+            
+            $total_points += $game['total_points'];
+            $margins[] = $game['margin'];
+        }
+        
+        $stats['total_games'] = count($games);
+        $stats['manager1_wins'] = $manager1_wins;
+        $stats['manager2_wins'] = $stats['total_games'] - $manager1_wins;
+        $stats['overall_win_pct'] = round(($manager1_wins / $stats['total_games']) * 100, 1);
+        $stats['average_combined'] = round($total_points / $stats['total_games'], 1);
+        $stats['biggest_blowout'] = max($margins);
+        $stats['closest_game'] = min($margins);
+    }
+    
+    return $stats;
+}

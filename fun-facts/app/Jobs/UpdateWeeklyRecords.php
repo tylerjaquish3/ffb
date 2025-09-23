@@ -643,6 +643,8 @@ class UpdateWeeklyRecords implements ShouldQueue
             // IDs 169-170: Seahawks Drafted
             169 => 'seahawksDrafted',
             170 => 'seahawksDrafted',
+            171 => 'weeklyScoring',
+            172 => 'weeklyScoring',
         ];
         
         if (isset($methodMap[$funFactId])) {

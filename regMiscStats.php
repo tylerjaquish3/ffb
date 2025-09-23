@@ -868,6 +868,110 @@
 	</tbody>
 </table>
 
+<!-- Weekly and Seasonal Scoring Statistics -->
+<table class="table table-responsive table-striped nowrap" id="datatable-misc17" style="display:none;">
+	<thead>
+		<th>Manager</th>
+		<th>Top Scorer (Week)</th>
+		<th>Bottom Scorer (Week)</th>
+		<th>Top Scorer (Season)</th>
+		<th>Bottom Scorer (Season)</th>
+	</thead>
+	<tbody>
+		<?php
+		$managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
+		
+		// Get weekly top scorers (most points in a week)
+		$weeklyTopScorers = [];
+		$result = query("SELECT rsm.manager1_id, COUNT(*) as count
+			FROM regular_season_matchups rsm
+			WHERE rsm.manager1_score = (
+				SELECT MAX(rsm2.manager1_score)
+				FROM regular_season_matchups rsm2
+				WHERE rsm2.year = rsm.year AND rsm2.week_number = rsm.week_number
+			)
+			GROUP BY rsm.manager1_id");
+		while ($row = fetch_array($result)) {
+			$weeklyTopScorers[$row['manager1_id']] = $row['count'];
+		}
+		
+		// Get weekly bottom scorers (fewest points in a week)
+		$weeklyBottomScorers = [];
+		$result = query("SELECT rsm.manager1_id, COUNT(*) as count
+			FROM regular_season_matchups rsm
+			WHERE rsm.manager1_score = (
+				SELECT MIN(rsm2.manager1_score)
+				FROM regular_season_matchups rsm2
+				WHERE rsm2.year = rsm.year AND rsm2.week_number = rsm.week_number
+			)
+			GROUP BY rsm.manager1_id");
+		while ($row = fetch_array($result)) {
+			$weeklyBottomScorers[$row['manager1_id']] = $row['count'];
+		}
+		
+		// Get seasonal top scorers (most total points in a season)
+		$seasonalTopScorers = [];
+		$result = query("SELECT season_totals.manager1_id, COUNT(*) as count
+			FROM (
+				SELECT rsm.manager1_id, rsm.year, SUM(rsm.manager1_score) as total_points
+				FROM regular_season_matchups rsm
+				GROUP BY rsm.manager1_id, rsm.year
+			) season_totals
+			WHERE season_totals.total_points = (
+				SELECT MAX(st2.total_points)
+				FROM (
+					SELECT rsm2.manager1_id, rsm2.year, SUM(rsm2.manager1_score) as total_points
+					FROM regular_season_matchups rsm2
+					GROUP BY rsm2.manager1_id, rsm2.year
+				) st2
+				WHERE st2.year = season_totals.year
+			)
+			GROUP BY season_totals.manager1_id");
+		while ($row = fetch_array($result)) {
+			$seasonalTopScorers[$row['manager1_id']] = $row['count'];
+		}
+		
+		// Get seasonal bottom scorers (fewest total points in a season)
+		$seasonalBottomScorers = [];
+		$result = query("SELECT season_totals.manager1_id, COUNT(*) as count
+			FROM (
+				SELECT rsm.manager1_id, rsm.year, SUM(rsm.manager1_score) as total_points
+				FROM regular_season_matchups rsm
+				GROUP BY rsm.manager1_id, rsm.year
+			) season_totals
+			WHERE season_totals.total_points = (
+				SELECT MIN(st2.total_points)
+				FROM (
+					SELECT rsm2.manager1_id, rsm2.year, SUM(rsm2.manager1_score) as total_points
+					FROM regular_season_matchups rsm2
+					GROUP BY rsm2.manager1_id, rsm2.year
+				) st2
+				WHERE st2.year = season_totals.year
+			)
+			GROUP BY season_totals.manager1_id");
+		while ($row = fetch_array($result)) {
+			$seasonalBottomScorers[$row['manager1_id']] = $row['count'];
+		}
+		
+		// Display results for each manager
+		for ($i = 1; $i <= 10; $i++) {
+			$managerName = $managers[$i-1];
+			$weeklyTop = isset($weeklyTopScorers[$i]) ? $weeklyTopScorers[$i] : 0;
+			$weeklyBottom = isset($weeklyBottomScorers[$i]) ? $weeklyBottomScorers[$i] : 0;
+			$seasonalTop = isset($seasonalTopScorers[$i]) ? $seasonalTopScorers[$i] : 0;
+			$seasonalBottom = isset($seasonalBottomScorers[$i]) ? $seasonalBottomScorers[$i] : 0;
+			?>
+			<tr>
+				<td><?php echo $managerName; ?></td>
+				<td><?php echo $weeklyTop; ?></td>
+				<td><?php echo $weeklyBottom; ?></td>
+				<td><?php echo $seasonalTop; ?></td>
+				<td><?php echo $seasonalBottom; ?></td>
+			</tr>
+		<?php } ?>
+	</tbody>
+</table>
+
 <script src="/assets/datatables.js"></script>
 
 <script type="text/javascript">
@@ -1017,6 +1121,14 @@
         },
         order: [
             [3, "desc"]
+        ]
+    });
+    $('#datatable-misc17').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
         ]
     });
 

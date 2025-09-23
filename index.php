@@ -170,53 +170,80 @@ include 'sidebar.html';
             </div>
 
             <div class="row">
-                <div class="col-sm-12 table-padding">
+                <div class="col-sm-12 col-md-4">
                     <div class="card">
+                        <div class="card-header">
+                            <h4><a href="postseason.php">Postseason Stats</a></h4>
+                        </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-sm-12 col-lg-6">
-                                    <div class="card-header" style="float: left">
-                                        <h4><a href="postseason.php">Postseason Stats</a></h4>
-                                    </div>
-                                    <div style="float: right; margin-right: 20px;">
-                                        <select id="postMiscStats" class="dropdown form-control">
-                                            <option value="20" selected>Average Finish</option>
-                                            <option value="21">First Round Byes</option>
-                                            <option value="22">Appearances</option>
-                                            <option value="23">Underdog Wins</option>
-                                            <option value="24">Top Seed Losses</option>
-                                            <option value="25">Playoff Points</option>
-                                            <option value="26">Win/Loss Margin</option>
-                                        </select>
-                                    </div>
+                                <div class="col-sm-12">
+                                    <select id="postMiscStats" class="dropdown form-control">
+                                        <option value="20" selected>Average Finish</option>
+                                        <option value="21">First Round Byes</option>
+                                        <option value="22">Appearances</option>
+                                        <option value="23">Underdog Wins</option>
+                                        <option value="24">Top Seed Losses</option>
+                                        <option value="25">Playoff Points</option>
+                                        <option value="26">Win/Loss Margin</option>
+                                    </select>
                                     <?php include 'postMiscStats.php'; ?>
                                 </div>
-                                <div class="col-sm-12 col-lg-6">
-                                    <div class="card-header" style="float: left">
-                                        <h4><a href="regularSeason.php">Regular Season Stats</a></h4>
-                                    </div>
-                                    <div style="float: right">
-                                        <select id="regMiscStats" class="dropdown form-control">
-                                            <option value="3" selected>Season Points</option>
-                                            <option value="1">Win/Lose Streaks</option>
-                                            <option value="2">Total Points</option>
-                                            <option value="4">Average PF/PA</option>
-                                            <option value="5">Start Streaks</option>
-                                            <option value="6">Win/Loss Margin</option>
-                                            <option value="7">Weekly Points</option>
-                                            <option value="8">Losses with Top 3 Pts</option>
-                                            <option value="9">Wins with Bottom 3 Pts</option>
-                                            <option value="10">Record Against Everyone</option>
-                                            <option value="11">Draft Positions</option>
-                                            <option value="12">Moves/Trades</option>
-                                            <option value="13">Lineup Accuracy</option>
-                                            <option value="14">Points by Position</option>
-                                            <option value="15">Points by Position & Season</option>
-                                            <option value="16">Points by Position & Week</option>
-                                        </select>
-                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><a href="regularSeason.php">Regular Season Stats</a></h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <select id="regMiscStats" class="dropdown form-control">
+                                        <option value="3" selected>Season Points</option>
+                                        <option value="1">Win/Lose Streaks</option>
+                                        <option value="2">Total Points</option>
+                                        <option value="4">Average PF/PA</option>
+                                        <option value="5">Start Streaks</option>
+                                        <option value="6">Win/Loss Margin</option>
+                                        <option value="7">Weekly Points</option>
+                                        <option value="8">Losses with Top 3 Pts</option>
+                                        <option value="9">Wins with Bottom 3 Pts</option>
+                                        <option value="10">Record Against Everyone</option>
+                                        <option value="11">Draft Positions</option>
+                                        <option value="12">Moves/Trades</option>
+                                        <option value="13">Lineup Accuracy</option>
+                                        <option value="14">Points by Position</option>
+                                        <option value="15">Points by Position & Season</option>
+                                        <option value="16">Points by Position & Week</option>
+                                        <option value="17">Scoring by Week/Season</option>
+                                    </select>
                                     <div style="direction: ltr;">
                                         <?php include 'regMiscStats.php'; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>League Stats</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <select id="leagueMiscStats" class="dropdown form-control">
+                                        <option value="30" selected>Weekly Points</option>
+                                        <option value="31">Season Points</option>
+                                        <option value="32">Points by Position</option>
+                                        <!-- <option value="33">Playoff Points</option> -->
+                                    </select>
+                                    <div style="direction: ltr;">
+                                        <?php include 'leagueMiscStats.php'; ?>
                                     </div>
                                 </div>
                             </div>
@@ -232,13 +259,16 @@ include 'sidebar.html';
 
 <script type="text/javascript">
 
-
     $('#regMiscStats').change(function() {
         showRegTable($(this).val());
     });
 
     $('#postMiscStats').change(function() {
         showPostTable($(this).val());
+    });
+    
+    $('#leagueMiscStats').change(function() {
+        showLeagueTable($(this).val());
     });
 
     $('#datatable-wins').DataTable({
@@ -250,64 +280,6 @@ include 'sidebar.html';
         ]
     });
 
-    
-    $('#datatable-misc20').DataTable({
-        searching: false,
-        paging: false,
-        info: false,
-        "order": [
-            [1, "asc"]
-        ]
-    });
-    $('#datatable-misc21').DataTable({
-        searching: false,
-        paging: false,
-        info: false,
-        order: [
-            [3, "desc"]
-        ]
-    });
-    $('#datatable-misc22').DataTable({
-        searching: false,
-        paging: false,
-        info: false,
-        order: [
-            [1, "desc"]
-        ]
-    });
-    $('#datatable-misc23').DataTable({
-        searching: false,
-        paging: false,
-        info: false,
-        order: [
-            [4, "desc"]
-        ]
-    });
-    $('#datatable-misc24').DataTable({
-        searching: false,
-        paging: false,
-        info: false,
-        order: [
-            [4, "desc"]
-        ]
-    });
-    $('#datatable-misc25').DataTable({
-        searching: false,
-        paging: false,
-        info: false,
-        order: [
-            [3, "desc"]
-        ]
-    });
-    $('#datatable-misc26').DataTable({
-        searching: false,
-        paging: false,
-        info: false,
-        order: [
-            [1, "desc"]
-        ]
-    });
-
     // Chart.defaults.global.defaultFontSize = 9;
     var ctx = $('#postseasonChart');
 
@@ -316,23 +288,20 @@ include 'sidebar.html';
         data: {
             labels: <?php echo json_encode($postseasonChart['managers']); ?>,
             datasets: [{
-                    label: 'Playoff Appearances',
-                    data: <?php echo json_encode($postseasonChart['appearances']); ?>,
-                    // backgroundColor: '#04015d'
-                    backgroundColor: '#297eff'
-                },
-                {
-                    label: 'Championship Appearances',
-                    data: <?php echo json_encode($postseasonChart['shipAppearances']); ?>,
-                },
-                {
-                    label: 'Championship Wins',
-                    data: <?php echo json_encode($postseasonChart['ships']); ?>,
-                    // backgroundColor: '#2eff37'
-                    backgroundColor: '#2eb82e'
-                }
-            ]
-        },
+                label: 'Playoff Appearances',
+                data: <?php echo json_encode($postseasonChart['appearances']); ?>,
+                backgroundColor: '#297eff'
+            },
+            {
+                label: 'Championship Appearances',
+                data: <?php echo json_encode($postseasonChart['shipAppearances']); ?>,
+            },
+            {
+                label: 'Championship Wins',
+                data: <?php echo json_encode($postseasonChart['ships']); ?>,
+                backgroundColor: '#2eb82e'
+            }
+        ]},
         options: {
             indexAxis: 'y',
             scales: {
@@ -346,14 +315,7 @@ include 'sidebar.html';
         }
     });
 
-
-    function showPostTable(tableId) {
-        for (i = 20; i < 27; i++) {
-            $('#datatable-misc' + i + '_wrapper').hide();
-        }
-        $('#datatable-misc' + tableId + '_wrapper').show();
-    }
-
     setTimeout(showRegTable(3), 1000);
+    setTimeout(showLeagueTable(30), 1000);
 
 </script>

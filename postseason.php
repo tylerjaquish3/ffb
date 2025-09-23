@@ -47,7 +47,9 @@ include 'sidebar.html';
                             <option value="26">Win/Loss Margin</option>
                         </select>
                     </div>
-                    <?php include 'postMiscStats.php'; ?>
+                    <div style="direction: ltr;">
+                        <?php include 'postMiscStats.php'; ?>
+                    </div>
                 </div>
                 <div class="col-sm-12 col-md-4">
                     <div class="card">
@@ -108,7 +110,6 @@ include 'sidebar.html';
                         </div>
                     </div>
                 </div>
-                
             </div>
 
             <div class="row card-section" id="champion-details" style="display: none;">
@@ -207,13 +208,6 @@ include 'sidebar.html';
             showPostTable($('#postMiscStats').val());
         });
 
-        function showPostTable(tableId) {
-            for (i = 20; i < 27; i++) {
-                $('#datatable-misc' + i).hide();
-            }
-            $('#datatable-misc' + tableId).show();
-        }
-
         let postseasonTable = $('#datatable-postseason').DataTable({
             columnDefs: [{
                 targets: [6],
@@ -229,62 +223,6 @@ include 'sidebar.html';
             ]
         });
 
-        $('#datatable-misc20').DataTable({
-            searching: false,
-            paging: false,
-            info: false,
-            order: [
-                [1, "asc"]
-            ]
-        });
-        $('#datatable-misc21').DataTable({
-            searching: false,
-            paging: false,
-            info: false,
-            order: [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc22').DataTable({
-            searching: false,
-            paging: false,
-            info: false,
-            order: [
-                [1, "desc"]
-            ]
-        });
-        $('#datatable-misc23').DataTable({
-            searching: false,
-            paging: false,
-            info: false,
-            order: [
-                [4, "desc"]
-            ]
-        });
-        $('#datatable-misc24').DataTable({
-            searching: false,
-            paging: false,
-            info: false,
-            order: [
-                [4, "desc"]
-            ]
-        });
-        $('#datatable-misc25').DataTable({
-            searching: false,
-            paging: false,
-            info: false,
-            order: [
-                [3, "desc"]
-            ]
-        });
-        $('#datatable-misc26').DataTable({
-            searching: false,
-            paging: false,
-            info: false,
-            order: [
-                [1, "desc"]
-            ]
-        });
 
         $('#datatable-records').DataTable({
             searching: false,

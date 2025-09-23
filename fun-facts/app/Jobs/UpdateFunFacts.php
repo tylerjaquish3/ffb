@@ -200,6 +200,8 @@ class UpdateFunFacts implements ShouldQueue
             $this->mostPicksByPosition();
             // 169,170
             $this->seahawksDrafted();
+            // 171,172
+            $this->weeklyScoring();
 
         } catch (\Exception $e) {
             $success = false;
@@ -3304,5 +3306,102 @@ class UpdateFunFacts implements ShouldQueue
 
         $tops = $this->checkMultiple($i, 'pick_count');
         $this->insertFunFact(170, 'manager_id', 'pick_count', [], $tops);
+    }
+
+    // 171,172
+    private function weeklyScoring()
+    {
+        echo 'Weekly Scoring'.PHP_EOL;
+        
+        // Initialize counts for all managers
+        $topScorers = [];
+        $bottomScorers = [];
+        for ($x = 1; $x <= 10; $x++) {
+            $topScorers[$x] = 0;
+            $bottomScorers[$x] = 0;
+        }
+        
+        // Get all year/week combinations with historical filtering
+        $query = RegularSeasonMatchup::selectRaw('DISTINCT year, week_number')
+            ->orderBy('year')
+            ->orderBy('week_number');
+        
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $weekCombinations = $query->get();
+        
+        foreach ($weekCombinations as $combo) {
+            $year = $combo->year;
+            $week = $combo->week_number;
+            
+            // Get all scores for this week, considering manager availability
+            $scoresQuery = RegularSeasonMatchup::selectRaw('manager1_id, manager1_score as score')
+                ->where('year', $year)
+                ->where('week_number', $week);
+                
+            // Filter out Andy (5) and Cameron (6) for 2006-2007 since they weren't in the league
+            if ($year < 2008) {
+                $scoresQuery->whereNotIn('manager1_id', [5, 6]);
+            }
+                
+            $scores = $scoresQuery->get();
+            
+            if ($scores->isEmpty()) {
+                continue;
+            }
+            
+            // Find max and min scores for this week
+            $maxScore = $scores->max('score');
+            $minScore = $scores->min('score');
+            
+            // Find all managers who had the top score (handles ties)
+            $topScorersThisWeek = $scores->where('score', $maxScore);
+            foreach ($topScorersThisWeek as $scorer) {
+                $topScorers[$scorer->manager1_id]++;
+            }
+            
+            // Find all managers who had the bottom score (handles ties)
+            $bottomScorersThisWeek = $scores->where('score', $minScore);
+            foreach ($bottomScorersThisWeek as $scorer) {
+                $bottomScorers[$scorer->manager1_id]++;
+            }
+        }
+        
+        // Convert to objects array for bottom scorers (171) - most weekly bottom scoring performances
+        $bottomScorersArray = [];
+        foreach ($bottomScorers as $managerId => $count) {
+            $bottomScorersArray[] = (object)[
+                'manager_id' => $managerId,
+                'count' => $count
+            ];
+        }
+        
+        // Sort by count in descending order
+        usort($bottomScorersArray, function($a, $b) {
+            return $b->count <=> $a->count;
+        });
+        
+        $bottomScorersCollection = collect($bottomScorersArray);
+        $tops = $this->checkMultiple($bottomScorersCollection, 'count');
+        $this->insertFunFact(171, 'manager_id', 'count', [], $tops);
+        
+        // Convert to objects array for top scorers (172) - most weekly top scoring performances
+        $topScorersArray = [];
+        foreach ($topScorers as $managerId => $count) {
+            $topScorersArray[] = (object)[
+                'manager_id' => $managerId,
+                'count' => $count
+            ];
+        }
+        
+        // Sort by count in descending order
+        usort($topScorersArray, function($a, $b) {
+            return $b->count <=> $a->count;
+        });
+        
+        $topScorersCollection = collect($topScorersArray);
+        $tops = $this->checkMultiple($topScorersCollection, 'count');
+        $this->insertFunFact(172, 'manager_id', 'count', [], $tops);
+        
+        $this->updateProgress("Weekly Scoring");
     }
 }

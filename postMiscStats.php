@@ -391,3 +391,77 @@
 		</tr>
 	</tfoot>
 </table>
+
+<script src="/assets/datatables.js"></script>
+
+<script type="text/javascript">
+
+    $('#datatable-misc20').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        "order": [
+            [1, "asc"]
+        ]
+    });
+    $('#datatable-misc21').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc22').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+    $('#datatable-misc23').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [4, "desc"]
+        ]
+    });
+    $('#datatable-misc24').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [4, "desc"]
+        ]
+    });
+    $('#datatable-misc25').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [3, "desc"]
+        ]
+    });
+    $('#datatable-misc26').DataTable({
+        searching: false,
+        paging: false,
+        info: false,
+        order: [
+            [1, "desc"]
+        ]
+    });
+
+    function showPostTable(tableId) 
+    {
+        for (i = 20; i < 30; i++) {
+            $('#datatable-misc' + i + '_wrapper').hide();
+            $('#datatable-misc' + i).hide();
+        }
+
+        $('#datatable-misc' + tableId).show();
+        $('#datatable-misc' + tableId + '_wrapper').show();
+    }
+
+</script>

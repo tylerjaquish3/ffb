@@ -12,6 +12,12 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - In regular_season_matchups table, lots of projections are wrong (looking at 2019)
 - start streaks on dashboard... maybe they started 4-0 3 times? put all years
 
+- If yahoo api request has an error, try it again. seems to continue after but skips errored rows
+    - make sure it doesnt add duplicate rows
+- index page, postseason stats, average finish table - fix spacing for cole's trophies
+- some current season records are showing 2006 data
+- fix logic for determining fun fact new leader
+
 # Ideas
 
 - Profile page, line chart for points each season vs league average
@@ -28,6 +34,10 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - fun fact finder page
 - allow people add comments/smack talk to profile
 - update laravel?
+
+- Add league stats
+    - Lineup accuracy
+    - Playoff points/margin
 
 Notes:
 Moved to 18 week schedule in 2021

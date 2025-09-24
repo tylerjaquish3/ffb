@@ -1,5 +1,10 @@
 <?php
 
+if (!isset($_GET['id'])) {
+    header('Location: /404.php');
+    exit();
+}
+
 $pageName = $_GET['id'] . "'s Profile";
 include 'header.php';
 include 'sidebar.html';

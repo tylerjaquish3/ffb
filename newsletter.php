@@ -27,24 +27,31 @@ if (!isset($_GET['week'])) {
 }
 
 // Set up custom meta properties for newsletter before including header
+// Get newsletter metadata image if available
 $customMetaTitle = "Week $selectedWeek Newsletter | $selectedSeason Suntown FFB";
 $customMetaDescription = "The best league in all the land";
+$customMetaImage = "http://suntownffb.us/images/football.ico"; // default
 
-// Try to get preview content for meta description
-$previewQuery = query("SELECT preview FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
-$previewRow = fetch_array($previewQuery);
-if ($previewRow && !empty($previewRow['preview'])) {
-    // Clean the preview content for meta description - remove HTML, limit length
-    $cleanPreview = strip_tags($previewRow['preview']);
-    $cleanPreview = preg_replace('/\s+/', ' ', trim($cleanPreview)); // Normalize whitespace
-    if (strlen($cleanPreview) > 160) {
-        $cleanPreview = substr($cleanPreview, 0, 157) . '...';
+$metaQuery = query("SELECT preview, metadata_image FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
+$metaRow = fetch_array($metaQuery);
+if ($metaRow) {
+    if (!empty($metaRow['preview'])) {
+        $cleanPreview = strip_tags($metaRow['preview']);
+        $cleanPreview = preg_replace('/\s+/', ' ', trim($cleanPreview));
+        if (strlen($cleanPreview) > 160) {
+            $cleanPreview = substr($cleanPreview, 0, 157) . '...';
+        }
+        if (!empty($cleanPreview)) {
+            $customMetaDescription = $cleanPreview;
+        }
     }
-    if (!empty($cleanPreview)) {
-        $customMetaDescription = $cleanPreview;
+    if (!empty($metaRow['metadata_image'])) {
+        // Use absolute URL for meta image
+        $customMetaImage = "http://suntownffb.us" . $metaRow['metadata_image'];
     }
 }
 
+// Pass $customMetaImage to header.php
 include 'header.php';
 include 'sidebar.html';
 
@@ -92,6 +99,13 @@ if ($previewRow && !empty($previewRow['preview'])) {
             
             <!-- Dropdown selections -->
             <div class="row" style="direction: ltr;">
+                <div class="col-sm-12 col-md-2 text-right">
+                    <?php
+                    if (isset($APP_ENV) && $APP_ENV !== 'production') {
+                        echo '<a class="btn btn-secondary" href="/editNewsletter.php" target="_blank">Edit Newsletter</a>';
+                    }
+                    ?>
+                </div>
                 <div class="col-sm-12 col-md-2">
                     <label for="year-select" style="color: #fff;">Season:</label>
                     <select id="year-select" class="form-control">

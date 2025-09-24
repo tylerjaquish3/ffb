@@ -15,8 +15,9 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
     - make sure it doesnt add duplicate rows
 - index page, postseason stats, average finish table - fix spacing for cole's trophies
-- some current season records are showing 2006 data
+- some current season records are showing 2006 data (i deleted them but the logic may put them back)
 - fix logic for determining fun fact new leader
+- if user goes to profile without one selected, go to 404
 
 # Ideas
 
@@ -33,11 +34,12 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 
 - fun fact finder page
 - allow people add comments/smack talk to profile
-- update laravel?
 
 - Add league stats
     - Lineup accuracy
     - Playoff points/margin
+- Newsletter, add a weekly metadata image
+- add form to submit new ideas
 
 Notes:
 Moved to 18 week schedule in 2021

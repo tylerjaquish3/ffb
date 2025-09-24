@@ -15,22 +15,50 @@ if ($_POST) {
     $editWeek = (int)$_POST['week'];
     $recap = isset($_POST['recap']) ? $_POST['recap'] : '';
     $preview = isset($_POST['preview']) ? $_POST['preview'] : '';
-    
+    $metadataImagePath = '';
+
+    // Handle file upload if present
+    if (isset($_FILES['metadata_image']) && $_FILES['metadata_image']['error'] === UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['metadata_image']['tmp_name'];
+        $fileName = $_FILES['metadata_image']['name'];
+        $fileSize = $_FILES['metadata_image']['size'];
+        $fileType = $_FILES['metadata_image']['type'];
+        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (in_array($fileExt, $allowedExts)) {
+            $newFileName = "newsletter_{$editYear}_wk{$editWeek}.{$fileExt}";
+            $destPath = "images/newsletter_metadata/" . $newFileName;
+            if (move_uploaded_file($fileTmpPath, $destPath)) {
+                $metadataImagePath = '/' . $destPath;
+            }
+        }
+    }
+
     if (isset($_POST['save'])) {
         // Check if record exists
         $existingQuery = query("SELECT id FROM newsletters WHERE year = $editYear AND week = $editWeek");
         $existingRow = fetch_array($existingQuery);
-        
+
         if ($existingRow) {
             // Update existing record
-            $updateQuery = "UPDATE newsletters SET recap = '" . SQLite3::escapeString($recap) . "', preview = '" . SQLite3::escapeString($preview) . "' WHERE year = $editYear AND week = $editWeek";
+            $updateQuery = "UPDATE newsletters SET recap = '" . SQLite3::escapeString($recap) . "', preview = '" . SQLite3::escapeString($preview) . "'";
+            if ($metadataImagePath) {
+                $updateQuery .= ", metadata_image = '" . SQLite3::escapeString($metadataImagePath) . "'";
+            }
+            $updateQuery .= " WHERE year = $editYear AND week = $editWeek";
             query($updateQuery);
         } else {
             // Insert new record
-            $insertQuery = "INSERT INTO newsletters (year, week, recap, preview) VALUES ($editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "')";
+            $insertQuery = "INSERT INTO newsletters (year, week, recap, preview";
+            $insertValues = "$editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "'";
+            if ($metadataImagePath) {
+                $insertQuery .= ", metadata_image";
+                $insertValues .= ", '" . SQLite3::escapeString($metadataImagePath) . "'";
+            }
+            $insertQuery .= ") VALUES (" . $insertValues . ")";
             query($insertQuery);
         }
-        
+
         // Redirect to newsletter page with the saved year and week
         header("Location: newsletter.php?year=$editYear&week=$editWeek");
         exit;
@@ -123,7 +151,7 @@ include 'sidebar.html';
             </div>
 
             <!-- Edit Form -->
-            <form method="POST" action="editNewsletter.php">
+            <form method="POST" action="editNewsletter.php" enctype="multipart/form-data">
                 <input type="hidden" name="year" value="<?php echo $editYear; ?>">
                 <input type="hidden" name="week" value="<?php echo $editWeek; ?>">
                 
@@ -146,6 +174,28 @@ include 'sidebar.html';
                             </div>
                             <div class="card-body" style="background: #fff;">
                                 <textarea name="preview" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the preview content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($preview); ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metadata Image Upload -->
+                <div class="row">
+                    <div class="col-sm-12 col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Metadata Image</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff;">
+                                <input type="file" name="metadata_image" id="metadata_image" accept="image/*" class="form-control">
+                                <?php
+                                // Show current image if exists
+                                $imgQuery = query("SELECT metadata_image FROM newsletters WHERE year = $editYear AND week = $editWeek");
+                                $imgRow = fetch_array($imgQuery);
+                                if ($imgRow && !empty($imgRow['metadata_image'])) {
+                                    echo '<div style="margin-top:10px;"><img src="' . htmlspecialchars($imgRow['metadata_image']) . '" alt="Current Metadata Image" style="max-width:200px;max-height:200px;" /></div>';
+                                }
+                                ?>
                             </div>
                         </div>
                     </div>

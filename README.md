@@ -17,7 +17,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - index page, postseason stats, average finish table - fix spacing for cole's trophies
 - some current season records are showing 2006 data (i deleted them but the logic may put them back)
 - fix logic for determining fun fact new leader
-- if user goes to profile without one selected, go to 404
+- current season draft performance has players in twice?
 
 # Ideas
 

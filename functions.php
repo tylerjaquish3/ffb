@@ -2441,9 +2441,34 @@ function getAllDraftedPlayerDetails()
         LEFT JOIN rosters ON rosters.player LIKE draft.player || '%' AND rosters.year = draft.year AND rosters.manager = managers.name
         WHERE draft.year = $selectedSeason
         GROUP BY manager, overall_pick, rosters.player, draft.position, round");
+    $temp = [];
     while ($row = fetch_array($result)) {
-        $response[] = $row;
+        // Normalize player name
+        $normName = preg_replace('/\b(Jr\.?|Sr\.?|III|II|IV)\b/i', '', $row['player']);
+        $normName = preg_replace('/[^\w\s]/', '', $normName);
+        $normName = strtolower(trim($normName));
+
+        // Try to deduplicate by fuzzy match
+        $found = false;
+        foreach ($temp as &$existing) {
+            $existingNorm = preg_replace('/\b(Jr\.?|Sr\.?|III|II|IV)\b/i', '', $existing['player']);
+            $existingNorm = preg_replace('/[^\w\s]/', '', $existingNorm);
+            $existingNorm = strtolower(trim($existingNorm));
+            // Use similar_text for fuzzy match
+            similar_text($normName, $existingNorm, $percent);
+            if ($percent > 90 && $row['manager'] == $existing['manager']) {
+                // Merge points and GP
+                $existing['points'] += $row['points'];
+                $existing['GP'] += $row['GP'];
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) {
+            $temp[] = $row;
+        }
     }
+    $response = $temp;
 
     return $response;
 }

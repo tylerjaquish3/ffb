@@ -6,7 +6,7 @@ include 'sidebar.html';
 
 ?>
 
-<div class="app-content content container-fluid">
+<div class="app-content content">
     <div class="content-wrapper">
         <div class="content-body">
 

@@ -7,7 +7,7 @@ if (!isset($_GET['id'])) {
 
 $pageName = $_GET['id'] . "'s Profile";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 $versusSet = false;
 if (isset($_GET['id'])) {
@@ -55,7 +55,7 @@ if (isset($_GET['id'])) {
                             Head to Head
                         </button>
                         <button class="tab-button" id="points-by-week-tab" onclick="showCard('points-by-week')">
-                            Points by Week
+                            Points Charts
                         </button>
                         <button class="tab-button" id="drafts-tab" onclick="showCard('drafts')">
                             Drafts
@@ -949,7 +949,7 @@ if (isset($_GET['id'])) {
                 </div>
             </div>
 
-            <!-- Points by Week Tab -->
+            <!-- Points Charts Tab -->
             <div class="row card-section" id="points-by-week" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
@@ -1004,6 +1004,20 @@ if (isset($_GET['id'])) {
                                 <div class="row mt-2">
                                     <div class="col-sm-12" style="height: 600px;">
                                         <canvas id="pointsByWeekChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="float: right">Points By Season</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr;">
+                                <div class="row">
+                                    <div class="col-sm-12" style="height: 600px;">
+                                        <canvas id="pointsBySeasonChart"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -1396,8 +1410,7 @@ if (isset($_GET['id'])) {
         }
     });
 
-    function updatePointsChart()
-    {
+    function updatePointsChart() {
         $.ajax({
             url: 'dataLookup.php',
             data:  {
@@ -1412,7 +1425,6 @@ if (isset($_GET['id'])) {
             },
             success: function(response) {
                 data = JSON.parse(response);
-            
                 var ctx = $('#pointsByWeekChart');
                 pointsByWeekChart = new Chart(ctx, {
                     type: 'line',
@@ -1459,6 +1471,94 @@ if (isset($_GET['id'])) {
     }
 
     updatePointsChart();
+
+    // Points by Season Chart
+    function renderPointsBySeasonChart() {
+        managerName = "<?php echo $managerName; ?>";
+
+        $.ajax({
+            url: 'dataLookup.php',
+            data: {
+                dataType: 'points-by-season',
+                manager: <?php echo $managerId; ?>
+            },
+            error: function() {
+                console.log('Error loading points by season');
+            },
+            success: function(response) {
+                var data = JSON.parse(response);
+                var ctx = document.getElementById('pointsBySeasonChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.seasons,
+                        datasets: [
+                            {
+                                label: managerName+"'s Points",
+                                data: data.managerPoints,
+                                borderColor: '#297eff',
+                                backgroundColor: 'rgba(46,184,46,0.1)',
+                                fill: false,
+                                tension: 0.2
+                            },
+                            {
+                                label: 'League Average',
+                                data: data.leagueAverages,
+                                borderColor: '#656567',
+                                backgroundColor: 'rgba(41,126,255,0.1)',
+                                fill: false,
+                                tension: 0.2
+                            },
+                            {
+                                label: 'League High',
+                                data: data.leagueHighs,
+                                borderColor: '#2eb82e',
+                                backgroundColor: 'rgba(243,60,71,0.1)',
+                                fill: false,
+                                tension: 0.2
+                            },
+                            {
+                                label: 'League Low',
+                                data: data.leagueLows,
+                                borderColor: '#f33c47',
+                                backgroundColor: 'rgba(189,189,189,0.1)',
+                                fill: false,
+                                tension: 0.2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+                            datalabels: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Total Points'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Season'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    renderPointsBySeasonChart();
     let season = <?php echo $season; ?>;
 
     $('#startWeek').change(function() {

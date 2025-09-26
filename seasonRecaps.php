@@ -2,7 +2,7 @@
 
 $pageName = "Season Recap";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 if (isset($_GET['id'])) {
     $season = $_GET['id'];

@@ -1,7 +1,7 @@
 <?php
 $pageName = 'Vote Info';
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 ?>
 

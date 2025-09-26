@@ -3,7 +3,7 @@
 
 $pageName = "Current Season";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 ?>
 

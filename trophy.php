@@ -2,13 +2,12 @@
 
 $pageName = "Trophy";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 ?>
-
-<div class="app-content content container-fluid">
+<link rel="stylesheet" type="text/css" href="/assets/owl.carousel.min.css">
+<div class="app-content content">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
 
         <div class="content-body">
 

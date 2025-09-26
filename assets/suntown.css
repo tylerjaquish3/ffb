@@ -26,6 +26,11 @@ html body {
     color: #fff;
 }
 
+.main-menu.menu-dark .navigation>li.active>a {
+    color: #162029;
+    background-color: #297eff;
+}
+
 ul.nav.navbar-nav {
     padding: 13px 18px;
 }

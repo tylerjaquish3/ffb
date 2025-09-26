@@ -2,7 +2,7 @@
 
 $pageName = "Constitution";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 $allYears = [];
 $result = query("SELECT distinct year FROM season_positions ORDER BY YEAR ASC");

@@ -2,7 +2,7 @@
 
 $pageName = "Schedule";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 if (isset($_GET['id'])) {
     $selectedSeason = $_GET['id'];

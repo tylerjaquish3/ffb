@@ -2,7 +2,7 @@
 
 $pageName = "Regular Season";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 ?>
 

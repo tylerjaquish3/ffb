@@ -2,7 +2,7 @@
 
 $pageName = "Awards";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 $type = 'all';
 if (isset($_GET['id'])) {

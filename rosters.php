@@ -2,7 +2,7 @@
 
 $pageName = "Rosters";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 $playoffRoster = false;
 $managerName = 'Andy';

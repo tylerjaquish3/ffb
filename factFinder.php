@@ -9,7 +9,7 @@ if ($APP_ENV === 'production') {
     exit();
 }
 
-include 'sidebar.html';
+include 'sidebar.php';
 
 // Data is loaded in functions.php based on pageName
 $selectedYear = $factFinderData['selectedYear'];

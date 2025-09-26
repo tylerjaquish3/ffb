@@ -1,7 +1,7 @@
 <?php
 $pageName = 'Dashboard';
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 ?>
 

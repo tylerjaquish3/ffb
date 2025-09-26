@@ -913,4 +913,50 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'mockSchedule') {
     }    die;
 }
 
+// Points by Season for a manager (for profile page)
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-season') {
+    $manager = $_GET['manager'];
+    $seasons = [];
+    $managerPoints = [];
+    $leagueAverages = [];
+    $leagueHighs = [];
+    $leagueLows = [];
+
+    // Get all seasons
+    $result = query("SELECT DISTINCT year FROM regular_season_matchups ORDER BY year ASC");
+    while ($row = fetch_array($result)) {
+        $seasons[] = $row['year'];
+    }
+
+    foreach ($seasons as $year) {
+        // Manager's total points for the season
+        $result = query("SELECT SUM(manager1_score) as points FROM regular_season_matchups WHERE manager1_id = '$manager' AND year = $year");
+        $row = fetch_array($result);
+        $managerPoints[] = $row && $row['points'] !== null ? round($row['points'], 2) : null;
+
+        // League stats for the season
+        $pointsArr = [];
+        $result = query("SELECT manager1_id, SUM(manager1_score) as points FROM regular_season_matchups WHERE year = $year GROUP BY manager1_id");
+        while ($row = fetch_array($result)) {
+            $pointsArr[] = $row['points'];
+        }
+        if (count($pointsArr) > 0) {
+            $leagueAverages[] = round(array_sum($pointsArr) / count($pointsArr), 2);
+            $leagueHighs[] = round(max($pointsArr), 2);
+            $leagueLows[] = round(min($pointsArr), 2);
+        } else {
+            $leagueAverages[] = $leagueHighs[] = $leagueLows[] = null;
+        }
+    }
+
+    echo json_encode([
+        'seasons' => $seasons,
+        'managerPoints' => $managerPoints,
+        'leagueAverages' => $leagueAverages,
+        'leagueHighs' => $leagueHighs,
+        'leagueLows' => $leagueLows
+    ]);
+    die;
+}
+
 ?>

@@ -1,7 +1,7 @@
 <?php
 
 $pageName = "20th Anniversary Draft Weekend";
-include '../sidebar.html';
+include '../sidebar.php';
 
 ?>
 
@@ -33,7 +33,6 @@ include '../sidebar.html';
     <link rel="stylesheet" type="text/css" href="/assets/vertical-menu.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/bootstrap-extended.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/app.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/colors.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/custom-rtl.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/owl.carousel.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/datatables.min.css">

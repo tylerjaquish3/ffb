@@ -11,6 +11,14 @@
     font-weight: normal;
     font-style: normal;
 
+    /* Ensures text is visible while webfont loads */
+    font-display: swap;
+
+    /* Optional: Uncomment and set these to match your font metrics to reduce layout shift */
+    ascent-override: 90%; 
+    descent-override: 10%;
+    line-gap-override: 0%;
+
 }
 
 [class^="icon-"], [class*=" icon-"] {

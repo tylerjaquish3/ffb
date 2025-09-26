@@ -83,7 +83,7 @@ if (isset($APP_ENV) && $APP_ENV === 'production') {
     exit;
 }
 
-include 'sidebar.html';
+include 'sidebar.php';
 
 ?>
 

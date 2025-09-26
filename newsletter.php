@@ -53,7 +53,7 @@ if ($metaRow) {
 
 // Pass $customMetaImage to header.php
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 // Check for rosters with the selected year and week
 $rosterQuery = query("SELECT * FROM rosters WHERE year = $selectedSeason AND week = $selectedWeek-1");

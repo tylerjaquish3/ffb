@@ -2,7 +2,7 @@
 
 $pageName = "Trade Finder";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 // Check if environment is set to production
 if (isset($APP_ENV) && $APP_ENV === 'production') {

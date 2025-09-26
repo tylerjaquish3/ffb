@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 
     <title><?php echo isset($pageName) ? $pageName. ' | Suntown FFB' : 'Suntown FFB'; ?></title>
-    <?php $version = "v5.1.2"; 
-    $vDate = "(9/24/25)"; ?>
+    <?php $version = "v5.1.3"; 
+    $vDate = "(9/26/25)"; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">
 
@@ -22,23 +22,33 @@
     <meta property="og:url" content="http://suntownffb.us" />
     <meta property="og:image" content="<?php echo isset($customMetaImage) ? $customMetaImage : 'http://suntownffb.us/images/football.ico'; ?>" />
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-touch-fullscreen" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <!-- BEGIN VENDOR CSS-->
-    <link rel="stylesheet" type="text/css" href="assets/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/icomoon.css">
-    <link rel="stylesheet" type="text/css" href="assets/vertical-menu.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/bootstrap-extended.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/app.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/colors.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/custom-rtl.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/owl.carousel.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/datatables.min.css">
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="assets/bootstrap.min.css" as="style" onload="this.rel='stylesheet'">
+    <link rel="preload" href="assets/app.min.css" as="style" onload="this.rel='stylesheet'">
+    <link rel="preload" href="assets/icomoon.css" as="style" onload="this.rel='stylesheet'">
+    <!-- Preload IcoMoon font for faster icon rendering -->
+    <link rel="preload" href="assets/icomoon/icomoon.woff?1ki0q8" as="font" type="font/woff" crossorigin>
+
+    <!-- Defer non-critical CSS -->
+    <link rel="stylesheet" href="assets/vertical-menu.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="assets/bootstrap-extended.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="assets/custom-rtl.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="assets/datatables.min.css" media="print" onload="this.media='all'">
 
     <!-- BEGIN Page Level CSS-->
-    <link rel="stylesheet" type="text/css" href="assets/suntown.css?v=<?php echo $version; ?>">
-    <link rel="stylesheet" type="text/css" href="assets/responsive.css?v=<?php echo $version; ?>">
+        <link rel="stylesheet" type="text/css" href="assets/suntown.css?v=<?php echo $version; ?>">
+        <link rel="stylesheet" type="text/css" href="assets/responsive.css?v=<?php echo $version; ?>">
+
+        <noscript>
+            <link rel="stylesheet" href="assets/vertical-menu.min.css">
+            <link rel="stylesheet" href="assets/bootstrap-extended.min.css">
+            <link rel="stylesheet" href="assets/custom-rtl.min.css">
+            <link rel="stylesheet" href="assets/datatables.min.css">
+        </noscript>
 
 </head>
 

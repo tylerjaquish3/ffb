@@ -2,7 +2,7 @@
 
 $pageName = "Draft";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 ?>
 

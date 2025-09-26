@@ -1,7 +1,7 @@
 <?php
     $pageName = "Records";
     include 'header.php';
-    include 'sidebar.html';
+    include 'sidebar.php';
 ?>
 <div class="app-content content">
     <div class="content-wrapper">

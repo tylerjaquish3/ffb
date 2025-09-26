@@ -2,7 +2,7 @@
 
 $pageName = "File Not Found";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 ?>
 

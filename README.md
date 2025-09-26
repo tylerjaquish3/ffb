@@ -17,11 +17,10 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - index page, postseason stats, average finish table - fix spacing for cole's trophies
 - some current season records are showing 2006 data (i deleted them but the logic may put them back)
 - fix logic for determining fun fact new leader
-- current season draft performance has players in twice?
+- current season draft performance has player missing (BRJ)
 
 # Ideas
 
-- Profile page, line chart for points each season vs league average
 - Current season, worst draft picks remove players that got traded midseason
 - add trophy graphic on trophy page
 - run some "what if" scenarios
@@ -38,7 +37,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - Add league stats
     - Lineup accuracy
     - Playoff points/margin
-- Newsletter, add a weekly metadata image
+- use lighthouse to find unneeded css and js, make more efficient
 - add form to submit new ideas
 
 Notes:

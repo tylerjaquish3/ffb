@@ -2,7 +2,7 @@
 
 $pageName = "Postseason";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 ?>
 

@@ -28,7 +28,7 @@ if (isset($APP_ENV) && $APP_ENV === 'production') {
     exit;
 }
 
-include 'sidebar.html';
+include 'sidebar.php';
 
 if (isset($_GET['archive'])) {
     $consumer_key = $archive_key;

@@ -2,13 +2,13 @@
 
 $pageName = "Players";
 include 'header.php';
-include 'sidebar.html';
+include 'sidebar.php';
 
 ?>
 
-<div class="app-content content container-fluid">
+<div class="app-content content">
     <div class="content-wrapper">
-        <div class="content-header row"></div>
+
         <div class="content-body"> 
             <div class="row">
                 <div class="col-sm-12 table-padding">
@@ -164,6 +164,101 @@ include 'sidebar.html';
                     </div>
                 </div>
             </div>
+
+            <!-- New Card: Players Grouped by Manager -->
+            <div class="row">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Players by Manager</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-striped nowrap" id="datatable-players-by-manager">
+                                        <thead>
+                                            <th>Player</th>
+                                            <th>Position</th>
+                                            <th>Managers</th>
+                                            <th>Seasons</th>
+                                            <th>Weeks</th>
+                                            <th>Last Season</th>
+                                        </thead>
+                                        <tbody>
+                                        <?php
+                                        // Get all managers
+                                        $managers = [];
+                                        $result = query("SELECT DISTINCT manager FROM rosters");
+                                        while ($row = fetch_array($result)) {
+                                            $managers[] = $row['manager'];
+                                        }
+                                        $managerCount = count($managers);
+
+                                        // Get all players, their seasons, managers, last season, positions, and weeks
+                                        $players = [];
+                                        $result = query("SELECT player, year, manager, position, week FROM rosters WHERE player != '(Empty)'");
+                                        while ($row = fetch_array($result)) {
+                                            $p = $row['player'];
+                                            $y = $row['year'];
+                                            $m = $row['manager'];
+                                            $pos = $row['position'];
+                                            $w = $row['week'];
+                                            if (!isset($players[$p])) {
+                                                $players[$p] = ['seasons' => [], 'managers' => [], 'positions' => [], 'last_season' => $y, 'weeks' => []];
+                                            }
+                                            if (!in_array($y, $players[$p]['seasons'])) {
+                                                $players[$p]['seasons'][] = $y;
+                                            }
+                                            if (!in_array($m, $players[$p]['managers'])) {
+                                                $players[$p]['managers'][] = $m;
+                                            }
+                                            if (!isset($players[$p]['positions'][$pos])) {
+                                                $players[$p]['positions'][$pos] = 0;
+                                            }
+                                            $players[$p]['positions'][$pos]++;
+                                            if ($y > $players[$p]['last_season']) {
+                                                $players[$p]['last_season'] = $y;
+                                            }
+                                            // Track unique weeks (by year+week)
+                                            $weekKey = $y.'-'.$w;
+                                            if (!in_array($weekKey, $players[$p]['weeks'])) {
+                                                $players[$p]['weeks'][] = $weekKey;
+                                            }
+                                        }
+
+                                        // Sort: players owned by all managers at the top
+                                        uasort($players, function($a, $b) use ($managerCount) {
+                                            $aAll = count($a['managers']) === $managerCount ? 1 : 0;
+                                            $bAll = count($b['managers']) === $managerCount ? 1 : 0;
+                                            if ($aAll !== $bAll) return $bAll - $aAll;
+                                            return count($b['managers']) - count($a['managers']);
+                                        });
+
+                                        foreach ($players as $player => $info) {
+                                            // Most common position
+                                            $pos = '';
+                                            if (!empty($info['positions'])) {
+                                                arsort($info['positions']);
+                                                $pos = array_key_first($info['positions']);
+                                            }
+                                            echo '<tr>';
+                                            echo '<td><a href="/players.php?player='.$player.'">'.$player.'</a></td>';
+                                            echo '<td>'.$pos.'</td>';
+                                            echo '<td>'.count($info['managers']).'</td>';
+                                            echo '<td>'.count($info['seasons']).'</td>';
+                                            echo '<td>'.count($info['weeks']).'</td>';
+                                            echo '<td>'.$info['last_season'].'</td>';
+                                            echo '</tr>';
+                                        }
+                                        ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -179,16 +274,12 @@ include 'sidebar.html';
 <script type="text/javascript">
     $(document).ready(function() {
 
-        let playerFilter = <?php echo isset($_GET['player']) ? "'".$_GET['player']."'" : 'null'; ?>;
+        $('#datatable-players-by-manager').DataTable({
+            pageLength: 25,
+            order: [[2, "desc"]]
+        });
 
-        setTimeout(function() {
-            if (playerFilter) {
-                $('#datatable-players_filter > label > input[type=search]').val(playerFilter);
-                $('#datatable-players_filter > label > input[type=search]').trigger('keyup');
-                // Also expand the search results
-                $('#datatable-players > tbody > tr > td.dt-control').trigger('click');
-            }
-        }, 1000);
+        let playerFilter = <?php echo isset($_GET['player']) ? "'".$_GET['player']."'" : 'null'; ?>;
 
         function format ( rowData ) {
             var div = $('<div/>')
@@ -204,7 +295,6 @@ include 'sidebar.html';
                 },
                 dataType: 'json',
                 success: function (data) {
-
                     let count = 1;
                     const table = document.createElement("table");
                     const thead = document.createElement("thead");
@@ -213,32 +303,25 @@ include 'sidebar.html';
                         if (count == 1) {
                             for (const key of Object.keys(row)) {
                                 const th = document.createElement("th");
-                                th.textContent = key.charAt(0).toUpperCase() + key.slice(1);;
+                                th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
                                 thead.appendChild(th);
                             }
-                        
                             table.appendChild(thead);
-                        } 
+                        }
                         const tr = document.createElement("tr");
                         for (const key of Object.keys(row)) {
                             const td = document.createElement("td");
                             td.textContent = row[key];
                             tr.appendChild(td);
                         }
-
                         tbody.appendChild(tr);
                         count++;
                     }
                     table.appendChild(tbody);
-
                     div.removeClass('loading');
                     div.text('');
                     div.append(table);
-
-                    // Make the table into a datatable
-                    $(table).DataTable({
-                        paging: false
-                    });
+                    // Removed DataTable initialization for child table to avoid column count warning
                 }
             } );
 
@@ -267,6 +350,10 @@ include 'sidebar.html';
                 [2, "desc"]
             ]
         });
+
+        if (playerFilter) {
+            table.search(playerFilter).draw();
+        }
 
         // Add event listener for opening and closing details
         table.on('click', 'td.dt-control', function (e) {

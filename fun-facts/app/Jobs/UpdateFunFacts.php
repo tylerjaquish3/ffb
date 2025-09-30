@@ -9,6 +9,7 @@ use App\Models\PlayoffMatchup;
 use App\Models\Finish;
 use App\Models\Manager;
 use App\Models\ManagerFunFact;
+use App\Models\RecordLog;
 use App\Models\TeamName;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -127,7 +128,7 @@ class UpdateFunFacts implements ShouldQueue
             // Only fetch game times for current calculations, not historical
             if (!$this->isHistoricalCalculation) {
                 echo 'Fetching game times'.PHP_EOL;
-                FetchGameTimes::dispatchSync();
+                // FetchGameTimes::dispatchSync();
             }
 
             // 1,2,3
@@ -257,29 +258,61 @@ class UpdateFunFacts implements ShouldQueue
      */
     private function insertFunFact(int $ffId, string $manId, string $value, array $notes, array $tops)
     {
-        if (count($tops) > 1) {
-            // Multiple managers are tied for the top spot
-            // Get the existing ones to determine if any leaders are new
-            $facts = ManagerFunFact::where('fun_fact_id', $ffId)->get();
-            foreach ($tops as $top) {
-                $top->new_leader = 1;
-                foreach ($facts as $fact) {
-                    if ($fact->manager_id == $top->{$manId}) {
-                        $top->new_leader = 0;
-                        break;
-                    }
+        // Get the current year and week from the job context
+        $year = $this->asOfYear ?? $this->currentSeason;
+        $week = $this->asOfWeek ?? $this->currentWeek;
+
+        // Get all record_log entries for this fun_fact_id for the latest week
+        $latestLogs = RecordLog::where('fun_fact_id', $ffId)
+            ->orderByDesc('year')
+            ->orderByDesc('week')
+            ->get();
+
+        $latestYear = null;
+        $latestWeek = null;
+        $latestManagers = [];
+        if ($latestLogs->count() > 0) {
+            $latestYear = $latestLogs[0]->year;
+            $latestWeek = $latestLogs[0]->week;
+            // Collect all managers for the latest week
+            foreach ($latestLogs as $log) {
+                if ($log->year == $latestYear && $log->week == $latestWeek) {
+                    $latestManagers[] = $log->manager_id;
                 }
             }
+        }
 
-            // Delete them all so we can prevent duplicates
+        // Helper to determine new_leader for a given manager
+        $determineNewLeader = function($managerId) use ($latestYear, $latestWeek, $latestManagers, $year, $week) {
+            if (!$latestYear || !$latestWeek) {
+                return 1; // No previous entry, always new leader
+            }
+            // If latest logs are for this week
+            if ($latestYear == $year && $latestWeek == $week) {
+                return in_array($managerId, $latestManagers) ? 0 : 1;
+            }
+            // If latest logs are for previous week
+            if (($latestYear < $year) || ($latestYear == $year && $latestWeek < $week)) {
+                return in_array($managerId, $latestManagers) ? 0 : 1;
+            }
+            // If latest logs are for a future week (shouldn't happen, but default to new leader)
+            return 1;
+        };
+
+        if (count($tops) > 1) {
+            // Multiple managers are tied for the top spot
+            foreach ($tops as $top) {
+                $topManagerId = $top->{$manId};
+                $top->new_leader = $determineNewLeader($topManagerId);
+            }
+            // ...existing code...
+            $facts = ManagerFunFact::where('fun_fact_id', $ffId)->get();
             ManagerFunFact::whereIn('id', $facts->pluck('id'))->delete();
-
             foreach ($tops as $top) {
                 $note = '';
                 foreach ($notes as $n) {
                     $note .= is_null($top->{$n}) ? $n.' ' : $top->{$n}.' ';
                 }
-
                 ManagerFunFact::create([
                     'fun_fact_id' => $ffId,
                     'manager_id' => $top->{$manId},
@@ -289,38 +322,25 @@ class UpdateFunFacts implements ShouldQueue
                     'new_leader' => $top->new_leader
                 ]);
             }
-            
         } else {
-
-            // if $tops array doesnt have element 0, skip it
             if (!isset($tops[0])) {
                 return;
             }
-
-            // One manager has the top spot on their own
             $top = $tops[0];
-            $newLeader = 1;
-            $facts = ManagerFunFact::where('fun_fact_id', $ffId)->get();
-            
-            foreach ($facts as $fact) {
-                if ($fact->manager_id == $top->{$manId}) {
-                    $newLeader = 0;
-                    break;
-                }
-            }
+            $topManagerId = $top->{$manId};
+            $newLeader = $determineNewLeader($topManagerId);
 
-            // If there's more than one manager saved for this fact, delete them all
-            // because we now only have one
+    // dd('fun fact: '.$ffId.' new leader: '.$newLeader);
+            // ...existing code...
+            $facts = ManagerFunFact::where('fun_fact_id', $ffId)->get();
             if (count($facts) > 1) {
                 ManagerFunFact::whereIn('id', $facts->pluck('id'))->delete();
             }
             $note = '';
-
             foreach ($notes as $n) {
                 if (is_subclass_of($top, 'Illuminate\Database\Eloquent\Model')) {
                     $note .= is_null($top->{$n}) ? $n.' ' : $top->{$n}.' ';
                 } elseif (gettype($top) == 'object') {
-                    // its a model instance
                     if (property_exists($top, $n)) {
                         $note .= is_null($top->{$n}) ? $n.' ' : $top->{$n}.' ';
                     } else {
@@ -332,7 +352,6 @@ class UpdateFunFacts implements ShouldQueue
                     $note .= $n.' ';
                 }
             }
-
             ManagerFunFact::updateOrCreate([
                 'fun_fact_id' => $ffId,
             ],[
@@ -342,6 +361,7 @@ class UpdateFunFacts implements ShouldQueue
                 'note' => $note,
                 'new_leader' => $newLeader
             ]);
+            // dd(ManagerFunFact::where('fun_fact_id', $ffId)->first());
         }
     }
 
@@ -844,21 +864,21 @@ class UpdateFunFacts implements ShouldQueue
             }
         }
 
-        $mostWinsa = collect($mostWinsa);
-        $tops = $this->checkMultiple($mostWinsa, 'val');
-        $this->insertFunFact(12, 'man', 'val', [], $tops);
+        // $mostWinsa = collect($mostWinsa);
+        // $tops = $this->checkMultiple($mostWinsa, 'val');
+        // $this->insertFunFact(12, 'man', 'val', [], $tops);
 
-        $mostQa = collect($mostQa);
-        $tops = $this->checkMultiple($mostQa, 'val');
-        $this->insertFunFact(65, 'man', 'val', [], $tops);
+        // $mostQa = collect($mostQa);
+        // $tops = $this->checkMultiple($mostQa, 'val');
+        // $this->insertFunFact(65, 'man', 'val', [], $tops);
 
-        $mostSa = collect($mostSa);
-        $tops = $this->checkMultiple($mostSa, 'val');
-        $this->insertFunFact(66, 'man', 'val', [], $tops);
+        // $mostSa = collect($mostSa);
+        // $tops = $this->checkMultiple($mostSa, 'val');
+        // $this->insertFunFact(66, 'man', 'val', [], $tops);
 
-        $mostFa = collect($mostFa);
-        $tops = $this->checkMultiple($mostFa, 'val');
-        $this->insertFunFact(31, 'man', 'val', [], $tops);
+        // $mostFa = collect($mostFa);
+        // $tops = $this->checkMultiple($mostFa, 'val');
+        // $this->insertFunFact(31, 'man', 'val', [], $tops);
 
         $mostUnderWinsa = collect($mostUnderWinsa);
         $tops = $this->checkMultiple($mostUnderWinsa, 'val');

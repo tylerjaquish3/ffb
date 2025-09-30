@@ -15,8 +15,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
     - make sure it doesnt add duplicate rows
 - index page, postseason stats, average finish table - fix spacing for cole's trophies
-- some current season records are showing 2006 data (i deleted them but the logic may put them back)
-- fix logic for determining fun fact new leader
 - current season draft performance has player missing (BRJ)
 
 # Ideas
@@ -25,7 +23,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - add trophy graphic on trophy page
 - run some "what if" scenarios
 - chances of making playoffs, make request to playoffcomputer linked above
-- add a bunch more fun facts
+- add more fun facts
     - record against everyone
     - best trade
     - fewest points by position (all time, season)
@@ -37,14 +35,18 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - Add league stats
     - Lineup accuracy
     - Playoff points/margin
-- use lighthouse to find unneeded css and js, make more efficient
+- move functions to lookup after page load to make more efficient
 - add form to submit new ideas
+- boom/bust predictor where managers login and choose one based on projection
 
 Notes:
 Moved to 18 week schedule in 2021
 Rams moved to LA between 2015 & 2016
 Chargers moved to LA between 2016 & 2017
 Raiders moved to LV between 2019 & 2020
+
+Team Name:
+- Almost Always Almost Win
 
 
 # Fun Fact ideas...

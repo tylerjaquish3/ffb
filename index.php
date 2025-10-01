@@ -21,7 +21,7 @@ include 'sidebar.php';
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
                                     <h5>Most Wins</h5>
-                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['most_wins_manager'] . ' (' . $dashboardNumbers['most_wins_number'] . ')'; ?>&#x200E;</h5>
+                                    <h5 class="text-bold-400" id="most-wins">Loading...</h5>
                                 </div>
                             </div>
                         </div>
@@ -36,7 +36,7 @@ include 'sidebar.php';
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
                                     <h5>Most Championships</h5>
-                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['most_championships_manager'] . ' (' . $dashboardNumbers['most_championships_number'] . ')'; ?>&#x200E;</h5>
+                                    <h5 class="text-bold-400" id="most-championships">Loading...</h5>
                                 </div>
                             </div>
                         </div>
@@ -51,7 +51,7 @@ include 'sidebar.php';
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
                                     <h5>Defending Champion</h5>
-                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['defending_champ']; ?></h5>
+                                    <h5 class="text-bold-400" id="defending-champ">Loading...</h5>
                                 </div>
                             </div>
                         </div>
@@ -66,7 +66,7 @@ include 'sidebar.php';
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
                                     <h5>Seasons</h5>
-                                    <h5 class="text-bold-400"><?php echo $dashboardNumbers['seasons']; ?></h5>
+                                    <h5 class="text-bold-400" id="seasons">Loading...</h5>
                                 </div>
                             </div>
                         </div>
@@ -280,39 +280,63 @@ include 'sidebar.php';
         ]
     });
 
-    // Chart.defaults.global.defaultFontSize = 9;
-    var ctx = $('#postseasonChart');
+    $(function() {
+        // Fetch dashboard and chart data via AJAX
+        fetch('data/index.php')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Dashboard cards
+            document.getElementById('most-wins').textContent = data.dashboardNumbers.most_wins_manager + ' (' + data.dashboardNumbers.most_wins_number + ')';
+            document.getElementById('most-championships').textContent = data.dashboardNumbers.most_championships_manager + ' (' + data.dashboardNumbers.most_championships_number + ')';
+            document.getElementById('defending-champ').textContent = data.dashboardNumbers.defending_champ;
+            document.getElementById('seasons').textContent = data.dashboardNumbers.seasons;
 
-    var stackedBar = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: <?php echo json_encode($postseasonChart['managers']); ?>,
-            datasets: [{
-                label: 'Playoff Appearances',
-                data: <?php echo json_encode($postseasonChart['appearances']); ?>,
-                backgroundColor: '#297eff'
-            },
-            {
-                label: 'Championship Appearances',
-                data: <?php echo json_encode($postseasonChart['shipAppearances']); ?>,
-            },
-            {
-                label: 'Championship Wins',
-                data: <?php echo json_encode($postseasonChart['ships']); ?>,
-                backgroundColor: '#2eb82e'
-            }
-        ]},
-        options: {
-            indexAxis: 'y',
-            scales: {
-                x: {
-                    stacked: true
+            // Postseason chart
+            var ctx = document.getElementById('postseasonChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.postseasonChart.managers,
+                    datasets: [
+                        {
+                            label: 'Playoff Appearances',
+                            data: data.postseasonChart.appearances,
+                            backgroundColor: '#297eff'
+                        },
+                        {
+                            label: 'Championship Appearances',
+                            data: data.postseasonChart.shipAppearances,
+                        },
+                        {
+                            label: 'Championship Wins',
+                            data: data.postseasonChart.ships,
+                            backgroundColor: '#2eb82e'
+                        }
+                    ]
                 },
-                y: {
-                    stacked: true
+                options: {
+                    indexAxis: 'y',
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true }
+                    }
                 }
-            }
-        }
+            });
+        })
+        .catch(error => {
+            
+            console.error('Error fetching dashboard data:', error);
+            document.getElementById('most-wins').textContent = 'Error loading data';
+            document.getElementById('most-championships').textContent = 'Error loading data';
+            document.getElementById('defending-champ').textContent = 'Error loading data';
+            document.getElementById('seasons').textContent = 'Error loading data';
+        });
+
     });
 
     setTimeout(showRegTable(3), 1000);

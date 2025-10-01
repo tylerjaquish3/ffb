@@ -31,11 +31,15 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 
 - fun fact finder page
 - allow people add comments/smack talk to profile
+- make the trophy plaques on index page load dynamicly
 
 - Add league stats
     - Lineup accuracy
     - Playoff points/margin
 - move functions to lookup after page load to make more efficient
+    - reg season
+    - current season
+    - profile
 - add form to submit new ideas
 - boom/bust predictor where managers login and choose one based on projection
 
@@ -81,3 +85,13 @@ Generic league ideas
 
 $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
 
+# Newsletter themes
+
+- Halloween, Thanksgiving, Christmas
+- 80s, superheroes
+- Baseball, golf, olympics
+- Mexican, italian, canadian
+- Pirates, animals, space, casino, school (report card)
+
+week 6 baseball
+week 7 

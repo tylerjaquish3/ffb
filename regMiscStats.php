@@ -625,7 +625,7 @@
 				<td><?php echo $row['name']; ?></td>
 				<td><?php echo $row['moves']; ?></td>
 				<td><?php echo $row['trades']; ?></td>
-				<td><?php echo round($row['total']/$dashboardNumbers['seasons'], 1); ?></td>
+				<td><span class="moves-total" data-total="<?php echo $row['total']; ?>">Loading...</span></td>
 			</tr>
 
 		<?php } ?>

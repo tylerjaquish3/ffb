@@ -61,8 +61,8 @@ if (!isset($pageName)) {
 }
 
 if ($pageName == 'Dashboard') {
-    $dashboardNumbers = getDashboardNumbers();
-    $postseasonChart = getPostseasonChartNumbers();
+    // $dashboardNumbers = getDashboardNumbers();
+    // $postseasonChart = getPostseasonChartNumbers();
 }
 if ((strpos($pageName, 'Profile') !== false)) {
     $profileNumbers = getProfileNumbers();

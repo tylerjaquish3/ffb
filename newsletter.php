@@ -102,7 +102,7 @@ if ($previewRow && !empty($previewRow['preview'])) {
                 <div class="col-sm-12 col-md-2 text-right">
                     <?php
                     if (isset($APP_ENV) && $APP_ENV !== 'production') {
-                        echo '<a class="btn btn-secondary" href="/editNewsletter.php" target="_blank">Edit Newsletter</a>';
+                        echo '<a class="btn btn-secondary" href="/editNewsletter.php">Edit Newsletter</a>';
                     }
                     ?>
                 </div>

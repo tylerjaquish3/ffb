@@ -99,6 +99,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <span data-i18n="nav.dash.main" class="menu-title">Newsletter</span>
                 </a>
             </li>
+            <li class="nav-item<?php if ($currentPage == 'suggestions.php') echo ' active'; ?>">
+                <a href="/suggestions.php">
+                    <i class="icon-bulb"></i>
+                    <span class="menu-title">Suggestions</span>
+                </a>
+            </li>
         </ul>
     </div>
 </div>

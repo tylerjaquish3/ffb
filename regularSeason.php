@@ -64,31 +64,7 @@ include 'sidebar.php';
                                     <th>Search 2</th>
                                 </thead>
                                 <tbody>
-                                    <?php
-                                    foreach ($regSeasonMatchups as $matchup) { ?>
-                                        <tr>
-                                            <td><?php echo $matchup['year']; ?></td>
-                                            <td><?php echo $matchup['week']; ?></td>
-
-                                            <?php if ($matchup['winner'] == 'm1') {
-                                                echo '<td><span class="badge badge-primary">' . $matchup['manager1'] . '</span></td>';
-                                            } else {
-                                                echo '<td><span class="badge badge-secondary">' . $matchup['manager1'] . '</span></td>';
-                                            }
-                                            if ($matchup['winner'] == 'm2') {
-                                                echo '<td><span class="badge badge-primary">' . $matchup['manager2'] . '</span></td>';
-                                            } else {
-                                                echo '<td><span class="badge badge-secondary">' . $matchup['manager2'] . '</span></td>';
-                                            } ?>
-                                            <td><?php echo '<a href="/rosters.php?year='.$matchup["year"].'&week='.$matchup["week"].'&manager='.$matchup['manager1'].'">'.$matchup['score1'].'</a>'; ?></td>
-                                            <td style="font-size: 11px;"><?php echo $matchup['score1note']; ?></td>
-                                            <td><?php echo '<a href="/rosters.php?year='.$matchup["year"].'&week='.$matchup["week"].'&manager='.$matchup['manager2'].'">'.$matchup['score2'].'</a>'; ?></td>
-                                            <td style="font-size: 11px;"><?php echo $matchup['score2note']; ?></td>
-                                            <td><?php echo $matchup['score1noteSearch']; ?></td>
-                                            <td><?php echo $matchup['score2noteSearch']; ?></td>
-                                        </tr>
-
-                                    <?php } ?>
+                                    <!-- Table body will be populated by JS -->
                                 </tbody>
                             </table>
                         </div>
@@ -165,26 +141,11 @@ include 'sidebar.php';
                                         <thead>
                                             <tr>
                                                 <th>Manager</th>
-                                                <?php 
-                                                sort($recordsByWeek['weeks']);
-                                                foreach ($recordsByWeek['weeks'] as $week) {
-                                                    echo '<th>Week ' . $week . '</th>';
-                                                }
-                                                ?>
+                                                <!-- Week headers will be populated by JS -->
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php
-                                            foreach ($recordsByWeek['managers'] as $manager) {
-                                                echo '<tr>';
-                                                echo '<td>' . $manager . '</td>';
-                                                foreach ($recordsByWeek['weeks'] as $week) {
-                                                    $record = isset($recordsByWeek['records'][$manager][$week]) ? $recordsByWeek['records'][$manager][$week] : '0-0';
-                                                    echo '<td>' . $record . '</td>';
-                                                }
-                                                echo '</tr>';
-                                            }
-                                            ?>
+                                            <!-- Table body will be populated by JS -->
                                         </tbody>
                                     </table>
                                 </div>
@@ -337,23 +298,7 @@ include 'sidebar.php';
                                         <th>Cole</th>
                                     </thead>
                                     <tbody>
-                                        <?php
-                                        foreach ($seasonWins as $year => $array) { ?>
-                                            <tr>
-                                                <td><?php echo $year; ?></td>
-                                                <td><?php echo $array['ben']; ?></td>
-                                                <td><?php echo $array['justin']; ?></td>
-                                                <td><?php echo $array['gavin']; ?></td>
-                                                <td><?php echo $array['matt']; ?></td>
-                                                <td><?php echo $array['aj']; ?></td>
-                                                <td><?php echo isset($array['andy']) ? $array['andy'] : 'N/A'; ?></td>
-                                                <td><?php echo isset($array['cameron']) ? $array['cameron'] : 'N/A'; ?></td>
-                                                <td><?php echo $array['tyler']; ?></td>
-                                                <td><?php echo $array['everett']; ?></td>
-                                                <td><?php echo $array['cole']; ?></td>
-                                            </tr>
-
-                                        <?php } ?>
+                                        <!-- Table body will be populated by JS after fetch -->
                                     </tbody>
                                 </table>
                             </div>
@@ -408,26 +353,13 @@ include 'sidebar.php';
                                             <div class="form-group-inline" style="display: flex; align-items: center; gap: 5px;">
                                                 <label style="margin: 0; white-space: nowrap;"><strong>Start:</strong></label>
                                                 <select id="startWeekRegular" class="dropdown form-control" style="width: auto; min-width: 120px;">
-                                                    <?php
-                                                    foreach ($allWeeks as $week) {
-                                                        echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
-                                                    }
-                                                    ?>
+                                                    <!-- Options will be populated by JS -->
                                                 </select>
                                             </div>
                                             <div class="form-group-inline" style="display: flex; align-items: center; gap: 5px;">
                                                 <label style="margin: 0; white-space: nowrap;"><strong>End:</strong></label>
                                                 <select id="endWeekRegular" class="dropdown form-control" style="width: auto; min-width: 120px;">
-                                                    <?php
-                                                    foreach ($allWeeks as $week) {
-                                                        // if last, select it
-                                                        if ($week['week_id'] == $allWeeks[count($allWeeks)-1]['week_id']) {
-                                                            echo '<option selected value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
-                                                        } else {
-                                                            echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
-                                                        }
-                                                    }
-                                                    ?>
+                                                    <!-- Options will be populated by JS -->
                                                 </select>
                                             </div>
                                             <div class="form-group-inline" style="display: flex; align-items: center; gap: 5px;">
@@ -539,7 +471,7 @@ include 'sidebar.php';
             </div>
 
             <div class="row card-section" id="champions" style="display: none;">
-                <div class="col-sm-12 col-md-6 table-padding">
+                <div class="col-sm-12 col-md-8 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Regular Season Champions</h4>
@@ -754,156 +686,17 @@ include 'sidebar.php';
             ]
         });
 
-        var ctx = $("#winsChart");
-        var years = <?php echo json_encode($winsChart['years']); ?>;
-        var yearLabels = years.split(",");
-        var teams = <?php echo json_encode($winsChart['wins']); ?>;
-        let colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
-        let x = 0;
-        let dataset = [];
-        for (const [key, value] of Object.entries(teams)) {
-            let obj = {};
-            obj.label = key;
-            obj.data = value.split(",");
-            obj.backgroundColor = 'rgba(39, 125, 161, 0.1)';
-            obj.borderColor = colors[x];
-            dataset.push(obj);
-            x++;
-        }
-
-        var myBarChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: yearLabels,
-                datasets: dataset
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Wins',
-                            font: {
-                                size: 20
-                            }
-                        }
-                    }
-                }
-            },
-        });
+        // Wins chart will be populated by JS after fetch
 
         // Chart for scatter of weekly points
         var ctx2 = $("#scatterChart");
 
-        var points = <?php echo json_encode($scatterChart); ?>;
-        let pointColor = '#000';
-        let dataset2 = [];
-        for (const [key, value] of Object.entries(points)) {
-
-            if (key.includes('Wins')) {
-                pointColor = '#acf0ac';
-            } else {
-                pointColor = '#ffbdc3';
-            }
-
-            let obj = {};
-            obj.label = key;
-            obj.data = value;
-            obj.showLine = false;
-            obj.pointBackgroundColor = pointColor;
-            obj.borderColor = pointColor;
-            dataset2.push(obj);
-        }
-
-        let scatterChart = new Chart(ctx2, {
-            type: 'scatter',
-            data: {
-                datasets: dataset2
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Manager Score vs. League Average',
-                            font: {
-                                size: 20
-                            }
-                        }
-                    },
-                    x: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Opponent Score vs. League Average',
-                            font: {
-                                size: 20
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        // Scatter chart will be populated by JS after fetch
 
         // Chart for scatter of season wins and points
         let ctx3 = $("#pfwinsChart");
 
-        let pfpawins = <?php echo json_encode($pfwins); ?>;
-        let dataset3 = [];
-        for (const [key, value] of Object.entries(pfpawins)) {
-
-            if (key.includes('For')) {
-                pointColor = '#acf0ac';
-            } else {
-                pointColor = '#ffbdc3';
-            }
-            let obj = {};
-            obj.label = key;
-            obj.data = value;
-            obj.showLine = false;
-            obj.pointBackgroundColor = pointColor;
-            obj.borderColor = pointColor;
-            dataset3.push(obj);
-        }
-
-        let scatterChart2 = new Chart(ctx3, {
-            type: 'scatter',
-            data: {
-                datasets: dataset3
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Season Points',
-                            font: {
-                                size: 20
-                            }
-                        }
-                    },
-                    x: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Season Wins',
-                            font: {
-                                size: 20
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        // PFPA chart will be populated by JS after fetch
 
         $('#lookup-btn').click(function () {
             lookupTable.ajax.reload();
@@ -1193,9 +986,372 @@ include 'sidebar.php';
             });
         }
         
-        // Season variables needed for button functionality
-        var season = <?php echo date('Y'); ?>;
-        var allWeeks = <?php echo json_encode($allWeeks); ?>;
+        // Season and allWeeks will be set by JS after fetch
+        let season, allWeeks;
+        // Fetch all regular season data after page load
+        $(function() {
+            fetch('data/regularSeason.php')
+            .then(response => response.json())
+            .then(data => {
+                season = new Date().getFullYear();
+                allWeeks = data.allWeeks;
+
+                // Populate startWeekRegular and endWeekRegular dropdowns
+                const $startWeekSelect = $('#startWeekRegular');
+                const $endWeekSelect = $('#endWeekRegular');
+                if ($startWeekSelect.length && $endWeekSelect.length && Array.isArray(allWeeks)) {
+                    $startWeekSelect.empty();
+                    $endWeekSelect.empty();
+                    allWeeks.forEach(weekObj => {
+                        $startWeekSelect.append($('<option>', {
+                            value: weekObj.week_id,
+                            text: weekObj.week_display
+                        }));
+                        $endWeekSelect.append($('<option>', {
+                            value: weekObj.week_id,
+                            text: weekObj.week_display
+                        }));
+                    });
+                    // Set default values to first and last week
+                    $startWeekSelect.val(allWeeks[0]?.week_id ?? '');
+                    $endWeekSelect.val(allWeeks[allWeeks.length-1]?.week_id ?? '');
+                }
+                // Destroy existing DataTable if it exists
+                if ($.fn.DataTable.isDataTable('#datatable-regSeason')) {
+                    $('#datatable-regSeason').DataTable().clear().destroy();
+                }
+                // Initialize DataTable with fetched data
+                $('#datatable-regSeason').DataTable({
+                    data: data.regSeasonMatchups,
+                    columns: [
+                        { data: 'year' },
+                        { data: 'week' },
+                        { data: 'manager1', render: function(data, type, row) {
+                            return `<span class="badge ${row.winner === 'm1' ? 'badge-primary' : 'badge-secondary'}">${data}</span>`;
+                        }},
+                        { data: 'manager2', render: function(data, type, row) {
+                            return `<span class="badge ${row.winner === 'm2' ? 'badge-primary' : 'badge-secondary'}">${data}</span>`;
+                        }},
+                        { data: 'score1', render: function(data, type, row) {
+                            return `<a href="/rosters.php?year=${row.year}&week=${row.week}&manager=${row.manager1}">${data}</a>`;
+                        }},
+                        { data: 'score1note', render: function(data) {
+                            return `<span style='font-size: 11px;'>${data}</span>`;
+                        }},
+                        { data: 'score2', render: function(data, type, row) {
+                            return `<a href="/rosters.php?year=${row.year}&week=${row.week}&manager=${row.manager2}">${data}</a>`;
+                        }},
+                        { data: 'score2note', render: function(data) {
+                            return `<span style='font-size: 11px;'>${data}</span>`;
+                        }},
+                        { data: 'score1noteSearch' },
+                        { data: 'score2noteSearch' }
+                    ],
+                    pageLength: 25,
+                    order: [[0, 'desc'], [1, 'desc']],
+                    columnDefs: [
+                        { targets: [8,9], visible: false },
+                        { targets: [1], type: 'num' }
+                    ],
+                    orderCellsTop: true,
+                    fixedHeader: true,
+                    initComplete: function () {
+                        var api = this.api();
+                        api.columns().eq(0).each(function (colIdx) {
+                            var cell = $('.filters th').eq($(api.column(colIdx).header()).index());
+                            var title = $(cell).text();
+                            $(cell).html('<input type="text" placeholder="filter" />');
+                            $('input',$('.filters th').eq($(api.column(colIdx).header()).index()))
+                                .off('keyup change')
+                                .on('change', function (e) {
+                                    $(this).attr('title', $(this).val());
+                                    var regexr = '({search})';
+                                    if (colIdx === 1 && this.value !== '') {
+                                        api.column(colIdx).search('^' + this.value + '$', true, false).draw();
+                                    } else {
+                                        api.column(colIdx).search(
+                                            this.value != ''
+                                                ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                                : '',
+                                            this.value != '',
+                                            this.value == ''
+                                        ).draw();
+                                    }
+                                })
+                                .on('keyup', function (e) {
+                                    e.stopPropagation();
+                                    $(this).trigger('change');
+                                });
+                        });
+                    }
+                });
+
+                // Populate Managers Dropdown
+                const managerSelect = document.getElementById('manager1-select');
+                if (managerSelect) {
+                    managerSelect.innerHTML = '';
+                    data.managers.forEach(manager => {
+                        const option = document.createElement('option');
+                        option.value = manager.id;
+                        option.textContent = manager.name;
+                        managerSelect.appendChild(option);
+                    });
+                }
+
+                // Populate Years Dropdown
+                const yearSelect = document.getElementById('year-select1');
+                if (yearSelect) {
+                    yearSelect.innerHTML = '';
+                    data.years.forEach(year => {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
+                        yearSelect.appendChild(option);
+                    });
+                }
+
+                // Populate Weeks Dropdown
+                const weekSelect = document.getElementById('week-select');
+                if (weekSelect) {
+                    weekSelect.innerHTML = '';
+                    data.weeks.forEach(week => {
+                        const option = document.createElement('option');
+                        option.value = week;
+                        option.textContent = week;
+                        weekSelect.appendChild(option);
+                    });
+                }
+
+                // Populate Wins By Season Table
+                const winsTbody = document.querySelector('#datatable-wins tbody');
+                if (winsTbody) {
+                    winsTbody.innerHTML = '';
+                    Object.entries(data.seasonWins).forEach(([year, array]) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${year}</td>
+                            <td>${array.ben}</td>
+                            <td>${array.justin}</td>
+                            <td>${array.gavin}</td>
+                            <td>${array.matt}</td>
+                            <td>${array.aj}</td>
+                            <td>${array.andy ?? 'N/A'}</td>
+                            <td>${array.cameron ?? 'N/A'}</td>
+                            <td>${array.tyler}</td>
+                            <td>${array.everett}</td>
+                            <td>${array.cole}</td>
+                        `;
+                        winsTbody.appendChild(tr);
+                    });
+                }
+
+                // Populate Game Time Points Table with DataTables
+                if ($.fn.DataTable.isDataTable('#datatable-game-time')) {
+                    $('#datatable-game-time').DataTable().clear().destroy();
+                }
+                $('#datatable-game-time').DataTable({
+                    data: data.gameTimePoints,
+                    columns: [
+                        { data: 'year' },
+                        { data: 'week' },
+                        { data: 'manager' },
+                        { data: 'game_slot_label' },
+                        { data: 'points', render: function(data, type, row) {
+                            const pointsRounded = Number(data).toFixed(2);
+                            return `<a href="/rosters.php?year=${row.year}&week=${row.week}&manager=${row.manager}">${pointsRounded}</a>`;
+                        }}
+                    ],
+                    order: [[4, 'desc']],
+                    pageLength: 25
+                });
+
+                // Populate Total Game Time Points Table with DataTables
+                if ($.fn.DataTable.isDataTable('#datatable-game-time2')) {
+                    $('#datatable-game-time2').DataTable().clear().destroy();
+                }
+                $('#datatable-game-time2').DataTable({
+                    data: data.totalGameTimePoints,
+                    columns: [
+                        { data: 'manager' },
+                        { data: 'game_slot_label' },
+                        { data: 'points', render: function(data) {
+                            return Number(data).toFixed(2);
+                        }}
+                    ],
+                    order: [[2, 'desc']],
+                    pageLength: 25
+                });
+
+                // Populate Regular Season Winners Table
+                const regSeasonWinnersTbody = document.querySelector('#datatable-reg-season-winners tbody');
+                if (regSeasonWinnersTbody) {
+                    regSeasonWinnersTbody.innerHTML = '';
+                    data.regSeasonWinners.forEach(winner => {
+                        const tr = document.createElement('tr');
+                        const pointsRounded = Number(winner.points).toFixed(2);
+                        tr.innerHTML = `
+                            <td>${winner.year}</td>
+                            <td>${winner.champion}</td>
+                            <td>${winner.record}</td>
+                            <td>${pointsRounded}</td>
+                            <td>${winner.runner_up}</td>
+                        `;
+                        regSeasonWinnersTbody.appendChild(tr);
+                    });
+                }
+
+                // Populate Wins Chart
+                const winsChart = document.getElementById('winsChart').getContext('2d');
+                const yearLabels = data.winsChart.years.split(',');
+                const teams = data.winsChart.wins;
+                let colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6","#f87598"];
+                let x = 0;
+                let dataset = [];
+                for (const [key, value] of Object.entries(teams)) {
+                    let obj = {};
+                    obj.label = key;
+                    obj.data = value.split(",");
+                    obj.backgroundColor = 'rgba(39, 125, 161, 0.1)';
+                    obj.borderColor = colors[x];
+                    dataset.push(obj);
+                    x++;
+                }
+                new Chart(winsChart, {
+                    type: 'line',
+                    data: {
+                        labels: yearLabels,
+                        datasets: dataset
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Wins',
+                                    font: { size: 20 }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Populate Scatter Chart
+                const scatterChart = document.getElementById('scatterChart').getContext('2d');
+                let points = data.scatterChart;
+                let pointColor = '#000';
+                let dataset2 = [];
+                for (const [key, value] of Object.entries(points)) {
+                    if (key.includes('Wins')) {
+                        pointColor = '#acf0ac';
+                    } else {
+                        pointColor = '#ffbdc3';
+                    }
+                    let obj = {};
+                    obj.label = key;
+                    obj.data = value;
+                    obj.showLine = false;
+                    obj.pointBackgroundColor = pointColor;
+                    obj.borderColor = pointColor;
+                    dataset2.push(obj);
+                }
+                new Chart(scatterChart, {
+                    type: 'scatter',
+                    data: { datasets: dataset2 },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Manager Score vs. League Average',
+                                    font: { size: 20 }
+                                }
+                            },
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Opponent Score vs. League Average',
+                                    font: { size: 20 }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Populate PFPA Chart
+                const pfwinsChart = document.getElementById('pfwinsChart').getContext('2d');
+                let pfpawins = data.pfwins;
+                let dataset3 = [];
+                for (const [key, value] of Object.entries(pfpawins)) {
+                    if (key.includes('For')) {
+                        pointColor = '#acf0ac';
+                    } else {
+                        pointColor = '#ffbdc3';
+                    }
+                    let obj = {};
+                    obj.label = key;
+                    obj.data = value;
+                    obj.showLine = false;
+                    obj.pointBackgroundColor = pointColor;
+                    obj.borderColor = pointColor;
+                    dataset3.push(obj);
+                }
+                new Chart(pfwinsChart, {
+                    type: 'scatter',
+                    data: { datasets: dataset3 },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Season Points',
+                                    font: { size: 20 }
+                                }
+                            },
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Season Wins',
+                                    font: { size: 20 }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Populate Record By Week Table
+                const recordByWeekTbody = document.querySelector('#datatable-recordByWeek tbody');
+                const recordByWeekThead = document.querySelector('#datatable-recordByWeek thead tr');
+                if (recordByWeekTbody && recordByWeekThead) {
+                    // Week headers
+                    recordByWeekThead.innerHTML = '<th>Manager</th>';
+                    data.recordsByWeek.weeks.sort().forEach(week => {
+                        recordByWeekThead.innerHTML += `<th>Week ${week}</th>`;
+                    });
+                    // Table body
+                    recordByWeekTbody.innerHTML = '';
+                    data.recordsByWeek.managers.forEach(manager => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${manager}</td>`;
+                        data.recordsByWeek.weeks.forEach(week => {
+                            const record = data.recordsByWeek.records[manager]?.[week] ?? '0-0';
+                            tr.innerHTML += `<td>${record}</td>`;
+                        });
+                        recordByWeekTbody.appendChild(tr);
+                    });
+                }
+            });
+        });
         
         // Button event handlers for points by season chart
         $('#startWeekRegular').change(function() {

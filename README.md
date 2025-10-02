@@ -37,10 +37,8 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - Lineup accuracy
     - Playoff points/margin
 - move functions to lookup after page load to make more efficient
-    - reg season
     - current season
     - profile
-- add form to submit new ideas
 - boom/bust predictor where managers login and choose one based on projection
 
 Notes:

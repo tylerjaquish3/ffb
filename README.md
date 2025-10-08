@@ -30,6 +30,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - most QB/RB/WR/etc points current season
     - optimal points missed
     - matchup combined score high/low
+    - highest/lowest avg margin
 
 - fun fact finder page
 - allow people add comments/smack talk to profile

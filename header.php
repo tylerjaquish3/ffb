@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 
     <title><?php echo isset($pageName) ? $pageName. ' | Suntown FFB' : 'Suntown FFB'; ?></title>
-    <?php $version = "v5.3.1"; 
-    $vDate = "(10/8/25)"; ?>
+    <?php $version = "v5.3.2"; 
+    $vDate = "(10/9/25)"; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">
 
@@ -21,6 +21,10 @@
     <meta property="og:description" content="<?php echo htmlspecialchars($ogDescription); ?>" />
     <meta property="og:url" content="http://suntownffb.us" />
     <meta property="og:image" content="<?php echo isset($customMetaImage) ? $customMetaImage : 'http://suntownffb.us/images/football.ico'; ?>" />
+
+    <meta name="twitter:title" content="<?php echo htmlspecialchars($ogTitle); ?>">
+    <meta name="twitter:description" content="<?php echo htmlspecialchars($ogDescription); ?>">
+    <meta name="twitter:image" content="<?php echo isset($customMetaImage) ? $customMetaImage : 'http://suntownffb.us/images/football.ico'; ?>">
 
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-touch-fullscreen" content="yes">

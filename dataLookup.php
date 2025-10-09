@@ -294,6 +294,7 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
                 'year' => $selectedSeason,
                 'optimal' => round($optimal, 2),
                 'points' => round($points, 2),
+                'pointsMissed' => round($optimal - $points, 2),
                 'result' => $winLoss,
                 'opponent' => $opponent,
                 'oppPoints' => round($opponentPoints, 2),

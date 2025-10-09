@@ -14,7 +14,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
     - make sure it doesnt add duplicate rows
-- index page, postseason stats, average finish table - fix spacing for cole's trophies
 - current season draft performance has player missing (BRJ)
 
 # Ideas
@@ -34,7 +33,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 
 - fun fact finder page
 - allow people add comments/smack talk to profile
-- make the trophy plaques on index page load dynamicly
 
 - Add league stats
     - Lineup accuracy

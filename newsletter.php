@@ -32,17 +32,17 @@ $customMetaTitle = "Week $selectedWeek Newsletter | $selectedSeason Suntown FFB"
 $customMetaDescription = "The best league in all the land";
 $customMetaImage = "http://suntownffb.us/images/football.ico"; // default
 
-$metaQuery = query("SELECT preview, metadata_image FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
+$metaQuery = query("SELECT recap, metadata_image FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
 $metaRow = fetch_array($metaQuery);
 if ($metaRow) {
-    if (!empty($metaRow['preview'])) {
-        $cleanPreview = strip_tags($metaRow['preview']);
-        $cleanPreview = preg_replace('/\s+/', ' ', trim($cleanPreview));
-        if (strlen($cleanPreview) > 160) {
-            $cleanPreview = substr($cleanPreview, 0, 157) . '...';
+    if (!empty($metaRow['recap'])) {
+        $cleanRecap = strip_tags($metaRow['recap']);
+        $cleanRecap = preg_replace('/\s+/', ' ', trim($cleanRecap));
+        if (strlen($cleanRecap) > 160) {
+            $cleanRecap = substr($cleanRecap, 0, 157) . '...';
         }
-        if (!empty($cleanPreview)) {
-            $customMetaDescription = $cleanPreview;
+        if (!empty($cleanRecap)) {
+            $customMetaDescription = $cleanRecap;
         }
     }
     if (!empty($metaRow['metadata_image'])) {
@@ -215,8 +215,16 @@ if ($previewRow && !empty($previewRow['preview'])) {
                                     <tbody>
                                         <?php foreach ($scheduleInfo as $matchup): ?>
                                             <tr>
-                                                <td><?php echo htmlspecialchars($matchup['manager1']); ?></td>
-                                                <td><?php echo htmlspecialchars($matchup['manager2']); ?></td>
+                                                <td>
+                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>" target="_blank" rel="noopener">
+                                                        <?php echo htmlspecialchars($matchup['manager1']); ?>
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>" target="_blank" rel="noopener">
+                                                        <?php echo htmlspecialchars($matchup['manager2']); ?>
+                                                    </a>
+                                                </td>
                                                 <td><?php echo htmlspecialchars($matchup['record']); ?></td>
                                                 <td><?php echo htmlspecialchars($matchup['postseason_record']); ?></td>
                                                 <td><?php echo htmlspecialchars($matchup['streak']); ?></td>

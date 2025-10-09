@@ -779,6 +779,8 @@ function getRegularSeasonMatchups()
                 $winner = 'm1';
             }
 
+            $margin = abs($row['manager1_score'] - $row['manager2_score']);
+            $combined = $row['manager1_score'] + $row['manager2_score'];
             $results[] = [
                 'year' => $row['year'],
                 'week' => $row['week_number'],
@@ -786,7 +788,9 @@ function getRegularSeasonMatchups()
                 'manager2' => $row['m2'],
                 'score1' => $row['manager1_score'],
                 'score2' => $row['manager2_score'],
-                'winner' => $winner
+                'winner' => $winner,
+                'margin' => round($margin, 2),
+                'combined' => round($combined, 2)
             ];
         }
 
@@ -3211,6 +3215,8 @@ function getScheduleInfo($year, $week)
         $schedule[] = [
             'manager1' => $manager1,
             'manager2' => $manager2,
+            'manager1_id' => $manager1_id,
+            'manager2_id' => $manager2_id,
             'record' => $record,
             'streak' => $streakText,
             'postseason_record' => $postseason_record

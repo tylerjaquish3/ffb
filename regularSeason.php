@@ -60,6 +60,8 @@ include 'sidebar.php';
                                     <th>Note</th>
                                     <th>Score 2</th>
                                     <th>Note</th>
+                                    <th>Margin</th>
+                                    <th>Combined</th>
                                     <th>Search 1</th>
                                     <th>Search 2</th>
                                 </thead>
@@ -1044,13 +1046,19 @@ include 'sidebar.php';
                         { data: 'score2note', render: function(data) {
                             return `<span style='font-size: 11px;'>${data}</span>`;
                         }},
+                        { data: 'margin', render: function(data) {
+                            return `<span>${data}</span>`;
+                        }},
+                        { data: 'combined', render: function(data) {
+                            return `<span>${data}</span>`;
+                        }},
                         { data: 'score1noteSearch' },
                         { data: 'score2noteSearch' }
                     ],
                     pageLength: 25,
                     order: [[0, 'desc'], [1, 'desc']],
                     columnDefs: [
-                        { targets: [8,9], visible: false },
+                        { targets: [10,11], visible: false },
                         { targets: [1], type: 'num' }
                     ],
                     orderCellsTop: true,

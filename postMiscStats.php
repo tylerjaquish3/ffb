@@ -32,7 +32,9 @@
                         }
                         if ($row['bronze'] > 0) {
                             echo '<i class="icon-trophy" style="color: #cd7f32;"></i> x'.$row['bronze'];
-                        } 
+                        } else {
+                            echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                        }
                     ?>
                 </td>
             </tr>

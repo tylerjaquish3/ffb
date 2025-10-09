@@ -454,9 +454,9 @@ include 'sidebar.php';
                                         <th>Opponent Score</th>
                                         <th>Result</th>
                                         <th>Optimal Points</th>
+                                            <th>Points Missed</th>
                                         <th>Opponent Optimal</th>
                                         <th>Actual Margin</th>
-                                        <th>Optimal Margin</th>
                                         <th>Accuracy</th>
                                     </tr>
                                 </thead>
@@ -939,9 +939,9 @@ include 'sidebar.php';
                 { data: 'oppPoints' },
                 { data: 'result' },
                 { data: 'optimal' },
+                { data: 'pointsMissed' },
                 { data: 'oppOptimal' },
                 { data: 'margin' },
-                { data: 'optimalMargin' },
                 { data: 'accuracy' }
             ],
             order: [

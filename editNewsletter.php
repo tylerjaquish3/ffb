@@ -150,6 +150,60 @@ include 'sidebar.php';
                 </div>
             </div>
 
+            <!-- Week's Matchups Card -->
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header" style="direction: ltr;">
+                            <h4>Week <?php echo $editWeek; ?> Schedule</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff;">
+                            <?php
+                            // Get schedule info for the selected year and week
+                            if (!function_exists('getScheduleInfo')) {
+                                include_once 'functions.php';
+                            }
+                            $scheduleInfo = getScheduleInfo($editYear, $editWeek);
+                            ?>
+                            <?php if (!empty($scheduleInfo)): ?>
+                                <table id="datatable-schedule" class="table table-striped table-bordered table-responsive" style="direction: ltr;">
+                                    <thead>
+                                        <tr>
+                                            <th>Manager 1</th>
+                                            <th>Manager 2</th>
+                                            <th>Regular Season H2H</th>
+                                            <th>Postseason H2H</th>
+                                            <th>Current Streak</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($scheduleInfo as $matchup): ?>
+                                            <tr>
+                                                <td>
+                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>" target="_blank" rel="noopener">
+                                                        <?php echo htmlspecialchars($matchup['manager1']); ?>
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>" target="_blank" rel="noopener">
+                                                        <?php echo htmlspecialchars($matchup['manager2']); ?>
+                                                    </a>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($matchup['record']); ?></td>
+                                                <td><?php echo htmlspecialchars($matchup['postseason_record']); ?></td>
+                                                <td><?php echo htmlspecialchars($matchup['streak']); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            <?php else: ?>
+                                <p>No schedule information available for Week <?php echo $editWeek; ?> of the <?php echo $editYear; ?> season.</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Edit Form -->
             <form method="POST" action="editNewsletter.php" enctype="multipart/form-data">
                 <input type="hidden" name="year" value="<?php echo $editYear; ?>">

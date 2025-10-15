@@ -128,7 +128,7 @@ class UpdateFunFacts implements ShouldQueue
             // Only fetch game times for current calculations, not historical
             if (!$this->isHistoricalCalculation) {
                 echo 'Fetching game times'.PHP_EOL;
-                // FetchGameTimes::dispatchSync();
+                FetchGameTimes::dispatchSync();
             }
 
             // 1,2,3

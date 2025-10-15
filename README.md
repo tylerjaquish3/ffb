@@ -14,7 +14,8 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
     - make sure it doesnt add duplicate rows
-- current season draft performance has player missing (BRJ)
+- current season draft performance has player missing (BRJ). also has some players not matching up (Stroud), need to use alias?
+
 
 # Ideas
 
@@ -40,7 +41,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - move functions to lookup after page load to make more efficient
     - current season
     - profile
-- boom/bust predictor where managers login and choose one based on projection
+- make records page more useful to find new current leaders by adding a filter for it
 
 Notes:
 Moved to 18 week schedule in 2021
@@ -90,7 +91,7 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 - 80s, superheroes
 - Baseball, golf, olympics
 - Mexican, italian, canadian
-- Pirates, animals, space, casino, school (report card)
+- Pirates, animals, space, casino, school (report card), race car
 
 week 6 baseball
 week 7 

@@ -100,6 +100,10 @@ if( ! $request_token_url ) {
                             <input type="checkbox" name="weeks[]" value="14"> 14<br>
 
                             <button class="btn btn-secondary" id="make_request">Submit</button>
+                            <p style="margin-top: 10px;">
+                                Note: after running these updates, run <i style="font-size: 10px;">php artisan funFacts</i> to update the awards. 
+                                <br />Then run <i style="font-size: 10px;">php artisan weekly:records 2025 6</i> (year and week) to update the record log.
+                            </p>
                         </div>
                     </div>
                 </div>

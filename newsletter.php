@@ -420,7 +420,7 @@ if ($previewRow && !empty($previewRow['preview'])) {
                                 <h4 style="float: right">Week <?php echo $selectedWeek - 1; ?> Top Performers</h4>
                             </div>
                             <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="stripe nowrap row-border" id="datatable-bestWeek2">
+                                <table class="stripe responsive" id="datatable-bestWeek2">
                                     <thead>
                                         <?php
                                         foreach ($bestWeek as $manager => $values) {
@@ -435,6 +435,7 @@ if ($previewRow && !empty($previewRow['preview'])) {
                                     </thead>
                                     <tbody>
                                         <?php
+                                        
                                         foreach ($bestWeek as $week => $players) { 
                                             if ($week != ($selectedWeek - 1)) {
                                                 continue;
@@ -749,6 +750,8 @@ if ($previewRow && !empty($previewRow['preview'])) {
                     paging: false,
                     info: false,
                     sort: false,
+                    scrollX: "100%",
+                    scrollCollapse: true,
                 });
             }
 

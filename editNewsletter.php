@@ -1,4 +1,8 @@
 <?php
+// Start session before any output
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Include functions for database access
 include_once 'functions.php';
@@ -9,10 +13,10 @@ $preview = '';
 $editYear = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
 $editWeek = isset($_GET['week']) ? (int)$_GET['week'] : 1;
 
-// Handle form submission BEFORE any HTML output
-if ($_POST) {
-    $editYear = (int)$_POST['year'];
-    $editWeek = (int)$_POST['week'];
+// Only process newsletter form if 'save' is set
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
+    $editYear = isset($_POST['year']) ? (int)$_POST['year'] : $editYear;
+    $editWeek = isset($_POST['week']) ? (int)$_POST['week'] : $editWeek;
     $recap = isset($_POST['recap']) ? $_POST['recap'] : '';
     $preview = isset($_POST['preview']) ? $_POST['preview'] : '';
     $metadataImagePath = '';
@@ -34,35 +38,33 @@ if ($_POST) {
         }
     }
 
-    if (isset($_POST['save'])) {
-        // Check if record exists
-        $existingQuery = query("SELECT id FROM newsletters WHERE year = $editYear AND week = $editWeek");
-        $existingRow = fetch_array($existingQuery);
-
-        if ($existingRow) {
-            // Update existing record
-            $updateQuery = "UPDATE newsletters SET recap = '" . SQLite3::escapeString($recap) . "', preview = '" . SQLite3::escapeString($preview) . "'";
-            if ($metadataImagePath) {
-                $updateQuery .= ", metadata_image = '" . SQLite3::escapeString($metadataImagePath) . "'";
-            }
-            $updateQuery .= " WHERE year = $editYear AND week = $editWeek";
-            query($updateQuery);
-        } else {
-            // Insert new record
-            $insertQuery = "INSERT INTO newsletters (year, week, recap, preview";
-            $insertValues = "$editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "'";
-            if ($metadataImagePath) {
-                $insertQuery .= ", metadata_image";
-                $insertValues .= ", '" . SQLite3::escapeString($metadataImagePath) . "'";
-            }
-            $insertQuery .= ") VALUES (" . $insertValues . ")";
-            query($insertQuery);
+    // Save newsletter
+    // Check if record exists
+    $existingQuery = query("SELECT id FROM newsletters WHERE year = $editYear AND week = $editWeek");
+    $existingRow = fetch_array($existingQuery);
+    if ($existingRow) {
+        // Update existing record
+        $updateQuery = "UPDATE newsletters SET recap = '" . SQLite3::escapeString($recap) . "', preview = '" . SQLite3::escapeString($preview) . "'";
+        if ($metadataImagePath) {
+            $updateQuery .= ", metadata_image = '" . SQLite3::escapeString($metadataImagePath) . "'";
         }
-
-        // Redirect to newsletter page with the saved year and week
-        header("Location: newsletter.php?year=$editYear&week=$editWeek");
-        exit;
+        $updateQuery .= " WHERE year = $editYear AND week = $editWeek";
+        query($updateQuery);
+    } else {
+        // Insert new record
+        $insertQuery = "INSERT INTO newsletters (year, week, recap, preview";
+        $insertValues = "$editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "'";
+        if ($metadataImagePath) {
+            $insertQuery .= ", metadata_image";
+            $insertValues .= ", '" . SQLite3::escapeString($metadataImagePath) . "'";
+        }
+        $insertQuery .= ") VALUES (" . $insertValues . ")";
+        query($insertQuery);
     }
+
+    // Redirect to newsletter page with the saved year and week
+    header("Location: newsletter.php?year=$editYear&week=$editWeek");
+    exit;
 }
 
 // Fetch existing content if any
@@ -77,10 +79,31 @@ if ($contentRow) {
 $pageName = "Edit Newsletter";
 include 'header.php';
 
-// Check if environment is set to production
+// Password protection for production
 if (isset($APP_ENV) && $APP_ENV === 'production') {
-    header("Location: 404.php");
-    exit;
+    $showPage = false;
+    if (isset($_SESSION['newsletter_pw']) && $_SESSION['newsletter_pw'] === 'suntown') {
+        $showPage = true;
+    } elseif (isset($_POST['newsletter_pw'])) {
+        if ($_POST['newsletter_pw'] === 'suntown') {
+            $_SESSION['newsletter_pw'] = 'suntown';
+            $showPage = true;
+        }
+    }
+    if (!$showPage) {
+        include 'header.php';
+        echo '<div class="app-content content"><div class="content-wrapper"><div class="content-body" style="direction: ltr;">';
+        echo '<div class="row"><div class="col-sm-12"><div class="card"><div class="card-header"><h4>Password Required</h4></div><div class="card-body" style="background: #fff;">';
+        echo '<form method="POST"><input type="password" name="newsletter_pw" placeholder="Enter password" class="form-control" style="max-width:300px;display:inline-block;margin-right:10px;" />';
+        echo '<button type="submit" class="btn btn-primary">Submit</button>';
+        echo '</form>';
+        if (isset($_POST['newsletter_pw']) && $_POST['newsletter_pw'] !== 'suntown') {
+            echo '<p style="color:red;margin-top:10px;">Incorrect password.</p>';
+        }
+        echo '</div></div></div></div></div></div></div>';
+        include 'footer.php';
+        exit;
+    }
 }
 
 include 'sidebar.php';

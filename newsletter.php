@@ -420,7 +420,7 @@ if ($previewRow && !empty($previewRow['preview'])) {
                                 <h4 style="float: right">Week <?php echo $selectedWeek - 1; ?> Top Performers</h4>
                             </div>
                             <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="stripe nowrap row-border order-column full-width" id="datatable-bestWeek">
+                                <table class="stripe nowrap row-border" id="datatable-bestWeek2">
                                     <thead>
                                         <?php
                                         foreach ($bestWeek as $manager => $values) {
@@ -441,15 +441,13 @@ if ($previewRow && !empty($previewRow['preview'])) {
                                             }
                                             ?>
                                             <tr>
-                                                <?php foreach ($players as $pos => $stuff) {
-                                                    if ($pos != 'qb') { ?>
-                                                        <td data-order="<?php echo $stuff['points']; ?>">
-                                                            <strong><?php echo $stuff['manager']; ?></strong><br />
-                                                            <?php echo $stuff['player']; ?><br />
-                                                            <i><?php echo $stuff['points']. ' points'; ?></i>
-                                                        </td>
-                                                    <?php }
-                                                } ?>
+                                                <?php foreach ($players as $pos => $stuff) { ?>
+                                                    <td data-order="<?php echo $stuff['points']; ?>">
+                                                        <strong><?php echo $stuff['manager']; ?></strong><br />
+                                                        <?php echo $stuff['player']; ?><br />
+                                                        <i><?php echo $stuff['points']. ' points'; ?></i>
+                                                    </td>
+                                                <?php } ?>
                                             </tr>
                                         <?php } ?>
                                     </tbody>
@@ -460,48 +458,48 @@ if ($previewRow && !empty($previewRow['preview'])) {
                 </div>
                 <div class="row">
                     <?php if ($selectedWeek != 2): ?>
-                    <div class="col-sm-12 col-lg-6 table-padding">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 style="float: right">Season Stats</h4>
-                            </div>
-                            <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="stripe nowrap row-border order-column" id="datatable-currentStats">
-                                    <thead>
-                                        <th>Manager</th>
-                                        <th>Total Yds</th>
-                                        <th>Total TDs</th>
-                                        <th>Pass Yds</th>
-                                        <th>Pass TDs</th>
-                                        <th>Ints</th>
-                                        <th>Rush Yds</th>
-                                        <th>Rush TDs</th>
-                                        <th>Rec</th>
-                                        <th>Rec Yds</th>
-                                        <th>Rec TDs</th>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        while ($row = fetch_array($stats)) { ?>
-                                            <tr>
-                                                <td><?php echo $row['manager']; ?></td>
-                                                <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
-                                                <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
-                                                <td><?php echo $row['pass_yds']; ?></td>
-                                                <td><?php echo $row['pass_tds']; ?></td>
-                                                <td><?php echo $row['ints']; ?></td>
-                                                <td><?php echo $row['rush_yds']; ?></td>
-                                                <td><?php echo $row['rush_tds']; ?></td>
-                                                <td><?php echo $row['rec']; ?></td>
-                                                <td><?php echo $row['rec_yds']; ?></td>
-                                                <td><?php echo $row['rec_tds']; ?></td>
-                                            </tr>
-                                        <?php } ?>
-                                    </tbody>
-                                </table>
+                        <div class="col-sm-12 col-lg-6 table-padding">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 style="float: right">Season Stats</h4>
+                                </div>
+                                <div class="card-body" style="background: #fff; direction: ltr">
+                                    <table class="stripe nowrap row-border order-column" id="datatable-currentStats">
+                                        <thead>
+                                            <th>Manager</th>
+                                            <th>Total Yds</th>
+                                            <th>Total TDs</th>
+                                            <th>Pass Yds</th>
+                                            <th>Pass TDs</th>
+                                            <th>Ints</th>
+                                            <th>Rush Yds</th>
+                                            <th>Rush TDs</th>
+                                            <th>Rec</th>
+                                            <th>Rec Yds</th>
+                                            <th>Rec TDs</th>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            while ($row = fetch_array($stats)) { ?>
+                                                <tr>
+                                                    <td><?php echo $row['manager']; ?></td>
+                                                    <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
+                                                    <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
+                                                    <td><?php echo $row['pass_yds']; ?></td>
+                                                    <td><?php echo $row['pass_tds']; ?></td>
+                                                    <td><?php echo $row['ints']; ?></td>
+                                                    <td><?php echo $row['rush_yds']; ?></td>
+                                                    <td><?php echo $row['rush_tds']; ?></td>
+                                                    <td><?php echo $row['rec']; ?></td>
+                                                    <td><?php echo $row['rec_yds']; ?></td>
+                                                    <td><?php echo $row['rec_tds']; ?></td>
+                                                </tr>
+                                            <?php } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     <?php endif; ?>
                     <div class="col-sm-12 col-lg-6 table-padding">
                         <div class="card">
@@ -553,16 +551,16 @@ if ($previewRow && !empty($previewRow['preview'])) {
                 <div class="row">
                
                     <?php if ($selectedWeek != 2): ?>
-                    <div class="col-sm-12 col-lg-8 table-padding">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 style="float: right">Standings By Week</h4>
-                            </div>
-                            <div class="card-body chart-block" style="background: #fff; direction: ltr">
-                                <canvas id="standingsChart"></canvas>
+                        <div class="col-sm-12 col-lg-8 table-padding">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 style="float: right">Standings By Week</h4>
+                                </div>
+                                <div class="card-body chart-block" style="background: #fff; direction: ltr">
+                                    <canvas id="standingsChart"></canvas>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
@@ -628,214 +626,185 @@ if ($previewRow && !empty($previewRow['preview'])) {
         }
         
         <?php if ($selectedWeek != 1 && $rosterAvailable): ?>
-        // Initialize DataTables for weeks with roster data
-        
-        if ($('#datatable-currentPoints').length) {
-            let currentPointsColCount = <?php echo isset($currentPointsColCount) ? 'parseInt("'.$currentPointsColCount.'")' : '0'; ?>;
-            $('#datatable-currentPoints').DataTable({
-                searching: false,
-                paging: false,
-                info: false,
-                scrollX: "100%",
-                scrollCollapse: true,
-                fixedColumns: {
-                    leftColumns: 1
-                },
-                order: [
-                    [currentPointsColCount+1, "desc"]
-                ],
-                initComplete: function() {
-                    var api = this.api();
-                    
-                    api.columns(':not(:first)').every(function() {
-                        var col = this.index();
-                        var array = [];
-                        api.cells(null, col).every(function() {
-                            var cell = this.node();
-                            var record_id = $(cell).attr("data-order");
-                            array.push(record_id)
-                        })
-
-                        last = array.length-1;
-                        array.sort(function(a, b){return b-a});
-
-                        api.cells(null, col).every( function() {
-                            var cell = this.node();
-                            var record_id = $( cell ).attr( "data-order" );
-                            if (record_id === array[0]) {
-                                $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                            } else if (record_id === array[last]) {
-                                $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                            }
-                        });
-                    });
-                }
-            });
-        }
-
-        <?php if ($selectedWeek != 2): ?>
-        if ($('#datatable-currentStats').length) {
-            $('#datatable-currentStats').DataTable({
-                searching: false,
-                paging: false,
-                info: false,
-                scrollX: "100%",
-                scrollCollapse: true,
-                fixedColumns: {
-                    left: 1
-                },
-                order: [
-                    [2, "desc"]
-                ],
-                initComplete: function() {
-                    var api = this.api();
-                    api.columns(':not(:first)').every(function() {
-                        var col = this.index();
-                        var data = this.data().unique().map(function(value) {
-                            return parseInt(value);
-                        }).toArray().sort(function(a, b){return b-a});
-
-                        last = data.length-1;
-                        api.cells(null, col).every(function() {
-                            var cell = parseInt(this.data());
-                            if (cell === data[0]) {
-                                $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                            } else if (cell === data[last]) {
-                                $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                            }
-                        });
-                    });
-                }
-            });
-        }
-        <?php endif; ?>
-
-        if ($('#datatable-currentWeekStats').length) {
-            $('#datatable-currentWeekStats').DataTable({
-                scrollX: "100%",
-                searching: false,
-                paging: false,
-                info: false,
-                scrollCollapse: true,
-                fixedColumns: {
-                    left: 1
-                },
-                order: [
-                    [2, "desc"]
-                ],
-                initComplete: function() {
-                    var api = this.api();
-                    api.columns(':not(:first)').every(function() {
-                        var col = this.index();
-                        var data = this.data().unique().map(function(value) {
-                            return parseInt(value);
-                        }).toArray().sort(function(a, b){return b-a});
-
-                        last = data.length-1;
-                        api.cells(null, col).every(function() {
-                            var cell = parseInt(this.data());
-                            if (cell === data[0]) {
-                                $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                            } else if (cell === data[last]) {
-                                $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                            }
-                        });
-                    });
-                }
-            });
-        }
-
-        if ($('#datatable-bestWeek').length) {
-            $('#datatable-bestWeek').DataTable({
-                searching: false,
-                paging: false,
-                info: false,
-                sort: false,
-                scrollX: "100%",
-                scrollCollapse: true,
-            });
-        }
-
-        if ($('#datatable-bestTeamWeek').length) {
-            $('#datatable-bestTeamWeek').DataTable({
-                searching: false,
-                info: false,
-                scrollX: "100%",
-                scrollCollapse: true,
-                fixedColumns: {
-                    left: 1
-                },
-                order: [
-                    [0, "desc"]
-                ]
-            });
-        }
-
-        if ($('#datatable-everyone').length) {
-            $('#datatable-everyone').DataTable({
-                searching: false,
-                paging: false,
-                info: false,
-                order: [
-                    [3, "desc"]
-                ]
-            });
-        }
-
-        <?php if (isset($weekStandings) && isset($weekStandings['weeks']) && isset($weekStandings['managers']) && $selectedWeek != 2): ?>
-        if ($('#standingsChart').length) {
-            let weeks = <?php echo json_encode($weekStandings['weeks']); ?>;
-            let managers = <?php echo json_encode($weekStandings['managers']); ?>;
+            // Initialize DataTables for weeks with roster data
             
-            var ctx = $('#standingsChart');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: weeks,
-                    datasets: managers
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            display: true,
-                            title: {
-                                display: true,
-                                text: 'Rank',
-                                font: {
-                                    size: 20
+            if ($('#datatable-currentPoints').length) {
+                let currentPointsColCount = <?php echo isset($currentPointsColCount) ? 'parseInt("'.$currentPointsColCount.'")' : '0'; ?>;
+                $('#datatable-currentPoints').DataTable({
+                    searching: false,
+                    paging: false,
+                    info: false,
+                    scrollX: "100%",
+                    scrollCollapse: true,
+                    fixedColumns: {
+                        leftColumns: 1
+                    },
+                    order: [
+                        [currentPointsColCount+1, "desc"]
+                    ],
+                    initComplete: function() {
+                        var api = this.api();
+                        
+                        api.columns(':not(:first)').every(function() {
+                            var col = this.index();
+                            var array = [];
+                            api.cells(null, col).every(function() {
+                                var cell = this.node();
+                                var record_id = $(cell).attr("data-order");
+                                array.push(record_id)
+                            })
+
+                            last = array.length-1;
+                            array.sort(function(a, b){return b-a});
+
+                            api.cells(null, col).every( function() {
+                                var cell = this.node();
+                                var record_id = $( cell ).attr( "data-order" );
+                                if (record_id === array[0]) {
+                                    $(this.node()).css('background-color', 'rgb(172, 240, 172)')
+                                } else if (record_id === array[last]) {
+                                    $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
                                 }
-                            },
-                            reverse: true
+                            });
+                        });
+                    }
+                });
+            }
+
+            <?php if ($selectedWeek != 2): ?>
+                if ($('#datatable-currentStats').length) {
+                    $('#datatable-currentStats').DataTable({
+                        searching: false,
+                        paging: false,
+                        info: false,
+                        scrollX: "100%",
+                        scrollCollapse: true,
+                        fixedColumns: {
+                            left: 1
                         },
-                        x: {
-                            display: true,
-                            title: {
-                                display: true,
-                                text: 'Week',
-                                font: {
-                                    size: 20
+                        order: [
+                            [2, "desc"]
+                        ],
+                        initComplete: function() {
+                            var api = this.api();
+                            api.columns(':not(:first)').every(function() {
+                                var col = this.index();
+                                var data = this.data().unique().map(function(value) {
+                                    return parseInt(value);
+                                }).toArray().sort(function(a, b){return b-a});
+
+                                last = data.length-1;
+                                api.cells(null, col).every(function() {
+                                    var cell = parseInt(this.data());
+                                    if (cell === data[0]) {
+                                        $(this.node()).css('background-color', 'rgb(172, 240, 172)')
+                                    } else if (cell === data[last]) {
+                                        $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
+                                    }
+                                });
+                            });
+                        }
+                    });
+                }
+            <?php endif; ?>
+
+            if ($('#datatable-currentWeekStats').length) {
+                $('#datatable-currentWeekStats').DataTable({
+                    scrollX: "100%",
+                    searching: false,
+                    paging: false,
+                    info: false,
+                    scrollCollapse: true,
+                    fixedColumns: {
+                        left: 1
+                    },
+                    order: [
+                        [2, "desc"]
+                    ],
+                    initComplete: function() {
+                        var api = this.api();
+                        api.columns(':not(:first)').every(function() {
+                            var col = this.index();
+                            var data = this.data().unique().map(function(value) {
+                                return parseInt(value);
+                            }).toArray().sort(function(a, b){return b-a});
+
+                            last = data.length-1;
+                            api.cells(null, col).every(function() {
+                                var cell = parseInt(this.data());
+                                if (cell === data[0]) {
+                                    $(this.node()).css('background-color', 'rgb(172, 240, 172)')
+                                } else if (cell === data[last]) {
+                                    $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
+                                }
+                            });
+                        });
+                    }
+                });
+            }
+
+            if ($('#datatable-bestWeek2').length) {
+                $('#datatable-bestWeek2').DataTable({
+                    searching: false,
+                    paging: false,
+                    info: false,
+                    sort: false,
+                });
+            }
+
+            if ($('#datatable-everyone').length) {
+                $('#datatable-everyone').DataTable({
+                    searching: false,
+                    paging: false,
+                    info: false,
+                    order: [
+                        [3, "desc"]
+                    ]
+                });
+            }
+
+            <?php if (isset($weekStandings) && isset($weekStandings['weeks']) && isset($weekStandings['managers']) && $selectedWeek != 2): ?>
+                if ($('#standingsChart').length) {
+                    let weeks = <?php echo json_encode($weekStandings['weeks']); ?>;
+                    let managers = <?php echo json_encode($weekStandings['managers']); ?>;
+                    
+                    var ctx = $('#standingsChart');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: weeks,
+                            datasets: managers
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Rank',
+                                        font: {
+                                            size: 20
+                                        }
+                                    },
+                                    reverse: true
+                                },
+                                x: {
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Week',
+                                        font: {
+                                            size: 20
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
+                    });
                 }
-            });
-        }
-        <?php endif; ?>
+            <?php endif; ?>
         <?php endif; ?>
     });
 </script>
-
-<style>
-    #datatable-currentStats_wrapper, #datatable-statsAgainst_wrapper {
-        max-width: 1100px;
-    }
-    #datatable-drafted_wrapper {
-        max-width: 800px;
-    }
-    #datatable-optimal_wrapper {
-        max-width: 1365px;
-    }
-</style>

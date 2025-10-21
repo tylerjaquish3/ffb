@@ -13,7 +13,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - start streaks on dashboard... maybe they started 4-0 3 times? put all years
 
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
-    - make sure it doesnt add duplicate rows
+    - make sure it doesnt add duplicate rows, this happens for names with an apostrophe in the name
 - current season draft performance has player missing (BRJ). also has some players not matching up (Stroud), need to use alias?
 
 
@@ -95,3 +95,4 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 
 week 6 baseball
 week 7 
+week 8. AJ, short for Andrew James and Ben, short for genetic reasons

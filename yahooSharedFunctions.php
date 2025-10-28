@@ -218,10 +218,12 @@ function updateOrCreate(string $table, array $params, array $values)
         $query = substr($query, 0, -2);
         $query .= ") VALUES (";
         foreach ($params as $key => $value) {
-            $query .= "'{$value}', ";
+            $escapedValue = is_string($value) ? str_replace("'", "''", $value) : $value;
+            $query .= "'{$escapedValue}', ";
         }
         foreach ($values as $key => $value) {
-            $query .= "'{$value}', ";
+            $escapedValue = is_string($value) ? str_replace("'", "''", $value) : $value;
+            $query .= "'{$escapedValue}', ";
         }
         $query = substr($query, 0, -2);
         $query .= ")";
@@ -247,7 +249,8 @@ function firstOrCreate(string $table, array $params, array $values) {
     $lastId = null;
     $query = "SELECT * FROM {$table} WHERE ";
     foreach ($params as $key => $value) {
-        $query .= "{$key} = '{$value}' AND ";
+        $escapedValue = is_string($value) ? str_replace("'", "''", $value) : $value;
+        $query .= "{$key} = '{$escapedValue}' AND ";
     }
     $query = substr($query, 0, -5);
     $result = query($query);
@@ -267,10 +270,12 @@ function firstOrCreate(string $table, array $params, array $values) {
         $query = substr($query, 0, -2);
         $query .= ") VALUES (";
         foreach ($params as $key => $value) {
-            $query .= "'{$value}', ";
+            $escapedValue = is_string($value) ? str_replace("'", "''", $value) : $value;
+            $query .= "'{$escapedValue}', ";
         }
         foreach ($values as $key => $value) {
-            $query .= "'{$value}', ";
+            $escapedValue = is_string($value) ? str_replace("'", "''", $value) : $value;
+            $query .= "'{$escapedValue}', ";
         }
         $query = substr($query, 0, -2);
         $query .= ")";

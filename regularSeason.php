@@ -1343,7 +1343,7 @@ include 'sidebar.php';
                 if (recordByWeekTbody && recordByWeekThead) {
                     // Week headers
                     recordByWeekThead.innerHTML = '<th>Manager</th>';
-                    data.recordsByWeek.weeks.sort().forEach(week => {
+                    data.recordsByWeek.weeks.sort((a, b) => a - b).forEach(week => {
                         recordByWeekThead.innerHTML += `<th>Week ${week}</th>`;
                     });
                     // Table body
@@ -1351,7 +1351,7 @@ include 'sidebar.php';
                     data.recordsByWeek.managers.forEach(manager => {
                         const tr = document.createElement('tr');
                         tr.innerHTML = `<td>${manager}</td>`;
-                        data.recordsByWeek.weeks.forEach(week => {
+                        data.recordsByWeek.weeks.sort((a, b) => a - b).forEach(week => {
                             const record = data.recordsByWeek.records[manager]?.[week] ?? '0-0';
                             tr.innerHTML += `<td>${record}</td>`;
                         });

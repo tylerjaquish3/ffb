@@ -96,3 +96,5 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 week 6 baseball
 week 7 
 week 8. AJ, short for Andrew James and Ben, short for genetic reasons
+week 9 halloween
+week 10 birthday

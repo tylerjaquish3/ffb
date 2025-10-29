@@ -3446,103 +3446,105 @@ function getStrengthOfSchedule($season) {
         // Track processed matchups to avoid duplicates
         $processedMatchups = [];
         
-        // Process each manager's opponents for the current season
+        // Process matchups for the current season
+        // First, get all matchups (only one record per matchup) and process both managers
+        $result = query("
+            SELECT week_number, manager1_id, manager2_id, manager1_score, manager2_score
+            FROM regular_season_matchups 
+            WHERE year = $season 
+            AND week_number <= $lastCompletedWeek
+            AND manager1_id < manager2_id
+            ORDER BY week_number
+        ");
+        
+        // Initialize manager stats
         foreach ($managers as $managerId => $managerData) {
-            // Get this manager's results in completed games
-            $wins = $losses = $points = 0;
+            $managers[$managerId]['wins'] = 0;
+            $managers[$managerId]['losses'] = 0;
+            $managers[$managerId]['points'] = 0;
+        }
+        
+        while ($row = fetch_array($result)) {
+            $manager1 = $row['manager1_id'];
+            $manager2 = $row['manager2_id'];
+            $score1 = $row['manager1_score'];
+            $score2 = $row['manager2_score'];
             
-            // Use DISTINCT to ensure each matchup is counted only once
-            // Also use manager1_id < manager2_id to get only one record per matchup
-            $result = query("
-                SELECT DISTINCT week_number, manager1_id, manager2_id, manager1_score, manager2_score
-                FROM regular_season_matchups 
-                WHERE year = $season 
-                AND week_number <= $lastCompletedWeek
-                AND (manager1_id = $managerId OR manager2_id = $managerId)
-            ");
-            
-            while ($row = fetch_array($result)) {
-                // Create a unique key for this matchup
-                $matchupKey = $season . '-' . $row['week_number'] . '-' . min($row['manager1_id'], $row['manager2_id']) . '-' . max($row['manager1_id'], $row['manager2_id']);
-                
-                // Skip if we've already processed this matchup for this manager
-                if (isset($processedMatchups[$managerId]) && in_array($matchupKey, $processedMatchups[$managerId])) {
-                    continue;
-                }
-                
-                // Mark this matchup as processed for this manager
-                if (!isset($processedMatchups[$managerId])) {
-                    $processedMatchups[$managerId] = [];
-                }
-                $processedMatchups[$managerId][] = $matchupKey;
-                
-                if ($row['manager1_id'] == $managerId) {
-                    if ($row['manager1_score'] > $row['manager2_score']) {
-                        $wins++;
-                    } else if ($row['manager1_score'] < $row['manager2_score']) {
-                        $losses++;
-                    }
-                    $points += $row['manager1_score'];
-                } else {
-                    if ($row['manager2_score'] > $row['manager1_score']) {
-                        $wins++;
-                    } else if ($row['manager2_score'] < $row['manager1_score']) {
-                        $losses++;
-                    }
-                    $points += $row['manager2_score'];
+            // Process manager1
+            if (isset($managers[$manager1])) {
+                $managers[$manager1]['points'] += $score1;
+                if ($score1 > $score2) {
+                    $managers[$manager1]['wins']++;
+                } else if ($score1 < $score2) {
+                    $managers[$manager1]['losses']++;
                 }
             }
             
-            $managers[$managerId]['wins'] = $wins;
-            $managers[$managerId]['losses'] = $losses;
-            $managers[$managerId]['points'] = $points;
+            // Process manager2
+            if (isset($managers[$manager2])) {
+                $managers[$manager2]['points'] += $score2;
+                if ($score2 > $score1) {
+                    $managers[$manager2]['wins']++;
+                } else if ($score2 < $score1) {
+                    $managers[$manager2]['losses']++;
+                }
+            }
         }
         
         // Now process the strength of schedule for current season
+        // Get all matchups once and process opponent data for each manager
+        $result = query("
+            SELECT week_number, manager1_id, manager2_id, manager1_score, manager2_score
+            FROM regular_season_matchups 
+            WHERE year = $season 
+            AND week_number <= $lastCompletedWeek
+            AND manager1_id < manager2_id
+            ORDER BY week_number
+        ");
+        
+        // Initialize opponent stats for all managers
         foreach ($managers as $managerId => $managerData) {
-            $uniqueOpponents = [];
-            $totalOpponentPoints = 0;
-            $gameCount = 0;
-            
-            // Get all matchups for this manager to collect opponent points
-            $result = query("
-                SELECT DISTINCT week_number, manager1_id, manager2_id, manager1_score, manager2_score
-                FROM regular_season_matchups 
-                WHERE year = $season 
-                AND week_number <= $lastCompletedWeek
-                AND (manager1_id = $managerId OR manager2_id = $managerId)
-            ");
-            
-            // Reset opponent stats
             $managers[$managerId]['opponent_wins'] = 0;
             $managers[$managerId]['opponent_losses'] = 0;
             $managers[$managerId]['opponent_points'] = 0;
             $managers[$managerId]['games_played'] = 0;
+            $managers[$managerId]['unique_opponents'] = [];
+        }
+        
+        // Process each matchup and update opponent data for both managers
+        while ($row = fetch_array($result)) {
+            $manager1 = $row['manager1_id'];
+            $manager2 = $row['manager2_id'];
+            $score1 = $row['manager1_score'];
+            $score2 = $row['manager2_score'];
             
-            while ($row = fetch_array($result)) {
-                $opponentId = ($row['manager1_id'] == $managerId) ? $row['manager2_id'] : $row['manager1_id'];
-                $opponentScore = ($row['manager1_id'] == $managerId) ? $row['manager2_score'] : $row['manager1_score'];
-                
-                // Add opponent's score from this specific game
-                $totalOpponentPoints += $opponentScore;
-                $gameCount++;
-                
-                // Track unique opponents for record calculation
-                if (!in_array($opponentId, $uniqueOpponents)) {
-                    $uniqueOpponents[] = $opponentId;
+            // Update manager1's opponent data (opponent is manager2)
+            if (isset($managers[$manager1])) {
+                $managers[$manager1]['opponent_points'] += $score2;
+                $managers[$manager1]['games_played']++;
+                if (!in_array($manager2, $managers[$manager1]['unique_opponents'])) {
+                    $managers[$manager1]['unique_opponents'][] = $manager2;
                 }
             }
             
-            // Calculate combined opponent record (each opponent counted once)
-            foreach ($uniqueOpponents as $opponentId) {
+            // Update manager2's opponent data (opponent is manager1)
+            if (isset($managers[$manager2])) {
+                $managers[$manager2]['opponent_points'] += $score1;
+                $managers[$manager2]['games_played']++;
+                if (!in_array($manager1, $managers[$manager2]['unique_opponents'])) {
+                    $managers[$manager2]['unique_opponents'][] = $manager1;
+                }
+            }
+        }
+        
+        // Calculate combined opponent record for each manager
+        foreach ($managers as $managerId => $managerData) {
+            foreach ($managers[$managerId]['unique_opponents'] as $opponentId) {
                 if (isset($managers[$opponentId])) {
                     $managers[$managerId]['opponent_wins'] += $managers[$opponentId]['wins'];
                     $managers[$managerId]['opponent_losses'] += $managers[$opponentId]['losses'];
                 }
             }
-            
-            $managers[$managerId]['opponent_points'] = $totalOpponentPoints;
-            $managers[$managerId]['games_played'] = $gameCount;
         }
     } else {
         // For past seasons, use a completely different approach focused on actual matchups
@@ -3565,11 +3567,12 @@ function getStrengthOfSchedule($season) {
         }
         
         // Process each manager's actual schedule
+        // Use manager1_id < manager2_id to ensure each matchup is only counted once
         $result = query("
             SELECT manager1_id, manager2_id, manager1_score, manager2_score, week_number
             FROM regular_season_matchups 
             WHERE year = $season
-            GROUP BY week_number, manager1_id, manager2_id  -- Ensure we only get one entry per matchup per week
+            AND manager1_id < manager2_id  -- Only get one record per matchup
             ORDER BY week_number
         ");
         

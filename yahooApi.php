@@ -5,22 +5,24 @@ set_time_limit(300);
 $pageName = 'Yahoo API';
 include 'header.php';
 
-// Custom styles for loader
-echo '<style>
-.spinner {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    border-radius: 50%;
-    border-top-color: #0275d8;
-    animation: spin 1s ease-in-out infinite;
+// Get managers for the current year
+$currentYear = date('Y');
+$managersResult = query("SELECT sm.yahoo_id, m.name FROM season_managers sm 
+    JOIN managers m ON sm.manager_id = m.id 
+    WHERE sm.year = $currentYear 
+    ORDER BY m.name");
+$managers = [];
+while ($row = fetch_array($managersResult)) {
+    $managers[] = [
+        'yahoo_id' => $row['yahoo_id'],
+        'name' => $row['name']
+    ];
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-</style>';
+// Get the current week to select by default (latest week + 1)
+$weekResult = query("SELECT MAX(week_number) as latest_week FROM regular_season_matchups WHERE year = $currentYear");
+$weekRow = fetch_array($weekResult);
+$defaultWeek = $weekRow ? $weekRow['latest_week'] + 1 : 1;
 
 // Check if environment is set to production
 if (isset($APP_ENV) && $APP_ENV === 'production') {
@@ -44,9 +46,25 @@ if( ! $request_token_url ) {
 
 ?>
 
+<style>
+    .spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top-color: #0275d8;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+</style>
+
 <div class="app-content content">
     <div class="content-wrapper">
-
         <div class="content-body">
 
             <div class="row">
@@ -84,22 +102,51 @@ if( ! $request_token_url ) {
                             <!-- <input type="checkbox" name="sections[]" value="fun_facts"> Fun Facts<br> -->
 
                             <h3>Weeks</h3>
-                            <input type="checkbox" name="weeks[]" value="1"> 1<br>
-                            <input type="checkbox" name="weeks[]" value="2"> 2<br>
-                            <input type="checkbox" name="weeks[]" value="3"> 3<br>
-                            <input type="checkbox" name="weeks[]" value="4"> 4<br>
-                            <input type="checkbox" name="weeks[]" value="5"> 5<br>
-                            <input type="checkbox" name="weeks[]" value="6"> 6<br>
-                            <input type="checkbox" name="weeks[]" value="7"> 7<br>
-                            <input type="checkbox" name="weeks[]" value="8"> 8<br>
-                            <input type="checkbox" name="weeks[]" value="9"> 9<br>
-                            <input type="checkbox" name="weeks[]" value="10"> 10<br>
-                            <input type="checkbox" name="weeks[]" value="11"> 11<br>
-                            <input type="checkbox" name="weeks[]" value="12"> 12<br>
-                            <input type="checkbox" name="weeks[]" value="13"> 13<br>
-                            <input type="checkbox" name="weeks[]" value="14"> 14<br>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <?php
+                                    // Display weeks 8-14 in second column
+                                    for ($week = 8; $week <= 14; $week++) {
+                                        $checked = ($week == $defaultWeek) ? 'checked' : '';
+                                        echo '<input type="checkbox" name="weeks[]" value="' . $week . '" ' . $checked . '> ' . $week . '<br>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="col-md-6">
+                                    <?php
+                                    // Display weeks 1-7 in first column
+                                    for ($week = 1; $week <= 7; $week++) {
+                                        $checked = ($week == $defaultWeek) ? 'checked' : '';
+                                        echo '<input type="checkbox" name="weeks[]" value="' . $week . '" ' . $checked . '> ' . $week . '<br>';
+                                    }
+                                    ?>
+                                </div>
+                            </div>
 
+                            <h3>Managers</h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <?php
+                                    // Display first 5 managers
+                                    for ($i = 0; $i < 5 && $i < count($managers); $i++) {
+                                        echo '<input type="checkbox" name="managers[]" value="' . $managers[$i]['yahoo_id'] . '"> ' . $managers[$i]['name'] . '<br>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="checkbox" name="managers[]" value="all" checked> All<br>
+                                    <?php
+                                    // Display remaining managers (6-10)
+                                    for ($i = 5; $i < count($managers); $i++) {
+                                        echo '<input type="checkbox" name="managers[]" value="' . $managers[$i]['yahoo_id'] . '"> ' . $managers[$i]['name'] . '<br>';
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+
+                            <br /><br />
                             <button class="btn btn-secondary" id="make_request">Submit</button>
+                            <hr />
                             <p style="margin-top: 10px;">
                                 Note: after running these updates, run <i style="font-size: 10px;">php artisan funFacts</i> to update the awards. 
                                 <br />Then run <i style="font-size: 10px;">php artisan weekly:records 2025 6</i> (year and week) to update the record log.
@@ -112,7 +159,7 @@ if( ! $request_token_url ) {
                         <div class="card-header">
                             <h4 class="card-title">Output</h4>
                         </div>
-                        <div class="card-body info-card" style="overflow: scroll;">
+                        <div class="card-body info-card" style="height: 800px; overflow: scroll;">
                             <div id="loading" style="display: none; text-align: center; margin: 20px 0;">
                                 <div class="spinner"></div>
                                 <p style="margin-top: 10px;">Processing request, please wait...</p>
@@ -132,11 +179,35 @@ if( ! $request_token_url ) {
 
     var access_token = null;
 
+    // Handle manager selection logic
+    $(document).ready(function() {
+        // When "All" is clicked
+        $('input[name="managers[]"][value="all"]').change(function() {
+            if ($(this).is(':checked')) {
+                // Deselect all individual managers
+                $('input[name="managers[]"]:not([value="all"])').prop('checked', false);
+            }
+        });
+
+        // When any individual manager is clicked
+        $('input[name="managers[]"]:not([value="all"])').change(function() {
+            if ($(this).is(':checked')) {
+                // Deselect "All"
+                $('input[name="managers[]"][value="all"]').prop('checked', false);
+            }
+        });
+    });
+
     $('#make_request').click(function () {
         var year = $('input[name="year"]').val();
         var weeks = [];
         $('input[name="weeks[]"]:checked').each(function () {
             weeks.push($(this).val());
+        });
+
+        var managers = [];
+        $('input[name="managers[]"]:checked').each(function () {
+            managers.push($(this).val());
         });
 
         // Show the loading spinner
@@ -154,7 +225,7 @@ if( ! $request_token_url ) {
                 success: function(response) {
                     access_token = response;
     
-                    makeRequest(year, weeks);
+                    makeRequest(year, weeks, managers);
                 },
                 error: function() {
                     $('#loading').hide();
@@ -162,11 +233,11 @@ if( ! $request_token_url ) {
                 }
             });
         } else {
-            makeRequest(year, weeks);
+            makeRequest(year, weeks, managers);
         }
     });
 
-    function makeRequest(year, weeks) {
+    function makeRequest(year, weeks, managers) {
         // Count selected sections for tracking completion
         var pendingRequests = $('input[name="sections[]"]:checked').length;
         var hasRosters = $('input[name="sections[]"][value="rosters"]:checked').length > 0;
@@ -187,7 +258,7 @@ if( ! $request_token_url ) {
         $('input[name="sections[]"]:checked').each(function () {
             let section = $(this).val();
             if (section == 'rosters') {
-                makeRosterRequest(year, weeks, 1, function() {
+                makeRosterRequest(year, weeks, managers, 0, function() {
                     // Hide spinner when rosters are complete
                     if (pendingRequests === 0) {
                         $('#loading').hide();
@@ -226,13 +297,32 @@ if( ! $request_token_url ) {
         });
     }
 
-    function makeRosterRequest(year, weeks, manager, callback) 
+    function makeRosterRequest(year, weeks, managers, managerIndex, callback) 
     {
-        if (manager == 11) {
+        // Determine which managers to process
+        var managersToProcess = [];
+        
+        if (managers.includes('all')) {
+            // If "all" is selected, process managers 1-10
+            for (var i = 1; i <= 10; i++) {
+                managersToProcess.push(i);
+            }
+        } else {
+            // Only process selected managers (convert yahoo_ids to manager numbers)
+            managersToProcess = managers.filter(function(manager) {
+                return manager !== 'all' && !isNaN(manager);
+            });
+        }
+        
+        // Check if we've processed all managers
+        if (managerIndex >= managersToProcess.length) {
             // All managers processed, call the callback to signal completion
             if (callback) callback();
             return;
         }
+        
+        var currentManager = managersToProcess[managerIndex];
+        
         $.ajax({
             url: 'yahooApiRequest.php',
             type: 'POST',
@@ -241,20 +331,18 @@ if( ! $request_token_url ) {
                 year: year,
                 section: 'rosters',
                 weeks: weeks,
-                manager: manager
+                manager: currentManager
             },
             success: function(response) {
                 $('#output').append(response);
-                manager++;
                 setTimeout(function () {
-                    makeRosterRequest(year, weeks, manager, callback);
+                    makeRosterRequest(year, weeks, managers, managerIndex + 1, callback);
                 }, 2000);
             },
             error: function() {
-                $('#output').append('<div class="alert alert-danger">Error processing rosters for manager ' + manager + '. Continuing with next manager.</div>');
-                manager++;
+                $('#output').append('<div class="alert alert-danger">Error processing rosters for manager ' + currentManager + '. Continuing with next manager.</div>');
                 setTimeout(function () {
-                    makeRosterRequest(year, weeks, manager, callback);
+                    makeRosterRequest(year, weeks, managers, managerIndex + 1, callback);
                 }, 2000);
             }
         });   

@@ -258,7 +258,7 @@ include 'sidebar.php';
                     <div class="col-sm-12">
                         <div class="card">
                             <div class="card-body" style="background: #fff; text-align: center;">
-                                <button type="submit" name="save" class="btn btn-success btn-lg" style="margin-right: 10px;">
+                                <button type="submit" name="save" class="btn btn-secondary btn-lg" style="margin-right: 10px;">
                                     <i class="icon-checkmark"></i> Save Changes
                                 </button>
                                 <button type="button" class="btn btn-secondary btn-lg" onclick="window.location.href='newsletter.php'">

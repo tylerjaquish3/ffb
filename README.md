@@ -48,6 +48,7 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - how many weeks we spent in top 3, top 6, bottom 3, etc.
     - regular season, league standings history, add lookups by manager and week
 - regular season, weekly rank, add column for opponent avg weekly rank
+- do some analysis on fab spent
 
 Notes:
 Moved to 18 week schedule in 2021

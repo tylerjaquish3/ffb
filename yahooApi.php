@@ -148,8 +148,16 @@ if( ! $request_token_url ) {
                             <button class="btn btn-secondary" id="make_request">Submit</button>
                             <hr />
                             <p style="margin-top: 10px;">
-                                Note: after running these updates, run <i style="font-size: 10px;">php artisan funFacts</i> to update the awards. 
-                                <br />Then run <i style="font-size: 10px;">php artisan weekly:records 2025 6</i> (year and week) to update the record log.
+                                Note: after running these updates, update the awards by running:
+                                <br />
+                                <button class="btn btn-sm btn-outline-primary copy-btn" data-clipboard-text="cd fun-facts && php artisan funFacts" style="margin: 5px 0;">
+                                    📋 Copy: php artisan funFacts
+                                </button>
+                                <br />Then update the record log with:
+                                <br />
+                                <button class="btn btn-sm btn-outline-primary copy-btn" data-clipboard-text="php artisan weekly:records <?php echo $currentYear; ?> <?php echo $defaultWeek; ?>" style="margin: 5px 0;">
+                                    📋 Copy: php artisan weekly:records <?php echo $currentYear; ?> <?php echo $defaultWeek; ?>
+                                </button>
                             </p>
                         </div>
                     </div>
@@ -346,6 +354,60 @@ if( ! $request_token_url ) {
                 }, 2000);
             }
         });   
+    }
+
+    // Clipboard copy functionality
+    $(document).ready(function() {
+        $('.copy-btn').click(function(e) {
+            e.preventDefault();
+            var textToCopy = $(this).data('clipboard-text');
+            
+            // Modern clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy).then(function() {
+                    showCopyFeedback($(e.target));
+                }).catch(function(err) {
+                    console.error('Failed to copy: ', err);
+                    fallbackCopyTextToClipboard(textToCopy, $(e.target));
+                });
+            } else {
+                // Fallback for older browsers
+                fallbackCopyTextToClipboard(textToCopy, $(e.target));
+            }
+        });
+    });
+
+    function fallbackCopyTextToClipboard(text, button) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            var successful = document.execCommand('copy');
+            if (successful) {
+                showCopyFeedback(button);
+            }
+        } catch (err) {
+            console.error('Fallback: Unable to copy', err);
+        }
+        
+        document.body.removeChild(textArea);
+    }
+
+    function showCopyFeedback(button) {
+        var originalText = button.text();
+        button.text('✓ Copied!');
+        button.removeClass('btn-outline-primary').addClass('btn-success');
+        
+        setTimeout(function() {
+            button.text(originalText);
+            button.removeClass('btn-success').addClass('btn-outline-primary');
+        }, 2000);
     }
 
 </script>

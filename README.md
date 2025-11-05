@@ -42,6 +42,12 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - current season
     - profile
 - make records page more useful to find new current leaders by adding a filter for it
+- profile head to head, add average margin & average combined
+- make a db table for standings to keep track of the standings over time so we dont have to calculate it
+    - we can make a temp job that stores them based on rsm table
+    - how many weeks we spent in top 3, top 6, bottom 3, etc.
+    - regular season, league standings history, add lookups by manager and week
+- regular season, weekly rank, add column for opponent avg weekly rank
 
 Notes:
 Moved to 18 week schedule in 2021
@@ -98,3 +104,12 @@ week 7
 week 8. AJ, short for Andrew James and Ben, short for genetic reasons
 week 9 halloween
 week 10 birthday
+week 11 gavin is 3-16 in week 11 all time
+lowest combined points in a matchup was when Matt & Cam faced off in week 2 (206)
+
+week 13 - Andy set the high in week 4 (196 pts), Tyler had most points in a loss (150)
+week 14 - cole is 4-0 in week 14
+highest optimal was AJ in week 5. lowest optimal was gavin in week 5. biggest blowout was these 2 in week 5
+
+
+Cole has never won more than 9 in a season (2017)

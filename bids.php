@@ -94,7 +94,6 @@ foreach ($competitiveBids as $compKey => $comp) {
 }
 
 // Parse competitive bids for overspend calculation
-// Parse competitive bids for overspend calculation
 function parseCompetitiveBids($filePath) {
     if (!file_exists($filePath)) return [];
     $content = file_get_contents($filePath);
@@ -191,8 +190,9 @@ $totalSpent = array_sum(array_column($bidData, 'amount'));
 $managerTotals = [];
 $playerCounts = [];
 
-// Track total overspend per manager
+// Track total overspend and lineup points per manager
 $managerOverspend = [];
+$managerLineupPoints = [];
 foreach ($bidData as $bid) {
     // Manager spending totals
     if (!isset($managerTotals[$bid['manager']])) {
@@ -209,6 +209,34 @@ foreach ($bidData as $bid) {
         $managerOverspend[$bid['manager']] = 0;
     }
     $managerOverspend[$bid['manager']] += $bid['overspend'];
+
+    // Parse $bid['player'] to extract player, team, position
+    $playerName = $bid['player'];
+    $team = $position = '';
+    if (preg_match('/^(.*?) ([A-Za-z]{2,4}) - ([A-Za-z]{1,3})$/', $playerName, $matches)) {
+        $player = trim($matches[1]);
+        $team = trim($matches[2]);
+        $position = trim($matches[3]);
+    } else {
+        $player = $playerName;
+    }
+    // Query for lineup points (roster_spot != 'BN')
+    $lineupQuery = "SELECT SUM(points) as total_points FROM rosters WHERE year = 2025 AND manager = '" . SQLite3::escapeString($bid['manager']) . "' 
+        AND player = '" . SQLite3::escapeString($player) . "'";
+    if ($team) {
+        $lineupQuery .= " AND team = '" . strtoupper($team) . "'";
+    }
+    if ($position) {
+        $lineupQuery .= " AND position = '" . strtoupper($position) . "'";
+    }
+    $lineupQuery .= " AND roster_spot != 'BN'";
+    $lineupResult = query($lineupQuery);
+    if ($lineupRow = fetch_array($lineupResult)) {
+        if (!isset($managerLineupPoints[$bid['manager']])) {
+            $managerLineupPoints[$bid['manager']] = 0;
+        }
+        $managerLineupPoints[$bid['manager']] += $lineupRow['total_points'] ? $lineupRow['total_points'] : 0;
+    }
 }
 
 // Sort managers by total spending
@@ -302,6 +330,7 @@ arsort($managerTotals);
                                             <th>Avg Bid</th>
                                             <th>Avg Overspend</th>
                                             <th>Overspend %</th>
+                                            <th>Points Per Dollar</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -314,6 +343,7 @@ arsort($managerTotals);
                                             <td>$<?php echo number_format($total / $playerCounts[$manager], 2); ?></td>
                                             <td>$<?php echo ($playerCounts[$manager] > 0 && isset($managerOverspend[$manager])) ? number_format($managerOverspend[$manager] / $playerCounts[$manager], 2) : '0.00'; ?></td>
                                             <td><?php echo ($total > 0 && isset($managerOverspend[$manager])) ? number_format(100 * $managerOverspend[$manager] / $total, 1) . '%' : '0.00%'; ?></td>
+                                            <td><?php echo ($total > 0 && isset($managerLineupPoints[$manager])) ? number_format($managerLineupPoints[$manager] / $total, 2) : '0.00'; ?></td>
                                         </tr>
                                         <?php endforeach; ?>
                                     </tbody>
@@ -337,21 +367,74 @@ arsort($managerTotals);
                                     <thead>
                                         <tr>
                                             <th>Manager</th>
+                                            <th>Player</th>
                                             <th>Amount</th>
                                             <th>Overspend</th>
                                             <th># Bids</th>
-                                            <th>Player</th>
+                                            <th>Total Points</th>
+                                            <th>Points in Lineup</th>
                                             <th>Date</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($bidData as $bid): ?>
+                                        <?php
+                                        // Build player points lookup for 2025
+                                        $debugged = false;
+                                        foreach ($bidData as $bid):
+                                            // Try to match player name (strip team/position if present)
+                                            $lineupoints = 0;
+                                            $totalPoints = 0;
+                                            // Convert bid date to timestamp
+                                            $bidDateStr = $bid['date'];
+                                            if (strpos($bidDateStr, ',') !== false) {
+                                                $parts = explode(',', $bidDateStr, 2);
+                                                $bidDateStr = $parts[0] . ', 2025,' . $parts[1];
+                                            }
+                                            $bidDateObj = DateTime::createFromFormat('M j, Y, g:i a', $bidDateStr);
+                                            $bidTimestamp = $bidDateObj ? $bidDateObj->getTimestamp() : false;
+                                            
+                                            // Parse $bid['player'] to extract player, team, position
+                                            $playerName = $bid['player'];
+                                            $team = $position = '';
+                                            // Improved regex: Name Team - Position (team: 2-4 letters, position: 1-3 letters, case-insensitive)
+                                            if (preg_match('/^(.*?) ([A-Za-z]{2,4}) - ([A-Za-z]{1,3})$/', $playerName, $matches)) {
+                                                $player = trim($matches[1]);
+                                                $team = trim($matches[2]);
+                                                $position = trim($matches[3]);
+                                            } else {
+                                                $player = $playerName;
+                                            }
+                                            $playerQuery = "SELECT SUM(points) as total_points FROM rosters WHERE year = 2025 AND manager = '" . SQLite3::escapeString($bid['manager']) . "' 
+                                                AND player = '" . SQLite3::escapeString($player) . "'";
+                                            if ($team) {
+                                                $playerQuery .= " AND team = '" . strtoupper($team) . "'";
+                                            }
+                                            if ($position) {
+                                                $playerQuery .= " AND position = '" . strtoupper($position) . "'";
+                                            }
+                                            if ($bidTimestamp) {
+                                                $playerQuery .= " AND game_time >= '" . date('Y-m-d H:i:s', $bidTimestamp) . "'";
+                                            }
+                                            // dd($playerQuery);
+                                            $result = query($playerQuery);
+                                            if ($row = fetch_array($result)) {
+                                                $totalPoints = $row['total_points'] ? $row['total_points'] : 0;
+                                            }
+
+                                            $totalQuery = $playerQuery . " AND roster_spot != 'BN'";
+                                            $totalResult = query($totalQuery);
+                                            if ($totalRow = fetch_array($totalResult)) {
+                                                $lineupPoints = $totalRow['total_points'] ? $totalRow['total_points'] : 0;
+                                            }
+                                        ?>
                                         <tr>
                                             <td><strong><?php echo htmlspecialchars($bid['manager']); ?></strong></td>
+                                            <td><?php echo htmlspecialchars($bid['player']); ?></td>
                                             <td class="text-right">$<?php echo number_format($bid['amount']); ?></td>
                                             <td class="text-right">$<?php echo number_format($bid['overspend']); ?></td>
                                             <td class="text-center"><?php echo $bid['bid_count']; ?></td>
-                                            <td><?php echo htmlspecialchars($bid['player']); ?></td>
+                                            <td class="text-right"><?php echo number_format($totalPoints, 2); ?></td>
+                                            <td class="text-right"><?php echo number_format($lineupPoints, 2); ?></td>
                                             <td data-sort="<?php echo htmlspecialchars($bid['sortable_date']); ?>"><?php echo htmlspecialchars($bid['date']); ?></td>
                                         </tr>
                                         <?php endforeach; ?>
@@ -380,7 +463,7 @@ $(document).ready(function() {
 
     $('#bidsTable').DataTable({
         "pageLength": 25,
-        "order": [[ 5, "desc" ]],
+        "order": [[ 7, "desc" ]],
         "columnDefs": [
             {
                 "targets": 1, // Amount column

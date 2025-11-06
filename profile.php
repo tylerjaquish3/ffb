@@ -567,6 +567,7 @@ if (isset($_GET['id'])) {
                                         $wins = $losses = $total = $pf = $pa = $ptsAvg = $bigWin = $bigLoss = $postTotal = $postWins = $postLosses = 0;
                                         $closeLoss = -9999;
                                         $closeWin = 9999;
+                                        $marginsArr = $combinedArr = [];
                                         $result = query(
                                             "SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score, winning_manager_id
                                             FROM regular_season_matchups
@@ -606,6 +607,8 @@ if (isset($_GET['id'])) {
                                             $closeLoss = ($margin < 0 && $margin > $closeLoss) ? $margin : $closeLoss;
                                             $closeWin = ($margin > 0 && $margin < $closeWin) ? $margin : $closeWin;
                                             $bigLoss = ($margin < 0 && $margin < $bigLoss) ? $margin : $bigLoss;
+                                            $marginsArr[] = $margin;
+                                            $combinedArr[] = $manager1score + $manager2score;
                                         } ?>
                                         <tr><td>Reg. Season Matchups</td><td><?php echo $total; ?></td></tr>
                                         <tr><td>Reg. Season Wins</td><td><?php echo $wins; ?></td></tr>
@@ -626,6 +629,8 @@ if (isset($_GET['id'])) {
                                         <tr><td>Biggest Loss</td><td><?php echo round($bigLoss, 2); ?></td></tr>
                                         <tr><td>Closest Win</td><td><?php echo round($closeWin, 2); ?></td></tr>
                                         <tr><td>Closest Loss</td><td><?php echo round($closeLoss, 2); ?></td></tr>
+                                        <tr><td>Average Margin</td><td><?php echo (count($marginsArr) > 0) ? round(abs(array_sum($marginsArr)/count($marginsArr)), 2) : 'N/A'; ?></td></tr>
+                                        <tr><td>Average Combined</td><td><?php echo (count($combinedArr) > 0) ? round(array_sum($combinedArr)/count($combinedArr), 2) : 'N/A'; ?></td></tr>
 
                                     </table>
                                 </div>
@@ -639,6 +644,7 @@ if (isset($_GET['id'])) {
                                             <th>Score</th>
                                             <th>Opponent</th>
                                             <th>Margin</th>
+                                            <th>Combined</th>
                                             <th>Records/Seeds</th>
                                         </thead>
                                         <tbody>
@@ -825,6 +831,7 @@ if (isset($_GET['id'])) {
                                                 }
                                                 
                                                 echo '<td>'.round(abs($managerScore - $opponentScore), 2).'</td>';
+                                                echo '<td>'.round($managerScore + $opponentScore, 2).'</td>';
                                                 
                                                 // Records/Seeds column - different for regular season vs playoff
                                                 if ($array['matchup_type'] == 'regular') {

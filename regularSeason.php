@@ -115,10 +115,11 @@ include 'sidebar.php';
                                 <div class="table-responsive">
                                     <table class="table table-striped nowrap" id="datatable-weeklyRanks" style="width: 100%;">
                                         <thead>
-                                            <th></th>
-                                            <th>Year</th>
-                                            <th>Manager</th>
-                                            <th>Avg. Weekly Rank</th>
+                                        <th></th>
+                                        <th>Year</th>
+                                        <th>Manager</th>
+                                        <th>Avg. Weekly Rank</th>
+                                        <th>Opp. Avg. Weekly Rank</th>
                                         </thead>
                                         <tbody></tbody>
                                     </table>
@@ -793,7 +794,8 @@ include 'sidebar.php';
                 },
                 { data: "year", width: '80px' },
                 { data: "manager", width: '120px' },
-                { data: "avg_rank", width: '150px' }
+                { data: "avg_rank", width: '150px' },
+                { data: "opp_avg_rank", width: '180px' }
             ],
             order: [
                 [1, "desc"],

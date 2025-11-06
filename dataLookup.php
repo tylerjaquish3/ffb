@@ -430,17 +430,27 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'weekly-ranks') {
     $managers = [];
     foreach ($allRanks as $manager => $years) {
         foreach ($years as $year => $weeks) {
-            // get average of all values within $weeks
             $total = count($weeks);
             $sum = 0;
+            $opp_sum = 0;
             foreach ($weeks as $week => $rank) {
                 $sum += $rank;
-            }            
-            
+                // Find opponent for this manager/week/year
+                $result = query("SELECT manager2_id FROM regular_season_matchups WHERE year = $year AND week_number = $week AND manager1_id = (SELECT id FROM managers WHERE name = '".$manager."') LIMIT 1");
+                $opp_row = fetch_array($result);
+                if ($opp_row && isset($opp_row['manager2_id'])) {
+                    $opp_name = getManagerName($opp_row['manager2_id']);
+                    if (isset($allRanks[$opp_name][$year][$week])) {
+                        $opp_sum += $allRanks[$opp_name][$year][$week];
+                    }
+                }
+            }
+            $opp_avg = $total > 0 ? number_format($opp_sum/$total, 2) : null;
             $managers[] = [
                 'manager' => $manager,
                 'year' => $year,
-                'avg_rank' => number_format($sum/$total, 2)
+                'avg_rank' => number_format($sum/$total, 2),
+                'opp_avg_rank' => $opp_avg
             ];
         }
     }

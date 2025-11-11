@@ -362,7 +362,7 @@ function handle_team_rosters(int $yahooId, int $week, object $data)
         }
         $player = $p->player;
         // do_dump($player);
-        $playerName = str_replace("'", "''", $player[0][2]->name->full);
+        $playerName = $player[0][2]->name->full;
 
         // Loop through the player properties to find team
         foreach ($player[0] as $key => $value) {
@@ -391,7 +391,7 @@ function handle_team_rosters(int $yahooId, int $week, object $data)
         $points = $stats['points'];
 
         echo $manager.' - '.$playerName.' ('.$team.' - '.$pos.' - '.$spot.')<br>';
-        echo 'Points: '.$points.' | Projected: '.$projected.'<br>';
+        echo 'Points: '.$points.'<br>';
         // Insert player into rosters
         $rosterId = updateOrCreate('rosters', [
             'manager' => $manager,

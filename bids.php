@@ -326,7 +326,7 @@ arsort($managerTotals);
                                             <th>Manager</th>
                                             <th>Total Spent</th>
                                             <th>Total Overspend</th>
-                                            <th>Number of Bids</th>
+                                            <th>Number of Claims</th>
                                             <th>Avg Bid</th>
                                             <th>Avg Overspend</th>
                                             <th>Overspend %</th>

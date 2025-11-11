@@ -563,6 +563,10 @@ if (isset($_GET['id'])) {
                             <div class="row">
                                 <div class="col-sm-12 col-md-4">
                                     <table class="table table-responsive table-striped nowrap">
+                                        <thead>
+                                            <th>Statistic</th>
+                                            <th>Value</th>
+                                        </thead>
                                     <?php
                                         $wins = $losses = $total = $pf = $pa = $ptsAvg = $bigWin = $bigLoss = $postTotal = $postWins = $postLosses = 0;
                                         $closeLoss = -9999;
@@ -626,10 +630,10 @@ if (isset($_GET['id'])) {
                                         <tr><td>Average Points Against</td><td><?php echo ($total+$postTotal) > 0 ? round($pa/($total+$postTotal), 1) : 'N/A'; ?></td></tr>
 
                                         <tr><td>Biggest Win</td><td><?php echo round($bigWin, 2); ?></td></tr>
-                                        <tr><td>Biggest Loss</td><td><?php echo round($bigLoss, 2); ?></td></tr>
+                                        <tr><td>Biggest Loss</td><td><?php echo round(abs($bigLoss), 2); ?></td></tr>
                                         <tr><td>Closest Win</td><td><?php echo round($closeWin, 2); ?></td></tr>
-                                        <tr><td>Closest Loss</td><td><?php echo round($closeLoss, 2); ?></td></tr>
-                                        <tr><td>Average Margin</td><td><?php echo (count($marginsArr) > 0) ? round(abs(array_sum($marginsArr)/count($marginsArr)), 2) : 'N/A'; ?></td></tr>
+                                        <tr><td>Closest Loss</td><td><?php echo round(abs($closeLoss), 2); ?></td></tr>
+                                        <tr><td>Average Margin</td><td><?php echo (count($marginsArr) > 0) ? round(array_sum(array_map('abs', $marginsArr))/count($marginsArr), 2) : 'N/A'; ?></td></tr>
                                         <tr><td>Average Combined</td><td><?php echo (count($combinedArr) > 0) ? round(array_sum($combinedArr)/count($combinedArr), 2) : 'N/A'; ?></td></tr>
 
                                     </table>
@@ -935,7 +939,7 @@ if (isset($_GET['id'])) {
                                         <tr>
                                             <td>Biggest Loss</td>
                                             <td><?php echo $foes['biggest_loss']['manager']; ?></td>
-                                            <td><?php echo $foes['biggest_loss']['value']; ?></td>
+                                            <td><?php echo abs($foes['biggest_loss']['value']); ?></td>
                                         </tr>
                                         <tr>
                                             <td>Closest Win</td>
@@ -945,7 +949,7 @@ if (isset($_GET['id'])) {
                                         <tr>
                                             <td>Closest Loss</td>
                                             <td><?php echo $foes['closest_loss']['manager']; ?></td>
-                                            <td><?php echo $foes['closest_loss']['value']; ?></td>
+                                            <td><?php echo abs($foes['closest_loss']['value']); ?></td>
                                         </tr>
 
                                     </table>

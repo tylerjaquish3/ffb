@@ -46,6 +46,9 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - we can make a temp job that stores them based on rsm table
     - how many weeks we spent in top 3, top 6, bottom 3, etc.
     - regular season, league standings history, add lookups by manager and week
+- analyze text messages by manager in group text
+- make a table with player aliases, so if they aren't matching up for draft or rosters, look in there
+- rosters page, show stats for when stats exist. like compare rush yards, pass tds, etc.
 
 Notes:
 Moved to 18 week schedule in 2021
@@ -104,7 +107,7 @@ week 9 halloween
 week 10 birthday
 week 11 gavin is 3-16 in week 11 all time
 lowest combined points in a matchup was when Matt & Cam faced off in week 2 (206)
-
+week 12 bottom 3 havent changed in the standings since week 4
 week 13 - Andy set the high in week 4 (196 pts), Tyler had most points in a loss (150)
 week 14 - cole is 4-0 in week 14
 highest optimal was AJ in week 5. lowest optimal was gavin in week 5. biggest blowout was these 2 in week 5

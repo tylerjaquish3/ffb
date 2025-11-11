@@ -374,6 +374,7 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'lineup-accuracy') {
                 'manager' => $manager,
                 'points' => round($totalActual, 2),
                 'optimal' => round($totalOptimal, 2),
+                'points_missed' => round($totalOptimal - $totalActual, 2),
                 'accuracy' => round($totalActual * 100 / $totalOptimal, 2).'%'
             ];
         }

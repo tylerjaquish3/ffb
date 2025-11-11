@@ -659,6 +659,7 @@ include 'sidebar.php';
                                     <th>Manager</th>
                                     <th>Points</th>
                                     <th>Optimal Points</th>
+                                    <th>Points Missed</th>
                                     <th>Accuracy</th>
                                 </thead>
                                 <tbody> </tbody>
@@ -985,10 +986,11 @@ include 'sidebar.php';
                 { data: 'manager' },
                 { data: 'points' },
                 { data: 'optimal' },
+                { data: 'points_missed' },
                 { data: 'accuracy' }
             ],
             order: [
-                [3, "desc"]
+                [4, "desc"]
             ]
         });
 

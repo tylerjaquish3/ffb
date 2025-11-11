@@ -2156,7 +2156,8 @@ function getAllDraftedPlayerDetails()
         JOIN managers ON draft.manager_id = managers.id 
         LEFT JOIN rosters ON rosters.player LIKE draft.player || '%' AND rosters.year = draft.year AND rosters.manager = managers.name
         WHERE draft.year = $selectedSeason
-        GROUP BY manager, overall_pick, rosters.player, draft.position, round");
+        GROUP BY manager, overall_pick, rosters.player, draft.position, round
+        ORDER BY overall_pick asc");
     $temp = [];
     while ($row = fetch_array($result)) {
         // Normalize player name
@@ -2166,24 +2167,26 @@ function getAllDraftedPlayerDetails()
 
         // Try to deduplicate by fuzzy match
         $found = false;
-        foreach ($temp as &$existing) {
-            $existingNorm = preg_replace('/\b(Jr\.?|Sr\.?|III|II|IV)\b/i', '', $existing['player']);
-            $existingNorm = preg_replace('/[^\w\s]/', '', $existingNorm);
-            $existingNorm = strtolower(trim($existingNorm));
-            // Use similar_text for fuzzy match
-            similar_text($normName, $existingNorm, $percent);
-            if ($percent > 90 && $row['manager'] == $existing['manager']) {
-                // Merge points and GP
-                $existing['points'] += $row['points'];
-                $existing['GP'] += $row['GP'];
-                $found = true;
-                break;
-            }
-        }
+        // foreach ($temp as &$existing) {
+
+        //     $existingNorm = preg_replace('/\b(Jr\.?|Sr\.?|III|II|IV)\b/i', '', $existing['player']);
+        //     $existingNorm = preg_replace('/[^\w\s]/', '', $existingNorm);
+        //     $existingNorm = strtolower(trim($existingNorm));
+        //     // Use similar_text for fuzzy match
+        //     similar_text($normName, $existingNorm, $percent);
+        //     if ($percent > 90 && $row['manager'] == $existing['manager']) {
+        //         // Merge points and GP
+        //         $existing['points'] += $row['points'];
+        //         $existing['GP'] += $row['GP'];
+        //         $found = true;
+        //         break;
+        //     }
+        // }
         if (!$found) {
             $temp[] = $row;
         }
     }
+
     $response = $temp;
 
     return $response;

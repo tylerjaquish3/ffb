@@ -1,4 +1,20 @@
 <?php
+// Visit tracking
+$logFile = __DIR__ . '/visit_log.txt';
+$dt = new DateTime('now', new DateTimeZone('America/Los_Angeles'));
+$timestamp = $dt->format('Y-m-d H:i:s');
+$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+
+// Generate or retrieve visitor ID from cookie
+$visitorId = $_COOKIE['visitor_id'] ?? null;
+if (!$visitorId) {
+    $visitorId = bin2hex(random_bytes(8));
+    setcookie('visitor_id', $visitorId, time() + 60*60*24*365, '/'); // 1 year
+}
+
+$logEntry = "$timestamp\t$ip\t$visitorId\t$userAgent\n";
+file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
 
 $pageName = "Newsletter";
 

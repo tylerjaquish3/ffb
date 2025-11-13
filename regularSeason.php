@@ -216,59 +216,108 @@ include 'sidebar.php';
                 </div>
             </div>
 
-            <div class="row card-section" id="league-standings" style="display: none;">
-                <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">League Standings History</h4>
+            <div class="card-section" id="league-standings" style="display: none;">
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="float: right">League Standings History</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr; text-align: center;">
+                                <h3>
+                                    Year
+                                    <select id="year-select1">
+                                        <?php
+                                        $result = query("SELECT distinct year FROM regular_season_matchups order by year desc");
+                                        while ($row = fetch_array($result)) {
+                                            echo '<option value="'.$row['year'].'">'.$row['year'].'</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                    Week
+                                    <select id="week-select">
+                                        <?php
+                                        $result = query("SELECT distinct week_number FROM regular_season_matchups");
+                                        while ($row = fetch_array($result)) {
+                                            echo '<option value="'.$row['week_number'].'">'.$row['week_number'].'</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                    <br>
+                                </h3>
+                                
+                                <button class="btn btn-secondary" id="lookup-standings-btn">Search</button> or 
+                                <button class="btn btn-secondary" id="next-week-standings-btn">Next Week</button>
+                                <br /><br />
+                            </div>
                         </div>
-                        <div class="card-body" style="background: #fff; direction: ltr; text-align: center;">
-                            <h3>
-                                Year
-                                <select id="year-select1">
+                    </div>
+
+                    <div class="col-sm-12 col-md-6 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Results</h4>
+                                <span id="count"></span>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr">
+                                <table class="table table-responsive table-striped nowrap" id="datatable-league-standings">
+                                    <thead>
+                                        <th>Rank</th>
+                                        <th>Manager</th>
+                                        <th>Record</th>
+                                        <th>Points</th>
+                                        <th>Next Week</th>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- New row of cards -->
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Standings by Manager</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr; text-align: center;">
+                                <select id="manager-standings-select">
                                     <?php
-                                    $result = query("SELECT distinct year FROM regular_season_matchups order by year desc");
+                                    $result = query("SELECT * FROM managers ORDER BY name ASC");
                                     while ($row = fetch_array($result)) {
-                                        echo '<option value="'.$row['year'].'">'.$row['year'].'</option>';
-                                    }
-                                    ?>
-                                </select>
-                                Week
-                                <select id="week-select">
-                                    <?php
-                                    $result = query("SELECT distinct week_number FROM regular_season_matchups");
-                                    while ($row = fetch_array($result)) {
-                                        echo '<option value="'.$row['week_number'].'">'.$row['week_number'].'</option>';
+                                        $selected = ($row['name'] == 'AJ') ? 'selected' : '';
+                                        echo '<option value="'.$row['id'].'" '.$selected.'>'.$row['name'].'</option>';
                                     }
                                     ?>
                                 </select>
                                 <br>
-                            </h3>
                             
-                            <button class="btn btn-secondary" id="lookup-standings-btn">Search</button> or 
-                            <button class="btn btn-secondary" id="next-week-standings-btn">Next Week</button>
-                            <br /><br />
+                                <table class="table table-responsive table-striped nowrap" id="datatable-manager-standings">
+                                    <thead>
+                                        <th>Year</th>
+                                        <th>Week</th>
+                                        <th>Rank</th>
+                                        <th>Record</th>
+                                        <th>Points</th>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-sm-12 col-md-6 col-lg-4 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4>Results</h4>
-                            <span id="count"></span>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive table-striped nowrap" id="datatable-league-standings">
-                                <thead>
-                                    <th>Rank</th>
-                                    <th>Manager</th>
-                                    <th>Record</th>
-                                    <th>Points</th>
-                                    <th>Next Week</th>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                    <div class="col-sm-12 col-md-6  table-padding">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Weeks Spent by Rank Range</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr">
+                                <div class="card-block">
+                                    <canvas id="rankDistributionChart" height="300px"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -511,7 +560,8 @@ include 'sidebar.php';
 </div>
 
 <style>
-    #datatable-regSeason input[type=text] {
+    #datatable-regSeason input[type=text],
+    #datatable-manager-standings input[type=text] {
         width: 100%;
     }
     
@@ -616,6 +666,7 @@ include 'sidebar.php';
             fixedHeader: true,
             initComplete: function () {
                 var api = this.api();
+                var searchTimeouts = {};
     
                 // For each column
                 api.columns()
@@ -628,36 +679,46 @@ include 'sidebar.php';
 
                     // On every keypress in this input
                     $('input',$('.filters th').eq($(api.column(colIdx).header()).index()))
-                    .off('keyup change')
-                    .on('change', function (e) {
-                        // Get the search value
-                        $(this).attr('title', $(this).val());
-                        var regexr = '({search})';
+                    .off('keyup change input')
+                    .on('input', function (e) {
+                        e.stopPropagation();
                         
-                        // For Week column (index 1), use exact match with ^ and $ anchors
-                        if (colIdx === 1 && this.value !== '') {
-                            // Use ^value$ for exact numeric match
-                            api
-                                .column(colIdx)
-                                .search('^' + this.value + '$', true, false)
-                                .draw();
-                        } else {
-                            // For other columns, use the original regex search
-                            api
-                                .column(colIdx)
-                                .search(
-                                    this.value != ''
-                                        ? regexr.replace('{search}', '(((' + this.value + ')))')
-                                        : '',
-                                    this.value != '',
-                                    this.value == ''
-                                )
-                                .draw();
-                        }
+                        var inputElement = this;
+                        var searchValue = this.value;
+                        
+                        // Clear previous timeout for this column
+                        clearTimeout(searchTimeouts[colIdx]);
+                        
+                        // Set new timeout for debounced search
+                        searchTimeouts[colIdx] = setTimeout(function() {
+                            // Get the search value
+                            $(inputElement).attr('title', searchValue);
+                            var regexr = '({search})';
+                            
+                            // For Week column (index 1), use exact match with ^ and $ anchors
+                            if (colIdx === 1 && searchValue !== '') {
+                                // Use ^value$ for exact numeric match
+                                api
+                                    .column(colIdx)
+                                    .search('^' + searchValue + '$', true, false)
+                                    .draw(false);
+                            } else {
+                                // For other columns, use the original regex search
+                                api
+                                    .column(colIdx)
+                                    .search(
+                                        searchValue != ''
+                                            ? regexr.replace('{search}', '(((' + searchValue + ')))')
+                                            : '',
+                                        searchValue != '',
+                                        searchValue == ''
+                                    )
+                                    .draw(false);
+                            }
+                        }, 300); // Wait 300ms after user stops typing
                     })
                     .on('keyup', function (e) {
                         e.stopPropagation();
-                        $(this).trigger('change');
                     });
                 });
             }
@@ -765,6 +826,136 @@ include 'sidebar.php';
         
         $('#lookup-standings-btn').click(function () {
             standingsTable.ajax.reload();
+        });
+
+        // Manager Standings functionality
+        var managerStandingsTable;
+
+        function initManagerStandingsTable() {
+            // Destroy existing table if it exists
+            if ($.fn.DataTable.isDataTable('#datatable-manager-standings')) {
+                $('#datatable-manager-standings').DataTable().destroy();
+            }
+
+            // Completely reset the table structure
+            var $table = $('#datatable-manager-standings');
+            
+            // Reset the table structure to basic headers only
+            $table.find('thead').html(`
+                <tr>
+                    <th style="width: 60px;">Year</th>
+                    <th style="width: 50px;">Week</th>
+                    <th style="width: 50px;">Rank</th>
+                    <th style="width: 80px;">Record</th>
+                    <th style="width: 75px;">Points</th>
+                </tr>
+            `);
+            
+            // Ensure tbody is clean
+            $table.find('tbody').html('');
+
+            managerStandingsTable = $('#datatable-manager-standings').DataTable({
+                pageLength: 10,
+                scrollX: true,
+                autoWidth: false,
+                ajax: {
+                    url: 'dataLookup.php',
+                    data: function(d) {
+                        d.dataType = 'manager-standings';
+                        d.manager = $('#manager-standings-select').val();
+                    }
+                },
+                columns: [
+                    { data: "year", width: '60px', className: 'dt-center' },
+                    { data: "week", width: '50px', className: 'dt-center' },
+                    { data: "rank", width: '50px', className: 'dt-center' },
+                    { data: "record", width: '80px', className: 'dt-center' },
+                    { data: "points", width: '75px', className: 'dt-center' }
+                ],
+                columnDefs: [
+                    { width: "60px", targets: [0] },
+                    { width: "50px", targets: [1, 2] },
+                    { width: "80px", targets: [3] },
+                    { width: "75px", targets: [4] }
+                ],
+                order: [
+                    [0, "desc"],
+                    [1, "desc"]
+                ]
+            });
+        }
+
+        $('#lookup-manager-standings-btn').click(function () {
+            if (managerStandingsTable) {
+                managerStandingsTable.ajax.reload();
+            }
+        });
+
+        $('#manager-standings-select').change(function() {
+            if (managerStandingsTable) {
+                managerStandingsTable.ajax.reload();
+            }
+        });
+
+        // Load default manager standings on page load - but only when tab is visible
+        var managerStandingsLoaded = false;
+
+        // Rank Distribution Chart
+        var rankDistributionChart;
+        
+        function loadRankDistributionChart() {
+            $.ajax({
+                url: 'dataLookup.php',
+                dataType: 'json',
+                data: {
+                    dataType: 'rank-distribution'
+                },
+                success: function(data) {
+                    var ctx = document.getElementById('rankDistributionChart').getContext('2d');
+                    
+                    if (rankDistributionChart) {
+                        rankDistributionChart.destroy();
+                    }
+                    
+                    rankDistributionChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: data,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    stacked: true,
+                                },
+                                y: {
+                                    stacked: true,
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Number of Weeks'
+                                    }
+                                }
+                            },
+                            interaction: {
+                                intersect: false,
+                                mode: 'index'
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // Load chart and fix manager standings table when league standings tab becomes active
+        $(document).on('click', '#league-standings-tab', function() {
+            setTimeout(function() {
+                // Always reinitialize to ensure clean state
+                initManagerStandingsTable();
+                managerStandingsLoaded = true;
+                
+                // Load the rank distribution chart
+                loadRankDistributionChart();
+            }, 100);
         });
 
         $('#regMiscStats').change(function() {

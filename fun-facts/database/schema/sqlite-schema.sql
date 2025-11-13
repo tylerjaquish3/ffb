@@ -81,6 +81,23 @@ CREATE TABLE record_log_backup_111(
   created_at NUM,
   updated_at NUM
 );
+CREATE TABLE player_aliases (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	player VARCHAR(100) NOT NULL,
+	alias_1 VARCHAR(100),
+	alias_2 VARCHAR(100),
+	alias_3 VARCHAR(100)
+);
+CREATE TABLE standings (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	year INTEGER NOT NULL,
+	week INTEGER NOT NULL,
+	manager_id INTEGER NOT NULL,
+	rank INTEGER NOT NULL,
+	points DECIMAL(8,2) NOT NULL,
+	wins INTEGER DEFAULT 0,
+	losses INTEGER DEFAULT 0
+);
 INSERT INTO migrations VALUES(1,'2014_10_12_000000_create_users_table',1);
 INSERT INTO migrations VALUES(2,'2014_10_12_100000_create_password_resets_table',1);
 INSERT INTO migrations VALUES(3,'2019_08_19_000000_create_failed_jobs_table',1);

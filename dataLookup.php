@@ -10,114 +10,21 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'standings') {
     $return = [];
     $manager = $_GET['manager1'];
     $place = $_GET['place1'];
-    $standings = $allYears = [];
-    $currYear = null;
 
-    $result = query("SELECT distinct year FROM regular_season_matchups ORDER BY YEAR DESC");
+    // Use the standings table to get all instances where this manager was in this place
+    $result = query("SELECT s.year, s.week, s.points, s.wins, s.losses
+        FROM standings s
+        JOIN managers m ON s.manager_id = m.id
+        WHERE s.rank = $place AND m.id = $manager AND s.points > 0
+        ORDER BY s.year DESC, s.week DESC");
+    
     while ($row = fetch_array($result)) {
-        $allYears[] = $row['year'];
-    }
-
-    $overallYearStandings = [];
-    // Loop year by year
-    foreach ($allYears as $year) {
-        $yearStandings = [];
-        $lastWeek = 1;
-        for ($x = 1; $x < 11; $x++) {
-            $yearStandings[] = [
-                'man' => $x, 'wins' => 0, 'points' => 0
-            ];
-        }
-
-        $result = query("SELECT * FROM regular_season_matchups WHERE year = $year ORDER BY YEAR DESC, week_number asc");
-        while ($row = fetch_array($result)) {
-            $week = $row['week_number']; 
-        
-            // If going to the next week, then store the standings at this point
-            if ($week != $lastWeek) {
-                // Sort by wins and then points (if tied for wins)
-                usort($yearStandings, function($b, $a) { 
-                    $rdiff = $a['wins'] - $b['wins'];
-                    if ($rdiff) return $rdiff; 
-
-                    if ($a['points'] > $b['points']) {
-                        return 1;
-                    } else if ($a['points'] < $b['points']) {
-                        return -1;
-                    }
-                    return 0; 
-                });
-                $overallYearStandings[$year][$week-1] = $yearStandings;
-            }
-            
-            foreach ($yearStandings as &$standing) {
-                if ($standing['man'] == $row['manager1_id']) {
-                    if ($row['winning_manager_id'] == $row['manager1_id']) {
-                        $standing['wins']++;
-                    }
-                    $standing['points'] += $row['manager1_score'];
-                }
-            }
-            // Unset it so the reference (&) is removed
-            unset($standing);
-            
-            $lastWeek = $week;
-        }
-
-        // Need to do this one more time to account for the last week of the season
-        usort($yearStandings, function($b, $a) { 
-            $rdiff = $a['wins'] - $b['wins'];
-            if ($rdiff) return $rdiff; 
-
-            if ($a['points'] > $b['points']) {
-                return 1;
-            } else if ($a['points'] < $b['points']) {
-                return -1;
-            }
-            return 0; 
-        });
-        $overallYearStandings[$year][$week] = $yearStandings;
-    }
-
-    // Now just get the ones associated to the place and manager passed in
-    $allInPlace = [];
-    foreach ($overallYearStandings as $year => $weeks) {
-        foreach ($weeks as $week => $dude) {
-            foreach ($dude as $spot => $man) {
-                if ($place == ($spot+1) && $man['man'] == $manager && $man['points'] != 0) {
-                    $allInPlace[] = [
-                        'year' => $year,
-                        'week' => $week,
-                        'wins' => $man['wins'],
-                        'points' => $man['points']
-                    ];
-                }
-            }
-        }
-    }
-
-    // Sort by year and week desc
-    usort($allInPlace, function($b, $a) { 
-        $rdiff = $a['wins'] - $b['wins'];
-        if ($rdiff) return $rdiff; 
-
-        if ($a['points'] > $b['points']) {
-            return 1;
-        } else if ($a['points'] < $b['points']) {
-            return -1;
-        }
-        return 0; 
-    });
-
-    // Return table rows
-    foreach ($allInPlace as $data) {
-        $losses = $data['week'] - $data['wins'];
-        $record = $data['wins'].' - '.$losses;
+        $record = $row['wins'].' - '.$row['losses'];
         $return[] = [
-            'year'      => $data['year'],
-            'week'      => $data['week'],
+            'year'      => $row['year'],
+            'week'      => $row['week'],
             'record'    => $record,
-            'points'    => round($data['points'], 1)
+            'points'    => round($row['points'], 1)
         ];
     }
 
@@ -126,9 +33,6 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'standings') {
 
     echo json_encode($content);
     die;
-
-    // echo json_encode($done);
-    // die;
 }
 
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'league-standings') {
@@ -137,72 +41,147 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'league-standings') {
     $year = $_GET['year'];
     $week = $_GET['week'];
     $nextWeek = $week + 1;
-    $standings = [];
 
-    for ($x = 1; $x < 11; $x++) {
-        $standings[] = [
-            'man' => $x, 'wins' => 0, 'losses' => 0, 'points' => 0, 'name' => '', 'next' => ''
-        ];
-    }
-
-    $result = query("SELECT * FROM regular_season_matchups 
-        JOIN managers ON regular_season_matchups.manager1_id = managers.id
-        WHERE year = $year and week_number <= $week");
-    while ($row = fetch_array($result)) {
-        $week = $row['week_number']; 
+    // Get standings from the standings table for the specified week
+    $result = query("SELECT s.rank, s.wins, s.losses, s.points, m.name, m.id as manager_id
+        FROM standings s
+        JOIN managers m ON s.manager_id = m.id
+        WHERE s.year = $year AND s.week = $week
+        ORDER BY s.rank ASC");
     
-        foreach ($standings as &$standing) {
-            if ($standing['man'] == $row['manager1_id']) {
-                if ($row['winning_manager_id'] == $row['manager1_id']) {
-                    $standing['wins']++;
-                } else {
-                    $standing['losses']++;
-                }
-                $standing['name'] = $row['name'];
-                $standing['points'] += $row['manager1_score'];
-                
-                // query to get the following week's matchup
-                $result2 = query("SELECT * FROM regular_season_matchups 
-                JOIN managers ON regular_season_matchups.manager2_id = managers.id
-                WHERE year = $year AND week_number = $nextWeek AND manager1_id = ".$row['manager1_id']);
-                while ($row2 = fetch_array($result2)) {
-                    $win = $row2['winning_manager_id'] == $row2['manager1_id'] ? 'W' : 'L';
-                    $standing['next'] = $row2['name'].' ('.$win.')';
-                }
-            }
-        } 
-    }
-
-    // Sort by wins and points to get rank
-    usort($standings, function($b, $a) { 
-        $rdiff = $a['wins'] - $b['wins'];
-        if ($rdiff) return $rdiff; 
-
-        if ($a['points'] > $b['points']) {
-            return 1;
-        } else if ($a['points'] < $b['points']) {
-            return -1;
+    while ($row = fetch_array($result)) {
+        $next = '';
+        
+        // Query to get the following week's matchup
+        $result2 = query("SELECT rsm.winning_manager_id, rsm.manager1_id, m2.name as opponent_name
+            FROM regular_season_matchups rsm
+            JOIN managers m2 ON rsm.manager2_id = m2.id
+            WHERE rsm.year = $year AND rsm.week_number = $nextWeek AND rsm.manager1_id = ".$row['manager_id']);
+        $row2 = fetch_array($result2);
+        if ($row2) {
+            $win = $row2['winning_manager_id'] == $row2['manager1_id'] ? 'W' : 'L';
+            $next = $row2['opponent_name'].' ('.$win.')';
         }
-        return 0; 
-    });
-
-    $rank = 1;
-    foreach ($standings as $data) {
-        $record = $data['wins'].' - '.$data['losses'];
+        
+        $record = $row['wins'].' - '.$row['losses'];
         $return[] = [
-            'rank' => $rank,
-            'manager' => $data['name'],
+            'rank' => $row['rank'],
+            'manager' => $row['name'],
             'record' => $record,
-            'points' => round($data['points'], 2),
-            'next' => $data['next']
+            'points' => round($row['points'], 2),
+            'next' => $next
         ];
-        $rank++;
     }
 
     $content = new \stdClass();
     $content->data = $return;
 
     echo json_encode($content);
+    die;
+}
+
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'manager-standings') {
+
+    $return = [];
+    $manager = $_GET['manager'];
+
+    // Get all standings for this manager from the standings table
+    $result = query("SELECT s.year, s.week, s.rank, s.wins, s.losses, s.points
+        FROM standings s
+        WHERE s.manager_id = $manager AND s.points > 0
+        ORDER BY s.year DESC, s.week DESC");
+    
+    while ($row = fetch_array($result)) {
+        $record = $row['wins'].' - '.$row['losses'];
+        $return[] = [
+            'year'      => $row['year'],
+            'week'      => $row['week'],
+            'rank'      => $row['rank'],
+            'record'    => $record,
+            'points'    => round($row['points'], 1)
+        ];
+    }
+
+    $content = new \stdClass();
+    $content->data = $return;
+
+    echo json_encode($content);
+    die;
+}
+
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'rank-distribution') {
+
+    $return = [];
+    $managers = [];
+    $rankRanges = [
+        'top' => [1, 2, 3],
+        'middle' => [4, 5, 6], 
+        'bottom' => [7, 8, 9, 10]
+    ];
+
+    // Get all managers
+    $result = query("SELECT id, name FROM managers ORDER BY name ASC");
+    while ($row = fetch_array($result)) {
+        $managers[$row['id']] = [
+            'name' => $row['name'],
+            'top' => 0,
+            'middle' => 0,
+            'bottom' => 0
+        ];
+    }
+
+    // Count weeks spent in each rank range
+    $result = query("SELECT manager_id, rank FROM standings WHERE points > 0");
+    while ($row = fetch_array($result)) {
+        $managerId = $row['manager_id'];
+        $rank = $row['rank'];
+        
+        if (isset($managers[$managerId])) {
+            if (in_array($rank, $rankRanges['top'])) {
+                $managers[$managerId]['top']++;
+            } elseif (in_array($rank, $rankRanges['middle'])) {
+                $managers[$managerId]['middle']++;
+            } elseif (in_array($rank, $rankRanges['bottom'])) {
+                $managers[$managerId]['bottom']++;
+            }
+        }
+    }
+
+    // Format data for chart
+    $labels = [];
+    $topData = [];
+    $middleData = [];
+    $bottomData = [];
+
+    foreach ($managers as $data) {
+        $labels[] = $data['name'];
+        $topData[] = $data['top'];
+        $middleData[] = $data['middle'];
+        $bottomData[] = $data['bottom'];
+    }
+
+    $return = [
+        'labels' => $labels,
+        'datasets' => [
+            [
+                'label' => 'Ranks 7-10',
+                'data' => $bottomData,
+                'backgroundColor' => '#f9cac6',
+            ],
+            [
+                'label' => 'Ranks 4-6', 
+                'data' => $middleData,
+                'backgroundColor' => '#f7e77c',
+            ],
+            [
+                'label' => 'Ranks 1-3',
+                'data' => $topData,
+                'backgroundColor' => '#a6e9a2',
+            ],
+        ]
+    ];
+
+    echo json_encode($return);
     die;
 }
 

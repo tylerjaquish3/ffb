@@ -42,12 +42,8 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - current season
     - profile
 - make records page more useful to find new current leaders by adding a filter for it
-- make a db table for standings to keep track of the standings over time so we dont have to calculate it
-    - we can make a temp job that stores them based on rsm table
-    - how many weeks we spent in top 3, top 6, bottom 3, etc.
-    - regular season, league standings history, add lookups by manager and week
 - analyze text messages by manager in group text
-- make a table with player aliases, so if they aren't matching up for draft or rosters, look in there
+- use player aliases, so if they aren't matching up for draft or rosters, look in there
 - rosters page, show stats for when stats exist. like compare rush yards, pass tds, etc.
 
 Notes:

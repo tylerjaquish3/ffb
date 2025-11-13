@@ -1364,54 +1364,16 @@ function getSeasonStandings($season = null)
 function weekStandings(int $year, int $week)
 {
     $return = [];
-    $standings = [];
 
-    for ($x = 1; $x < 11; $x++) {
-        $standings[] = [
-            'man' => $x, 'wins' => 0, 'losses' => 0, 'points' => 0, 'name' => ''
-        ];
-    }
-
-    $result = query("SELECT * FROM regular_season_matchups 
-        JOIN managers ON regular_season_matchups.manager1_id = managers.id
-        WHERE year = $year and week_number <= $week");
-    while ($row = fetch_array($result)) {
-        $week = $row['week_number']; 
+    // Get standings from the standings table for the specified week
+    $result = query("SELECT s.rank, m.name
+        FROM standings s
+        JOIN managers m ON s.manager_id = m.id
+        WHERE s.year = $year AND s.week = $week
+        ORDER BY s.rank ASC");
     
-        foreach ($standings as &$standing) {
-            if ($standing['man'] == $row['manager1_id']) {
-                if ($row['winning_manager_id'] == $row['manager1_id']) {
-                    $standing['wins']++;
-                } else {
-                    $standing['losses']++;
-                }
-                $standing['name'] = $row['name'];
-                $standing['points'] += $row['manager1_score'];
-            }
-        } 
-    }
-
-    // Sort by wins and points to get rank
-    usort($standings, function($b, $a) { 
-        $rdiff = $a['wins'] - $b['wins'];
-        if ($rdiff) return $rdiff; 
-
-        if ($a['points'] > $b['points']) {
-            return 1;
-        } else if ($a['points'] < $b['points']) {
-            return -1;
-        }
-        return 0; 
-    });
-
-    $rank = 1;
-    foreach ($standings as $data) {
-        $return[$data['name']] = $rank;
-        $rank++;
-    }
-
-    if (isset($return[''])) {
-        unset($return['']);
+    while ($row = fetch_array($result)) {
+        $return[$row['name']] = $row['rank'];
     }
 
     return $return;
@@ -1635,7 +1597,6 @@ function getCurrentSeasonStatsAgainst()
 function getCurrentSeasonWeekStatsAgainst()
 {
     global $selectedSeason;
-    $managers = ['Tyler', 'Matt', 'Justin', 'Ben', 'AJ', 'Gavin', 'Cameron', 'Cole', 'Everett', 'Andy'];
 
     $weekOpponents = [];
     $result = query("SELECT year, week_number, name, manager2_id FROM regular_season_matchups rsm
@@ -1772,16 +1733,12 @@ function getCurrentSeasonBestTeamWeek()
  */
 function getDraftedPoints($dir, $round)
 {
-    global $DB_TYPE, $selectedSeason;
+    global $selectedSeason;
     $response = [];
-
-    // query("SET SQL_BIG_SELECTS=1");
 
     // Need to do different join for sqlite vs mysql
     $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
-    if ($DB_TYPE == 'mysql') {
-        $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
-    }
+
     $query = "SELECT rosters.manager, sum(points) as points FROM rosters
         JOIN managers ON rosters.manager = managers.name
         $join
@@ -1805,7 +1762,7 @@ function getDraftedPoints($dir, $round)
  */
 function getDraftPoints()
 {
-    global $selectedSeason, $DB_TYPE;
+    global $selectedSeason;
     $response = [];
 
     $drafted = getDraftedPoints('>', 0);
@@ -1814,9 +1771,6 @@ function getDraftPoints()
 
     // Need to do different join for sqlite vs mysql
     $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
-    if ($DB_TYPE == 'mysql') {
-        $join = "JOIN draft ON rosters.player LIKE CONCAT(draft.player, '%') AND managers.id = draft.manager_id AND rosters.year = draft.year";
-    }
 
     $result = query("SELECT MAX(WEEK) AS maxweek FROM rosters WHERE YEAR = $selectedSeason");
     while ($row = fetch_array($result)) {
@@ -2599,19 +2553,18 @@ function getMatchupRecapNumbers()
 
 function getRecord($managerName, $year, $week)
 {
-    $wins = $losses = 0;
-    $result = query("SELECT * FROM regular_season_matchups rsm
-        JOIN managers on managers.id = rsm.manager1_id
-        WHERE year = $year and week_number <= $week and managers.name = '".$managerName."'");
-    while ($row = fetch_array($result)) {
-        $managerScore = $row['manager1_score'];
-        $versusScore = $row['manager2_score'];
-
-        $wins += $managerScore > $versusScore ? 1 : 0;
-        $losses += $managerScore > $versusScore ? 0 : 1;
+    // Get wins and losses from standings table for the specified week
+    $result = query("SELECT s.wins, s.losses
+        FROM standings s
+        JOIN managers m ON s.manager_id = m.id
+        WHERE m.name = '$managerName' AND s.year = $year AND s.week = $week");
+    
+    $row = fetch_array($result);
+    if ($row) {
+        return $row['wins'].'-'.$row['losses'];
     }
-
-    return $wins.'-'.$losses;
+    
+    return '0-0';
 }
 
 function getPositionPointsChartNumbers()

@@ -686,57 +686,13 @@ if (isset($_GET['id'])) {
                                                     return '-';
                                                 }
                                                 
-                                                // Get all managers' records before this week
-                                                $managers = array();
-                                                $managerResult = query("SELECT DISTINCT manager1_id as mid FROM regular_season_matchups WHERE year = $year
-                                                    UNION SELECT DISTINCT manager2_id as mid FROM regular_season_matchups WHERE year = $year");
+                                                // Get rank from standings table for the previous week
+                                                $prevWeek = $week - 1;
+                                                $result = query("SELECT rank FROM standings 
+                                                    WHERE manager_id = $manager_id AND year = $year AND week = $prevWeek");
+                                                $row = fetch_array($result);
                                                 
-                                                while ($managerRow = fetch_array($managerResult)) {
-                                                    $mid = $managerRow['mid'];
-                                                    $wins = 0;
-                                                    $losses = 0;
-                                                    $totalPoints = 0;
-                                                    
-                                                    $recordResult = query("SELECT winning_manager_id, losing_manager_id, 
-                                                        CASE WHEN manager1_id = $mid THEN manager1_score ELSE manager2_score END as score
-                                                        FROM regular_season_matchups 
-                                                        WHERE year = $year AND week_number < $week 
-                                                        AND (manager1_id = $mid OR manager2_id = $mid)
-                                                        AND manager1_id < manager2_id");
-                                                    
-                                                    while ($recordRow = fetch_array($recordResult)) {
-                                                        $totalPoints += $recordRow['score'];
-                                                        if ($recordRow['winning_manager_id'] == $mid) {
-                                                            $wins++;
-                                                        } else if ($recordRow['losing_manager_id'] == $mid) {
-                                                            $losses++;
-                                                        }
-                                                    }
-                                                    
-                                                    $managers[] = array(
-                                                        'id' => $mid,
-                                                        'wins' => $wins,
-                                                        'losses' => $losses,
-                                                        'points' => $totalPoints
-                                                    );
-                                                }
-                                                
-                                                // Sort by wins (desc), then by points (desc)
-                                                usort($managers, function($a, $b) {
-                                                    if ($a['wins'] != $b['wins']) {
-                                                        return $b['wins'] - $a['wins'];
-                                                    }
-                                                    return $b['points'] - $a['points'];
-                                                });
-                                                
-                                                // Find the rank of our manager
-                                                for ($i = 0; $i < count($managers); $i++) {
-                                                    if ($managers[$i]['id'] == $manager_id) {
-                                                        return $i + 1;
-                                                    }
-                                                }
-                                                
-                                                return '-';
+                                                return $row ? $row['rank'] : '-';
                                             }
 
                                             // Get regular season matchups with records (avoiding duplicates)

@@ -501,8 +501,19 @@ if (isset($_GET['id'])) {
                                 <tbody>
                                     <?php
                                     $result = query(
-                                        "SELECT draft.player, COUNT(distinct draft.year) as times, sum(points) as points FROM draft
-                                        JOIN rosters on draft.player = rosters.player and draft.year = rosters.year
+                                        "SELECT draft.player, COUNT(distinct draft.year) as times, sum(COALESCE(rosters.points, 0)) as points FROM draft
+                                        LEFT JOIN player_aliases pa ON draft.player = pa.player 
+                                            OR draft.player = pa.alias_1 
+                                            OR draft.player = pa.alias_2 
+                                            OR draft.player = pa.alias_3
+                                        LEFT JOIN rosters ON (
+                                            (rosters.player = draft.player OR 
+                                             rosters.player = pa.player OR 
+                                             rosters.player = pa.alias_1 OR 
+                                             rosters.player = pa.alias_2 OR 
+                                             rosters.player = pa.alias_3)
+                                            AND rosters.year = draft.year
+                                        )
                                         WHERE manager_id = $managerId
                                         GROUP BY draft.player
                                         HAVING times > 2

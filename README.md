@@ -14,7 +14,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
     - make sure it doesnt add duplicate rows, this happens for names with an apostrophe in the name
-- current season draft performance has player missing (BRJ). also has some players not matching up (Stroud), need to use alias?
 
 
 # Ideas
@@ -43,8 +42,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
     - profile
 - make records page more useful to find new current leaders by adding a filter for it
 - analyze text messages by manager in group text
-- use player aliases, so if they aren't matching up for draft or rosters, look in there
-- rosters page, show stats for when stats exist. like compare rush yards, pass tds, etc.
 
 Notes:
 Moved to 18 week schedule in 2021

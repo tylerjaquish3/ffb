@@ -142,11 +142,26 @@ include 'sidebar.php';
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $result = query("SELECT r.manager, r.year, sum(points) as points, min(draft.overall_pick) as pick
+                                    $result = query("SELECT r.manager, r.year, sum(r.points) as points, min(d.overall_pick) as pick
                                         FROM rosters r
-                                        JOIN draft on r.player = draft.player AND r.year = draft.year
+                                        JOIN draft d ON d.year = r.year AND (
+                                            r.player = d.player
+                                        )
                                         GROUP BY r.manager, r.year
-                                        ORDER BY sum(points) DESC");
+                                        UNION
+                                        SELECT r.manager, r.year, sum(r.points) as points, min(d.overall_pick) as pick
+                                        FROM rosters r
+                                        JOIN draft d ON d.year = r.year
+                                        JOIN player_aliases pa ON d.player = pa.player 
+                                            OR d.player = pa.alias_1 
+                                            OR d.player = pa.alias_2 
+                                            OR d.player = pa.alias_3
+                                        WHERE r.player = pa.player OR 
+                                              r.player = pa.alias_1 OR 
+                                              r.player = pa.alias_2 OR 
+                                              r.player = pa.alias_3
+                                        GROUP BY r.manager, r.year
+                                        ORDER BY points DESC");
                                     while ($row = fetch_array($result)) { ?>
                                         <tr>
                                             <td><?php echo $row['manager']; ?></td>
@@ -174,10 +189,27 @@ include 'sidebar.php';
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $result = query("SELECT r.manager, sum(points) as points, count(distinct draft.year) as years
-                                        FROM rosters r
-                                        JOIN draft on r.player = draft.player AND r.year = draft.year
-                                        GROUP BY r.manager
+                                    $result = query("SELECT manager, sum(points) as points, count(distinct year) as years
+                                        FROM (
+                                            SELECT r.manager, r.year, sum(r.points) as points
+                                            FROM rosters r
+                                            JOIN draft d ON d.year = r.year AND r.player = d.player
+                                            GROUP BY r.manager, r.year
+                                            UNION
+                                            SELECT r.manager, r.year, sum(r.points) as points
+                                            FROM rosters r
+                                            JOIN draft d ON d.year = r.year
+                                            JOIN player_aliases pa ON d.player = pa.player 
+                                                OR d.player = pa.alias_1 
+                                                OR d.player = pa.alias_2 
+                                                OR d.player = pa.alias_3
+                                            WHERE r.player = pa.player OR 
+                                                  r.player = pa.alias_1 OR 
+                                                  r.player = pa.alias_2 OR 
+                                                  r.player = pa.alias_3
+                                            GROUP BY r.manager, r.year
+                                        ) combined
+                                        GROUP BY manager
                                         ORDER BY sum(points) DESC");
                                     while ($row = fetch_array($result)) { ?>
                                         <tr>

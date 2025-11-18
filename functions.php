@@ -1067,8 +1067,19 @@ function getChampions()
         // Get top drafted player (highest scoring drafted player)
         $topDraftResult = query("SELECT d.player, SUM(r.points) as total_points 
             FROM draft d 
-            LEFT JOIN rosters r ON d.player = r.player AND d.year = r.year AND d.manager_id = (
-                SELECT id FROM managers WHERE name = r.manager
+            LEFT JOIN player_aliases pa ON d.player = pa.player 
+                OR d.player = pa.alias_1 
+                OR d.player = pa.alias_2 
+                OR d.player = pa.alias_3
+            LEFT JOIN rosters r ON (
+                (r.player = d.player OR 
+                 r.player = pa.player OR 
+                 r.player = pa.alias_1 OR 
+                 r.player = pa.alias_2 OR 
+                 r.player = pa.alias_3)
+                AND d.year = r.year AND d.manager_id = (
+                    SELECT id FROM managers WHERE name = r.manager
+                )
             )
             WHERE d.year = $year AND d.manager_id = $managerId 
             GROUP BY d.player 
@@ -1083,7 +1094,13 @@ function getChampions()
             FROM rosters r 
             WHERE r.year = $year AND r.manager = '$name' 
             AND r.player NOT IN (
-                SELECT d.player FROM draft d WHERE d.year = $year
+                SELECT DISTINCT COALESCE(pa.player, d.player) 
+                FROM draft d 
+                LEFT JOIN player_aliases pa ON d.player = pa.player 
+                    OR d.player = pa.alias_1 
+                    OR d.player = pa.alias_2 
+                    OR d.player = pa.alias_3
+                WHERE d.year = $year
             )
             GROUP BY r.player 
             ORDER BY total_points DESC 
@@ -1401,13 +1418,13 @@ function getCurrentSeasonPoints()
     while ($row = fetch_array($result)) {
 
         if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
-            $points[$row['manager']]['BN']['projected'] += round($row['projected'], 1);
-            $points[$row['manager']]['BN']['points'] += round($row['points'], 1);
+            $points[$row['manager']]['BN']['projected'] += round($row['projected'] ?? 0, 1);
+            $points[$row['manager']]['BN']['points'] += round($row['points'] ?? 0, 1);
 
         } else {
             $points[$row['manager']][$row['roster_spot']] = [
-                'projected' => round($row['projected'], 1),
-                'points' => round($row['points'], 1)
+                'projected' => round($row['projected'] ?? 0, 1),
+                'points' => round($row['points'] ?? 0, 1)
             ];
         }
     }
@@ -1736,14 +1753,34 @@ function getDraftedPoints($dir, $round)
     global $selectedSeason;
     $response = [];
 
-    // Need to do different join for sqlite vs mysql
-    $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
-
-    $query = "SELECT rosters.manager, sum(points) as points FROM rosters
-        JOIN managers ON rosters.manager = managers.name
-        $join
-        WHERE rosters.year = $selectedSeason AND roster_spot NOT IN ('BN', 'IR') and draft.round $dir $round
-        GROUP BY manager";
+    $query = "SELECT manager, sum(points) as points FROM (
+        SELECT r.manager, sum(r.points) as points
+        FROM rosters r
+        JOIN managers m ON r.manager = m.name
+        JOIN draft d ON d.manager_id = m.id AND d.year = r.year AND r.player = d.player
+        WHERE r.year = $selectedSeason 
+            AND r.roster_spot NOT IN ('BN', 'IR') 
+            AND d.round $dir $round
+        GROUP BY r.manager
+        UNION
+        SELECT r.manager, sum(r.points) as points
+        FROM rosters r
+        JOIN managers m ON r.manager = m.name
+        JOIN draft d ON d.manager_id = m.id AND d.year = r.year
+        JOIN player_aliases pa ON d.player = pa.player 
+            OR d.player = pa.alias_1 
+            OR d.player = pa.alias_2 
+            OR d.player = pa.alias_3
+        WHERE r.year = $selectedSeason 
+            AND r.roster_spot NOT IN ('BN', 'IR') 
+            AND d.round $dir $round
+            AND (r.player = pa.player OR 
+                 r.player = pa.alias_1 OR 
+                 r.player = pa.alias_2 OR 
+                 r.player = pa.alias_3)
+        GROUP BY r.manager
+    ) combined
+    GROUP BY manager";
 
     $result = query($query);
 
@@ -1769,39 +1806,75 @@ function getDraftPoints()
     $lateRound = getDraftedPoints('>', 9);
     $earlyRound = getDraftedPoints('<', 6);
 
-    // Need to do different join for sqlite vs mysql
-    $join = "JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year";
-
     $result = query("SELECT MAX(WEEK) AS maxweek FROM rosters WHERE YEAR = $selectedSeason");
     while ($row = fetch_array($result)) {
         $week = $row['maxweek'];
     }
 
     $retained = [];
-    $query = "SELECT manager, COUNT(rosters.player) as players FROM rosters
-        JOIN managers ON rosters.manager = managers.name
-        $join
-        WHERE rosters.year = $selectedSeason AND WEEK = $week
-        GROUP BY manager";
+    $query = "SELECT manager, COUNT(player) as players FROM (
+        SELECT r.manager, r.player
+        FROM rosters r
+        JOIN managers m ON r.manager = m.name
+        JOIN draft d ON d.manager_id = m.id AND d.year = r.year AND r.player = d.player
+        WHERE r.year = $selectedSeason AND r.week = $week
+        UNION
+        SELECT r.manager, r.player
+        FROM rosters r
+        JOIN managers m ON r.manager = m.name
+        JOIN draft d ON d.manager_id = m.id AND d.year = r.year
+        JOIN player_aliases pa ON d.player = pa.player 
+            OR d.player = pa.alias_1 
+            OR d.player = pa.alias_2 
+            OR d.player = pa.alias_3
+        WHERE r.year = $selectedSeason AND r.week = $week
+            AND (r.player = pa.player OR 
+                 r.player = pa.alias_1 OR 
+                 r.player = pa.alias_2 OR 
+                 r.player = pa.alias_3)
+    ) combined
+    GROUP BY manager";
     $result = query($query);
     while ($row = fetch_array($result)) {
         $retained[] = $row;
     }
 
-    $result = query("SELECT rosters.manager, sum(points) AS points FROM rosters
-        WHERE rosters.YEAR = $selectedSeason AND roster_spot NOT IN ('BN', 'IR')
-        GROUP BY manager");
-    while ($row = fetch_array($result)) {
+    // Get undrafted points directly - players in rosters but NOT in draft
+    $undraftedQuery = "SELECT r.manager, sum(r.points) as undrafted_points
+        FROM rosters r
+        JOIN managers m ON r.manager = m.name
+        WHERE r.year = $selectedSeason AND r.roster_spot NOT IN ('BN', 'IR')
+        AND NOT EXISTS (
+            SELECT 1 FROM draft d 
+            WHERE d.manager_id = m.id AND d.year = r.year AND d.player = r.player
+        )
+        AND NOT EXISTS (
+            SELECT 1 FROM draft d
+            JOIN player_aliases pa ON d.player = pa.player 
+                OR d.player = pa.alias_1 
+                OR d.player = pa.alias_2 
+                OR d.player = pa.alias_3
+            WHERE d.manager_id = m.id AND d.year = r.year
+                AND (r.player = pa.player OR 
+                     r.player = pa.alias_1 OR 
+                     r.player = pa.alias_2 OR 
+                     r.player = pa.alias_3)
+        )
+        GROUP BY r.manager";
+    
+    $undraftedResult = query($undraftedQuery);
+    $undraftedPoints = [];
+    while ($row = fetch_array($undraftedResult)) {
+        $undraftedPoints[$row['manager']] = $row['undrafted_points'];
+    }
 
-        foreach ($drafted as $item) {
-            if ($item['manager'] == $row['manager']) {
-                $response[] = [
-                    'manager' => $row['manager'],
-                    'undrafted_points' => $row['points'] - $item['points'],
-                    'drafted_points' => $item['points'],
-                ];
-            }
-        }
+    // Combine drafted and undrafted points
+    foreach ($drafted as $item) {
+        $response[] = [
+            'manager' => $item['manager'],
+            'undrafted_points' => isset($undraftedPoints[$item['manager']]) ? $undraftedPoints[$item['manager']] : 0,
+            'drafted_points' => $item['points'],
+        ];
     }
 
     foreach ($retained as $item) {
@@ -1855,13 +1928,30 @@ function getWorstDraftPicks()
     $kMedian = getMedian($year, 'K');
     $kAvgPick = getAveragePick($year, 'K');
 
-    $sql = "SELECT rosters.manager, managers.id as manager_id, draft.overall_pick, draft.position, 
-        rosters.player, sum(points) AS points, draft.year
-        FROM rosters
-        JOIN managers ON rosters.manager = managers.name
-        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
-        WHERE rosters.year = $year
-        GROUP BY manager, overall_pick, rosters.player, draft.position";
+    $sql = "SELECT r.manager, m.id as manager_id, d.overall_pick, d.position, 
+        COALESCE(pa1.player, pa2.player, d.player) as player, sum(r.points) AS points, d.year
+        FROM rosters r
+        JOIN managers m ON r.manager = m.name
+        JOIN draft d ON d.manager_id = m.id AND d.year = r.year
+        LEFT JOIN player_aliases pa1 ON d.player = pa1.player 
+            OR d.player = pa1.alias_1 
+            OR d.player = pa1.alias_2 
+            OR d.player = pa1.alias_3
+        LEFT JOIN player_aliases pa2 ON r.player = pa2.player 
+            OR r.player = pa2.alias_1 
+            OR r.player = pa2.alias_2 
+            OR r.player = pa2.alias_3
+        WHERE r.year = $year
+            AND (r.player = d.player OR 
+                 r.player = pa1.player OR 
+                 r.player = pa1.alias_1 OR 
+                 r.player = pa1.alias_2 OR 
+                 r.player = pa1.alias_3 OR
+                 d.player = pa2.player OR 
+                 d.player = pa2.alias_1 OR 
+                 d.player = pa2.alias_2 OR 
+                 d.player = pa2.alias_3)
+        GROUP BY r.manager, d.overall_pick, COALESCE(pa1.player, pa2.player, d.player), d.position";
 
     $result = query($sql);
 
@@ -1935,13 +2025,30 @@ function getBestDraftPicks()
     $kMedian = getMedian($year, 'K');
     $kAvgPick = getAveragePick($year, 'K');
 
-    $sql = "SELECT rosters.manager, managers.id as manager_id, draft.overall_pick, draft.position, 
-        rosters.player, sum(points) AS points, draft.year
-        FROM rosters
-        JOIN managers ON rosters.manager = managers.name
-        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
-        WHERE rosters.year = $year
-        GROUP BY manager, overall_pick, rosters.player, draft.position";
+    $sql = "SELECT r.manager, m.id as manager_id, d.overall_pick, d.position, 
+        COALESCE(pa1.player, pa2.player, d.player) as player, sum(r.points) AS points, d.year
+        FROM rosters r
+        JOIN managers m ON r.manager = m.name
+        JOIN draft d ON d.manager_id = m.id AND d.year = r.year
+        LEFT JOIN player_aliases pa1 ON d.player = pa1.player 
+            OR d.player = pa1.alias_1 
+            OR d.player = pa1.alias_2 
+            OR d.player = pa1.alias_3
+        LEFT JOIN player_aliases pa2 ON r.player = pa2.player 
+            OR r.player = pa2.alias_1 
+            OR r.player = pa2.alias_2 
+            OR r.player = pa2.alias_3
+        WHERE r.year = $year
+            AND (r.player = d.player OR 
+                 r.player = pa1.player OR 
+                 r.player = pa1.alias_1 OR 
+                 r.player = pa1.alias_2 OR 
+                 r.player = pa1.alias_3 OR
+                 d.player = pa2.player OR 
+                 d.player = pa2.alias_1 OR 
+                 d.player = pa2.alias_2 OR 
+                 d.player = pa2.alias_3)
+        GROUP BY r.manager, d.overall_pick, COALESCE(pa1.player, pa2.player, d.player), d.position";
 
     $result = query($sql);
 
@@ -2041,11 +2148,28 @@ function getPlayersRetained()
     global $week, $selectedSeason;
     $response = [];
 
-    $result = query("SELECT manager, COUNT(rosters.player) as players FROM rosters
-        JOIN managers ON rosters.manager = managers.name
-        JOIN draft ON rosters.player LIKE draft.player || '%' AND managers.id = draft.manager_id AND rosters.year = draft.year
-        WHERE rosters.year = $selectedSeason AND WEEK = $week
-        GROUP BY manager");
+    $result = query("SELECT manager, COUNT(player) as players FROM (
+        SELECT r.manager, r.player
+        FROM rosters r
+        JOIN managers m ON r.manager = m.name
+        JOIN draft d ON d.manager_id = m.id AND d.year = r.year AND r.player = d.player
+        WHERE r.year = $selectedSeason AND r.week = $week
+        UNION
+        SELECT r.manager, r.player
+        FROM rosters r
+        JOIN managers m ON r.manager = m.name
+        JOIN draft d ON d.manager_id = m.id AND d.year = r.year
+        JOIN player_aliases pa ON d.player = pa.player 
+            OR d.player = pa.alias_1 
+            OR d.player = pa.alias_2 
+            OR d.player = pa.alias_3
+        WHERE r.year = $selectedSeason AND r.week = $week
+            AND (r.player = pa.player OR 
+                 r.player = pa.alias_1 OR 
+                 r.player = pa.alias_2 OR 
+                 r.player = pa.alias_3)
+    ) retained
+    GROUP BY manager");
     while ($row = fetch_array($result)) {
         $response[] = $row;
     }
@@ -2105,43 +2229,30 @@ function getAllDraftedPlayerDetails()
     $response = [];
 
     $result = query("SELECT managers.name as manager, draft.overall_pick, draft.position, draft.round, draft.player,
-        SUM(points) AS points, SUM(IF(roster_spot NOT IN ('BN','IR'), 1, 0)) AS GP
+        SUM(COALESCE(rosters.points, 0)) AS points, SUM(IF(rosters.roster_spot NOT IN ('BN','IR'), 1, 0)) AS GP
         FROM draft
         JOIN managers ON draft.manager_id = managers.id 
-        LEFT JOIN rosters ON rosters.player LIKE draft.player || '%' AND rosters.year = draft.year AND rosters.manager = managers.name
+        LEFT JOIN player_aliases pa ON draft.player = pa.player 
+            OR draft.player = pa.alias_1 
+            OR draft.player = pa.alias_2 
+            OR draft.player = pa.alias_3
+        LEFT JOIN rosters ON (
+            (rosters.player = draft.player OR 
+             rosters.player = pa.player OR 
+             rosters.player = pa.alias_1 OR 
+             rosters.player = pa.alias_2 OR 
+             rosters.player = pa.alias_3)
+            AND rosters.year = draft.year 
+            AND rosters.manager = managers.name
+        )
         WHERE draft.year = $selectedSeason
-        GROUP BY manager, overall_pick, rosters.player, draft.position, round
-        ORDER BY overall_pick asc");
-    $temp = [];
+        GROUP BY managers.name, draft.overall_pick, draft.player, draft.position, draft.round
+        ORDER BY draft.overall_pick asc");
+    
+    $response = [];
     while ($row = fetch_array($result)) {
-        // Normalize player name
-        $normName = preg_replace('/\b(Jr\.?|Sr\.?|III|II|IV)\b/i', '', $row['player']);
-        $normName = preg_replace('/[^\w\s]/', '', $normName);
-        $normName = strtolower(trim($normName));
-
-        // Try to deduplicate by fuzzy match
-        $found = false;
-        // foreach ($temp as &$existing) {
-
-        //     $existingNorm = preg_replace('/\b(Jr\.?|Sr\.?|III|II|IV)\b/i', '', $existing['player']);
-        //     $existingNorm = preg_replace('/[^\w\s]/', '', $existingNorm);
-        //     $existingNorm = strtolower(trim($existingNorm));
-        //     // Use similar_text for fuzzy match
-        //     similar_text($normName, $existingNorm, $percent);
-        //     if ($percent > 90 && $row['manager'] == $existing['manager']) {
-        //         // Merge points and GP
-        //         $existing['points'] += $row['points'];
-        //         $existing['GP'] += $row['GP'];
-        //         $found = true;
-        //         break;
-        //     }
-        // }
-        if (!$found) {
-            $temp[] = $row;
-        }
+        $response[] = $row;
     }
-
-    $response = $temp;
 
     return $response;
 }

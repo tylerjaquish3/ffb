@@ -200,6 +200,7 @@ function lookupGameTime(?int $id) {
                     <div class="tab-buttons-container">
                         <button class="tab-button active" id="recap-tab" onclick="showCard('recap')">Recap</button>
                         <button class="tab-button" id="matchup-rosters-tab" onclick="showCard('matchup-rosters')">Matchup Rosters</button>
+                        <button class="tab-button" id="player-stats-tab" onclick="showCard('player-stats')">Player Stats</button>
                         <button class="tab-button" id="points-by-position-tab" onclick="showCard('points-by-position')">Points by Position</button>
                         <button class="tab-button" id="full-season-roster-tab" onclick="showCard('full-season-roster')">Full Season Roster</button>
                     </div>
@@ -394,6 +395,208 @@ function lookupGameTime(?int $id) {
                                     </table>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row card-section" id="player-stats" style="display: none;">
+                <div class="col-sm-12 col-md-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Player Stats Comparison</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <?php
+                            // Query stats for both managers in this matchup
+                            $statsAvailable = false;
+                            $managerStats = [];
+                            $versusStats = [];
+                            
+                            // Check if stats exist for this year/week
+                            $statsCheckQuery = "SELECT COUNT(*) as count FROM rosters r 
+                                JOIN stats s ON s.roster_id = r.id 
+                                WHERE r.year = $year AND r.week = $week";
+                            $statsCheckResult = query($statsCheckQuery);
+                            $statsCheckRow = fetch_array($statsCheckResult);
+                            
+                            if ($statsCheckRow['count'] > 0) {
+                                $statsAvailable = true;
+                                
+                                // Get stats for the main manager
+                                if ($playoffRoster) {
+                                    $managerStatsQuery = "SELECT 
+                                        SUM(s.pass_yds) AS pass_yds, SUM(s.pass_tds) AS pass_tds, SUM(s.ints) AS ints,
+                                        SUM(s.rush_yds) AS rush_yds, SUM(s.rush_tds) AS rush_tds,
+                                        SUM(s.receptions) AS receptions, SUM(s.rec_yds) AS rec_yds, SUM(s.rec_tds) AS rec_tds,
+                                        SUM(s.fumbles) AS fumbles
+                                        FROM playoff_rosters r
+                                        JOIN stats s ON s.roster_id = r.id
+                                        WHERE r.year = $year AND r.week = $week AND r.manager = '$managerName' AND r.roster_spot != 'BN' AND r.roster_spot != 'IR'";
+                                } else {
+                                    $managerStatsQuery = "SELECT 
+                                        SUM(s.pass_yds) AS pass_yds, SUM(s.pass_tds) AS pass_tds, SUM(s.ints) AS ints,
+                                        SUM(s.rush_yds) AS rush_yds, SUM(s.rush_tds) AS rush_tds,
+                                        SUM(s.receptions) AS receptions, SUM(s.rec_yds) AS rec_yds, SUM(s.rec_tds) AS rec_tds,
+                                        SUM(s.fumbles) AS fumbles
+                                        FROM rosters r
+                                        JOIN stats s ON s.roster_id = r.id
+                                        WHERE r.year = $year AND r.week = $week AND r.manager = '$managerName' AND r.roster_spot != 'BN' AND r.roster_spot != 'IR'";
+                                }
+                                $result = query($managerStatsQuery);
+                                $managerStats = fetch_array($result);
+                                
+                                // Get stats for the versus manager
+                                if ($playoffRoster) {
+                                    $versusStatsQuery = "SELECT 
+                                        SUM(s.pass_yds) AS pass_yds, SUM(s.pass_tds) AS pass_tds, SUM(s.ints) AS ints,
+                                        SUM(s.rush_yds) AS rush_yds, SUM(s.rush_tds) AS rush_tds,
+                                        SUM(s.receptions) AS receptions, SUM(s.rec_yds) AS rec_yds, SUM(s.rec_tds) AS rec_tds,
+                                        SUM(s.fumbles) AS fumbles
+                                        FROM playoff_rosters r
+                                        JOIN stats s ON s.roster_id = r.id
+                                        WHERE r.year = $year AND r.week = $week AND r.manager = '$versus' AND r.roster_spot != 'BN' AND r.roster_spot != 'IR'";
+                                } else {
+                                    $versusStatsQuery = "SELECT 
+                                        SUM(s.pass_yds) AS pass_yds, SUM(s.pass_tds) AS pass_tds, SUM(s.ints) AS ints,
+                                        SUM(s.rush_yds) AS rush_yds, SUM(s.rush_tds) AS rush_tds,
+                                        SUM(s.receptions) AS receptions, SUM(s.rec_yds) AS rec_yds, SUM(s.rec_tds) AS rec_tds,
+                                        SUM(s.fumbles) AS fumbles
+                                        FROM rosters r
+                                        JOIN stats s ON s.roster_id = r.id
+                                        WHERE r.year = $year AND r.week = $week AND r.manager = '$versus' AND r.roster_spot != 'BN' AND r.roster_spot != 'IR'";
+                                }
+                                $result = query($versusStatsQuery);
+                                $versusStats = fetch_array($result);
+                            }
+                            ?>
+                            
+                            <?php if (!$statsAvailable): ?>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <h4 class="alert-heading">Data not available</h4>
+                                        <p>Player statistics are not available for <?php echo $year; ?> Week <?php echo $week; ?>.</p>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <table class="table table-responsive table-striped nowrap">
+                                            <thead>
+                                                <th>Statistic</th>
+                                                <th class="text-center"><?php echo $managerName; ?></th>
+                                                <th class="text-center"><?php echo $versus; ?></th>
+                                                <th class="text-center">Difference</th>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Total Yards</strong></td>
+                                                    <td class="text-center"><?php echo number_format(($managerStats['pass_yds'] ?? 0) + ($managerStats['rush_yds'] ?? 0) + ($managerStats['rec_yds'] ?? 0)); ?></td>
+                                                    <td class="text-center"><?php echo number_format(($versusStats['pass_yds'] ?? 0) + ($versusStats['rush_yds'] ?? 0) + ($versusStats['rec_yds'] ?? 0)); ?></td>
+                                                    <td class="text-center"><?php 
+                                                        $managerTotal = ($managerStats['pass_yds'] ?? 0) + ($managerStats['rush_yds'] ?? 0) + ($managerStats['rec_yds'] ?? 0);
+                                                        $versusTotal = ($versusStats['pass_yds'] ?? 0) + ($versusStats['rush_yds'] ?? 0) + ($versusStats['rec_yds'] ?? 0);
+                                                        $diff = $managerTotal - $versusTotal;
+                                                        echo ($diff > 0 ? '+' : '') . number_format($diff);
+                                                    ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Total TDs</strong></td>
+                                                    <td class="text-center"><?php echo ($managerStats['pass_tds'] ?? 0) + ($managerStats['rush_tds'] ?? 0) + ($managerStats['rec_tds'] ?? 0); ?></td>
+                                                    <td class="text-center"><?php echo ($versusStats['pass_tds'] ?? 0) + ($versusStats['rush_tds'] ?? 0) + ($versusStats['rec_tds'] ?? 0); ?></td>
+                                                    <td class="text-center"><?php 
+                                                        $managerTds = ($managerStats['pass_tds'] ?? 0) + ($managerStats['rush_tds'] ?? 0) + ($managerStats['rec_tds'] ?? 0);
+                                                        $versusTds = ($versusStats['pass_tds'] ?? 0) + ($versusStats['rush_tds'] ?? 0) + ($versusStats['rec_tds'] ?? 0);
+                                                        $diff = $managerTds - $versusTds;
+                                                        echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Pass Yards</strong></td>
+                                                    <td class="text-center"><?php echo number_format($managerStats['pass_yds'] ?? 0); ?></td>
+                                                    <td class="text-center"><?php echo number_format($versusStats['pass_yds'] ?? 0); ?></td>
+                                                    <td class="text-center"><?php 
+                                                        $diff = ($managerStats['pass_yds'] ?? 0) - ($versusStats['pass_yds'] ?? 0);
+                                                        echo ($diff > 0 ? '+' : '') . number_format($diff);
+                                                    ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Pass TDs</strong></td>
+                                                    <td class="text-center"><?php echo $managerStats['pass_tds'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php echo $versusStats['pass_tds'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php 
+                                                        $diff = ($managerStats['pass_tds'] ?? 0) - ($versusStats['pass_tds'] ?? 0);
+                                                        echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Interceptions</strong></td>
+                                                    <td class="text-center"><?php echo $managerStats['ints'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php echo $versusStats['ints'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php 
+                                                        $diff = ($managerStats['ints'] ?? 0) - ($versusStats['ints'] ?? 0);
+                                                        echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Rush Yards</strong></td>
+                                                    <td class="text-center"><?php echo number_format($managerStats['rush_yds'] ?? 0); ?></td>
+                                                    <td class="text-center"><?php echo number_format($versusStats['rush_yds'] ?? 0); ?></td>
+                                                    <td class="text-center"><?php 
+                                                        $diff = ($managerStats['rush_yds'] ?? 0) - ($versusStats['rush_yds'] ?? 0);
+                                                        echo ($diff > 0 ? '+' : '') . number_format($diff);
+                                                    ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Rush TDs</strong></td>
+                                                    <td class="text-center"><?php echo $managerStats['rush_tds'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php echo $versusStats['rush_tds'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php 
+                                                        $diff = ($managerStats['rush_tds'] ?? 0) - ($versusStats['rush_tds'] ?? 0);
+                                                        echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Receptions</strong></td>
+                                                    <td class="text-center"><?php echo $managerStats['receptions'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php echo $versusStats['receptions'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php 
+                                                        $diff = ($managerStats['receptions'] ?? 0) - ($versusStats['receptions'] ?? 0);
+                                                        echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Receiving Yards</strong></td>
+                                                    <td class="text-center"><?php echo number_format($managerStats['rec_yds'] ?? 0); ?></td>
+                                                    <td class="text-center"><?php echo number_format($versusStats['rec_yds'] ?? 0); ?></td>
+                                                    <td class="text-center"><?php 
+                                                        $diff = ($managerStats['rec_yds'] ?? 0) - ($versusStats['rec_yds'] ?? 0);
+                                                        echo ($diff > 0 ? '+' : '') . number_format($diff);
+                                                    ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Receiving TDs</strong></td>
+                                                    <td class="text-center"><?php echo $managerStats['rec_tds'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php echo $versusStats['rec_tds'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php 
+                                                        $diff = ($managerStats['rec_tds'] ?? 0) - ($versusStats['rec_tds'] ?? 0);
+                                                        echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Fumbles</strong></td>
+                                                    <td class="text-center"><?php echo $managerStats['fumbles'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php echo $versusStats['fumbles'] ?? 0; ?></td>
+                                                    <td class="text-center"><?php 
+                                                        $diff = ($managerStats['fumbles'] ?? 0) - ($versusStats['fumbles'] ?? 0);
+                                                        echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

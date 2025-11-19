@@ -950,4 +950,191 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-season') {
     die;
 }
 
+// Playoff Calculator data retrieval
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'playoff-calculator') {
+    $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
+    $playoffSpots = 6; // Assuming top 6 teams make playoffs
+    
+    // Get current standings (wins/losses from regular_season_matchups)
+    $standings = [];
+    $managerStats = [];
+    
+    // Get all managers first
+    $result = query("SELECT id, name FROM managers ORDER BY name");
+    
+    while ($row = fetch_array($result)) {
+        $managerId = $row['id'];
+        $managerName = $row['name'];
+        
+        // Count wins, losses, and total points for this manager
+        // Only count games where this manager is manager1 to avoid double counting
+        $statsResult = query("SELECT 
+                                SUM(CASE WHEN winning_manager_id = $managerId THEN 1 ELSE 0 END) as wins,
+                                SUM(CASE WHEN losing_manager_id = $managerId THEN 1 ELSE 0 END) as losses,
+                                SUM(manager1_score) as total_points
+                              FROM regular_season_matchups 
+                              WHERE year = $year 
+                              AND manager1_id = $managerId
+                              AND winning_manager_id IS NOT NULL");
+        
+        $statsRow = fetch_array($statsResult);
+        
+        $managerStats[$managerId] = [
+            'id' => $managerId,
+            'name' => $managerName,
+            'wins' => intval($statsRow['wins'] ?: 0),
+            'losses' => intval($statsRow['losses'] ?: 0),
+            'total_points' => floatval($statsRow['total_points'] ?: 0),
+            'remaining_games' => []
+        ];
+    }
+    
+    // Get remaining schedule for each manager
+    $result = query("SELECT 
+                        s.manager1_id,
+                        s.manager2_id,
+                        s.week,
+                        m1.name as manager1_name,
+                        m2.name as manager2_name
+                     FROM schedule s
+                     JOIN managers m1 ON m1.id = s.manager1_id
+                     JOIN managers m2 ON m2.id = s.manager2_id
+                     WHERE s.year = $year
+                     ORDER BY s.week");
+    
+    $futureMatchups = [];
+    while ($row = fetch_array($result)) {
+        // Check if this game has already been played
+        $gameResult = query("SELECT id FROM regular_season_matchups 
+                           WHERE year = $year 
+                           AND week_number = " . $row['week'] . "
+                           AND ((manager1_id = " . $row['manager1_id'] . " AND manager2_id = " . $row['manager2_id'] . ")
+                           OR (manager1_id = " . $row['manager2_id'] . " AND manager2_id = " . $row['manager1_id'] . "))
+                           AND winning_manager_id IS NOT NULL");
+        
+        $gameRow = fetch_array($gameResult);
+        if (!$gameRow) { // Game hasn't been played yet
+            $futureMatchups[] = [
+                'week' => $row['week'],
+                'manager1_id' => $row['manager1_id'],
+                'manager2_id' => $row['manager2_id'],
+                'manager1_name' => $row['manager1_name'],
+                'manager2_name' => $row['manager2_name']
+            ];
+            
+            // Add to remaining games for each manager
+            if (isset($managerStats[$row['manager1_id']])) {
+                $managerStats[$row['manager1_id']]['remaining_games'][] = [
+                    'week' => $row['week'],
+                    'opponent_id' => $row['manager2_id'],
+                    'opponent_name' => $row['manager2_name']
+                ];
+            }
+            if (isset($managerStats[$row['manager2_id']])) {
+                $managerStats[$row['manager2_id']]['remaining_games'][] = [
+                    'week' => $row['week'],
+                    'opponent_id' => $row['manager1_id'],
+                    'opponent_name' => $row['manager1_name']
+                ];
+            }
+        }
+    }
+    
+    // Calculate playoff scenarios for each manager
+    $results = [];
+    $totalScenarios = pow(2, count($futureMatchups));
+    
+    foreach ($managerStats as $managerId => $manager) {
+        $playoffCount = 0;
+        
+        // Run through all possible scenarios
+        for ($scenario = 0; $scenario < $totalScenarios; $scenario++) {
+            $tempRecords = [];
+            
+            // Initialize with current records
+            foreach ($managerStats as $tempId => $tempManager) {
+                $tempRecords[$tempId] = [
+                    'wins' => $tempManager['wins'],
+                    'losses' => $tempManager['losses'],
+                    'total_points' => $tempManager['total_points']
+                ];
+            }
+            
+            // Apply scenario results to future matchups
+            for ($gameIndex = 0; $gameIndex < count($futureMatchups); $gameIndex++) {
+                $game = $futureMatchups[$gameIndex];
+                $manager1Wins = ($scenario >> $gameIndex) & 1;
+                
+                if ($manager1Wins) {
+                    $tempRecords[$game['manager1_id']]['wins']++;
+                    $tempRecords[$game['manager2_id']]['losses']++;
+                } else {
+                    $tempRecords[$game['manager2_id']]['wins']++;
+                    $tempRecords[$game['manager1_id']]['losses']++;
+                }
+            }
+            
+            // Sort by wins (descending), then by points (descending)
+            uasort($tempRecords, function($a, $b) {
+                if ($a['wins'] != $b['wins']) {
+                    return $b['wins'] - $a['wins'];
+                }
+                return $b['total_points'] <=> $a['total_points'];
+            });
+            
+            // Check if this manager makes playoffs (top 6)
+            $rank = 1;
+            foreach ($tempRecords as $tempId => $record) {
+                if ($tempId == $managerId && $rank <= $playoffSpots) {
+                    $playoffCount++;
+                    break;
+                }
+                $rank++;
+            }
+        }
+        
+        $playoffPercentage = ($totalScenarios > 0) ? round(($playoffCount / $totalScenarios) * 100, 1) : 0;
+        
+        // Calculate best and worst case scenarios
+        $remainingGames = count($manager['remaining_games']);
+        $bestCaseWins = $manager['wins'] + $remainingGames;
+        $bestCaseLosses = $manager['losses'];
+        $worstCaseWins = $manager['wins'];
+        $worstCaseLosses = $manager['losses'] + $remainingGames;
+        
+        $results[] = [
+            'manager_id' => $managerId,
+            'manager_name' => $manager['name'],
+            'current_wins' => $manager['wins'],
+            'current_losses' => $manager['losses'],
+            'remaining_games' => $remainingGames,
+            'playoff_percentage' => $playoffPercentage,
+            'best_case_record' => $bestCaseWins . '-' . $bestCaseLosses,
+            'worst_case_record' => $worstCaseWins . '-' . $worstCaseLosses
+        ];
+    }
+    
+    // Sort by current standings (wins desc, then total points desc)
+    usort($results, function($a, $b) use ($managerStats) {
+        $aStats = $managerStats[$a['manager_id']];
+        $bStats = $managerStats[$b['manager_id']];
+        
+        if ($aStats['wins'] != $bStats['wins']) {
+            return $bStats['wins'] - $aStats['wins'];
+        }
+        return $bStats['total_points'] <=> $aStats['total_points'];
+    });
+    
+    // Add ranking
+    for ($i = 0; $i < count($results); $i++) {
+        $results[$i]['current_rank'] = $i + 1;
+    }
+    
+    $content = new \stdClass();
+    $content->data = $results;
+    
+    echo json_encode($content);
+    die;
+}
+
 ?>

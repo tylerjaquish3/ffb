@@ -6,7 +6,6 @@ There is a laravel project inside the fun-facts folder so that jobs can be run. 
 php artisan funFacts : update all of the manager fun facts. 
 php artisan gameTimes : get game times from the storage/app/games CSVs and update rosters table. Also update game_slot based on game_time
 
-Playoff Calculator: https://playoffcomputer.appspot.com/
 
 # Bugs
 - In regular_season_matchups table, lots of projections are wrong (looking at 2019)
@@ -21,7 +20,6 @@ Playoff Calculator: https://playoffcomputer.appspot.com/
 - Current season, worst draft picks remove players that got traded midseason
 - add trophy graphic on trophy page
 - run some "what if" scenarios
-- chances of making playoffs, make request to playoffcomputer linked above
 - add more fun facts
     - record against everyone
     - best trade

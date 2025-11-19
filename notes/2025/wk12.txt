@@ -12,10 +12,16 @@ recap
 
 preview
 
-Justin & Cameron
-Tyler & AJ
-Matt & Gavin
-Everett & Andy
-Cole & Ben
+Justin & Cameron: Justin has his fewest wins against Cameron (only 11) 
+    but they have just 17 points difference in 26 matchups and 10,081 combined points scored.
+Tyler & AJ: tyler has his fewest wins against AJ, but their avg points are separated by just 1.4 over their 30 matchups.
+    its also the 3rd time in their last 5 matchups that Tyler was in 4th place. and the second week in a row that AJ has played the 4th place team.
+Matt & Gavin: Matt has by far the most points ever in week 12 (298 in 2013), 
+    but last time they played, they were in the same position in standings they are now and Matt scored his lowest of the season (97).
+Everett & Andy: last week Everett set a new record as the fewest points ever scored in the Sunday morning game slot (-3 from LAC) out of over 2500 entries!
+    but Andy's week 12 point totals have been dropping off a cliff for the last 4 years (164,136,115,86)
+Cole & Ben: when they played in week 3, they were both 2-0 but Cole won by almost the same margin that they have averaged over 29 matchups (39 points)
+    
+
 
 look at schedule upcoming

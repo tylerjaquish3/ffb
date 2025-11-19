@@ -57,6 +57,9 @@ if (isset($_GET['id'])) {
                         <button class="tab-button" id="mock-schedule-tab" onclick="showCard('mock-schedule')">
                             Mock Schedule
                         </button>
+                        <button class="tab-button" id="playoff-calculator-tab" onclick="showCard('playoff-calculator')">
+                            Playoff Calculator
+                        </button>
                     </div>
                 </div>
             </div>
@@ -242,6 +245,41 @@ if (isset($_GET['id'])) {
                     </div>
                 </div>
             </div>
+            
+            <!-- Playoff Calculator Tab -->
+            <div class="row card-section" id="playoff-calculator" style="display: none;">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 id="playoff-calculator-title">Playoff Calculator</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <div id="playoff-calculator-results">
+                                <div class="text-center initial-message">
+                                    <p>Analyzing playoff scenarios and calculating chances...</p>
+                                </div>
+                                <div class="table-responsive" style="display: none;">
+                                    <table id="playoff-calculator-table" class="table table-striped table-bordered">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>Rank</th>
+                                                <th>Manager</th>
+                                                <th>Current Record</th>
+                                                <th>Playoff Chances</th>
+                                                <th>Best Case Record</th>
+                                                <th>Worst Case Record</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="playoff-calculator-tbody">
+                                            <!-- Data will be inserted here via AJAX -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -284,6 +322,95 @@ if (isset($_GET['id'])) {
                 });
             }
         });
+        
+        // Handle playoff calculator tab
+        $('#playoff-calculator-tab').click(function() {
+            // Load playoff calculator data if not already loaded
+            const rowCount = $('#playoff-calculator-tbody tr').length;
+            if (rowCount === 0) {
+                loadPlayoffCalculatorData();
+            } 
+        });
+        
+        function loadPlayoffCalculatorData() {
+            
+            // Show loading indicator
+            $('#playoff-calculator-results .initial-message').html('<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i><p>Calculating playoff scenarios...</p></div>');
+            $('#playoff-calculator-results .initial-message').show();
+            $('#playoff-calculator-results .table-responsive').hide();
+            
+            // Fetch playoff calculator data via AJAX
+            $.ajax({
+                url: 'dataLookup.php',
+                type: 'GET',
+                cache: false,
+                data: {
+                    dataType: 'playoff-calculator',
+                    year: selectedSeason,
+                    _t: new Date().getTime() // Cache busting timestamp
+                },
+                success: function(response) {
+                    try {
+                        const data = JSON.parse(response);
+                        
+                        // Clear the table body
+                        $('#playoff-calculator-tbody').empty();
+                        
+                        // Populate the table with data
+                        if (data.data && data.data.length > 0) {
+                            
+                            // Update title with remaining games count (all managers should have the same count)
+                            const remainingGames = data.data[0].remaining_games;
+                            const gamesText = remainingGames === 1 ? 'game' : 'games';
+                            $('#playoff-calculator-title').text('Playoff Calculator (' + remainingGames + ' ' + gamesText + ' remaining)');
+                            
+                            data.data.forEach(function(manager) {
+                                const playoffClass = manager.playoff_percentage >= 90 ? 'table-success' : 
+                                                   manager.playoff_percentage >= 50 ? 'table-warning' : 
+                                                   manager.playoff_percentage > 0 ? 'table-info' : 'table-danger';
+                                
+                                const row = '<tr class="' + playoffClass + '">' +
+                                    '<td>' + manager.current_rank + '</td>' +
+                                    '<td><a href="/profile.php?id=' + manager.manager_name + '">' + manager.manager_name + '</a></td>' +
+                                    '<td>' + manager.current_wins + '-' + manager.current_losses + '</td>' +
+                                    '<td><strong>' + manager.playoff_percentage + '%</strong></td>' +
+                                    '<td>' + manager.best_case_record + '</td>' +
+                                    '<td>' + manager.worst_case_record + '</td>' +
+                                    '</tr>';
+                                $('#playoff-calculator-tbody').append(row);
+                            });
+                            
+                            // Hide loading message and show table
+                            $('#playoff-calculator-results .initial-message').hide();
+                            $('#playoff-calculator-results .table-responsive').show();
+                            
+                            // Initialize DataTable if not already initialized
+                            if (!$.fn.DataTable.isDataTable('#playoff-calculator-table')) {
+                                $('#playoff-calculator-table').DataTable({
+                                    searching: false,
+                                    paging: false,
+                                    info: false,
+                                    order: [[0, 'asc']] // Sort by rank
+                                });
+                            }
+                        } else {
+                            console.log('No data available');
+                            $('#playoff-calculator-results .initial-message').html('<div class="alert alert-info">No playoff data available for this season.</div>');
+                        }
+                    } catch (e) {
+                        console.error('Error parsing playoff calculator data:', e);
+                        console.log('Raw response:', response);
+                        $('#playoff-calculator-results .initial-message').html('<div class="alert alert-danger">Error parsing playoff calculator data: ' + e.message + '</div>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                    console.log('XHR object:', xhr);
+                    console.log('Response text:', xhr.responseText);
+                    $('#playoff-calculator-results .initial-message').html('<div class="alert alert-danger">Error loading playoff calculator data: ' + status + ' - ' + error + '</div>');
+                }
+            });
+        }
         
         // Handle mock schedule manager selection
         $('#schedule-manager-select').change(function() {

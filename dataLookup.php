@@ -1102,12 +1102,29 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'playoff-calculator') {
         $worstCaseWins = $manager['wins'];
         $worstCaseLosses = $manager['losses'] + $remainingGames;
         
+        // Calculate cumulative opponent record and points
+        $opponentWins = 0;
+        $opponentLosses = 0;
+        $opponentPoints = 0;
+        foreach ($manager['remaining_games'] as $game) {
+            $opponentId = $game['opponent_id'];
+            if (isset($managerStats[$opponentId])) {
+                $opponentWins += $managerStats[$opponentId]['wins'];
+                $opponentLosses += $managerStats[$opponentId]['losses'];
+                $opponentPoints += $managerStats[$opponentId]['total_points'];
+            }
+        }
+        $opponentRecord = ($opponentWins + $opponentLosses > 0) ? $opponentWins . '-' . $opponentLosses : 'N/A';
+        $opponentPointsFormatted = ($opponentPoints > 0) ? number_format($opponentPoints, 2) : 'N/A';
+        
         $results[] = [
             'manager_id' => $managerId,
             'manager_name' => $manager['name'],
             'current_wins' => $manager['wins'],
             'current_losses' => $manager['losses'],
             'remaining_games' => $remainingGames,
+            'opponent_record' => $opponentRecord,
+            'opponent_points' => $opponentPointsFormatted,
             'playoff_percentage' => $playoffPercentage,
             'best_case_record' => $bestCaseWins . '-' . $bestCaseLosses,
             'worst_case_record' => $worstCaseWins . '-' . $worstCaseLosses

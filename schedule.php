@@ -265,6 +265,8 @@ if (isset($_GET['id'])) {
                                                 <th>Rank</th>
                                                 <th>Manager</th>
                                                 <th>Current Record</th>
+                                                <th>Remaining Opp. Record</th>
+                                                <th>Remaining Opp. Points</th>
                                                 <th>Playoff Chances</th>
                                                 <th>Best Case Record</th>
                                                 <th>Worst Case Record</th>
@@ -373,6 +375,8 @@ if (isset($_GET['id'])) {
                                     '<td>' + manager.current_rank + '</td>' +
                                     '<td><a href="/profile.php?id=' + manager.manager_name + '">' + manager.manager_name + '</a></td>' +
                                     '<td>' + manager.current_wins + '-' + manager.current_losses + '</td>' +
+                                    '<td>' + (manager.opponent_record || 'N/A') + '</td>' +
+                                    '<td>' + (manager.opponent_points || 'N/A') + '</td>' +
                                     '<td><strong>' + manager.playoff_percentage + '%</strong></td>' +
                                     '<td>' + manager.best_case_record + '</td>' +
                                     '<td>' + manager.worst_case_record + '</td>' +

@@ -14,6 +14,11 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
     - make sure it doesnt add duplicate rows, this happens for names with an apostrophe in the name
 
+- awards listing many as new leader when they aren't
+    - fewest transactions tyler ? no way
+- record for best free agent pick is not using player aliases to match players
+- misc stats start streaks says cam started 0-3 in 2025 and finished 10th but the season isnt over yet
+- players by manager needs to use aliases
 
 # Ideas
 
@@ -40,6 +45,17 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
     - profile
 - make records page more useful to find new current leaders by adding a filter for it
 - analyze text messages by manager in group text
+- milestones about to happen
+    - Matt about to go over 10,000 QB points
+    - league on pace to break record
+- page just for charts
+    - pie chart for points by position with filters for manager or all
+    - lineup accuracy
+- win/lose streaks, put the start and end week and year
+- page for random league facts
+    - all Marvin's since 2009 have been Jrs
+    - Baltimore has been owned the most but only by 7 managers
+
 
 Notes:
 Moved to 18 week schedule in 2021

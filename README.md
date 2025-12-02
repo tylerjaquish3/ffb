@@ -12,10 +12,8 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 - start streaks on dashboard... maybe they started 4-0 3 times? put all years
 
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
-    - make sure it doesnt add duplicate rows, this happens for names with an apostrophe in the name
+- make sure it doesnt add duplicate rows, this happens for names with an apostrophe in the name
 
-- awards listing many as new leader when they aren't
-    - fewest transactions tyler ? no way
 - record for best free agent pick is not using player aliases to match players
 - misc stats start streaks says cam started 0-3 in 2025 and finished 10th but the season isnt over yet
 - players by manager needs to use aliases
@@ -107,19 +105,9 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 - Mexican, italian, canadian
 - Pirates, animals, space, casino, school (report card), race car
 
-week 6 baseball
-week 7 
-week 8. AJ, short for Andrew James and Ben, short for genetic reasons
-week 9 halloween
-week 10 birthday
-week 11 gavin is 3-16 in week 11 all time
-lowest combined points in a matchup was when Matt & Cam faced off in week 2 (206)
-week 12 
+
 week 13 - Andy set the high in week 4 (196 pts), Tyler had most points in a loss (150)
 bottom 3 havent changed in the standings since week 4
 look at remaining schedule
 week 14 - cole is 4-0 in week 14
 highest optimal was AJ in week 5. lowest optimal was gavin in week 5. biggest blowout was these 2 in week 5
-
-
-Cole has never won more than 9 in a season (2017)

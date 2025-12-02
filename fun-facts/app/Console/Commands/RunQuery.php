@@ -15,7 +15,7 @@ class RunQuery extends Command
     /**
      * The console command description.
      */
-    protected $description = 'Run a temporary query';
+    protected $description = 'Run a temporary query to find discrepancies between rosters and regular season matchups';
 
     /**
      * Create a new command instance.

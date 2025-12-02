@@ -30,50 +30,6 @@ class UpdateFunFacts implements ShouldQueue
     protected $asOfYear = null;
     protected $asOfWeek = null;
     protected $isHistoricalCalculation = false;
-    
-    /**
-     * Apply historical filters to a query builder based on the current asOfYear and asOfWeek
-     */
-    protected function applyHistoricalFilter($query, $yearColumn = 'year', $weekColumn = null)
-    {
-        if ($this->isHistoricalCalculation) {
-            // Always filter by year
-            $query->where($yearColumn, '<=', $this->asOfYear);
-            
-            // If week is provided and we have a week column, also filter by week
-            if ($this->asOfWeek !== null && $weekColumn !== null) {
-                $query->where(function($q) use ($yearColumn, $weekColumn) {
-                    $q->where($yearColumn, '<', $this->asOfYear)
-                      ->orWhere(function($q2) use ($yearColumn, $weekColumn) {
-                          $q2->where($yearColumn, '=', $this->asOfYear)
-                             ->where($weekColumn, '<=', $this->asOfWeek);
-                      });
-                });
-            }
-        }
-        
-        return $query;
-    }
-    
-    /**
-     * Get SQL WHERE clause for historical filtering
-     */
-    protected function getHistoricalFilterSql($tableAlias = '', $yearColumn = 'year', $weekColumn = null)
-    {
-        if (!$this->isHistoricalCalculation) {
-            return '';
-        }
-        
-        $prefix = $tableAlias ? "$tableAlias." : '';
-        $yearCol = $prefix . $yearColumn;
-        
-        if ($this->asOfWeek !== null && $weekColumn !== null) {
-            $weekCol = $prefix . $weekColumn;
-            return " AND ($yearCol < {$this->asOfYear} OR ($yearCol = {$this->asOfYear} AND $weekCol <= {$this->asOfWeek})) ";
-        } else {
-            return " AND $yearCol <= {$this->asOfYear} ";
-        }
-    }
 
     /**
      * Create a new job instance.
@@ -83,28 +39,6 @@ class UpdateFunFacts implements ShouldQueue
         $this->asOfYear = $asOfYear;
         $this->asOfWeek = $asOfWeek;
         $this->isHistoricalCalculation = ($asOfYear !== null);
-    }
-    
-    /**
-     * Get a description of the historical point in time for logging
-     */
-    protected function getHistoricalPointDescription()
-    {
-        if ($this->isHistoricalCalculation) {
-            return "Year: {$this->asOfYear}, Week: " . ($this->asOfWeek ?? 'ALL');
-        } else {
-            return "CURRENT";
-        }
-    }
-    
-    /**
-     * Report progress for historical calculations
-     */
-    protected function updateProgress($method)
-    {
-        if ($this->isHistoricalCalculation) {
-            echo "Completed {$method} for " . $this->getHistoricalPointDescription() . PHP_EOL;
-        }
     }
 
     /**
@@ -228,6 +162,72 @@ class UpdateFunFacts implements ShouldQueue
     }
 
     /**
+     * Apply historical filters to a query builder based on the current asOfYear and asOfWeek
+     */
+    protected function applyHistoricalFilter($query, $yearColumn = 'year', $weekColumn = null)
+    {
+        if ($this->isHistoricalCalculation) {
+            // Always filter by year
+            $query->where($yearColumn, '<=', $this->asOfYear);
+            
+            // If week is provided and we have a week column, also filter by week
+            if ($this->asOfWeek !== null && $weekColumn !== null) {
+                $query->where(function($q) use ($yearColumn, $weekColumn) {
+                    $q->where($yearColumn, '<', $this->asOfYear)
+                      ->orWhere(function($q2) use ($yearColumn, $weekColumn) {
+                          $q2->where($yearColumn, '=', $this->asOfYear)
+                             ->where($weekColumn, '<=', $this->asOfWeek);
+                      });
+                });
+            }
+        }
+        
+        return $query;
+    }
+    
+    /**
+     * Get SQL WHERE clause for historical filtering
+     */
+    protected function getHistoricalFilterSql($tableAlias = '', $yearColumn = 'year', $weekColumn = null)
+    {
+        if (!$this->isHistoricalCalculation) {
+            return '';
+        }
+        
+        $prefix = $tableAlias ? "$tableAlias." : '';
+        $yearCol = $prefix . $yearColumn;
+        
+        if ($this->asOfWeek !== null && $weekColumn !== null) {
+            $weekCol = $prefix . $weekColumn;
+            return " AND ($yearCol < {$this->asOfYear} OR ($yearCol = {$this->asOfYear} AND $weekCol <= {$this->asOfWeek})) ";
+        } else {
+            return " AND $yearCol <= {$this->asOfYear} ";
+        }
+    }
+    
+    /**
+     * Get a description of the historical point in time for logging
+     */
+    protected function getHistoricalPointDescription()
+    {
+        if ($this->isHistoricalCalculation) {
+            return "Year: {$this->asOfYear}, Week: " . ($this->asOfWeek ?? 'ALL');
+        } else {
+            return "CURRENT";
+        }
+    }
+    
+    /**
+     * Report progress for historical calculations
+     */
+    protected function updateProgress($method)
+    {
+        if ($this->isHistoricalCalculation) {
+            echo "Completed {$method} for " . $this->getHistoricalPointDescription() . PHP_EOL;
+        }
+    }
+
+    /**
      * Check if multiple managers have the same value for a field
      */
     private function checkMultiple(Collection $data, string $field) : array
@@ -283,27 +283,30 @@ class UpdateFunFacts implements ShouldQueue
         }
 
         // Helper to determine new_leader for a given manager
-        $determineNewLeader = function($managerId) use ($latestYear, $latestWeek, $latestManagers, $year, $week) {
-            if (!$latestYear || !$latestWeek) {
-                return 1; // No previous entry, always new leader
+        $determineNewLeader = function($currentTopManagers) use ($ffId) {
+            // Get previous leaders from manager_fun_facts table
+            $previousLeaders = ManagerFunFact::where('fun_fact_id', $ffId)
+                ->pluck('manager_id')
+                ->toArray();
+            // If there are no previous leaders, always new leader
+            if (empty($previousLeaders)) {
+                return 1;
             }
-            // If latest logs are for this week
-            if ($latestYear == $year && $latestWeek == $week) {
-                return in_array($managerId, $latestManagers) ? 0 : 1;
-            }
-            // If latest logs are for previous week
-            if (($latestYear < $year) || ($latestYear == $year && $latestWeek < $week)) {
-                return in_array($managerId, $latestManagers) ? 0 : 1;
-            }
-            // If latest logs are for a future week (shouldn't happen, but default to new leader)
-            return 1;
+            // Only mark as new leader if none of the previous leaders are in the current set
+            $currentSet = array_map('strval', (array)$currentTopManagers);
+            $previousSet = array_map('strval', (array)$previousLeaders);
+            $overlap = array_intersect($currentSet, $previousSet);
+            return empty($overlap) ? 1 : 0;
         };
 
         if (count($tops) > 1) {
             // Multiple managers are tied for the top spot
+            $currentTopManagers = array_map(function($top) use ($manId) {
+                return $top->{$manId};
+            }, $tops);
+            $isNewLeader = $determineNewLeader($currentTopManagers);
             foreach ($tops as $top) {
-                $topManagerId = $top->{$manId};
-                $top->new_leader = $determineNewLeader($topManagerId);
+                $top->new_leader = $isNewLeader;
             }
             // ...existing code...
             $facts = ManagerFunFact::where('fun_fact_id', $ffId)->get();
@@ -327,8 +330,8 @@ class UpdateFunFacts implements ShouldQueue
                 return;
             }
             $top = $tops[0];
-            $topManagerId = $top->{$manId};
-            $newLeader = $determineNewLeader($topManagerId);
+            $currentTopManagers = [$top->{$manId}];
+            $newLeader = $determineNewLeader($currentTopManagers);
 
     // dd('fun fact: '.$ffId.' new leader: '.$newLeader);
             // ...existing code...
@@ -1439,25 +1442,36 @@ class UpdateFunFacts implements ShouldQueue
         $tops = $this->checkMultiple($i, 'trades');
         $this->insertFunFact(73, 'manager_id', 'trades', [], $tops);
 
-        $query = TeamName::selectRaw('manager_id, sum(moves) as moves')
-            ->orderBy('moves', 'desc')
+        $query = TeamName::selectRaw('manager_id, sum(trades) as trades')
+            ->orderBy('trades', 'desc')
             ->groupBy('manager_id');
-            
         if ($this->isHistoricalCalculation) {
             $query->where('year', '<=', $this->asOfYear);
         }
-        
         $i = $query->get();
+        $tops = $this->checkMultiple($i, 'trades');
+        $this->insertFunFact(73, 'manager_id', 'trades', [], $tops);
 
-        $tops = $this->checkMultiple($i, 'moves');
+        // Most Moves
+        $query = TeamName::selectRaw('manager_id, sum(moves) as moves')
+            ->orderBy('moves', 'desc')
+            ->groupBy('manager_id');
+        if ($this->isHistoricalCalculation) {
+            $query->where('year', '<=', $this->asOfYear);
+        }
+        $mostMoves = $query->get();
+        $tops = $this->checkMultiple($mostMoves, 'moves');
         $this->insertFunFact(74, 'manager_id', 'moves', [], $tops);
 
+        // Fewest Moves
         $query = TeamName::selectRaw('manager_id, sum(moves) as moves')
             ->orderBy('moves', 'asc')
-            ->groupBy('manager_id')
-            ->get();
-
-        $tops = $this->checkMultiple($i, 'moves');
+            ->groupBy('manager_id');
+        if ($this->isHistoricalCalculation) {
+            $query->where('year', '<=', $this->asOfYear);
+        }
+        $fewestMoves = $query->get();
+        $tops = $this->checkMultiple($fewestMoves, 'moves');
         $this->insertFunFact(75, 'manager_id', 'moves', [], $tops);
     }
 

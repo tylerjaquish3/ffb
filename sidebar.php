@@ -21,16 +21,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <li class="nav-item<?php if ($currentPage == 'profile.php') echo ' active'; ?>"><a href="#"><i class="icon-profile"></i><span data-i18n="nav.page_layouts.main"
                         class="menu-title">User Profiles</span></a>
                 <ul class="menu-content">
-                    <li><a href="/profile.php?id=Ben" data-i18n="nav.page_layouts.1_column" class="menu-item">Ben</a></li>
-                    <li><a href="/profile.php?id=Andy" data-i18n="nav.page_layouts.1_column" class="menu-item">Andy</a></li>
-                    <li><a href="/profile.php?id=Gavin" data-i18n="nav.page_layouts.1_column" class="menu-item">Gavin</a></li>
-                    <li><a href="/profile.php?id=Tyler" data-i18n="nav.page_layouts.1_column" class="menu-item">Tyler</a></li>
-                    <li><a href="/profile.php?id=Justin" data-i18n="nav.page_layouts.1_column" class="menu-item">Justin</a></li>
-                    <li><a href="/profile.php?id=Cameron" data-i18n="nav.page_layouts.1_column" class="menu-item">Cameron</a></li>
-                    <li><a href="/profile.php?id=Matt" data-i18n="nav.page_layouts.1_column" class="menu-item">Matt</a></li>
                     <li><a href="/profile.php?id=AJ" data-i18n="nav.page_layouts.1_column" class="menu-item">AJ</a></li>
+                    <li><a href="/profile.php?id=Andy" data-i18n="nav.page_layouts.1_column" class="menu-item">Andy</a></li>
+                    <li><a href="/profile.php?id=Ben" data-i18n="nav.page_layouts.1_column" class="menu-item">Ben</a></li>
+                    <li><a href="/profile.php?id=Cameron" data-i18n="nav.page_layouts.1_column" class="menu-item">Cameron</a></li>
                     <li><a href="/profile.php?id=Cole" data-i18n="nav.page_layouts.1_column" class="menu-item">Cole</a></li>
                     <li><a href="/profile.php?id=Everett" data-i18n="nav.page_layouts.1_column" class="menu-item">Everett</a></li>
+                    <li><a href="/profile.php?id=Gavin" data-i18n="nav.page_layouts.1_column" class="menu-item">Gavin</a></li>
+                    <li><a href="/profile.php?id=Justin" data-i18n="nav.page_layouts.1_column" class="menu-item">Justin</a></li>
+                    <li><a href="/profile.php?id=Matt" data-i18n="nav.page_layouts.1_column" class="menu-item">Matt</a></li>
+                    <li><a href="/profile.php?id=Tyler" data-i18n="nav.page_layouts.1_column" class="menu-item">Tyler</a></li>
                 </ul>
             </li>
             <li class="nav-item<?php if ($currentPage == 'seasonRecaps.php') echo ' active'; ?>">

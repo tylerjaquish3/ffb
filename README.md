@@ -8,15 +8,15 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 
 
 # Bugs
-- In regular_season_matchups table, lots of projections are wrong (looking at 2019)
-- start streaks on dashboard... maybe they started 4-0 3 times? put all years
 
+- start streaks on dashboard... maybe they started 4-0 3 times? put all years
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
-- make sure it doesnt add duplicate rows, this happens for names with an apostrophe in the name
+    - make sure it doesnt add duplicate rows, this happens for names with an apostrophe in the name
 
 - record for best free agent pick is not using player aliases to match players
 - misc stats start streaks says cam started 0-3 in 2025 and finished 10th but the season isnt over yet
 - players by manager needs to use aliases
+- players page, all players, needs to use aliases
 
 # Ideas
 
@@ -53,7 +53,11 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 - page for random league facts
     - all Marvin's since 2009 have been Jrs
     - Baltimore has been owned the most but only by 7 managers
-
+- regular season, wins by season, add current year to it. use standings table to get the numbers
+- regular season, game time analysis, make some way to highlight the current year bests and where they rank so its easier to use
+- regular season, league standings history, add Previous Week button
+- profile, overview, add seed as a column
+- players page, put in tabs
 
 Notes:
 Moved to 18 week schedule in 2021
@@ -106,8 +110,6 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 - Pirates, animals, space, casino, school (report card), race car
 
 
-week 13 - Andy set the high in week 4 (196 pts), Tyler had most points in a loss (150)
-bottom 3 havent changed in the standings since week 4
-look at remaining schedule
-week 14 - cole is 4-0 in week 14
-highest optimal was AJ in week 5. lowest optimal was gavin in week 5. biggest blowout was these 2 in week 5
+wk 15
+- Andy got to 9 wins for the first time since he won it all in 2013
+- playoff streaks (see post it)

@@ -247,6 +247,7 @@ include 'sidebar.php';
                                 </h3>
                                 
                                 <button class="btn btn-secondary" id="lookup-standings-btn">Search</button> or 
+                                <button class="btn btn-secondary" id="prev-week-standings-btn">Previous Week</button>
                                 <button class="btn btn-secondary" id="next-week-standings-btn">Next Week</button>
                                 <br /><br />
                             </div>
@@ -813,13 +814,25 @@ include 'sidebar.php';
         });
 
         $('#next-week-standings-btn').click(function () {
-            let currWeek = $('#week-select').val();
-            let currYear = $('#year-select1').val();
-            if (currWeek == 14) {
+            let currWeek = parseInt($('#week-select').val());
+            let currYear = parseInt($('#year-select1').val());
+            if (currWeek === 14) {
                 $('#week-select').val(1);
-                $('#year-select1').val(parseInt(currYear) + 1);
+                $('#year-select1').val(currYear + 1);
             } else {
-                $('#week-select').val(parseInt(currWeek) + 1);
+                $('#week-select').val(currWeek + 1);
+            }
+            standingsTable.ajax.reload();
+        });
+
+        $('#prev-week-standings-btn').click(function () {
+            let currWeek = parseInt($('#week-select').val());
+            let currYear = parseInt($('#year-select1').val());
+            if (currWeek === 1) {
+                $('#week-select').val(14);
+                $('#year-select1').val(currYear - 1);
+            } else {
+                $('#week-select').val(currWeek - 1);
             }
             standingsTable.ajax.reload();
         });

@@ -389,14 +389,16 @@ function getSeasonNumbers()
     $results = [];
 
     if (isset($_GET)) {
-
+        // Get all finishes for this manager
         $result = query("SELECT * FROM finishes
             JOIN managers ON managers.id = finishes.manager_id
             JOIN team_names ON team_names.manager_id = managers.id AND team_names.year = finishes.year
             WHERE managers.name = '" . $_GET['id'] . "'");
+        $years_in_finishes = [];
         while ($row = fetch_array($result)) {
             $managerId = $row['manager_id'];
             $year = $row['year'];
+            $years_in_finishes[] = $year;
 
             $pf = $pa = $wins = $losses = 0;
             $result2 = query("SELECT * FROM regular_season_matchups
@@ -412,6 +414,19 @@ function getSeasonNumbers()
             }
 
             $winPct = $wins * 100 / ($wins + $losses);
+            // Get seed from playoff_matchups
+            $seed = null;
+            $seedRes = query("SELECT manager1_seed FROM playoff_matchups WHERE year = $year AND manager1_id = $managerId LIMIT 1");
+            $seedRow = fetch_array($seedRes);
+            if (!empty($seedRow) && isset($seedRow['manager1_seed'])) {
+                $seed = $seedRow['manager1_seed'];
+            } else {
+                $seedRes2 = query("SELECT manager2_seed FROM playoff_matchups WHERE year = $year AND manager2_id = $managerId LIMIT 1");
+                $seedRow2 = fetch_array($seedRes2);
+                if (!empty($seedRow2) && isset($seedRow2['manager2_seed'])) {
+                    $seed = $seedRow2['manager2_seed'];
+                }
+            }
             $results[$year] = [
                 'year' => $year,
                 'finish' => $row['finish'],
@@ -421,65 +436,53 @@ function getSeasonNumbers()
                 'pa' => $pa,
                 'team_name' => $row['name'],
                 'moves' => $row['moves'],
-                'trades' => $row['trades']
+                'trades' => $row['trades'],
+                'seed' => $seed
             ];
         }
 
-        $mostPf = $mostPa = $mostWinPct = $mostMoves = 0;
-        $leastPf = $leastPa = $leastWinPct = $leastMoves = 417417;
+        // Now, check if current season is missing from finishes
+        $currentSeasonRes = query("SELECT year FROM rosters ORDER BY year DESC LIMIT 1");
+        $currentSeasonRow = fetch_array($currentSeasonRes);
+        if ($currentSeasonRow && !in_array($currentSeasonRow['year'], $years_in_finishes)) {
+            $currentYear = $currentSeasonRow['year'];
+            // Get managerId for this manager
+            $managerRes = query("SELECT id FROM managers WHERE name = '" . $_GET['id'] . "'");
+            $managerRow = fetch_array($managerRes);
+            $managerId = $managerRow ? $managerRow['id'] : null;
+            // Get team name for current year
+            $teamNameRes = query("SELECT name FROM team_names WHERE manager_id = $managerId AND year = $currentYear");
+            $teamNameRow = fetch_array($teamNameRes);
+            $teamName = $teamNameRow ? $teamNameRow['name'] : '';
 
-        foreach ($results as $year => $stats) {
-            if ($stats['pf'] > $mostPf) {
-                $mostPf = $stats['pf'];
+            $pf = $pa = $wins = $losses = 0;
+            $result2 = query("SELECT * FROM regular_season_matchups WHERE manager1_id = $managerId AND year = $currentYear");
+            while ($row2 = fetch_array($result2)) {
+                $pf += $row2['manager1_score'];
+                $pa += $row2['manager2_score'];
+                if ($row2['manager1_score'] > $row2['manager2_score']) {
+                    $wins++;
+                } else {
+                    $losses++;
+                }
             }
-            if ($stats['pa'] > $mostPa) {
-                $mostPa = $stats['pa'];
-            }
-            if ($stats['pf'] < $leastPf) {
-                $leastPf = $stats['pf'];
-            }
-            if ($stats['pa'] < $leastPa) {
-                $leastPa = $stats['pa'];
-            }
-            if ($stats['win_pct'] > $mostWinPct) {
-                $mostWinPct = $stats['win_pct'];
-            }
-            if ($stats['win_pct'] < $leastWinPct) {
-                $leastWinPct = $stats['win_pct'];
-            }
-            if ($stats['moves'] > $mostMoves) {
-                $mostMoves = $stats['moves'];
-            }
-            if ($stats['moves'] < $leastMoves) {
-                $leastMoves = $stats['moves'];
-            }
+            $winPct = ($wins + $losses) > 0 ? $wins * 100 / ($wins + $losses) : 0;
+
+            // Moves and finish and seed blank
+            $results[$currentYear] = [
+                'year' => $currentYear,
+                'finish' => '',
+                'record' => $wins . ' - ' . $losses,
+                'win_pct' => round($winPct, 1),
+                'pf' => $pf,
+                'pa' => $pa,
+                'team_name' => $teamName,
+                'moves' => '',
+                'trades' => '',
+                'seed' => ''
+            ];
         }
-        foreach ($results as $year => &$stats) {
-            if ($stats['pf'] == $mostPf) {
-                $stats['pf'] = '<span class="badge badge-primary">'.$mostPf.'</span>';
-            }
-            if ($stats['pa'] == $mostPa) {
-                $stats['pa'] = '<span class="badge badge-primary">'.$mostPa.'</span>';
-            }
-            if ($stats['pf'] == $leastPf) {
-                $stats['pf'] = '<span class="badge badge-secondary">'.$leastPf.'</span>';
-            }
-            if ($stats['pa'] == $leastPa) {
-                $stats['pa'] = '<span class="badge badge-secondary">'.$leastPa.'</span>';
-            }
-            if ($stats['win_pct'] == $mostWinPct) {
-                $stats['win_pct'] = '<span class="badge badge-primary">'.$mostWinPct.'</span>';
-            }
-            if ($stats['win_pct'] == $leastWinPct) {
-                $stats['win_pct'] = '<span class="badge badge-secondary">'.$leastWinPct.'</span>';
-            }
-            if ($stats['moves'] == $mostMoves) {
-                $stats['moves'] = '<span class="badge badge-primary">'.$mostMoves.'</span>';
-            }
-            if ($stats['moves'] == $leastMoves) {
-                $stats['moves'] = '<span class="badge badge-secondary">'.$leastMoves.'</span>';
-            }
-        }
+        // Badge logic removed; raw data only returned
     } else {
         // redirect to index
     }

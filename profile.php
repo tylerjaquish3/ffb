@@ -152,6 +152,7 @@ if (isset($_GET['id'])) {
                                         <th>Win %</th>
                                         <th>PF</th>
                                         <th>PA</th>
+                                        <th>Seed</th>
                                         <th>Finish</th>
                                         <th>Moves</th>
                                         <th>Trades</th>
@@ -166,6 +167,7 @@ if (isset($_GET['id'])) {
                                                 <td><?php echo $array['win_pct'] . ' %'; ?></td>
                                                 <td><?php echo $array['pf']; ?></td>
                                                 <td><?php echo $array['pa']; ?></td>
+                                                <td><?php echo isset($array['seed']) ? $array['seed'] : ''; ?></td>
                                                 <td><?php echo $array['finish']; ?></td>
                                                 <td><?php echo $array['moves']; ?></td>
                                                 <td><?php echo $array['trades']; ?></td>
@@ -1099,7 +1101,45 @@ if (isset($_GET['id'])) {
             info: false,
             order: [
                 [0, "desc"]
-            ]
+            ],
+            initComplete: function() {
+                var api = this.api();
+                // Highlight all columns except first (Year)
+                api.columns(':not(:first)').every(function() {
+                    var col = this.index();
+                    // Only consider numeric values
+                    var data = this.data().unique().map(function(value) {
+                        var num = parseInt(value);
+                        return isNaN(num) ? null : num;
+                    }).toArray().filter(function(v){ return v !== null; }).sort(function(a, b){return a-b});
+
+                    if (data.length > 0) {
+                        var min = data[0];
+                        var max = data[data.length-1];
+                        // For Seed and Finish columns, reverse logic: lower is better
+                        // Seed = col 6, Finish = col 7 (0-based index)
+                        if (col === 6 || col === 7) {
+                            api.cells(null, col).every(function() {
+                                var cell = parseInt(this.data());
+                                if (cell === min) {
+                                    $(this.node()).css('background-color', 'rgb(172, 240, 172)'); // best (lowest)
+                                } else if (cell === max) {
+                                    $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)'); // worst (highest)
+                                }
+                            });
+                        } else if (col !== 1) {
+                            api.cells(null, col).every(function() {
+                                var cell = parseInt(this.data());
+                                if (cell === max) {
+                                    $(this.node()).css('background-color', 'rgb(172, 240, 172)'); // best (highest)
+                                } else if (cell === min) {
+                                    $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)'); // worst (lowest)
+                                }
+                            });
+                        }
+                    }
+                });
+            }
         });
 
         $('#datatable-teamNames').DataTable({

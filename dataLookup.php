@@ -187,14 +187,43 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'rank-distribution') {
 
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'all-players') {
     
+
+    // Build alias map: canonical name => [all aliases]
+    $aliasMap = [];
+    $aliasLookup = [];
+    $aliasResult = query("SELECT player, alias_1, alias_2, alias_3 FROM player_aliases");
+    while ($row = fetch_array($aliasResult)) {
+        $names = array_filter([$row['player'], $row['alias_1'], $row['alias_2'], $row['alias_3']]);
+        foreach ($names as $name) {
+            $aliasLookup[$name] = $row['player']; // map every alias to canonical
+        }
+        $aliasMap[$row['player']] = $names;
+    }
+
+    // Get all player rows
     $result = query("SELECT player, SUM(points) as points from rosters 
         WHERE player != '' AND player != '(Empty)'
         GROUP BY player");
-    while ($row = fetch_array($result)) {
 
+    $groupedPlayers = [];
+    while ($row = fetch_array($result)) {
+        $name = $row['player'];
+        $canonical = isset($aliasLookup[$name]) ? $aliasLookup[$name] : $name;
+        if (!isset($groupedPlayers[$canonical])) {
+            $groupedPlayers[$canonical] = [
+                'player' => $canonical,
+                'points' => 0
+            ];
+        }
+        $groupedPlayers[$canonical]['points'] += $row['points'];
+    }
+
+    // Format output
+    $players = [];
+    foreach ($groupedPlayers as $info) {
         $players[] = [
-            'player' => $row['player'],
-            'points' => number_format($row['points'], 2)
+            'player' => $info['player'],
+            'points' => number_format($info['points'], 2)
         ];
     }
     $content = new \stdClass();

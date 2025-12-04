@@ -15,8 +15,6 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 
 - record for best free agent pick is not using player aliases to match players
 - misc stats start streaks says cam started 0-3 in 2025 and finished 10th but the season isnt over yet
-- players by manager needs to use aliases
-- players page, all players, needs to use aliases
 
 # Ideas
 
@@ -55,9 +53,10 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
     - Baltimore has been owned the most but only by 7 managers
 - regular season, wins by season, add current year to it. use standings table to get the numbers
 - regular season, game time analysis, make some way to highlight the current year bests and where they rank so its easier to use
-- regular season, league standings history, add Previous Week button
-- profile, overview, add seed as a column
 - players page, put in tabs
+- separate pages now into a folder with an index and include other page parts
+    - need to update links to that page to just go to that folder rather than .php file
+    - do this on a new branch in case it gets messy
 
 Notes:
 Moved to 18 week schedule in 2021
@@ -113,3 +112,4 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 wk 15
 - Andy got to 9 wins for the first time since he won it all in 2013
 - playoff streaks (see post it)
+- AJ's first bye since 2016, he tied/broke his most wins in a season, set back in 2010

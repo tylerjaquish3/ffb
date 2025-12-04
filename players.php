@@ -195,34 +195,48 @@ include 'sidebar.php';
                                         $managerCount = count($managers);
 
                                         // Get all players, their seasons, managers, last season, positions, and weeks
+
+                                        // Build alias map: canonical name => [all aliases]
+                                        $aliasMap = [];
+                                        $aliasLookup = [];
+                                        $aliasResult = query("SELECT player, alias_1, alias_2, alias_3 FROM player_aliases");
+                                        while ($row = fetch_array($aliasResult)) {
+                                            $names = array_filter([$row['player'], $row['alias_1'], $row['alias_2'], $row['alias_3']]);
+                                            foreach ($names as $name) {
+                                                $aliasLookup[$name] = $row['player']; // map every alias to canonical
+                                            }
+                                            $aliasMap[$row['player']] = $names;
+                                        }
+
                                         $players = [];
                                         $result = query("SELECT player, year, manager, position, week FROM rosters WHERE player != '(Empty)'");
                                         while ($row = fetch_array($result)) {
                                             $p = $row['player'];
+                                            $canonical = isset($aliasLookup[$p]) ? $aliasLookup[$p] : $p;
                                             $y = $row['year'];
                                             $m = $row['manager'];
                                             $pos = $row['position'];
                                             $w = $row['week'];
-                                            if (!isset($players[$p])) {
-                                                $players[$p] = ['seasons' => [], 'managers' => [], 'positions' => [], 'last_season' => $y, 'weeks' => []];
+                                            if (!isset($players[$canonical])) {
+                                                $players[$canonical] = ['seasons' => [], 'managers' => [], 'positions' => [], 'last_season' => $y, 'weeks' => []];
                                             }
-                                            if (!in_array($y, $players[$p]['seasons'])) {
-                                                $players[$p]['seasons'][] = $y;
+                                            if (!in_array($y, $players[$canonical]['seasons'])) {
+                                                $players[$canonical]['seasons'][] = $y;
                                             }
-                                            if (!in_array($m, $players[$p]['managers'])) {
-                                                $players[$p]['managers'][] = $m;
+                                            if (!in_array($m, $players[$canonical]['managers'])) {
+                                                $players[$canonical]['managers'][] = $m;
                                             }
-                                            if (!isset($players[$p]['positions'][$pos])) {
-                                                $players[$p]['positions'][$pos] = 0;
+                                            if (!isset($players[$canonical]['positions'][$pos])) {
+                                                $players[$canonical]['positions'][$pos] = 0;
                                             }
-                                            $players[$p]['positions'][$pos]++;
-                                            if ($y > $players[$p]['last_season']) {
-                                                $players[$p]['last_season'] = $y;
+                                            $players[$canonical]['positions'][$pos]++;
+                                            if ($y > $players[$canonical]['last_season']) {
+                                                $players[$canonical]['last_season'] = $y;
                                             }
                                             // Track unique weeks (by year+week)
                                             $weekKey = $y.'-'.$w;
-                                            if (!in_array($weekKey, $players[$p]['weeks'])) {
-                                                $players[$p]['weeks'][] = $weekKey;
+                                            if (!in_array($weekKey, $players[$canonical]['weeks'])) {
+                                                $players[$canonical]['weeks'][] = $weekKey;
                                             }
                                         }
 

@@ -1357,6 +1357,16 @@ include 'sidebar.php';
                         `;
                         winsTbody.appendChild(tr);
                     });
+                    
+                    // Initialize DataTable with descending year sort
+                    if ($.fn.DataTable.isDataTable('#datatable-wins')) {
+                        $('#datatable-wins').DataTable().destroy();
+                    }
+                    $('#datatable-wins').DataTable({
+                        searching: false,
+                        paging: false,
+                        order: [[0, "desc"]] // Sort by Year column descending
+                    });
                 }
 
                 // Populate Game Time Points Table with DataTables

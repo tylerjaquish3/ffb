@@ -783,26 +783,38 @@ if (isset($_GET['id'])) {
                                                 $isManagerFirst = ($array['man1'] == $managerId);
                                                 $managerScore = $isManagerFirst ? $array['man1score'] : $array['man2score'];
                                                 $opponentScore = $isManagerFirst ? $array['man2score'] : $array['man1score'];
-                                                
+
+                                                // Calculate correct week for playoff matchups
+                                                $linkWeek = $array["week_number"];
+                                                if ($array['matchup_type'] == 'playoff') {
+                                                    if ($array['week_number'] == 'Quarterfinal') {
+                                                        $linkWeek = ($array['year'] < 2021) ? 14 : 15;
+                                                    } elseif ($array['week_number'] == 'Semifinal') {
+                                                        $linkWeek = ($array['year'] < 2021) ? 15 : 16;
+                                                    } elseif ($array['week_number'] == 'Final') {
+                                                        $linkWeek = ($array['year'] < 2021) ? 16 : 17;
+                                                    }
+                                                }
+
                                                 echo '<tr class="highlight">
                                                     <td>'.$array["year"].'</td>
                                                     <td>'.($array["week_number"] == '0' || !is_numeric($array["week_number"]) ? $array["week_number"] : (int)$array["week_number"]).'</td>';
-                                                    
+
                                                 if ($array['winning_manager_id'] == $managerId) {
                                                     echo '<td><span class="badge badge-primary">'.$managerName.'</span></td>';
                                                 } else {
                                                     echo '<td><span class="badge badge-secondary">'.$managerName.'</span></td>';
                                                 }
-                                                
-                                                echo '<td><a href="/rosters.php?year='.$array["year"].'&week='.$array["week_number"].'&manager='.$managerName.'">'.
+
+                                                echo '<td><a href="/rosters.php?year='.$array["year"].'&week='.$linkWeek.'&manager='.$managerName.'">'.
                                                     $managerScore.' - '.$opponentScore.'</a></td>';
-                                                    
+
                                                 if ($array['winning_manager_id'] == $versus) {
                                                     echo '<td><span class="badge badge-primary">' . $versusName.'</span></td>';
                                                 } else {
                                                     echo '<td><span class="badge badge-secondary">' . $versusName.'</span></td>';
                                                 }
-                                                
+
                                                 echo '<td>'.round(abs($managerScore - $opponentScore), 2).'</td>';
                                                 echo '<td>'.round($managerScore + $opponentScore, 2).'</td>';
                                                 

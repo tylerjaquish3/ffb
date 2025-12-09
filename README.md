@@ -51,9 +51,9 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 - page for random league facts
     - all Marvin's since 2009 have been Jrs
     - Baltimore has been owned the most but only by 7 managers
-- regular season, wins by season, add current year to it. use standings table to get the numbers
 - regular season, game time analysis, make some way to highlight the current year bests and where they rank so its easier to use
 - players page, put in tabs
+    - add some analysis by nfl team and year
 - separate pages now into a folder with an index and include other page parts
     - need to update links to that page to just go to that folder rather than .php file
     - do this on a new branch in case it gets messy

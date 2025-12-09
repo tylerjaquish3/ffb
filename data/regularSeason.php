@@ -77,22 +77,60 @@ echo json_encode($response);
 function getSeasonWins()
 {
     $response = [];
-    $result = query("SELECT * FROM finishes
-        JOIN managers ON managers.id = finishes.manager_id");
+    
+    // Get years from finishes
+    $result = query("SELECT DISTINCT year FROM finishes");
+    $years = [];
     while ($row = fetch_array($result)) {
-        $managerId = $row['manager_id'];
-        $managerName = strtolower($row['name']);
-        $year = $row['year'];
-        $wins = 0;
-        $result2 = query("SELECT * FROM regular_season_matchups
-            WHERE manager1_id = " . $managerId . " AND year = " . $year);
-        while ($row2 = fetch_array($result2)) {
-            if ($row2['manager1_score'] > $row2['manager2_score']) {
-                $wins++;
-            }
-        }
+        $years[] = $row['year'];
+    }
 
-        $response[$year][$managerName] = $wins;
+    // Get current season from rosters (always present)
+    $currentSeasonResult = query("SELECT year FROM rosters ORDER BY year DESC LIMIT 1");
+    $currentSeason = null;
+    while ($row = fetch_array($currentSeasonResult)) {
+        $currentSeason = $row['year'];
+    }
+    if ($currentSeason && !in_array($currentSeason, $years)) {
+        $years[] = $currentSeason;
+    }
+    rsort($years);
+
+    // Get all managers
+    $managersResult = query("SELECT * FROM managers");
+    $managers = [];
+    while ($row = fetch_array($managersResult)) {
+        $managers[$row['id']] = strtolower($row['name']);
+    }
+
+    foreach ($years as $year) {
+        foreach ($managers as $managerId => $managerName) {
+            if ($year == $currentSeason) {
+                // Use standings table for current season, only latest week
+                $latestWeekResult = query("SELECT MAX(week) as week FROM standings WHERE year = $year");
+                $latestWeekRow = fetch_array($latestWeekResult);
+                $latestWeek = $latestWeekRow ? $latestWeekRow['week'] : null;
+                $standingsResult = query("SELECT wins FROM standings WHERE manager_id = $managerId AND year = $year AND week = $latestWeek");
+                $standingsRow = fetch_array($standingsResult);
+                $wins = $standingsRow && isset($standingsRow['wins']) ? (int)$standingsRow['wins'] : 0;
+            } else {
+                // Use finishes if available, else fallback to matchups
+                $finishesResult = query("SELECT * FROM finishes WHERE manager_id = $managerId AND year = $year");
+                $finishesRow = fetch_array($finishesResult);
+                if ($finishesRow && isset($finishesRow['wins'])) {
+                    $wins = $finishesRow['wins'];
+                } else {
+                    $wins = 0;
+                    $result2 = query("SELECT * FROM regular_season_matchups WHERE manager1_id = $managerId AND year = $year");
+                    while ($row2 = fetch_array($result2)) {
+                        if ($row2['manager1_score'] > $row2['manager2_score']) {
+                            $wins++;
+                        }
+                    }
+                }
+            }
+            $response[$year][$managerName] = $wins;
+        }
     }
 
     return $response;
@@ -106,39 +144,74 @@ function getWinsChartNumbers()
     $response = ['years' => ''];
 
     $result = query("SELECT DISTINCT year FROM finishes");
+    $years = [];
     while ($row = fetch_array($result)) {
-        $response['years'] .= $row['year'].', ';
+        $years[] = $row['year'];
     }
 
-    $result = query("SELECT * FROM finishes
-        JOIN managers ON managers.id = finishes.manager_id");
-    while ($row = fetch_array($result)) {
-        $managerId = $row['manager_id'];
-        $managerName = $row['name'];
-        $year = $row['year'];
-        $wins = 0;
-        $result2 = query("SELECT * FROM regular_season_matchups
-            WHERE manager1_id = ".$managerId." AND year = ".$year);
-        while ($row2 = fetch_array($result2)) {
-            if ($row2['manager1_score'] > $row2['manager2_score']) {
-                $wins++;
+    // Get current season from rosters (always present)
+    $currentSeasonResult = query("SELECT year FROM rosters ORDER BY year DESC LIMIT 1");
+    $currentSeason = null;
+    while ($row = fetch_array($currentSeasonResult)) {
+        $currentSeason = $row['year'];
+    }
+    if ($currentSeason && !in_array($currentSeason, $years)) {
+        $years[] = $currentSeason;
+    }
+    sort($years);
+    $response['years'] = implode(', ', $years);
+
+    // Get all managers
+    $managersResult = query("SELECT * FROM managers");
+    $managers = [];
+    while ($row = fetch_array($managersResult)) {
+        $managers[$row['id']] = $row['name'];
+    }
+
+    $winsData = [];
+    foreach ($managers as $managerId => $managerName) {
+        foreach ($years as $year) {
+            if ($year == $currentSeason) {
+                // Use standings table for current season, only latest week
+                $latestWeekResult = query("SELECT MAX(week) as week FROM standings WHERE year = $year");
+                $latestWeekRow = fetch_array($latestWeekResult);
+                $latestWeek = $latestWeekRow ? $latestWeekRow['week'] : null;
+                $standingsResult = query("SELECT wins FROM standings WHERE manager_id = $managerId AND year = $year AND week = $latestWeek");
+                $standingsRow = fetch_array($standingsResult);
+                $wins = $standingsRow && isset($standingsRow['wins']) ? (int)$standingsRow['wins'] : '';
+            } else {
+                // Use finishes if available, else fallback to matchups
+                $finishesResult = query("SELECT * FROM finishes WHERE manager_id = $managerId AND year = $year");
+                $finishesRow = fetch_array($finishesResult);
+                if ($finishesRow && isset($finishesRow['wins'])) {
+                    $wins = $finishesRow['wins'];
+                } else {
+                    $wins = 0;
+                    $result2 = query("SELECT * FROM regular_season_matchups WHERE manager1_id = $managerId AND year = $year");
+                    while ($row2 = fetch_array($result2)) {
+                        if ($row2['manager1_score'] > $row2['manager2_score']) {
+                            $wins++;
+                        }
+                    }
+                }
+            }
+            $winsData[$managerName][$year] = $wins;
+        }
+    }
+
+    // Format wins for chart and table (string of comma-separated values)
+    foreach ($winsData as $team => $winsByYear) {
+        $winsList = [];
+        foreach ($years as $year) {
+            // For 2006-2007, Andy and Cameron should be 0
+            if (($team == 'Andy' || $team == 'Cameron') && ($year == 2006 || $year == 2007)) {
+                $winsList[] = 0;
+            } else {
+                $winsList[] = isset($winsByYear[$year]) ? $winsByYear[$year] : '';
             }
         }
-
-        if (!isset($response['wins'][$managerName])) {
-            $response['wins'][$managerName] = '';
-        }
-
-        $response['wins'][$managerName] .= $wins.', ';
-    }
-
-    $response['years'] = rtrim($response['years'], ', ');
-    foreach ($response['wins'] as $team => &$wins) {
-        // Add 2 blank years for andy and cam
-        if ($team == 'Andy' || $team == 'Cameron') {
-            $wins = ', ,'.$wins;
-        }
-        $wins = rtrim($wins, ', ');
+        $response['wins'][$team] = implode(', ', $winsList);
+        $response['table'][$team] = $winsList;
     }
 
     return $response;

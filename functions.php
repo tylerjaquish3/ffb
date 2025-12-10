@@ -4074,3 +4074,224 @@ function getManagerVsManagerStats($manager1_id, $manager2_id, $manager1_name, $m
     
     return $stats;
 }
+
+/**
+ * Get playoff schedule info based on year, week, and playoff round
+ */
+function getPlayoffScheduleInfo($year, $week, $round)
+{
+    $schedule = [];
+    $playoffStartWeek = ($year >= 2021) ? 15 : 14;
+    $lastRegularWeek = $playoffStartWeek - 1;
+    
+    if ($round === 'Quarterfinal') {
+        // Get final regular season standings to determine seeding
+        $standings = weekStandings($year, $lastRegularWeek);
+        
+        // If no standings data available, return empty schedule
+        if (empty($standings)) {
+            return [];
+        }
+        
+        // Convert standings to array sorted by rank
+        $sortedStandings = [];
+        foreach ($standings as $managerName => $rank) {
+            $sortedStandings[$rank] = [
+                'name' => $managerName,
+                'seed' => $rank,
+                'manager_id' => getManagerId($managerName)
+            ];
+        }
+        ksort($sortedStandings); // Sort by seed (rank)
+        
+        // Add bye weeks for #1 and #2 seeds
+        if (isset($sortedStandings[1])) {
+            $schedule[] = [
+                'manager1' => $sortedStandings[1]['name'] . ' (#1 seed - Bye)',
+                'manager2' => '',
+                'manager1_id' => $sortedStandings[1]['manager_id'],
+                'manager2_id' => '',
+                'record' => '',
+                'streak' => '',
+                'postseason_record' => '',
+                'is_bye' => true
+            ];
+        }
+        
+        if (isset($sortedStandings[2])) {
+            $schedule[] = [
+                'manager1' => $sortedStandings[2]['name'] . ' (#2 seed - Bye)',
+                'manager2' => '',
+                'manager1_id' => $sortedStandings[2]['manager_id'],
+                'manager2_id' => '',
+                'record' => '',
+                'streak' => '',
+                'postseason_record' => '',
+                'is_bye' => true
+            ];
+        }
+        
+        // Add matchups: #3 vs #6, #4 vs #5 (only if we have 6+ teams)
+        if (isset($sortedStandings[3]) && isset($sortedStandings[6])) {
+            $manager1_id = $sortedStandings[3]['manager_id'];
+            $manager2_id = $sortedStandings[6]['manager_id'];
+            $manager1 = $sortedStandings[3]['name'] . ' (#3 seed)';
+            $manager2 = $sortedStandings[6]['name'] . ' (#6 seed)';
+            
+            // Get H2H records
+            $h2hInfo = getManagerH2HInfo($manager1_id, $manager2_id);
+            
+            $schedule[] = [
+                'manager1' => $manager1,
+                'manager2' => $manager2,
+                'manager1_id' => $manager1_id,
+                'manager2_id' => $manager2_id,
+                'record' => $h2hInfo['regular_record'],
+                'streak' => $h2hInfo['streak'],
+                'postseason_record' => $h2hInfo['postseason_record'],
+                'is_bye' => false
+            ];
+        }
+        
+        if (isset($sortedStandings[4]) && isset($sortedStandings[5])) {
+            $manager1_id = $sortedStandings[4]['manager_id'];
+            $manager2_id = $sortedStandings[5]['manager_id'];
+            $manager1 = $sortedStandings[4]['name'] . ' (#4 seed)';
+            $manager2 = $sortedStandings[5]['name'] . ' (#5 seed)';
+            
+            // Get H2H records
+            $h2hInfo = getManagerH2HInfo($manager1_id, $manager2_id);
+            
+            $schedule[] = [
+                'manager1' => $manager1,
+                'manager2' => $manager2,
+                'manager1_id' => $manager1_id,
+                'manager2_id' => $manager2_id,
+                'record' => $h2hInfo['regular_record'],
+                'streak' => $h2hInfo['streak'],
+                'postseason_record' => $h2hInfo['postseason_record'],
+                'is_bye' => false
+            ];
+        }
+        
+    } elseif ($round === 'Semifinal' || $round === 'Final') {
+        // Get matchups from playoff_matchups table for current round
+        $result = query("SELECT pm.manager1_id, pm.manager2_id, pm.manager1_seed, pm.manager2_seed,
+            m1.name as manager1, m2.name as manager2
+            FROM playoff_matchups pm
+            JOIN managers m1 ON pm.manager1_id = m1.id
+            JOIN managers m2 ON pm.manager2_id = m2.id
+            WHERE pm.year = $year AND pm.round = '$round'");
+        
+        $hasMatchups = false;
+        while ($row = fetch_array($result)) {
+            $hasMatchups = true;
+            $manager1_id = $row['manager1_id'];
+            $manager2_id = $row['manager2_id'];
+            $manager1 = $row['manager1'];
+            $manager2 = $row['manager2'];
+            
+            // Get H2H records
+            $h2hInfo = getManagerH2HInfo($manager1_id, $manager2_id);
+            
+            $schedule[] = [
+                'manager1' => $manager1 . ' (#' . $row['manager1_seed'] . ' seed)',
+                'manager2' => $manager2 . ' (#' . $row['manager2_seed'] . ' seed)',
+                'manager1_id' => $manager1_id,
+                'manager2_id' => $manager2_id,
+                'record' => $h2hInfo['regular_record'],
+                'streak' => $h2hInfo['streak'],
+                'postseason_record' => $h2hInfo['postseason_record'],
+                'is_bye' => false
+            ];
+        }
+        
+        // If no matchups found, show placeholder message
+        if (!$hasMatchups) {
+            $schedule[] = [
+                'manager1' => 'Matchups will be determined based on',
+                'manager2' => 'previous round results',
+                'manager1_id' => '',
+                'manager2_id' => '',
+                'record' => '',
+                'streak' => '',
+                'postseason_record' => '',
+                'is_bye' => true
+            ];
+        }
+    }
+    
+    return $schedule;
+}
+
+/**
+ * Get head-to-head information between two managers
+ */
+function getManagerH2HInfo($manager1_id, $manager2_id)
+{
+    // Get historical head-to-head record - only count each game once by looking at one direction
+    $h2hResult = query("SELECT 
+        SUM(CASE WHEN manager1_score > manager2_score THEN 1 ELSE 0 END) as manager1_wins,
+        SUM(CASE WHEN manager2_score > manager1_score THEN 1 ELSE 0 END) as manager2_wins
+        FROM regular_season_matchups 
+        WHERE manager1_id = $manager1_id AND manager2_id = $manager2_id");
+    
+    $h2hRow = fetch_array($h2hResult);
+    $manager1_wins = $h2hRow['manager1_wins'] ?? 0;
+    $manager2_wins = $h2hRow['manager2_wins'] ?? 0;
+    $regular_record = $manager1_wins . '-' . $manager2_wins;
+    
+    // Get postseason head-to-head record between these two managers
+    $postseasonH2HResult = query("SELECT 
+        SUM(CASE WHEN manager1_id = $manager1_id AND manager1_score > manager2_score THEN 1 ELSE 0 END) +
+        SUM(CASE WHEN manager2_id = $manager1_id AND manager2_score > manager1_score THEN 1 ELSE 0 END) as manager1_wins,
+        SUM(CASE WHEN manager1_id = $manager2_id AND manager1_score > manager2_score THEN 1 ELSE 0 END) +
+        SUM(CASE WHEN manager2_id = $manager2_id AND manager2_score > manager1_score THEN 1 ELSE 0 END) as manager2_wins
+        FROM playoff_matchups 
+        WHERE (manager1_id = $manager1_id AND manager2_id = $manager2_id) 
+           OR (manager1_id = $manager2_id AND manager2_id = $manager1_id)");
+    
+    $postseasonH2HRow = fetch_array($postseasonH2HResult);
+    $manager1_postseason_wins = $postseasonH2HRow['manager1_wins'] ?? 0;
+    $manager2_postseason_wins = $postseasonH2HRow['manager2_wins'] ?? 0;
+    $postseason_record = $manager1_postseason_wins . '-' . $manager2_postseason_wins;
+    
+    // Get current streak - only look at one direction to avoid duplicates
+    $streakResult = query("SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score
+        FROM regular_season_matchups 
+        WHERE (manager1_id = $manager1_id AND manager2_id = $manager2_id)
+        ORDER BY year DESC, week_number DESC");
+    
+    $streak = 0;
+    $streakWinner = '';
+    $lastWinner = '';
+    
+    while ($streakRow = fetch_array($streakResult)) {
+        $gameWinner = '';
+        if ($streakRow['manager1_score'] > $streakRow['manager2_score']) {
+            $gameWinner = getManagerName($streakRow['manager1_id']);
+        } elseif ($streakRow['manager2_score'] > $streakRow['manager1_score']) {
+            $gameWinner = getManagerName($streakRow['manager2_id']);
+        } else {
+            continue; // Skip ties
+        }
+        
+        if ($lastWinner == '') {
+            $lastWinner = $gameWinner;
+            $streakWinner = $gameWinner;
+            $streak = 1;
+        } elseif ($lastWinner == $gameWinner) {
+            $streak++;
+        } else {
+            break;
+        }
+    }
+    
+    $streakText = $streak > 0 ? $streakWinner . ' ' . $streak : 'Even';
+    
+    return [
+        'regular_record' => $regular_record,
+        'postseason_record' => $postseason_record,
+        'streak' => $streakText
+    ];
+}

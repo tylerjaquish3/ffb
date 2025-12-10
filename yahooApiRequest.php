@@ -103,11 +103,16 @@ if ($section == 'team_names') {
 if ($section == 'matchups') {
     // Get regular season matchup scores for specific week 
     echo 'Getting scoreboard...<br />';
-    for ($managerId = 1; $managerId < 11; $managerId++) {
-        $request_uri = '/team/'.$gameCode.'.l.'.$leagueId.'.t.'.$managerId.'/matchups';
-        $matchups = get_data($request_uri, $access_token);
-        if ($matchups) {
-            handle_team_matchups($managerId, $matchups);
+    if (count($weeks) == 0) {
+        echo 'No weeks selected';
+    } else {
+        echo 'Processing weeks: ' . implode(', ', $weeks) . '<br />';
+        for ($managerId = 1; $managerId < 11; $managerId++) {
+            $request_uri = '/team/'.$gameCode.'.l.'.$leagueId.'.t.'.$managerId.'/matchups';
+            $matchups = get_data($request_uri, $access_token);
+            if ($matchups) {
+                handle_team_matchups($managerId, $matchups, $weeks);
+            }
         }
     }
     echo '<hr />';die;
@@ -294,7 +299,7 @@ function lookupManager(int $yahooTeamId, int $year)
     }
 }
 
-function handle_team_matchups(int $yahooTeamId, object $data)
+function handle_team_matchups(int $yahooTeamId, object $data, array $selectedWeeks = [])
 {
     global $year;
     // do_dump($data);die;
@@ -303,6 +308,7 @@ function handle_team_matchups(int $yahooTeamId, object $data)
     echo 'Manager ID: '.$managerId.' Weeks: ';
     
     $weeksToUpdate = []; // Track weeks that need standings updates
+    $processedWeeks = []; // Track which weeks we actually processed
  
     // Loop through each week for this manager
     foreach ($data->team[1]->matchups as $index => $m) {
@@ -315,41 +321,47 @@ function handle_team_matchups(int $yahooTeamId, object $data)
         // Only insert if the matchup is over
         if ($matchup->status == 'postevent') {
             $week = $matchup->week;
-            echo '| '.$week.' ';
-            $managerScore = (float)$matchup->{0}->teams->{0}->team[1]->team_points->total;
-            $managerProjected = (float)$matchup->{0}->teams->{0}->team[1]->team_projected_points->total;
-    
-            $oppYahooId = (int)$matchup->{0}->teams->{1}->team[0][1]->team_id;
-            $oppId = lookupManager($oppYahooId, $year);
-            $oppScore = (float)$matchup->{0}->teams->{1}->team[1]->team_points->total;
-            $oppProjected = (float)$matchup->{0}->teams->{1}->team[1]->team_projected_points->total;
-    
-            // Check if this matchup already exists
-            $existingResult = query("SELECT id FROM regular_season_matchups 
-                                   WHERE manager1_id = $managerId 
-                                   AND year = $year 
-                                   AND week_number = $week");
-            $existingRow = fetch_array($existingResult);
-            $wasNewMatchup = !$existingRow;
-    
-            // echo $managerId.' vs '.$oppId.' in week '.$week.' ('.$managerScore.' - '.$oppScore.')<br>';
-            updateOrCreate('regular_season_matchups', [
-                'manager1_id' => $managerId,
-                'year' => $year,
-                'week_number' => $week
-            ], [
-                'manager2_id' => $oppId,
-                'manager1_score' => $managerScore,
-                'manager2_score' => $oppScore,
-                'winning_manager_id' => $managerScore > $oppScore ? $managerId : $oppId,
-                'losing_manager_id' => $managerScore > $oppScore ? $oppId : $managerId,
-                'manager1_projected' => $managerProjected,
-                'manager2_projected' => $oppProjected
-            ]);
             
-            // If this was a new matchup, mark this week for standings update
-            if ($wasNewMatchup) {
-                $weeksToUpdate[] = $week;
+            // Only process if this week is in the selected weeks (or if no weeks specified, process all)
+            if (empty($selectedWeeks) || in_array($week, $selectedWeeks)) {
+                echo '| '.$week.' ';
+                $processedWeeks[] = $week;
+                
+                $managerScore = (float)$matchup->{0}->teams->{0}->team[1]->team_points->total;
+                $managerProjected = (float)$matchup->{0}->teams->{0}->team[1]->team_projected_points->total;
+        
+                $oppYahooId = (int)$matchup->{0}->teams->{1}->team[0][1]->team_id;
+                $oppId = lookupManager($oppYahooId, $year);
+                $oppScore = (float)$matchup->{0}->teams->{1}->team[1]->team_points->total;
+                $oppProjected = (float)$matchup->{0}->teams->{1}->team[1]->team_projected_points->total;
+        
+                // Check if this matchup already exists
+                $existingResult = query("SELECT id FROM regular_season_matchups 
+                                       WHERE manager1_id = $managerId 
+                                       AND year = $year 
+                                       AND week_number = $week");
+                $existingRow = fetch_array($existingResult);
+                $wasNewMatchup = !$existingRow;
+        
+                // echo $managerId.' vs '.$oppId.' in week '.$week.' ('.$managerScore.' - '.$oppScore.')<br>';
+                updateOrCreate('regular_season_matchups', [
+                    'manager1_id' => $managerId,
+                    'year' => $year,
+                    'week_number' => $week
+                ], [
+                    'manager2_id' => $oppId,
+                    'manager1_score' => $managerScore,
+                    'manager2_score' => $oppScore,
+                    'winning_manager_id' => $managerScore > $oppScore ? $managerId : $oppId,
+                    'losing_manager_id' => $managerScore > $oppScore ? $oppId : $managerId,
+                    'manager1_projected' => $managerProjected,
+                    'manager2_projected' => $oppProjected
+                ]);
+                
+                // If this was a new matchup, mark this week for standings update
+                if ($wasNewMatchup) {
+                    $weeksToUpdate[] = $week;
+                }
             }
         }
     }
@@ -359,6 +371,13 @@ function handle_team_matchups(int $yahooTeamId, object $data)
     foreach ($uniqueWeeks as $week) {
         echo " [Updating standings for week $week]";
         updateStandingsForWeek($year, $week);
+    }
+    
+    // Show summary of processed weeks
+    if (!empty($processedWeeks)) {
+        echo ' (processed: ' . implode(', ', array_unique($processedWeeks)) . ')';
+    } else {
+        echo ' (no weeks processed - check week selection)';
     }
 
     echo '...done<br>';
@@ -643,7 +662,7 @@ function updateStandingsForWeek($year, $week) {
                      VALUES ($year, $week, $managerId, $rank, $points, $wins, $losses)";
         
         $insertResult = query($insertSql);
-        echo "Inserted standing for manager {$managerId} ({$standing['name']}) - rank {$rank}, wins {$wins}, losses {$losses}, points {$points}<br>";
+        echo "<br>Inserted standing for manager {$managerId} ({$standing['name']}) - rank {$rank}, wins {$wins}, losses {$losses}, points {$points}";
         $rank++;
     }
 }

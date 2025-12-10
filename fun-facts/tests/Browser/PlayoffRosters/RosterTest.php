@@ -14,7 +14,7 @@ use App\Traits\TestHelper;
 class RosterTest extends DuskTestCase
 {
     use TestHelper;
-    protected $year = 2011;
+    protected $year = 2025;
     protected $manager;
 
     // php artisan dusk --filter=testPlayoffRoster

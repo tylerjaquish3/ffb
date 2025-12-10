@@ -57,6 +57,7 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 - separate pages now into a folder with an index and include other page parts
     - need to update links to that page to just go to that folder rather than .php file
     - do this on a new branch in case it gets messy
+- set up ckeditor for newsletter content
 
 Notes:
 Moved to 18 week schedule in 2021

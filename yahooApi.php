@@ -106,7 +106,7 @@ if( ! $request_token_url ) {
                                 <div class="col-md-6">
                                     <?php
                                     // Display weeks 8-14 in second column
-                                    for ($week = 8; $week <= 14; $week++) {
+                                    for ($week = 8; $week <= 17; $week++) {
                                         $checked = ($week == $defaultWeek) ? 'checked' : '';
                                         echo '<input type="checkbox" name="weeks[]" value="' . $week . '" ' . $checked . '> ' . $week . '<br>';
                                     }
@@ -210,13 +210,24 @@ if( ! $request_token_url ) {
         var year = $('input[name="year"]').val();
         var weeks = [];
         $('input[name="weeks[]"]:checked').each(function () {
-            weeks.push($(this).val());
+            weeks.push(parseInt($(this).val()));
         });
 
         var managers = [];
         $('input[name="managers[]"]:checked').each(function () {
             managers.push($(this).val());
         });
+
+        // Check if matchups is selected with playoff weeks
+        var matchupsSelected = $('input[name="sections[]"][value="matchups"]:checked').length > 0;
+        var playoffWeeksSelected = weeks.some(function(week) {
+            return week > 14;
+        });
+        
+        if (matchupsSelected && playoffWeeksSelected) {
+            $('#output').html('<div class="alert alert-danger"><strong>Error:</strong> Playoff matchups (weeks 15+) are not available from the Yahoo API. Please deselect weeks 15-17 when updating matchups, or deselect the Matchups option.</div>');
+            return false; // Prevent submission
+        }
 
         // Show the loading spinner
         $('#loading').show();

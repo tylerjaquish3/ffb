@@ -42,6 +42,15 @@ if (!isset($_GET['week'])) {
     $selectedWeek = $_GET['week'];
 }
 
+// Check if selected week is in playoffs and redirect to playoff newsletter
+$playoffStartWeek = ($selectedSeason >= 2021) ? 15 : 14;
+if ($selectedWeek >= $playoffStartWeek) {
+    // Redirect to playoff newsletter with same parameters
+    $redirectUrl = 'playoffNewsletter.php?year=' . $selectedSeason . '&week=' . $selectedWeek;
+    header('Location: ' . $redirectUrl);
+    exit;
+}
+
 // Set up custom meta properties for newsletter before including header
 // Get newsletter metadata image if available
 $customMetaTitle = "Week $selectedWeek Newsletter | $selectedSeason Suntown FFB";
@@ -158,33 +167,44 @@ if ($previewRow && !empty($previewRow['preview'])) {
                     <label for="week-select" style="color: #fff;">Week:</label>
                     <select id="week-select" class="form-control">
                         <?php
-                        // Get weeks for the selected season
+                        // Get weeks for the selected season including playoffs
                         $weeks = [];
+                        $playoffStartWeek = ($selectedSeason >= 2021) ? 15 : 14;
+                        $maxPlayoffWeek = ($selectedSeason >= 2021) ? 17 : 16;
                         
                         // First try to get weeks from schedule table
                         $scheduleResult = query("SELECT DISTINCT week FROM schedule WHERE year = $selectedSeason ORDER BY week ASC");
                         while ($row = fetch_array($scheduleResult)) {
-                            $weeks[] = $row['week'];
+                            if ($row['week'] < $playoffStartWeek) {
+                                $weeks[] = $row['week'];
+                            }
                         }
                         
                         // If no weeks in schedule (especially for current year), check rosters
                         if (empty($weeks)) {
                             $rosterResult = query("SELECT DISTINCT week FROM rosters WHERE year = $selectedSeason ORDER BY week ASC");
                             while ($row = fetch_array($rosterResult)) {
-                                $weeks[] = $row['week'];
+                                if ($row['week'] < $playoffStartWeek) {
+                                    $weeks[] = $row['week'];
+                                }
                             }
                             
-                            // For current year, if we have roster data, add the next week too
+                            // For current year, if we have roster data, add the next week too (if it's regular season)
                             if ($selectedSeason == $currentYear && !empty($weeks)) {
                                 $maxWeekResult = query("SELECT MAX(week) as maxWeek FROM rosters WHERE year = $selectedSeason");
                                 $maxWeekRow = fetch_array($maxWeekResult);
                                 if ($maxWeekRow && isset($maxWeekRow['maxWeek'])) {
                                     $nextWeek = $maxWeekRow['maxWeek'] + 1;
-                                    if (!in_array($nextWeek, $weeks)) {
+                                    if (!in_array($nextWeek, $weeks) && $nextWeek < $playoffStartWeek) {
                                         $weeks[] = $nextWeek;
                                     }
                                 }
                             }
+                        }
+                        
+                        // Add playoff weeks 
+                        for ($playoffWeek = $playoffStartWeek; $playoffWeek <= $maxPlayoffWeek; $playoffWeek++) {
+                            $weeks[] = $playoffWeek;
                         }
                         
                         // If still no weeks found, default to Week 1
@@ -195,12 +215,30 @@ if ($previewRow && !empty($previewRow['preview'])) {
                         // Sort weeks in ascending order
                         sort($weeks);
                         
-                        // Display week options
+                        // Display week options with playoff round names
                         foreach ($weeks as $week) {
+                            $weekLabel = "Week $week";
+                            if ($week >= $playoffStartWeek) {
+                                $weeksSincePlayoffStart = $week - $playoffStartWeek;
+                                switch ($weeksSincePlayoffStart) {
+                                    case 0:
+                                        $weekLabel = "Week $week (Quarterfinal)";
+                                        break;
+                                    case 1:
+                                        $weekLabel = "Week $week (Semifinal)";
+                                        break;
+                                    case 2:
+                                        $weekLabel = "Week $week (Final)";
+                                        break;
+                                    default:
+                                        $weekLabel = "Week $week";
+                                }
+                            }
+                            
                             if ($week == $selectedWeek) {
-                                echo '<option selected value="'.$week.'">Week '.$week.'</option>';
+                                echo '<option selected value="'.$week.'">'.$weekLabel.'</option>';
                             } else {
-                                echo '<option value="'.$week.'">Week '.$week.'</option>';
+                                echo '<option value="'.$week.'">'.$weekLabel.'</option>';
                             }
                         }
                         ?>
@@ -825,5 +863,39 @@ if ($previewRow && !empty($previewRow['preview'])) {
                 }
             <?php endif; ?>
         <?php endif; ?>
+        
+        // Handle dropdown changes
+        const yearSelect = document.getElementById('year-select');
+        const weekSelect = document.getElementById('week-select');
+        
+        if (yearSelect && weekSelect) {
+            yearSelect.addEventListener('change', function() {
+                const selectedYear = this.value;
+                const selectedWeek = weekSelect.value;
+                
+                // Determine if this week should go to regular newsletter or playoff newsletter
+                const playoffStartWeek = (selectedYear >= 2021) ? 15 : 14;
+                
+                if (selectedWeek < playoffStartWeek) {
+                    window.location.href = `newsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+                } else {
+                    window.location.href = `playoffNewsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+                }
+            });
+            
+            weekSelect.addEventListener('change', function() {
+                const selectedWeek = this.value;
+                const selectedYear = yearSelect.value;
+                
+                // Determine if this week should go to regular newsletter or playoff newsletter
+                const playoffStartWeek = (selectedYear >= 2021) ? 15 : 14;
+                
+                if (selectedWeek < playoffStartWeek) {
+                    window.location.href = `newsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+                } else {
+                    window.location.href = `playoffNewsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+                }
+            });
+        }
     });
 </script>

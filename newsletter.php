@@ -270,12 +270,12 @@ if ($previewRow && !empty($previewRow['preview'])) {
                                         <?php foreach ($scheduleInfo as $matchup): ?>
                                             <tr>
                                                 <td>
-                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>" target="_blank" rel="noopener">
+                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager1_clean'] ?? $matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>" target="_blank" rel="noopener">
                                                         <?php echo htmlspecialchars($matchup['manager1']); ?>
                                                     </a>
                                                 </td>
                                                 <td>
-                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>" target="_blank" rel="noopener">
+                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager2_clean'] ?? $matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>" target="_blank" rel="noopener">
                                                         <?php echo htmlspecialchars($matchup['manager2']); ?>
                                                     </a>
                                                 </td>

@@ -121,17 +121,10 @@ class HistoricalRostersTest extends DuskTestCase
     //  */
     // protected function insertRow(array $row, int $week)
     // {
-    //     $projectedCol = 4;
     //     $pointsCol = 3;
 
     //     if ($this->manager == 'Tyler') {
-    //         $projectedCol = 3;
     //         $pointsCol = 2;
-    //     }
-
-    //     if (str_contains($row[$projectedCol], '%')) {
-    //         $projectedCol--;
-    //         $pointsCol--; 
     //     }
 
     //     Roster::updateOrCreate([
@@ -142,7 +135,6 @@ class HistoricalRostersTest extends DuskTestCase
     //         'manager' => $this->manager,
     //         'position' => $row[0],
     //         'roster_spot' => $row[0] == 'Q/W' ? 'Q/W/R/T' : $row[0],
-    //         'projected' => $row[$projectedCol] == "–" ? 0 : $row[$projectedCol],
     //         'points' => $row[$pointsCol] == "–" ? 0 : $row[$pointsCol]
     //     ]);
     // }

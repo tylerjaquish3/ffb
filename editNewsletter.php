@@ -154,7 +154,7 @@ include 'sidebar.php';
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header" style="direction: ltr;">
-                            <h4>Week <?php echo $editWeek; ?> Schedule</h4>
+                            <h4>Week <?php echo $editWeek; ?> Schedule<?php if (isset($isPlayoffWeek) && $isPlayoffWeek): ?> (<?php echo $playoffRound; ?>)<?php endif; ?></h4>
                         </div>
                         <div class="card-body" style="background: #fff;">
                             <?php
@@ -162,7 +162,31 @@ include 'sidebar.php';
                             if (!function_exists('getScheduleInfo')) {
                                 include_once 'functions.php';
                             }
-                            $scheduleInfo = getScheduleInfo($editYear, $editWeek);
+                            
+                            // Determine if this is a playoff week
+                            $playoffStartWeek = ($editYear >= 2021) ? 15 : 14;
+                            $isPlayoffWeek = ($editWeek >= $playoffStartWeek);
+                            
+                            if ($isPlayoffWeek) {
+                                // Determine playoff round name
+                                $weeksSincePlayoffStart = $editWeek - $playoffStartWeek;
+                                switch ($weeksSincePlayoffStart) {
+                                    case 0:
+                                        $playoffRound = 'Quarterfinal';
+                                        break;
+                                    case 1:
+                                        $playoffRound = 'Semifinal';
+                                        break;
+                                    case 2:
+                                        $playoffRound = 'Final';
+                                        break;
+                                    default:
+                                        $playoffRound = 'Playoff';
+                                }
+                                $scheduleInfo = getPlayoffScheduleInfo($editYear, $editWeek, $playoffRound);
+                            } else {
+                                $scheduleInfo = getScheduleInfo($editYear, $editWeek);
+                            }
                             ?>
                             <?php if (!empty($scheduleInfo)): ?>
                                 <table id="datatable-schedule" class="table table-striped table-bordered table-responsive" style="direction: ltr;">
@@ -179,24 +203,40 @@ include 'sidebar.php';
                                         <?php foreach ($scheduleInfo as $matchup): ?>
                                             <tr>
                                                 <td>
-                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>" target="_blank" rel="noopener">
+                                                    <?php if (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['manager1_id'])): ?>
                                                         <?php echo htmlspecialchars($matchup['manager1']); ?>
-                                                    </a>
+                                                    <?php else: ?>
+                                                        <a href="profile.php?id=<?php echo urlencode($matchup['manager1_clean'] ?? $matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>" target="_blank" rel="noopener">
+                                                            <?php echo htmlspecialchars($matchup['manager1']); ?>
+                                                        </a>
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>" target="_blank" rel="noopener">
+                                                    <?php if (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['manager2_id'])): ?>
                                                         <?php echo htmlspecialchars($matchup['manager2']); ?>
-                                                    </a>
+                                                    <?php else: ?>
+                                                        <a href="profile.php?id=<?php echo urlencode($matchup['manager2_clean'] ?? $matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>" target="_blank" rel="noopener">
+                                                            <?php echo htmlspecialchars($matchup['manager2']); ?>
+                                                        </a>
+                                                    <?php endif; ?>
                                                 </td>
-                                                <td><?php echo htmlspecialchars($matchup['record']); ?></td>
-                                                <td><?php echo htmlspecialchars($matchup['postseason_record']); ?></td>
-                                                <td><?php echo htmlspecialchars($matchup['streak']); ?></td>
+                                                <td><?php echo (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['record'])) ? '—' : htmlspecialchars($matchup['record']); ?></td>
+                                                <td><?php echo (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['postseason_record'])) ? '—' : htmlspecialchars($matchup['postseason_record']); ?></td>
+                                                <td><?php echo (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['streak'])) ? '—' : htmlspecialchars($matchup['streak']); ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
                                 </table>
                             <?php else: ?>
-                                <p>No schedule information available for Week <?php echo $editWeek; ?> of the <?php echo $editYear; ?> season.</p>
+                                <p>No schedule information available for Week <?php echo $editWeek; ?> of the <?php echo $editYear; ?> season.
+                                <?php if (isset($isPlayoffWeek) && $isPlayoffWeek): ?>
+                                    <?php if ($playoffRound === 'Quarterfinal'): ?>
+                                        This could be because the regular season standings are not yet available.
+                                    <?php else: ?>
+                                        Matchups will be determined based on previous round results.
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                </p>
                             <?php endif; ?>
                         </div>
                     </div>

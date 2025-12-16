@@ -402,7 +402,7 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'player-info') {
     $player = str_replace("'", "''", $_GET['player']);
     $details = [];
 
-    $result = query("SELECT year, manager, player, team, COUNT(week) as weeks, SUM(points) as points, SUM(projected) as projected 
+    $result = query("SELECT year, manager, player, team, COUNT(week) as weeks, SUM(points) as points
         FROM rosters 
         JOIN managers ON rosters.manager = managers.name
         WHERE player = '$player'

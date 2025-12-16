@@ -157,6 +157,9 @@ foreach ($seasonNumbers as $standings) {
                                     $bye1 = $bye2 = '';
                                     foreach ($postseasonMatchups as $matchup) {
                                         if ($matchup['year'] == $season) {
+                                            
+                                            // Create combined score field for bracket display
+                                            $matchup['score'] = $matchup['score1'] . ' - ' . $matchup['score2'];
 
                                             if ($matchup['winner'] == 'm1') {
                                                 $matchup['manager1disp'] = '<span class="badge badge-primary">'.$matchup['manager1'].'</span>';

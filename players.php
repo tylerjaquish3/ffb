@@ -180,6 +180,8 @@ include 'sidebar.php';
                                             <th>Player</th>
                                             <th>Position</th>
                                             <th>Managers</th>
+                                            <th>Owned By</th>
+                                            <th>Not Owned By</th>
                                             <th>Seasons</th>
                                             <th>Weeks</th>
                                             <th>Last Season</th>
@@ -255,10 +257,23 @@ include 'sidebar.php';
                                                 arsort($info['positions']);
                                                 $pos = array_key_first($info['positions']);
                                             }
+                                            
+                                            // Sort managers alphabetically
+                                            $ownedBy = $info['managers'];
+                                            sort($ownedBy);
+                                            $ownedByStr = implode(', ', $ownedBy);
+                                            
+                                            // Find managers who haven't owned this player
+                                            $notOwnedBy = array_diff($managers, $info['managers']);
+                                            sort($notOwnedBy);
+                                            $notOwnedByStr = implode(', ', $notOwnedBy);
+                                            
                                             echo '<tr>';
                                             echo '<td><a href="/players.php?player='.$player.'">'.$player.'</a></td>';
                                             echo '<td>'.$pos.'</td>';
                                             echo '<td>'.count($info['managers']).'</td>';
+                                            echo '<td>'.$ownedByStr.'</td>';
+                                            echo '<td>'.$notOwnedByStr.'</td>';
                                             echo '<td>'.count($info['seasons']).'</td>';
                                             echo '<td>'.count($info['weeks']).'</td>';
                                             echo '<td>'.$info['last_season'].'</td>';

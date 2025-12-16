@@ -68,6 +68,10 @@ Raiders moved to LV between 2019 & 2020
 Team Name:
 - Almost Always Almost Win
 
+Draft ideas:
+- magic 8 ball or mystic pickle?
+- movie like the Mean Girls one i saw, but still random
+
 
 # Fun Fact ideas...
 
@@ -110,7 +114,11 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 - Pirates, animals, space, casino, school (report card), race car
 
 
-wk 15
-- Andy got to 9 wins for the first time since he won it all in 2013
-- playoff streaks (see post it)
-- AJ's first bye since 2016, he tied/broke his most wins in a season, set back in 2010
+Billy madison
+have 5 daquiris? opening scene
+tallyhoo - early scene with business men
+pickle race 
+4 and 7 in 1st grade classroom
+
+Storyline
+A decathlon to determine the draft order

@@ -427,8 +427,6 @@ function handle_team_rosters(int $yahooId, int $week, object $data)
         
         $team = strtoupper($teamKey);
         $spot = $player[1]->selected_position[1]->position;
-        // Projected is not available from API
-        $projected = 0;
         $points = $stats['points'];
 
         echo $manager.' - '.$playerName.' ('.$team.' - '.$pos.' - '.$spot.')<br>';
@@ -443,7 +441,6 @@ function handle_team_rosters(int $yahooId, int $week, object $data)
         ], [
             'team' => $team,
             'roster_spot' => $spot,
-            'projected' => $projected,
             'points' => $points
         ]);
 
@@ -495,7 +492,6 @@ function get_player_stats(string $playerKey, int $week)
     $player = $data->league[1]->players->{0}->player;
 
     $values = [
-        'projected' => null, // NA in API
         'points' => (float)$player[1]->player_points->total,
         'stats' => []
     ];

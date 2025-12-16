@@ -76,10 +76,12 @@ include 'sidebar.php';
                                 <thead>
                                     <th>Year</th>
                                     <th>Round</th>
-                                    <th>Manager</th>
-                                    <th>Opponent</th>
-                                    <th>Score</th>
+                                    <th>Manager 1</th>
+                                    <th>Manager 2</th>
+                                    <th>Score 1</th>
+                                    <th>Score 2</th>
                                     <th>Margin</th>
+                                    <th>Combined</th>
                                     <th></th>
                                 </thead>
                                 <tbody>
@@ -99,8 +101,10 @@ include 'sidebar.php';
                                             } else {
                                                 echo '<td><span class="badge badge-secondary">' . $matchup['manager2'] . '<span class="seed">' . $matchup['m2seed'] . '</span></span></td>';
                                             } ?>
-                                            <td><?php echo $matchup['score']; ?></td>
-                                            <td><?php echo $matchup['margin']; ?></td>
+                                            <td><?php echo $matchup['score1']; ?></td>
+                                            <td><?php echo $matchup['score2']; ?></td>
+                                            <td><?php echo round($matchup['margin'], 2); ?></td>
+                                            <td><?php echo $matchup['combined']; ?></td>
                                             <td><?php echo $matchup['sort']; ?></td>
                                         </tr>
 
@@ -210,7 +214,7 @@ include 'sidebar.php';
 
         let postseasonTable = $('#datatable-postseason').DataTable({
             columnDefs: [{
-                targets: [6],
+                targets: [8],
                 visible: false,
                 searchable: false
             }],

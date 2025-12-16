@@ -131,7 +131,6 @@ class TeamTest extends DuskTestCase
             'manager' => $this->manager,
             'position' => $this->getPosition($row[2]),
             'roster_spot' => $row[0] == 'Q/W' ? 'Q/W/R/T' : $row[0],
-            'projected' => $row[8+$x] == "-" ? 0 : $row[8+$x],
             'points' => $row[7+$x] == "-" ? 0 : $row[7+$x]
         ]);
 
@@ -201,22 +200,18 @@ class TeamTest extends DuskTestCase
     {
         // $playerArray = explode(' - ', $row[1]);
         
-        // $projectedCol = 7;
         // $pointsCol = 6;
         // $fgYardsCol = 13;
         // $patCol = 12;
         
         // if ($this->manager == 'Tyler') {
-        //     $projectedCol = 5;
         //     $pointsCol = 4;
         //     $fgYardsCol = 9;
         //     $patCol = 8;
         // }
         
         // if ($row[2] == 'Bye') {
-        //     $projected = $points = 0;
         // } else {
-        //     $projected = $row[$projectedCol] == "-" ? 0 : $row[$projectedCol];
         //     $points = $row[$pointsCol] == "-" ? 0 : $row[$pointsCol];
         // }
 
@@ -231,7 +226,6 @@ class TeamTest extends DuskTestCase
             'manager' => $this->manager,
             'position' => 'K',
             'roster_spot' => $row[0],
-            'projected' => $row[8+$x],
             'points' => $row[7+$x]
         ]);
 
@@ -280,7 +274,6 @@ class TeamTest extends DuskTestCase
             'manager' => $this->manager,
             'position' => 'DEF',
             'roster_spot' => $row[0],
-            'projected' => $row[8+$x] == "-" ? 0 : $row[8+$x],
             'points' => $row[7+$x] == "-" ? 0 : $row[7+$x]
         ]);
 

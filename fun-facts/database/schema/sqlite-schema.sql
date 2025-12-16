@@ -57,7 +57,7 @@ CREATE TABLE season_managers (id INTEGER PRIMARY KEY AUTOINCREMENT, year INTEGER
 CREATE TABLE managers (id integer NOT NULL, name varchar (50) NOT NULL, PRIMARY KEY (id));
 CREATE TABLE season_positions (id INTEGER PRIMARY KEY AUTOINCREMENT, year INTEGER NOT NULL, position VARCHAR (11) NOT NULL, sort_order INTEGER (11));
 CREATE TABLE nfl_teams (id integer NOT NULL, name varchar (50), abbr VARCHAR (10), sportradar_id varchar (200), PRIMARY KEY (id));
-CREATE TABLE IF NOT EXISTS "rosters" (id integer NOT NULL, year integer DEFAULT 0 NOT NULL, week integer, manager varchar (50), player varchar (100), position varchar (50), roster_spot varchar (50), projected float (12), points float (12), team VARCHAR (5), game_time DATETIME, game_slot INTEGER, PRIMARY KEY (id));
+CREATE TABLE IF NOT EXISTS "rosters" (id integer NOT NULL, year integer DEFAULT 0 NOT NULL, week integer, manager varchar (50), player varchar (100), position varchar (50), roster_spot varchar (50), points float (12), team VARCHAR (5), game_time DATETIME, game_slot INTEGER, PRIMARY KEY (id));
 CREATE TABLE newsletters (id INTEGER PRIMARY KEY AUTOINCREMENT, year INT NOT NULL, week INT NOT NULL, recap TEXT, preview TEXT);
 CREATE TABLE schedule (id integer NOT NULL, manager1_id integer, manager2_id integer, year INT, week integer, PRIMARY KEY (id));
 CREATE TABLE playoff_rosters (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, year INTEGER NOT NULL, round VARCHAR (20) NOT NULL, week INTEGER, manager VARCHAR (20) NOT NULL, player VARCHAR (50), position VARCHAR (10), roster_spot VARCHAR (10), team VARCHAR (10), points DECIMAL, game_time DATETIME, game_slot INTEGER);

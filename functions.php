@@ -922,7 +922,9 @@ function getPostseasonMatchups()
             'round' => $row['round'],
             'manager1' => $row['m1'],
             'manager2' => $row['m2'],
-            'score' => $row['manager1_score'] . ' - ' . $row['manager2_score'],
+            'score1' => $row['manager1_score'],
+            'score2' => $row['manager2_score'],
+            'combined' => $row['manager1_score'] + $row['manager2_score'],
             'margin' => abs($row['manager1_score']-$row['manager2_score']),
             'winner' => $winner,
             'm1seed' => $row['manager1_seed'],
@@ -1410,23 +1412,20 @@ function getCurrentSeasonPoints()
     $managers = ['Tyler', 'Matt', 'Justin', 'Ben', 'AJ', 'Gavin', 'Cameron', 'Cole', 'Everett', 'Andy'];
     foreach ($managers as $manager) {
         $points[$manager]['BN'] = [
-            'projected' => 0,
             'points' => 0
         ];
     }
 
-    $result = query("SELECT manager, roster_spot, SUM(points) AS points, SUM(projected) AS projected FROM rosters r
+    $result = query("SELECT manager, roster_spot, SUM(points) AS points FROM rosters r
         WHERE YEAR = $selectedSeason
         GROUP BY manager, roster_spot");
     while ($row = fetch_array($result)) {
 
         if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
-            $points[$row['manager']]['BN']['projected'] += round($row['projected'] ?? 0, 1);
             $points[$row['manager']]['BN']['points'] += round($row['points'] ?? 0, 1);
 
         } else {
             $points[$row['manager']][$row['roster_spot']] = [
-                'projected' => round($row['projected'] ?? 0, 1),
                 'points' => round($row['points'] ?? 0, 1)
             ];
         }
@@ -2542,7 +2541,7 @@ function getMatchupRecapNumbers()
         }
     }
     $recap = [
-        'man1' => '', 'man2' => '', 'margin1' => 0, 'margin2' => 0, 'projected1' => 0, 'projected2' => 0,
+        'man1' => '', 'man2' => '', 'margin1' => 0, 'margin2' => 0, 
         'top_scorer1' => 0, 'top_scorer2' => 0, 'bottom_scorer1' => 417, 'bottom_scorer2' => 417,
         'top_scorer_name1' => '', 'top_scorer_name2' => '', 'bottom_scorer_name1' => '', 'bottom_scorer_name2' => '',
         'bench1' => 0, 'bench2' => 0, 'points1' => 0, 'points2' => 0,
@@ -2596,9 +2595,7 @@ function getMatchupRecapNumbers()
         if ($row['roster_spot'] == 'BN' || $row['roster_spot'] == 'IR') {
             $recap['bench1'] += (float)$row['points'];
         } else {
-            $recap['projected1'] = isset($row['manager1_projected']) ? (float)$row['manager1_projected'] : 'N/A';
-            $recap['projected2'] = isset($row['manager2_projected']) ? (float)$row['manager2_projected'] : 'N/A';
-            
+ 
             if ($row['points'] > $recap['top_scorer1']) {
                 $recap['top_scorer1'] = $row['points'];
                 $recap['top_scorer_name1'] = $row['player'];
@@ -3285,6 +3282,8 @@ function getScheduleInfo($year, $week)
         $schedule[] = [
             'manager1' => $manager1,
             'manager2' => $manager2,
+            'manager1_clean' => $manager1,
+            'manager2_clean' => $manager2,
             'manager1_id' => $manager1_id,
             'manager2_id' => $manager2_id,
             'record' => $record,
@@ -4109,6 +4108,8 @@ function getPlayoffScheduleInfo($year, $week, $round)
             $schedule[] = [
                 'manager1' => $sortedStandings[1]['name'] . ' (#1 seed - Bye)',
                 'manager2' => '',
+                'manager1_clean' => $sortedStandings[1]['name'],
+                'manager2_clean' => '',
                 'manager1_id' => $sortedStandings[1]['manager_id'],
                 'manager2_id' => '',
                 'record' => '',
@@ -4122,6 +4123,8 @@ function getPlayoffScheduleInfo($year, $week, $round)
             $schedule[] = [
                 'manager1' => $sortedStandings[2]['name'] . ' (#2 seed - Bye)',
                 'manager2' => '',
+                'manager1_clean' => $sortedStandings[2]['name'],
+                'manager2_clean' => '',
                 'manager1_id' => $sortedStandings[2]['manager_id'],
                 'manager2_id' => '',
                 'record' => '',
@@ -4144,6 +4147,8 @@ function getPlayoffScheduleInfo($year, $week, $round)
             $schedule[] = [
                 'manager1' => $manager1,
                 'manager2' => $manager2,
+                'manager1_clean' => $sortedStandings[3]['name'],
+                'manager2_clean' => $sortedStandings[6]['name'],
                 'manager1_id' => $manager1_id,
                 'manager2_id' => $manager2_id,
                 'record' => $h2hInfo['regular_record'],
@@ -4165,6 +4170,8 @@ function getPlayoffScheduleInfo($year, $week, $round)
             $schedule[] = [
                 'manager1' => $manager1,
                 'manager2' => $manager2,
+                'manager1_clean' => $sortedStandings[4]['name'],
+                'manager2_clean' => $sortedStandings[5]['name'],
                 'manager1_id' => $manager1_id,
                 'manager2_id' => $manager2_id,
                 'record' => $h2hInfo['regular_record'],
@@ -4174,7 +4181,175 @@ function getPlayoffScheduleInfo($year, $week, $round)
             ];
         }
         
-    } elseif ($round === 'Semifinal' || $round === 'Final') {
+    } elseif ($round === 'Semifinal') {
+        // Special complex logic for week 16 semifinals
+        // Get final regular season standings to determine original seeding
+        $standings = weekStandings($year, $lastRegularWeek);
+        
+        if (empty($standings)) {
+            return [];
+        }
+        
+        // Convert standings to array sorted by rank
+        $sortedStandings = [];
+        foreach ($standings as $managerName => $rank) {
+            $sortedStandings[$rank] = [
+                'name' => $managerName,
+                'manager_id' => getManagerId($managerName)
+            ];
+        }
+        ksort($sortedStandings); // Sort by seed (rank)
+        
+        // Get quarterfinal winners and losers
+        $quarterWinners = [];
+        $quarterLosers = [];
+        
+        $quarterResult = query("SELECT pm.manager1_id, pm.manager2_id, pm.manager1_score, pm.manager2_score, 
+                                       pm.manager1_seed, pm.manager2_seed
+                               FROM playoff_matchups pm
+                               WHERE pm.year = $year AND pm.round = 'Quarterfinal'");
+        
+        while ($row = fetch_array($quarterResult)) {
+            if ($row['manager1_score'] > $row['manager2_score']) {
+                // Manager 1 won
+                $quarterWinners[] = [
+                    'manager_id' => $row['manager1_id'],
+                    'seed' => $row['manager1_seed']
+                ];
+                $quarterLosers[] = [
+                    'manager_id' => $row['manager2_id'], 
+                    'seed' => $row['manager2_seed']
+                ];
+            } else {
+                // Manager 2 won  
+                $quarterWinners[] = [
+                    'manager_id' => $row['manager2_id'],
+                    'seed' => $row['manager2_seed'] 
+                ];
+                $quarterLosers[] = [
+                    'manager_id' => $row['manager1_id'],
+                    'seed' => $row['manager1_seed']
+                ];
+            }
+        }
+        
+        // Sort winners and losers by seed for matchup determination
+        usort($quarterWinners, function($a, $b) { return $a['seed'] - $b['seed']; });
+        usort($quarterLosers, function($a, $b) { return $a['seed'] - $b['seed']; });
+        
+        // CHAMPIONSHIP SEMIFINAL MATCHUPS
+        // 1 seed vs lowest remaining seed from quarterfinals
+        if (isset($sortedStandings[1]) && !empty($quarterWinners)) {
+            $topSeed = $sortedStandings[1];
+            
+            // Find lowest seed among quarter winners (highest seed number)
+            $lowestSeedWinner = end($quarterWinners);
+            
+            $h2hInfo = getManagerH2HInfo($topSeed['manager_id'], $lowestSeedWinner['manager_id']);
+            
+            $schedule[] = [
+                'manager1' => $topSeed['name'] . ' (#1 seed)',
+                'manager2' => getManagerName($lowestSeedWinner['manager_id']) . ' (#' . $lowestSeedWinner['seed'] . ' seed)',
+                'manager1_clean' => $topSeed['name'],
+                'manager2_clean' => getManagerName($lowestSeedWinner['manager_id']),
+                'manager1_id' => $topSeed['manager_id'],
+                'manager2_id' => $lowestSeedWinner['manager_id'],
+                'record' => $h2hInfo['regular_record'],
+                'streak' => $h2hInfo['streak'],
+                'postseason_record' => $h2hInfo['postseason_record'],
+                'is_bye' => false
+            ];
+        }
+        
+        // 2 seed vs the other quarterfinal winner
+        if (isset($sortedStandings[2]) && count($quarterWinners) >= 2) {
+            $secondSeed = $sortedStandings[2];
+            
+            // Find the other quarterfinal winner (not the lowest seed)
+            $otherWinner = null;
+            foreach ($quarterWinners as $winner) {
+                if ($winner['manager_id'] != $lowestSeedWinner['manager_id']) {
+                    $otherWinner = $winner;
+                    break;
+                }
+            }
+            
+            if ($otherWinner) {
+                $h2hInfo = getManagerH2HInfo($secondSeed['manager_id'], $otherWinner['manager_id']);
+                
+                $schedule[] = [
+                    'manager1' => $secondSeed['name'] . ' (#2 seed)',
+                    'manager2' => getManagerName($otherWinner['manager_id']) . ' (#' . $otherWinner['seed'] . ' seed)',
+                    'manager1_clean' => $secondSeed['name'],
+                    'manager2_clean' => getManagerName($otherWinner['manager_id']),
+                    'manager1_id' => $secondSeed['manager_id'],
+                    'manager2_id' => $otherWinner['manager_id'],
+                    'record' => $h2hInfo['regular_record'],
+                    'streak' => $h2hInfo['streak'], 
+                    'postseason_record' => $h2hInfo['postseason_record'],
+                    'is_bye' => false
+                ];
+            }
+        }
+        
+        // CONSOLATION BRACKET - Quarterfinal losers play each other
+        if (count($quarterLosers) >= 2) {
+            $loser1 = $quarterLosers[0]; // Lower seed
+            $loser2 = $quarterLosers[1]; // Higher seed
+            
+            $h2hInfo = getManagerH2HInfo($loser1['manager_id'], $loser2['manager_id']);
+            
+            $schedule[] = [
+                'manager1' => getManagerName($loser1['manager_id']) . ' (#' . $loser1['seed'] . ' seed)',
+                'manager2' => getManagerName($loser2['manager_id']) . ' (#' . $loser2['seed'] . ' seed)', 
+                'manager1_clean' => getManagerName($loser1['manager_id']),
+                'manager2_clean' => getManagerName($loser2['manager_id']),
+                'manager1_id' => $loser1['manager_id'],
+                'manager2_id' => $loser2['manager_id'],
+                'record' => $h2hInfo['regular_record'],
+                'streak' => $h2hInfo['streak'],
+                'postseason_record' => $h2hInfo['postseason_record'],
+                'is_bye' => false
+            ];
+        }
+        
+        // CONSOLATION SEMIFINAL - Non-playoff teams
+        // 7 vs 10, 8 vs 9
+        if (isset($sortedStandings[7]) && isset($sortedStandings[10])) {
+            $h2hInfo = getManagerH2HInfo($sortedStandings[7]['manager_id'], $sortedStandings[10]['manager_id']);
+            
+            $schedule[] = [
+                'manager1' => $sortedStandings[7]['name'] . ' (#7 seed)',
+                'manager2' => $sortedStandings[10]['name'] . ' (#10 seed)',
+                'manager1_clean' => $sortedStandings[7]['name'],
+                'manager2_clean' => $sortedStandings[10]['name'],
+                'manager1_id' => $sortedStandings[7]['manager_id'],
+                'manager2_id' => $sortedStandings[10]['manager_id'],
+                'record' => $h2hInfo['regular_record'],
+                'streak' => $h2hInfo['streak'],
+                'postseason_record' => $h2hInfo['postseason_record'],
+                'is_bye' => false
+            ];
+        }
+        
+        if (isset($sortedStandings[8]) && isset($sortedStandings[9])) {
+            $h2hInfo = getManagerH2HInfo($sortedStandings[8]['manager_id'], $sortedStandings[9]['manager_id']);
+            
+            $schedule[] = [
+                'manager1' => $sortedStandings[8]['name'] . ' (#8 seed)',
+                'manager2' => $sortedStandings[9]['name'] . ' (#9 seed)',
+                'manager1_clean' => $sortedStandings[8]['name'],
+                'manager2_clean' => $sortedStandings[9]['name'],
+                'manager1_id' => $sortedStandings[8]['manager_id'],
+                'manager2_id' => $sortedStandings[9]['manager_id'],
+                'record' => $h2hInfo['regular_record'],
+                'streak' => $h2hInfo['streak'],
+                'postseason_record' => $h2hInfo['postseason_record'],
+                'is_bye' => false
+            ];
+        }
+        
+    } elseif ($round === 'Final') {
         // Get matchups from playoff_matchups table for current round
         $result = query("SELECT pm.manager1_id, pm.manager2_id, pm.manager1_seed, pm.manager2_seed,
             m1.name as manager1, m2.name as manager2
@@ -4197,6 +4372,8 @@ function getPlayoffScheduleInfo($year, $week, $round)
             $schedule[] = [
                 'manager1' => $manager1 . ' (#' . $row['manager1_seed'] . ' seed)',
                 'manager2' => $manager2 . ' (#' . $row['manager2_seed'] . ' seed)',
+                'manager1_clean' => $manager1,
+                'manager2_clean' => $manager2,
                 'manager1_id' => $manager1_id,
                 'manager2_id' => $manager2_id,
                 'record' => $h2hInfo['regular_record'],
@@ -4211,6 +4388,8 @@ function getPlayoffScheduleInfo($year, $week, $round)
             $schedule[] = [
                 'manager1' => 'Matchups will be determined based on',
                 'manager2' => 'previous round results',
+                'manager1_clean' => '',
+                'manager2_clean' => '',
                 'manager1_id' => '',
                 'manager2_id' => '',
                 'record' => '',

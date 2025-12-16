@@ -233,11 +233,6 @@ function lookupGameTime(?int $id) {
                                             <td><?php echo round($recap['margin2'], 2); ?></td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Projected</strong></td>
-                                            <td><?php echo $recap['projected1']; ?></td>
-                                            <td><?php echo $recap['projected2']; ?></td>
-                                        </tr>
-                                        <tr>
                                             <td><strong>Top Scorer</strong></td>
                                             <td><?php echo $recap['top_scorer1']; ?></td>
                                             <td><?php echo $recap['top_scorer2']; ?></td>

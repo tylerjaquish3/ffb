@@ -255,7 +255,7 @@ include 'sidebar.php';
                                 <h4>Week <?php echo $editWeek - 1; ?> Recap</h4>
                             </div>
                             <div class="card-body" style="background: #fff;">
-                                <textarea name="recap" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the recap content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($recap); ?></textarea>
+                                <textarea id="recap" name="recap" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the recap content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($recap); ?></textarea>
                             </div>
                         </div>
                     </div>
@@ -266,7 +266,7 @@ include 'sidebar.php';
                                 <h4>Week <?php echo $editWeek; ?> Preview</h4>
                             </div>
                             <div class="card-body" style="background: #fff;">
-                                <textarea name="preview" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the preview content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($preview); ?></textarea>
+                                <textarea id="preview" name="preview" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the preview content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($preview); ?></textarea>
                             </div>
                         </div>
                     </div>
@@ -323,3 +323,51 @@ function updateURL() {
 </script>
 
 <?php include 'footer.php'; ?>
+
+
+<!-- CKEditor 5 CDN integration for Recap and Preview fields (must be after all other scripts) -->
+<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/47.3.0/ckeditor5.css" crossorigin>
+<script src="https://cdn.ckeditor.com/ckeditor5/47.3.0/ckeditor5.umd.js" crossorigin></script>
+<script src="https://cdn.ckbox.io/ckbox/2.9.2/ckbox.js" crossorigin></script>
+
+<script>
+    $( document ).ready( () => {
+        const {
+            ClassicEditor,Autoformat,AutoImage,Autosave,BlockQuote,Bold,Emoji,
+            Essentials,Heading,Indent,IndentBlock,Italic,Link,List,MediaEmbed,Mention,Paragraph,
+		    Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline
+        } = CKEDITOR;
+
+        let plugins = [
+            Autoformat,AutoImage,Autosave,BlockQuote,Bold,Emoji,
+            Essentials,Heading,Indent,IndentBlock,Italic,Link,List,MediaEmbed,Mention,Paragraph,
+		    Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline
+        ];
+
+        let toolbar = ['undo','redo','|',
+            'heading','|',
+            'bold','italic','underline','|',
+            'emoji','link','mediaEmbed','insertTable','blockQuote','|',
+            'bulletedList','numberedList','todoList','outdent','indent'
+        ];
+
+        ClassicEditor.create( $( '#recap' )[ 0 ], {
+            licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
+            plugins: plugins,
+            toolbar: toolbar
+        })
+        .catch( error => {
+            console.error( 'Error initializing CKEditor 5:', error );
+        });
+        
+        ClassicEditor.create( $( '#preview' )[ 0 ], {
+            licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
+            plugins: plugins,
+            toolbar: toolbar
+        })
+        .catch( error => {
+            console.error( 'Error initializing CKEditor 5:', error );
+        });
+    } );
+    
+</script>

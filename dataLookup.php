@@ -200,8 +200,8 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'all-players') {
         $aliasMap[$row['player']] = $names;
     }
 
-    // Get all player rows
-    $result = query("SELECT player, SUM(points) as points from rosters 
+    // Get all player rows and their seasons
+    $result = query("SELECT player, SUM(points) as points, COUNT(DISTINCT year) as seasons from rosters 
         WHERE player != '' AND player != '(Empty)'
         GROUP BY player");
 
@@ -212,10 +212,12 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'all-players') {
         if (!isset($groupedPlayers[$canonical])) {
             $groupedPlayers[$canonical] = [
                 'player' => $canonical,
-                'points' => 0
+                'points' => 0,
+                'seasons' => 0
             ];
         }
         $groupedPlayers[$canonical]['points'] += $row['points'];
+        $groupedPlayers[$canonical]['seasons'] += $row['seasons'];
     }
 
     // Format output
@@ -223,7 +225,8 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'all-players') {
     foreach ($groupedPlayers as $info) {
         $players[] = [
             'player' => $info['player'],
-            'points' => number_format($info['points'], 2)
+            'points' => round($info['points'], 2), // return as float, not formatted
+            'seasons' => $info['seasons']
         ];
     }
     $content = new \stdClass();

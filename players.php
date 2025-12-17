@@ -9,8 +9,21 @@ include 'sidebar.php';
 <div class="app-content content">
     <div class="content-wrapper">
 
-        <div class="content-body"> 
-            <div class="row">
+        <div class="content-body">
+            <!-- Tabs Navigation -->
+            <div class="row mb-1">
+                <div class="col-sm-12">
+                    <div class="tab-buttons-container">
+                        <button class="tab-button active" id="all-players-tab" onclick="showCard('all-players', true)">All Players</button>
+                        <button class="tab-button" id="top-seasons-tab" onclick="showCard('top-seasons', true)">Top Seasons</button>
+                        <button class="tab-button" id="top-weeks-tab" onclick="showCard('top-weeks', true)">Top Weeks</button>
+                        <button class="tab-button" id="players-by-manager-tab" onclick="showCard('players-by-manager', true)">Players by Manager</button>
+                        <button class="tab-button" id="nfl-teams-tab" onclick="showCard('nfl-teams', true)">NFL Teams</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row card-section" id="all-players">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -24,6 +37,8 @@ include 'sidebar.php';
                                             <th></th>
                                             <th>Player</th>
                                             <th>Points</th>
+                                            <th>Seasons</th>
+                                            <th>Points Per Season</th>
                                         </thead>
                                         <tbody></tbody>
                                     </table>
@@ -33,8 +48,9 @@ include 'sidebar.php';
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-12 col-lg-6 table-padding">
+
+            <div class="row card-section" id="top-seasons" style="display: none;">
+                <div class="col-sm-12 col-md-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Top Player Seasons</h4>
@@ -98,8 +114,10 @@ include 'sidebar.php';
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-sm-12 col-lg-6 table-padding">
+            <div class="row card-section" id="top-weeks" style="display: none;">
+                <div class="col-sm-12 col-md-6 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4>Top Player Weeks</h4>
@@ -165,8 +183,7 @@ include 'sidebar.php';
                 </div>
             </div>
 
-            <!-- New Card: Players Grouped by Manager -->
-            <div class="row">
+            <div class="row card-section" id="players-by-manager" style="display: none;">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -288,20 +305,117 @@ include 'sidebar.php';
                     </div>
                 </div>
             </div>
+
+            <!-- NFL Teams Tab -->
+            <div class="row card-section" id="nfl-teams" style="display: none;">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>NFL Teams by Manager</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-striped nowrap" id="datatable-nfl-teams">
+                                        <thead>
+                                            <tr>
+                                                <th>NFL Team</th>
+                                                <?php
+                                                // Get all managers
+                                                $managers = [];
+                                                $result = query("SELECT DISTINCT manager FROM rosters");
+                                                while ($row = fetch_array($result)) {
+                                                    $managers[] = $row['manager'];
+                                                }
+                                                sort($managers);
+                                                foreach ($managers as $manager) {
+                                                    echo '<th>' . htmlspecialchars($manager) . '</th>';
+                                                }
+                                                ?>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            // Get all teams
+                                            $teams = [];
+                                            $result = query("SELECT DISTINCT team FROM rosters WHERE team IS NOT NULL AND team != '' ORDER BY team");
+                                            while ($row = fetch_array($result)) {
+                                                $teams[] = $row['team'];
+                                            }
+
+                                            // Get counts: team => manager => count
+                                            $counts = [];
+                                            $result = query("SELECT team, manager, COUNT(DISTINCT player) as player_count FROM rosters WHERE team IS NOT NULL AND team != '' GROUP BY team, manager");
+                                            while ($row = fetch_array($result)) {
+                                                $counts[$row['team']][$row['manager']] = $row['player_count'];
+                                            }
+
+                                            foreach ($teams as $team) {
+                                                echo '<tr>';
+                                                echo '<td>' . htmlspecialchars($team) . '</td>';
+                                                // Collect all values for this row
+                                                $rowVals = [];
+                                                foreach ($managers as $manager) {
+                                                    $rowVals[] = isset($counts[$team][$manager]) ? $counts[$team][$manager] : 0;
+                                                }
+                                                $min = min($rowVals);
+                                                $max = max($rowVals);
+                                                foreach ($managers as $i => $manager) {
+                                                    $val = $rowVals[$i];
+                                                    $class = '';
+                                                    if ($val === $min && $min !== $max) $class = 'nfl-low';
+                                                    if ($val === $max && $min !== $max) $class = 'nfl-high';
+                                                    echo '<td'.($class ? ' class="'.$class.'"' : '').'>' . $val . '</td>';
+                                                }
+                                                echo '</tr>';
+                                            }
+                                            ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <style>
+    
+    .card-section { margin-bottom: 20px; }
     input[type="text"] {
         width: 100%
+    }
+    .nfl-low {
+        background: #ffeaea !important;
+    }
+    .nfl-high {
+        background: #eaffea !important;
     }
 </style>
 
 <?php include 'footer.php'; ?>
 
 <script type="text/javascript">
+    function showCard(cardId, setActive) {
+        // Hide all card-sections
+        $('.card-section').hide();
+        // Show the selected card-section
+        $('#' + cardId).show();
+        if (setActive) {
+            // Remove active from all tab buttons
+            $('.tab-button').removeClass('active');
+            // Add active to the clicked tab
+            $('#' + cardId + '-tab').addClass('active');
+        }
+    }
+
     $(document).ready(function() {
+        // Initialize with All Players tab active
+        showCard('all-players', true);
+
 
         $('#datatable-players-by-manager').DataTable({
             pageLength: 25,
@@ -373,7 +487,19 @@ include 'sidebar.php';
                     defaultContent: '<i class="icon-plus"></i>'
                 },
                 { data: "player" },
-                { data: "points" }
+                { data: "points" },
+                { data: "seasons" },
+                { 
+                    data: null,
+                    render: function(data, type, row) {
+                        if (row.seasons && row.seasons > 0) {
+                            return (row.points / row.seasons).toFixed(1);
+                        } else {
+                            return '';
+                        }
+                    },
+                    title: "Points Per Season"
+                }
             ],
             order: [
                 [2, "desc"]
@@ -431,5 +557,9 @@ include 'sidebar.php';
             playerSeasons.columns('').search('').draw();
         });
 
+        $('#datatable-nfl-teams').DataTable({
+            pageLength: 50,
+            order: [[0, "asc"]]
+        });
     });
 </script>

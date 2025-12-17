@@ -20,7 +20,6 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 
 - Current season, worst draft picks remove players that got traded midseason
 - add trophy graphic on trophy page
-- run some "what if" scenarios
 - add more fun facts
     - record against everyone
     - best trade
@@ -52,12 +51,11 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
     - all Marvin's since 2009 have been Jrs
     - Baltimore has been owned the most but only by 7 managers
 - regular season, game time analysis, make some way to highlight the current year bests and where they rank so its easier to use
-- players page, put in tabs
-    - add some analysis by nfl team and year
+- players page, add some analysis by nfl team and year from rosters
 - separate pages now into a folder with an index and include other page parts
     - need to update links to that page to just go to that folder rather than .php file
     - do this on a new branch in case it gets messy
-- set up ckeditor for newsletter content
+- check points missed to see which teams missed out on the most wins
 
 Notes:
 Moved to 18 week schedule in 2021

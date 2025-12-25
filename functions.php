@@ -4350,28 +4350,25 @@ function getPlayoffScheduleInfo($year, $week, $round)
         }
         
     } elseif ($round === 'Final') {
-        // Get matchups from playoff_matchups table for current round
-        $result = query("SELECT pm.manager1_id, pm.manager2_id, pm.manager1_seed, pm.manager2_seed,
-            m1.name as manager1, m2.name as manager2
-            FROM playoff_matchups pm
-            JOIN managers m1 ON pm.manager1_id = m1.id
-            JOIN managers m2 ON pm.manager2_id = m2.id
-            WHERE pm.year = $year AND pm.round = '$round'");
-        
-        $hasMatchups = false;
-        while ($row = fetch_array($result)) {
-            $hasMatchups = true;
-            $manager1_id = $row['manager1_id'];
-            $manager2_id = $row['manager2_id'];
-            $manager1 = $row['manager1'];
-            $manager2 = $row['manager2'];
-            
-            // Get H2H records
+        // Show the two semifinal winners as the finals matchup
+        $semifinalWinners = [];
+        $semiResult = query("SELECT manager1_id, manager2_id, manager1_score, manager2_score FROM playoff_matchups WHERE year = $year AND round = 'Semifinal'");
+        while ($row = fetch_array($semiResult)) {
+            if ($row['manager1_score'] > $row['manager2_score']) {
+                $semifinalWinners[] = $row['manager1_id'];
+            } elseif ($row['manager2_score'] > $row['manager1_score']) {
+                $semifinalWinners[] = $row['manager2_id'];
+            }
+        }
+        if (count($semifinalWinners) === 2) {
+            $manager1_id = $semifinalWinners[0];
+            $manager2_id = $semifinalWinners[1];
+            $manager1 = getManagerName($manager1_id);
+            $manager2 = getManagerName($manager2_id);
             $h2hInfo = getManagerH2HInfo($manager1_id, $manager2_id);
-            
             $schedule[] = [
-                'manager1' => $manager1 . ' (#' . $row['manager1_seed'] . ' seed)',
-                'manager2' => $manager2 . ' (#' . $row['manager2_seed'] . ' seed)',
+                'manager1' => $manager1,
+                'manager2' => $manager2,
                 'manager1_clean' => $manager1,
                 'manager2_clean' => $manager2,
                 'manager1_id' => $manager1_id,
@@ -4381,10 +4378,7 @@ function getPlayoffScheduleInfo($year, $week, $round)
                 'postseason_record' => $h2hInfo['postseason_record'],
                 'is_bye' => false
             ];
-        }
-        
-        // If no matchups found, show placeholder message
-        if (!$hasMatchups) {
+        } else {
             $schedule[] = [
                 'manager1' => 'Matchups will be determined based on',
                 'manager2' => 'previous round results',

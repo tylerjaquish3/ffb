@@ -666,9 +666,16 @@ function lookupGameTime(?int $id) {
                                                 foreach ($positions as $position => $players) {
                                                     
                                                     foreach ($players as $player) {
-                                                        echo '<td data-order="'.$player['points'].'">
-                                                            <a href="/players.php?player='.$player['player'].'">'.$player['player'].'</a><br />'.
-                                                            $player['points'].' pts</td>';
+                                                        // Debug: check if player or points is not a string/number
+                                                        if (!is_scalar($player['player']) || !is_scalar($player['points'])) {
+                                                            echo '<td style="background: #ffcccc; color: #900;">DEBUG: Invalid data<br><pre>';
+                                                            echo htmlspecialchars(print_r($player, true));
+                                                            echo '</pre></td>';
+                                                        } else {
+                                                            echo '<td data-order="'.$player['points'].'">
+                                                                <a href="/players.php?player='.$player['player'].'">'.$player['player'].'</a><br />'.
+                                                                $player['points'].' pts</td>';
+                                                        }
                                                     }
                                                     // if any positions were blank, put in an empty cell
                                                     if (count($players) <= $positionCounts[$position]) {

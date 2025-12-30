@@ -1634,8 +1634,13 @@ function getCurrentSeasonWeekStatsAgainst()
         WHERE YEAR = $selectedSeason and roster_spot != 'BN' and roster_spot != 'IR'
         GROUP BY manager, week");
     while ($row = fetch_array($result)) {
-        $opponent = $weekOpponents[$row['week']][$row['manager']];
-        $row['manager'] = getManagerName($opponent);
+        $opponent = null;
+        if (isset($weekOpponents[$row['week']][$row['manager']])) {
+            $opponent = $weekOpponents[$row['week']][$row['manager']];
+            $row['manager'] = getManagerName($opponent);
+        } else {
+            $row['manager'] = 'Unknown';
+        }
         $response[] = $row;
     }
 

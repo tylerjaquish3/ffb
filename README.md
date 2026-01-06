@@ -1,6 +1,6 @@
 ### Suntown FFB website
 
-All environments now use sqlite for the database. There is an outdated version of the database in mysql on PC and Production.
+All environments now use sqlite for the database.
 To get new data, use the admin page that will interact with the Yahoo API. 
 There is a laravel project inside the fun-facts folder so that jobs can be run. Here are the jobs:
 php artisan funFacts : update all of the manager fun facts. 
@@ -56,6 +56,8 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
     - need to update links to that page to just go to that folder rather than .php file
     - do this on a new branch in case it gets messy
 - check points missed to see which teams missed out on the most wins
+- add an easy way to get the game times from that website and save it to the storage folder
+- make newsletter show random additional data so its not the same every week    
 
 Notes:
 Moved to 18 week schedule in 2021

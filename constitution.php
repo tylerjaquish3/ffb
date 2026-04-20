@@ -200,6 +200,60 @@ while ($row = fetch_array($result)) {
 
             <div class="row card-section" id="meeting-notes" style="display: none;">
                 <div class="col-sm-12">
+
+                    <!-- Meeting Agenda TBD 2026 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Meeting Agenda | TBD 2026</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block" style="direction: ltr">
+                                <br />
+                                <strong>Vote on the following: </strong>
+                                <ol>
+                                    <li>Add stat category for Pick 6s Thrown worth -4 points. Burrow had 3, 2 QBs had 2, and 20 QBs had 1.</li>
+                                    <li>Increase points for DEF turnovers &amp; sacks.
+                                        <div class="table-responsive mt-2 mb-2">
+                                            <table class="table table-sm table-bordered text-center small" style="max-width: 320px; line-height: 1.2;">
+                                                <thead class="thead-light">
+                                                    <tr><th>Category</th><th>2025</th><th>2026</th></tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr><td>Sack</td><td>0.5</td><td>0.5</td></tr>
+                                                    <tr class="table-warning"><td>Interception</td><td>1</td><td><strong>2</strong></td></tr>
+                                                    <tr class="table-warning"><td>Fumble Recovery</td><td>1</td><td><strong>2</strong></td></tr>
+                                                    <tr class="table-warning"><td>Safety</td><td>2</td><td><strong>4</strong></td></tr>
+                                                    <tr class="table-warning"><td>Block Kick</td><td>1</td><td><strong>4</strong></td></tr>
+                                                    <tr class="table-warning"><td>4th Down Stop</td><td>1</td><td><strong>2</strong></td></tr>
+                                                    <tr><td>3 and Out</td><td>0.5</td><td>0.5</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        How DEF compares to other positions (2025):
+                                        <div class="table-responsive mt-2 mb-2">
+                                            <table class="table table-sm table-bordered text-center small" style="max-width: 380px; line-height: 1.2;">
+                                                <thead class="thead-light">
+                                                    <tr><th>Pos</th><th>#1</th><th>#25</th><th>Avg</th></tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr><td>QB</td><td>361</td><td>159</td><td>257</td></tr>
+                                                    <tr><td>RB</td><td>365</td><td>161</td><td>237</td></tr>
+                                                    <tr><td>WR</td><td>309</td><td>163</td><td>198</td></tr>
+                                                    <tr class="table-danger"><td>DEF now</td><td>243</td><td>95</td><td>156</td></tr>
+                                                    <tr class="table-success"><td>DEF prop.</td><td>299</td><td>129</td><td>196</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </li>
+                                </ol>
+                                <strong>Determine 2026 draft order</strong><br />
+                                <br /><br />
+                                <strong>Draft date: 8.29.26 | Time: TBD | Location: Cole's</strong>
+                                <br /><br />
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 2025 -->
                     <div class="card">
                         <div class="card-header">

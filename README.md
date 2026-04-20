@@ -1,5 +1,32 @@
 ### Suntown FFB website
 
+# Starting a New Season
+
+## 1. Build the Schedule
+Insert the new season's matchups into the `schedule` table (one row per game, not both directions). Columns: `id, year, week, manager1_id, manager2_id`.
+
+**Structure:** 14 weeks, 5 matchups per week. Weeks 10–14 are identical to weeks 1–5 — those are the "rematch" weeks. Each manager plays all 9 opponents once (weeks 1–9) and 5 opponents twice (weeks 1–5 / 10–14).
+
+**Picking the 5 rematches:** Run the query below to see how many times each pair has played historically, then prioritize rematches for the lowest-count pairs. Andy and Cameron joined in 2008 so they naturally have fewer matchups — lean their rematch slots toward the lowest pairs first.
+
+```sql
+SELECT m1.name, m2.name, COUNT(*) as games
+FROM regular_season_matchups rsm
+JOIN managers m1 ON rsm.manager1_id = m1.id
+JOIN managers m2 ON rsm.manager2_id = m2.id
+WHERE rsm.manager1_id < rsm.manager2_id
+GROUP BY rsm.manager1_id, rsm.manager2_id
+ORDER BY COUNT(*) ASC;
+```
+
+Each manager must appear in exactly 5 rematch pairs (since they play 5 rematches). The 25 total rematch pairs must also form 5 valid weeks (each week has all 10 managers playing once). Ask Claude to do this — it will optimize the pairing and handle the scheduling math.
+
+## 2. Pull Data from Yahoo API
+Use the admin page to fetch the current season's data from the Yahoo Fantasy Sports API. Do this each week during the season to keep scores, rosters, and standings current.
+
+
+---
+
 All environments now use sqlite for the database.
 To get new data, use the admin page that will interact with the Yahoo API. 
 There is a laravel project inside the fun-facts folder so that jobs can be run. Here are the jobs:

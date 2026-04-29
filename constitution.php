@@ -247,7 +247,7 @@ while ($row = fetch_array($result)) {
                                     </li>
                                 </ol>
                                 <strong>Determine 2026 draft order</strong><br />
-                                <br /><br />
+                                <br />
                                 <strong>Draft date: 8.29.26 | Time: TBD | Location: Cole's</strong>
                                 <br /><br />
                             </div>

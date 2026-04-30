@@ -10,6 +10,12 @@ include 'sidebar.php';
         <div class="content-header row"></div>
 
         <div class="content-body">
+
+            <!-- Hero Banner -->
+            <div class="page-hero">
+                <img src="/images/full-logo.jpeg" alt="Suntown FFB" class="page-hero-logo">
+            </div>
+
             <!-- Statistics -->
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-sm-12">

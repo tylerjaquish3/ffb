@@ -92,9 +92,6 @@ Rams moved to LA between 2015 & 2016
 Chargers moved to LA between 2016 & 2017
 Raiders moved to LV between 2019 & 2020
 
-Team Name:
-- Almost Always Almost Win
-
 Draft ideas:
 - magic 8 ball or mystic pickle?
 - movie like the Mean Girls one i saw, but still random

@@ -17,6 +17,11 @@ while ($row = fetch_array($result)) {
 
         <div class="content-body">
 
+            <!-- Hero Banner -->
+            <div class="page-hero">
+                <img src="/images/full-logo.jpeg" alt="Suntown FFB" class="page-hero-logo">
+            </div>
+
             <!-- Tabs Navigation -->
             <div class="row mb-1">
                 <div class="col-sm-12">

@@ -33,8 +33,18 @@ html body {
 }
 
 .header-navbar.navbar-semi-dark .navbar-header {
-    background: linear-gradient(135deg, #0d55c4, #297eff) !important;
+    background: #04131e !important;
     color: #fff;
+}
+
+.navbar-logo {
+    height: 36px;
+    width: auto;
+    display: block;
+}
+
+.navbar-logo-sm {
+    height: 26px;
 }
 
 .header-navbar.navbar-semi-dark .navbar-header h2 {
@@ -48,9 +58,15 @@ html body {
     text-shadow: 0 2px 6px rgba(0,0,0,0.35), 0 0 24px rgba(46,184,46,0.4);
 }
 
-.main-menu.menu-dark .navigation>li.active>a {
-    color: #162029;
-    background-color: #297eff;
+.main-menu.menu-dark .navigation > li.active > a {
+    background: #297eff !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    border-left: 3px solid rgba(255,255,255,0.5);
+}
+
+.main-menu.menu-dark .navigation > li.active > a i {
+    color: #fff !important;
 }
 
 ul.nav.navbar-nav {
@@ -79,19 +95,39 @@ div#navbar-mobile h2 {
 .main-menu.menu-dark .navigation,
 .main-menu.menu-dark,
 .main-menu.menu-dark .navigation > li.open > ul {
-    /* background-color: #2eff37; */
-    background-color: #2eb82e;
+    background: linear-gradient(170deg, #259925 0%, #2eb82e 52%, #28b028 100%) !important;
 }
 
 .main-menu.menu-dark .navigation li a {
-    color: #000;
+    color: rgba(0, 30, 0, 0.82);
+    text-decoration: none !important;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    transition: color 0.18s ease, background 0.18s ease;
+    border-left: 3px solid transparent;
+}
+
+.main-menu.menu-dark .navigation > li > a i {
+    color: rgba(0, 60, 0, 0.55) !important;
+    transition: color 0.18s ease, transform 0.18s ease;
 }
 
 .main-menu.menu-dark .navigation > li:hover > a,
 .main-menu.menu-dark .navigation > li.open .hover > a,
 .main-menu.menu-dark .navigation > li.open > a {
-    /* background-color: #04015d; */
-    background-color: #297eff;
+    background: #297eff !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.main-menu.menu-dark .navigation > li:hover > a i,
+.main-menu.menu-dark .navigation > li.open > a i {
+    color: #fff !important;
+    transform: translateX(2px);
 }
 
 body.vertical-layout.vertical-menu.menu-collapsed
@@ -108,8 +144,7 @@ body.vertical-layout.vertical-menu.menu-collapsed
     a.menu-title,
 .main-menu.menu-dark .navigation > li > ul,
 .main-menu.menu-dark ul.menu-popout {
-    /* background-color: #04015d; */
-    background-color: #297eff;
+    background: linear-gradient(170deg, #259925 0%, #2eb82e 52%, #28b028 100%) !important;
 }
 
 .bg-green-ffb {
@@ -530,6 +565,9 @@ span.seed {
     color: #fff;
     line-height: 1.1;
     word-break: break-word;
+    direction: ltr;
+    unicode-bidi: embed;
+    text-align: right;
 }
 
 /* Equal-height stat cards within a section row */
@@ -839,9 +877,7 @@ tr.color-black td {
 .footer {
     width: 100%;
     height: 32px;
-    background: rgba(4, 8, 20, 0.82);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: #04131e;
     border-top: 1px solid rgba(41, 126, 255, 0.18);
     display: flex;
     align-items: center;
@@ -1298,4 +1334,81 @@ div.dt-container .dt-paging-button:not(.disabled):hover {
         width: 100% !important;
         margin: 0 !important;
     }
+}
+
+/* =============================================
+   SIDEBAR POLISH
+   ============================================= */
+
+/* Item dividers */
+.main-menu.menu-dark .navigation > li {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    margin: 0 !important;
+}
+
+/* Submenu items */
+.main-menu.menu-dark .navigation li .menu-item {
+    color: rgba(0, 30, 0, 0.75) !important;
+    text-decoration: none !important;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    transition: color 0.15s ease;
+}
+
+.main-menu.menu-dark .navigation li .menu-item:hover {
+    color: #fff !important;
+    text-decoration: none !important;
+}
+
+/* Thin custom scrollbar on the menu */
+.main-menu-content::-webkit-scrollbar {
+    width: 3px;
+}
+.main-menu-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+.main-menu-content::-webkit-scrollbar-thumb {
+    background: rgba(41, 126, 255, 0.22);
+    border-radius: 2px;
+}
+
+/* Collapsed-mode icon glow on hover (icon-only view) */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:hover > a,
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li.active > a {
+    background: rgba(41, 126, 255, 0.18) !important;
+}
+
+/* Remove any stray underlines inside the sidebar */
+.main-menu a,
+.main-menu a:hover,
+.main-menu a:focus {
+    text-decoration: none !important;
+}
+
+/* =============================================
+   PAGE HERO BANNER
+   ============================================= */
+
+.page-hero {
+    position: relative;
+    text-align: center;
+    padding: 36px 20px 24px;
+    margin-bottom: 28px;
+    background: #010b15;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(41, 126, 255, 0.12);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
+}
+
+.page-hero-logo {
+    width: 300px;
+    max-width: 75%;
+}
+
+@media (max-width: 768px) {
+    .page-hero { padding: 24px 16px 18px; margin-bottom: 20px; }
+    .page-hero-logo { width: 220px; }
 }

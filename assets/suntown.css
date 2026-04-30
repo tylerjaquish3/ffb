@@ -977,6 +977,72 @@ div.dt-container div.dt-layout-row {
     margin: 0 !important;
 }
 
+/* Ensure all tab card sections stay within the content area */
+.card-section {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.card-section .card {
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.card-section .card-body {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.card-section .card-block {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.card-section .card-block ul,
+.card-section .card-block li {
+    width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.card-section .card-block li {
+    max-width: 100%;
+    display: list-item;
+}
+
+.page-hero {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.content-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.content-body {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.row {
+    overflow-x: hidden;
+}
+
+.app-content.content.container-fluid {
+    width: 85%;
+}
+
 table.nowrap th,
 table.nowrap td,
 table.dataTable.nowrap th,
@@ -991,7 +1057,8 @@ table.dataTable.nowrap td,
    ============================================= */
 
 /* Column headers — Barlow Condensed, spaced uppercase */
-.table thead th {
+.table thead th,
+table.dataTable thead th {
     font-family: 'Barlow Condensed', sans-serif !important;
     font-size: 11px !important;
     font-weight: 700 !important;
@@ -1006,7 +1073,8 @@ table.dataTable.nowrap td,
 }
 
 /* Data cells — DM Mono for crisp numeric alignment */
-.table tbody td {
+.table tbody td,
+table.dataTable tbody td {
     font-family: 'DM Mono', monospace;
     font-size: 12.5px;
     color: #12213a;
@@ -1017,42 +1085,38 @@ table.dataTable.nowrap td,
 }
 
 /* Row hover — ghost green */
-.table tbody tr:hover > td {
+.table tbody tr:hover > td,
+table.dataTable tbody tr:hover > td {
     background: rgba(46,184,46,0.07) !important;
     transition: background 0.12s ease;
 }
 
 /* Striped rows — barely-there blue tint */
-.table-striped > tbody > tr:nth-of-type(odd) > * {
+.table-striped > tbody > tr:nth-of-type(odd) > *,
+table.dataTable.stripe > tbody > tr:nth-of-type(odd) > td {
     background: rgba(41,126,255,0.04) !important;
     --bs-table-accent-bg: transparent;
 }
 
-.table-striped > tbody > tr:nth-of-type(even) > * {
+.table-striped > tbody > tr:nth-of-type(even) > *,
+table.dataTable.stripe > tbody > tr:nth-of-type(even) > td {
     background: transparent !important;
 }
 
 /* Links inside tables */
-.table tbody td a {
+.table tbody td a,
+table.dataTable tbody td a {
     color: #1450c8;
     text-decoration: none;
     font-weight: 500;
 }
 
-.table tbody td a:hover {
+.table tbody td a:hover,
+table.dataTable tbody td a:hover {
     color: #2eb82e;
     text-decoration: none;
 }
 
-/* Roster Position History — allow DataTables scrollX container to show through card */
-#roster-history .card {
-    overflow: visible;
-}
-
-#roster-history .card-header {
-    border-radius: 10px 10px 0 0;
-    overflow: hidden;
-}
 
 #datatable-settings_wrapper .dataTables_scrollBody {
     -webkit-overflow-scrolling: touch;
@@ -1175,6 +1239,10 @@ div.dt-container .dt-paging-button:not(.disabled):hover {
     /* Let footer flow naturally after content on mobile (not viewport-pinned) */
     .app-content {
         flex: none;
+    }
+
+    .app-content.content.container-fluid {
+        width: 100%;
     }
 
     /* Fix negative margin causing overflow */

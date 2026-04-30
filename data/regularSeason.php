@@ -68,6 +68,36 @@ while ($row = fetch_array($result)) {
 }
 $response['totalGameTimePoints'] = $totalGameTimePoints;
 
+// Current year game time rankings (each entry ranked against all-time)
+$currentYearResult = query("SELECT MAX(year) as year FROM rosters");
+$currentYearRow = fetch_array($currentYearResult);
+$currentYear = $currentYearRow ? (int)$currentYearRow['year'] : (int)date('Y');
+
+$currentYearGameTimeRankings = [];
+$sql = "SELECT rank, slot_total, year, week, manager, game_slot, points FROM (
+    SELECT
+        RANK() OVER (PARTITION BY game_slot ORDER BY grp_points DESC) as rank,
+        COUNT(*) OVER (PARTITION BY game_slot) as slot_total,
+        year, week, manager, game_slot,
+        grp_points as points
+    FROM (
+        SELECT year, week, manager, game_slot, SUM(points) as grp_points
+        FROM rosters
+        WHERE game_time IS NOT NULL
+        AND roster_spot NOT IN ('IR','BN')
+        GROUP BY year, week, manager, game_slot
+    )
+) ranked
+WHERE year = $currentYear
+ORDER BY rank ASC, game_slot ASC";
+$result = query($sql);
+while ($row = fetch_array($result)) {
+    $row['game_slot_label'] = isset($labels[$row['game_slot']]) ? $labels[$row['game_slot']] : null;
+    $currentYearGameTimeRankings[] = $row;
+}
+$response['currentYearGameTimeRankings'] = $currentYearGameTimeRankings;
+$response['currentYear'] = $currentYear;
+
 echo json_encode($response);
 
 

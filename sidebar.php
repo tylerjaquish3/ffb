@@ -6,7 +6,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <!-- main menu content-->
     <div class="main-menu-content">
         <ul id="main-menu-navigation" data-menu="menu-navigation" class="navigation navigation-main">
-            <li class="nav-item<?php if ($currentPage == 'index.php') echo ' active'; ?>">
+            <li class="nav-item<?php if ($currentPage == 'index.php' || $currentPage == '') echo ' active'; ?>">
                 <a href="/index.php">
                     <i class="icon-home3"></i>
                     <span data-i18n="nav.dash.main" class="menu-title">Dashboard</span>

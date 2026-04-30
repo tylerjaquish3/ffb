@@ -3,7 +3,11 @@
 	<thead>
 		<th>Manager</th>
 		<th>Longest Win Streak</th>
+		<th>Win Start</th>
+		<th>Win End</th>
 		<th>Longest Lose Streak</th>
+		<th>Lose Start</th>
+		<th>Lose End</th>
 	</thead>
 	<tbody>
 		<?php
@@ -15,6 +19,11 @@
 			$managerName = $manager['name'];
 
 			$winStreak = $loseStreak = $longestWinStreak = $longestLoseStreak = 0;
+			$winStreakStartYear = $winStreakStartWeek = $winStreakEndYear = $winStreakEndWeek = 0;
+			$loseStreakStartYear = $loseStreakStartWeek = $loseStreakEndYear = $loseStreakEndWeek = 0;
+			$longestWinStartYear = $longestWinStartWeek = $longestWinEndYear = $longestWinEndWeek = 0;
+			$longestLoseStartYear = $longestLoseStartWeek = $longestLoseEndYear = $longestLoseEndWeek = 0;
+
 			$result = query("SELECT name, w.year, w.week_number, win, lose
 	            FROM managers
 	            JOIN regular_season_matchups rsm ON managers.id = rsm.manager1_id
@@ -35,26 +44,85 @@
 	                FROM regular_season_matchups
 	                GROUP BY year, week_number
 	            ) w2 ON w2.year = rsm.year AND w2.week_number = rsm.week_number
-	            WHERE name = '$managerName'");
+	            WHERE name = '$managerName'
+	            ORDER BY w.year ASC, w.week_number ASC");
 			while ($row = fetch_array($result)) {
 				if ($row['win'] == 1) {
+					if ($winStreak == 0) {
+						$winStreakStartYear = $row['year'];
+						$winStreakStartWeek = $row['week_number'];
+					}
 					$winStreak++;
-					$longestLoseStreak = ($loseStreak > $longestLoseStreak) ? $loseStreak : $longestLoseStreak;
+					$winStreakEndYear = $row['year'];
+					$winStreakEndWeek = $row['week_number'];
+
+					if ($loseStreak > $longestLoseStreak) {
+						$longestLoseStreak = $loseStreak;
+						$longestLoseStartYear = $loseStreakStartYear;
+						$longestLoseStartWeek = $loseStreakStartWeek;
+						$longestLoseEndYear = $loseStreakEndYear;
+						$longestLoseEndWeek = $loseStreakEndWeek;
+					}
 					$loseStreak = 0;
+
+					if ($winStreak > $longestWinStreak) {
+						$longestWinStreak = $winStreak;
+						$longestWinStartYear = $winStreakStartYear;
+						$longestWinStartWeek = $winStreakStartWeek;
+						$longestWinEndYear = $winStreakEndYear;
+						$longestWinEndWeek = $winStreakEndWeek;
+					}
 				} else {
-					$longestWinStreak = ($winStreak > $longestWinStreak) ? $winStreak : $longestWinStreak;
-					$winStreak = 0;
+					if ($loseStreak == 0) {
+						$loseStreakStartYear = $row['year'];
+						$loseStreakStartWeek = $row['week_number'];
+					}
 					$loseStreak++;
+					$loseStreakEndYear = $row['year'];
+					$loseStreakEndWeek = $row['week_number'];
+
+					if ($winStreak > $longestWinStreak) {
+						$longestWinStreak = $winStreak;
+						$longestWinStartYear = $winStreakStartYear;
+						$longestWinStartWeek = $winStreakStartWeek;
+						$longestWinEndYear = $winStreakEndYear;
+						$longestWinEndWeek = $winStreakEndWeek;
+					}
+					$winStreak = 0;
+
+					if ($loseStreak > $longestLoseStreak) {
+						$longestLoseStreak = $loseStreak;
+						$longestLoseStartYear = $loseStreakStartYear;
+						$longestLoseStartWeek = $loseStreakStartWeek;
+						$longestLoseEndYear = $loseStreakEndYear;
+						$longestLoseEndWeek = $loseStreakEndWeek;
+					}
 				}
 			}
 
-			$longestLoseStreak = ($loseStreak > $longestLoseStreak) ? $loseStreak : $longestLoseStreak;
-			$longestWinStreak = ($winStreak > $longestWinStreak) ? $winStreak : $longestWinStreak;
+			if ($loseStreak > $longestLoseStreak) {
+				$longestLoseStreak = $loseStreak;
+				$longestLoseStartYear = $loseStreakStartYear;
+				$longestLoseStartWeek = $loseStreakStartWeek;
+				$longestLoseEndYear = $loseStreakEndYear;
+				$longestLoseEndWeek = $loseStreakEndWeek;
+			}
+			if ($winStreak > $longestWinStreak) {
+				$longestWinStreak = $winStreak;
+				$longestWinStartYear = $winStreakStartYear;
+				$longestWinStartWeek = $winStreakStartWeek;
+				$longestWinEndYear = $winStreakEndYear;
+				$longestWinEndWeek = $winStreakEndWeek;
+			}
 
 			$response[] = [
 				'manager' => $managerName,
 				'winStreak' => $longestWinStreak,
-				'loseStreak' => $longestLoseStreak
+				'winStart' => $longestWinStreak > 0 ? $longestWinStartYear . ' Wk ' . $longestWinStartWeek : '',
+				'winEnd' => $longestWinStreak > 0 ? $longestWinEndYear . ' Wk ' . $longestWinEndWeek : '',
+				'loseStreak' => $longestLoseStreak,
+				'loseStart' => $longestLoseStreak > 0 ? $longestLoseStartYear . ' Wk ' . $longestLoseStartWeek : '',
+				'loseEnd' => $longestLoseStreak > 0 ? $longestLoseEndYear . ' Wk ' . $longestLoseEndWeek : '',
 			];
 		}
 
@@ -62,14 +130,18 @@
 			<tr>
 				<td><?php echo $row['manager']; ?></td>
 				<td><?php echo $row['winStreak']; ?></td>
+				<td><?php echo $row['winStart']; ?></td>
+				<td><?php echo $row['winEnd']; ?></td>
 				<td><?php echo $row['loseStreak']; ?></td>
+				<td><?php echo $row['loseStart']; ?></td>
+				<td><?php echo $row['loseEnd']; ?></td>
 			</tr>
 
 		<?php } ?>
 	</tbody>
 	<tfoot>
 		<tr>
-			<td colspan=3>Streaks span across seasons</td>
+			<td colspan=7>Streaks span across seasons</td>
 		</tr>
 	</tfoot>
 </table>
@@ -993,6 +1065,9 @@
         info: false,
         order: [
             [1, "desc"]
+        ],
+        columnDefs: [
+            { orderable: false, targets: [2, 3, 5, 6] }
         ]
     });
     $('#datatable-misc2').DataTable({

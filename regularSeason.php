@@ -441,6 +441,26 @@ include 'sidebar.php';
             </div>
 
             <div class="row card-section" id="game-time" style="display: none;">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right" id="game-time-current-year-title">Current Year Game Time Rankings</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-game-time-current">
+                                <thead>
+                                    <th>Rank</th>
+                                    <th>Slot Total</th>
+                                    <th>Week</th>
+                                    <th>Manager</th>
+                                    <th>Game Time</th>
+                                    <th>Points</th>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-sm-12 col-lg-6 table-padding">
                     <div class="card">
                         <div class="card-header">
@@ -1404,6 +1424,31 @@ include 'sidebar.php';
                         }}
                     ],
                     order: [[2, 'desc']],
+                    pageLength: 25
+                });
+
+                // Populate Current Year Game Time Rankings Table
+                const currentYearTitle = document.getElementById('game-time-current-year-title');
+                if (currentYearTitle) {
+                    currentYearTitle.textContent = data.currentYear + ' Game Time Rankings';
+                }
+                if ($.fn.DataTable.isDataTable('#datatable-game-time-current')) {
+                    $('#datatable-game-time-current').DataTable().clear().destroy();
+                }
+                $('#datatable-game-time-current').DataTable({
+                    data: data.currentYearGameTimeRankings,
+                    columns: [
+                        { data: 'rank' },
+                        { data: 'slot_total' },
+                        { data: 'week' },
+                        { data: 'manager' },
+                        { data: 'game_slot_label' },
+                        { data: 'points', render: function(data, type, row) {
+                            const pointsRounded = Number(data).toFixed(2);
+                            return `<a href="/rosters.php?year=${row.year}&week=${row.week}&manager=${row.manager}">${pointsRounded}</a>`;
+                        }}
+                    ],
+                    order: [[0, 'asc']],
                     pageLength: 25
                 });
 

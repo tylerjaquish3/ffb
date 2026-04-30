@@ -84,73 +84,50 @@ foreach ($seasonNumbers as $standings) {
             <div class="row card-section" id="overview">
                 <!-- Statistics -->
                 <div class="col-xl-3 col-lg-6 col-sm-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-checkmark2 font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Most Points</h5>
-                                    <h5 class="text-bold-400"><?php echo $topScorer; ?>&#x200E;</h5>
-                                </div>
-                            </div>
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-checkmark2"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Most Points</div>
+                            <div class="dash-stat-value"><?php echo $topScorer; ?></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-sm-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Regular Season Champion</h5>
-                                    <h5 class="text-bold-400"><?php echo $regSeasonChamp; ?>&#x200E;</h5>
-                                </div>
-                            </div>
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-star-full"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Regular Season Champion</div>
+                            <div class="dash-stat-value"><?php echo $regSeasonChamp; ?></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-sm-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-sad font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Second Place</h5>
-                                    <h5 class="text-bold-400"><?php echo $runnerUp; ?>&#x200E;</h5>
-                                </div>
-                            </div>
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-sad"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Second Place</div>
+                            <div class="dash-stat-value"><?php echo $runnerUp; ?></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-sm-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-trophy font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Champion</h5>
-                                    <h5 class="text-bold-400"><?php echo $champion; ?>&#x200E;</h5>
-                                </div>
-                            </div>
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-trophy"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Champion</div>
+                            <div class="dash-stat-value"><?php echo $champion; ?></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row" style="direction: ltr;">
+                    <div class="col-md-6 col-sm-12"></div>
                     <div class="col-md-6 col-sm-12 table-padding">
                         <div class="card">
                             <div class="card-header">
                                 <h3>Playoff Bracket</h3>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body" style="direction: ltr;">
                                 <div class="card-block">
                                     <?php
                                     $firstQ = $firstS = true;
@@ -180,6 +157,9 @@ foreach ($seasonNumbers as $standings) {
 
                                                 if ($matchup['m1seed'] == '1') {
                                                     $bye1 = '<span class="badge badge-primary">'.$matchup['manager1'].'</span>';
+                                                }
+                                                if ($matchup['m2seed'] == '1') {
+                                                    $bye1 = '<span class="badge badge-primary">'.$matchup['manager2'].'</span>';
                                                 }
                                                 if ($matchup['m1seed'] == '2') {
                                                     $bye2 = '<span class="badge badge-primary">'.$matchup['manager1'].'</span>';
@@ -477,16 +457,109 @@ foreach ($seasonNumbers as $standings) {
 <?php include 'footer.php'; ?>
 
 <style>
-    span.seed {
-        font-size: 14px;
-        padding: 0px 5px;
+    /* ===== MODERN PLAYOFF BRACKET ===== */
+    #bracket {
+        direction: ltr;
+        background: transparent;
+        padding: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    #bracket thead th {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: rgba(0,0,0,0.38);
+        padding: 0 10px 14px;
+        text-align: left;
+        background: transparent;
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    #bracket td {
+        padding: 3px 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #2c3e50;
+        vertical-align: middle;
+        border: none;
+        background: transparent;
+        min-width: 130px;
+    }
+
+    #bracket td.top {
+        padding: 10px 12px 6px !important;
+        background: rgba(41,126,255,0.05);
+        border-top: 2px solid rgba(41,126,255,0.45) !important;
+        border-left: 2px solid rgba(41,126,255,0.45) !important;
+        border-right: 2px solid rgba(41,126,255,0.45) !important;
+        border-bottom: none !important;
+        border-radius: 8px 8px 0 0;
+    }
+
+    #bracket td.bottom {
+        padding: 6px 12px 10px !important;
+        background: rgba(41,126,255,0.05);
+        border-bottom: 2px solid rgba(41,126,255,0.45) !important;
+        border-left: 2px solid rgba(41,126,255,0.45) !important;
+        border-right: 2px solid rgba(41,126,255,0.45) !important;
+        border-top: 1px dashed rgba(0,0,0,0.1) !important;
+        border-radius: 0 0 8px 8px;
+    }
+
+    #bracket .badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: 'Barlow', sans-serif;
+        letter-spacing: 0.3px;
+        margin: 1px 0;
+    }
+
+    #bracket .badge-primary {
+        background: linear-gradient(135deg, #1d8c1d, #2eb82e) !important;
+        color: #fff !important;
+        box-shadow: 0 2px 8px rgba(46,184,46,0.3);
+    }
+
+    #bracket .badge-secondary {
+        background: #f0f0f0 !important;
+        color: #aaa !important;
+        text-decoration: line-through;
+        text-decoration-color: #ccc;
+    }
+
+    #bracket span.seed {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 17px;
+        height: 17px;
+        background: #e8edf5;
+        color: #5a7aaa;
+        border: 1px solid #c5d3e8;
+        font-size: 8px;
+        border-radius: 50%;
         margin-right: 5px;
+        font-weight: 700;
+        vertical-align: middle;
     }
 
     tr.black-row td {
-        background-color: #bdbdbd;
+        background-color: #f5f5f5;
+        color: #888;
+        font-size: 11px;
+        font-family: 'Barlow Condensed', sans-serif;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border-top: 1px solid #e0e0e0 !important;
     }
-     
 </style>
 
 <script type="text/javascript">

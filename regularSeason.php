@@ -73,31 +73,31 @@ include 'sidebar.php';
                     </div>
                 </div>
                 <div class="col-sm-12 col-lg-5 table-padding">
-                    <div class="card-header" style="float: left">
-                        <h4>Regular Season</h4>
-                    </div>
-                    <div style="float: right">
-                        <select id="regMiscStats" class="dropdown form-control">
-                            <option value="1">Win/Lose Streaks</option>
-                            <option value="2">Total Points</option>
-                            <option value="3" selected>Season Points</option>
-                            <option value="4">Average PF/PA</option>
-                            <option value="5">Start Streaks</option>
-                            <option value="6">Win/Loss Margin</option>
-                            <option value="7">Weekly Points</option>
-                            <option value="8">Losses with Top 3 Pts</option>
-                            <option value="9">Wins with Bottom 3 Pts</option>
-                            <option value="10">Record Against Everyone</option>
-                            <option value="11">Draft Positions</option>
-                            <option value="12">Moves/Trades</option>
-                            <option value="13">Lineup Accuracy</option>
-                            <option value="14">Points by Position</option>
-                            <option value="15">Points by Position & Season</option>
-                            <option value="16">Points by Position & Week</option>
-                        </select>
-                    </div>
-                    <div style="background: #fff; direction: ltr; clear: both; padding-top: 10px;">
-                        <?php include 'regMiscStats.php'; ?>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Regular Season</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <select id="regMiscStats" class="dropdown form-control" style="margin-bottom: 12px;">
+                                <option value="1">Win/Lose Streaks</option>
+                                <option value="2">Total Points</option>
+                                <option value="3" selected>Season Points</option>
+                                <option value="4">Average PF/PA</option>
+                                <option value="5">Start Streaks</option>
+                                <option value="6">Win/Loss Margin</option>
+                                <option value="7">Weekly Points</option>
+                                <option value="8">Losses with Top 3 Pts</option>
+                                <option value="9">Wins with Bottom 3 Pts</option>
+                                <option value="10">Record Against Everyone</option>
+                                <option value="11">Draft Positions</option>
+                                <option value="12">Moves/Trades</option>
+                                <option value="13">Lineup Accuracy</option>
+                                <option value="14">Points by Position</option>
+                                <option value="15">Points by Position & Season</option>
+                                <option value="16">Points by Position & Week</option>
+                            </select>
+                            <?php include 'regMiscStats.php'; ?>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1365,6 +1365,7 @@ include 'sidebar.php';
                     $('#datatable-wins').DataTable({
                         searching: false,
                         paging: false,
+                        info: false,
                         order: [[0, "desc"]] // Sort by Year column descending
                     });
                 }

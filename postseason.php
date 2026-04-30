@@ -33,22 +33,26 @@ include 'sidebar.php';
 
             <div class="row card-section" id="overview">
                 <div class="col-sm-12 col-md-8 table-padding">
-                    <div class="card-header" style="float: left">
-                        <h4>Postseason</h4>
-                    </div>
-                    <div style="float: right">
-                        <select id="postMiscStats" class="dropdown form-control">
-                            <option value="20">Average Finish</option>
-                            <option value="21">First Round Byes</option>
-                            <option value="22">Appearances</option>
-                            <option value="23">Underdog Wins</option>
-                            <option value="24">Top Seed Losses</option>
-                            <option value="25">Playoff Points</option>
-                            <option value="26">Win/Loss Margin</option>
-                        </select>
-                    </div>
-                    <div style="direction: ltr;">
-                        <?php include 'postMiscStats.php'; ?>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Postseason</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <select id="postMiscStats" class="dropdown form-control">
+                                        <option value="20">Average Finish</option>
+                                        <option value="21">First Round Byes</option>
+                                        <option value="22">Appearances</option>
+                                        <option value="23">Underdog Wins</option>
+                                        <option value="24">Top Seed Losses</option>
+                                        <option value="25">Playoff Points</option>
+                                        <option value="26">Win/Loss Margin</option>
+                                    </select>
+                                    <?php include 'postMiscStats.php'; ?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-sm-12 col-md-4">
@@ -201,6 +205,7 @@ include 'sidebar.php';
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <?php include 'footer.php'; ?>

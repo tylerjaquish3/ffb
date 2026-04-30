@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+
 html body {
     /* background-color: #04015d; */
     background-color: #297eff;
@@ -20,10 +22,30 @@ html body {
     display: flex;
 }
 
+/* Push footer to bottom — app-content fills remaining body height */
+.app-content {
+    flex: 1;
+}
+
+.header-navbar {
+    border-bottom: 3px solid #2eb82e !important;
+    box-shadow: 0 3px 16px rgba(0,0,0,0.25) !important;
+}
+
 .header-navbar.navbar-semi-dark .navbar-header {
-    /* background-color: #04015d; */
-    background-color: #297eff;
+    background: linear-gradient(135deg, #0d55c4, #297eff) !important;
     color: #fff;
+}
+
+.header-navbar.navbar-semi-dark .navbar-header h2 {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-weight: 800;
+    font-size: 1.55rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #fff !important;
+    margin: 0;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.35), 0 0 24px rgba(46,184,46,0.4);
 }
 
 .main-menu.menu-dark .navigation>li.active>a {
@@ -36,7 +58,22 @@ ul.nav.navbar-nav {
 }
 
 div#navbar-mobile {
-    padding-top: 13px;
+    padding-top: 8px;
+    padding-bottom: 6px;
+    /* border-left: 4px solid #2eb82e; */
+    padding-left: 16px;
+    margin-left: 6px;
+}
+
+div#navbar-mobile h2 {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #1060d0 !important;
+    margin: 0;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.8);
 }
 
 .main-menu.menu-dark .navigation,
@@ -81,14 +118,120 @@ body.vertical-layout.vertical-menu.menu-collapsed
     color: #000 !important;
 }
 
+/* === STAT CARD MODERNIZATION (all pages) === */
+
+/* Remove white card-body background and outer card border for stat media cards */
+.card-body:has(> .media) {
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+.card:has(.card-body > .media) {
+    border: none !important;
+    box-shadow: none !important;
+    margin-bottom: 0 !important;
+}
+
+/* Glass card applied to the media wrapper */
+.card-body > .media {
+    background: rgba(255,255,255,0.13);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 14px;
+    padding: 18px 20px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 16px;
+    direction: ltr !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.18);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    margin-bottom: 10px;
+}
+
+.card-body > .media:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+/* Icon box */
+.card-body > .media .bg-green-ffb.media-left {
+    background: linear-gradient(140deg, #34d134, #1a8c1a) !important;
+    border-radius: 12px !important;
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px;
+    float: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    box-shadow: 0 3px 12px rgba(46,184,46,0.4);
+    order: 0;
+}
+
+.card-body > .media .bg-green-ffb.media-left i {
+    font-size: 22px !important;
+    color: #fff !important;
+}
+
+/* Text area */
+.card-body > .media .bg-green-ffb.media-body {
+    background: transparent !important;
+    direction: ltr !important;
+    padding: 0 0 0 4px !important;
+    order: 1;
+    flex: 1;
+}
+
+/* Label (first h5) */
+.card-body > .media .bg-green-ffb.media-body h5:first-child {
+    font-family: 'Barlow', sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.3px !important;
+    color: rgba(255,255,255,0.68) !important;
+    margin-bottom: 3px !important;
+}
+
+/* Value (second h5) */
+.card-body > .media .bg-green-ffb.media-body h5 + h5,
+.card-body > .media .bg-green-ffb.media-body h5.text-bold-400 {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 19px !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+    line-height: 1.1 !important;
+    margin: 0 !important;
+}
+
+@media only screen and (max-width: 480px) {
+    .card-body > .media {
+        padding: 14px 16px !important;
+        gap: 12px;
+    }
+    .card-body > .media .bg-green-ffb.media-left {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px;
+    }
+    .card-body > .media .bg-green-ffb.media-body h5 + h5,
+    .card-body > .media .bg-green-ffb.media-body h5.text-bold-400 {
+        font-size: 16px !important;
+    }
+}
+
 .table,
 .media-body {
     direction: ltr;
-    background: #fff;
+    background: transparent !important;
 }
 
-thead {
-    background: #fff;
+thead,
+.table thead {
+    background: transparent;
 }
 
 th {
@@ -117,19 +260,53 @@ a:hover {
 
 .card {
     background: none;
+    border-radius: 10px !important;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.28) !important;
+    box-shadow: 0 4px 28px rgba(0,0,0,0.16) !important;
 }
 
 .card-block {
-    background: #fff;
+    background: transparent;
 }
 
 .card-header {
-    /* background: #2eff37; */
-    background: #2eb82e;
+    background: linear-gradient(135deg, #259925, #33cc33) !important;
+    padding: 11px 18px;
+}
+
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6,
+.card-header .card-title,
+.card-header h1 a,
+.card-header h2 a,
+.card-header h3 a,
+.card-header h4 a,
+.card-header h5 a,
+.card-header h6 a {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.6px !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    margin: 0 !important;
+}
+
+.card-header a:hover {
+    color: rgba(255,255,255,0.8) !important;
+    text-decoration: none !important;
 }
 
 .card-body {
-    background: #fff;
+    background: rgba(235,244,255,0.92) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 .down15 {
@@ -294,6 +471,157 @@ span.seed {
     font-size: 14px;
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* =============================================
+   DASHBOARD MODERNIZATION
+   ============================================= */
+
+/* Glassmorphism stat cards */
+.dash-stat-card {
+    background: rgba(255,255,255,0.13);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.18);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    animation: dashFadeUp 0.45s ease both;
+}
+
+.dash-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.dash-stat-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(140deg, #34d134, #1a8c1a);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px;
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(46,184,46,0.4);
+}
+
+.dash-stat-label {
+    font-family: 'Barlow', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    color: rgba(255,255,255,0.68);
+    margin-bottom: 3px;
+}
+
+.dash-stat-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 21px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+    word-break: break-word;
+}
+
+/* Equal-height stat cards within a section row */
+#overview > [class*="col-"] {
+    display: flex;
+}
+#overview > [class*="col-"] > .dash-stat-card {
+    flex: 1;
+    align-items: flex-start;
+}
+
+@keyframes dashFadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Modern card header */
+.card-header-mod {
+    background: linear-gradient(135deg, #259925, #33cc33) !important;
+    padding: 11px 18px !important;
+    border-bottom: none !important;
+}
+
+.card-header-mod h4 {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.6px !important;
+    color: #fff !important;
+    margin: 0 !important;
+}
+
+.card-header-mod h4 a {
+    color: #fff !important;
+    text-decoration: none !important;
+}
+
+.card-header-mod h4 a:hover {
+    color: rgba(255,255,255,0.8) !important;
+}
+
+/* Modern trophy plaque */
+.plaque-mod {
+    background: linear-gradient(160deg, #161616, #242424);
+    border: 1px solid rgba(200,162,60,0.28);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+    margin: 4px 0;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    box-sizing: border-box;
+}
+
+.plaque-mod:hover {
+    transform: translateY(-2px);
+    border-color: rgba(200,162,60,0.6);
+    box-shadow: 0 5px 18px rgba(200,162,60,0.16);
+}
+
+.plaque-mod a {
+    display: block;
+    width: 100%;
+    text-decoration: none !important;
+    line-height: 1.45;
+}
+
+.plaque-year {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: rgba(200,162,60,0.6) !important;
+    margin-bottom: 1px;
+}
+
+.plaque-name {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #c8a23c !important;
+}
+
+@media only screen and (max-width: 480px) {
+    .dash-stat-card { padding: 14px 16px; gap: 12px; }
+    .dash-stat-icon { width: 42px; height: 42px; font-size: 18px; }
+    .dash-stat-value { font-size: 17px; }
+    .plaque-name { font-size: 16px; }
 }
 
 .awards-grid {
@@ -509,16 +837,33 @@ tr.color-black td {
 }
 
 .footer {
-    background: #d3d3d3;
-    padding: 10px;
-    text-align: center;
-    margin-top: 20px;
-    position: relative;
-    min-height: 40px;
-    clear: both;
-    width: calc(100vw);
+    width: 100%;
+    height: 32px;
+    background: rgba(4, 8, 20, 0.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(41, 126, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
     box-sizing: border-box;
-    margin-right: 0px !important;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.32);
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+}
+
+.footer a {
+    color: rgba(41, 126, 255, 0.55);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer a:hover {
+    color: rgba(41, 126, 255, 0.9);
 }
 
 .tab-size-alt {
@@ -546,42 +891,208 @@ tr.color-black td {
 .tab-buttons-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 6px;
     justify-content: flex-start;
-    padding: 10px 0;
+    padding: 14px 0 18px;
     background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    margin-bottom: 18px;
 }
 
 .tab-button {
-    background: white;
-    color: black;
-    border: 1px solid #ccc;
-    padding: 10px 15px;
-    border-radius: 5px;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.65);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 9px 20px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: normal;
-    transition: all 0.3s ease;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .tab-button:hover {
-    background: #f8f9fa;
-    border: 1px solid #2eb82e;
+    background: rgba(46,184,46,0.18);
+    border-color: rgba(46,184,46,0.45);
+    color: #fff;
+    transform: translateY(-1px);
 }
 
 .tab-button.active {
-    background: #2eb82e;
-    color: white;
-    border: 1px solid #2eb82e;
+    background: linear-gradient(135deg, #1d8c1d, #2eb82e);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 18px rgba(46,184,46,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+    transform: translateY(-1px);
+    font-weight: 700;
+    letter-spacing: 1.8px;
 }
 
 .tab-button:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 div.dt-container div.dt-layout-row {
     margin: 0 !important;
+}
+
+table.nowrap th,
+table.nowrap td,
+table.dataTable.nowrap th,
+table.dataTable.nowrap td,
+#datatable-seasons th,
+#datatable-seasons td {
+    white-space: nowrap !important;
+}
+
+/* =============================================
+   GLOBAL TABLE TYPOGRAPHY & FROSTED GLASS
+   ============================================= */
+
+/* Column headers — Barlow Condensed, spaced uppercase */
+.table thead th {
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.8px !important;
+    color: #1e3a6e !important;
+    padding: 10px 12px !important;
+    background: rgba(41,126,255,0.07) !important;
+    border-top: none !important;
+    border-bottom: 2px solid rgba(41,126,255,0.2) !important;
+    white-space: nowrap;
+}
+
+/* Data cells — DM Mono for crisp numeric alignment */
+.table tbody td {
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px;
+    color: #12213a;
+    padding: 9px 12px !important;
+    border-top: none !important;
+    border-bottom: 1px solid rgba(41,126,255,0.09) !important;
+    vertical-align: middle !important;
+}
+
+/* Row hover — ghost green */
+.table tbody tr:hover > td {
+    background: rgba(46,184,46,0.07) !important;
+    transition: background 0.12s ease;
+}
+
+/* Striped rows — barely-there blue tint */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background: rgba(41,126,255,0.04) !important;
+    --bs-table-accent-bg: transparent;
+}
+
+.table-striped > tbody > tr:nth-of-type(even) > * {
+    background: transparent !important;
+}
+
+/* Links inside tables */
+.table tbody td a {
+    color: #1450c8;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.table tbody td a:hover {
+    color: #2eb82e;
+    text-decoration: none;
+}
+
+/* Roster Position History — allow DataTables scrollX container to show through card */
+#roster-history .card {
+    overflow: visible;
+}
+
+#roster-history .card-header {
+    border-radius: 10px 10px 0 0;
+    overflow: hidden;
+}
+
+#datatable-settings_wrapper .dataTables_scrollBody {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* DataTables controls */
+.dataTables_wrapper .dataTables_filter label,
+.dataTables_wrapper .dataTables_length label,
+div.dt-container .dt-search,
+div.dt-container .dt-length {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #1e3a6e;
+}
+
+.dataTables_wrapper .dataTables_filter input,
+div.dt-container .dt-search input {
+    background: rgba(255,255,255,0.75) !important;
+    border: 1px solid rgba(41,126,255,0.28) !important;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #12213a;
+    outline: none;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus,
+div.dt-container .dt-search input:focus {
+    border-color: rgba(41,126,255,0.55) !important;
+    box-shadow: 0 0 0 3px rgba(41,126,255,0.1) !important;
+}
+
+.dataTables_wrapper .dataTables_length select,
+div.dt-container .dt-length select {
+    background: rgba(255,255,255,0.75) !important;
+    border: 1px solid rgba(41,126,255,0.28) !important;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #12213a;
+}
+
+.dataTables_wrapper .dataTables_info,
+div.dt-container .dt-info {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: rgba(30,58,110,0.65);
+    padding-top: 8px !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button,
+div.dt-container .dt-paging-button {
+    font-family: 'DM Mono', monospace !important;
+    font-size: 11px !important;
+    border-radius: 5px !important;
+    color: #1e3a6e !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    padding: 4px 9px !important;
+    transition: all 0.15s ease !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+div.dt-container .dt-paging-button.current {
+    background: rgba(41,126,255,0.12) !important;
+    border-color: rgba(41,126,255,0.3) !important;
+    color: #1450c8 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:not(.disabled):hover,
+div.dt-container .dt-paging-button:not(.disabled):hover {
+    background: rgba(46,184,46,0.1) !important;
+    border-color: rgba(46,184,46,0.35) !important;
+    color: #1a7a1a !important;
 }
 
 /* Top Weekly Performers table fixes */
@@ -625,6 +1136,11 @@ div.dt-container div.dt-layout-row {
 /* Mobile fixes to prevent horizontal scroll */
 @media (max-width: 768px) {
 
+    /* Let footer flow naturally after content on mobile (not viewport-pinned) */
+    .app-content {
+        flex: none;
+    }
+
     /* Fix negative margin causing overflow */
     .tab-size-alt h2 {
         margin-right: 0px !important;
@@ -651,6 +1167,11 @@ div.dt-container div.dt-layout-row {
         white-space: normal !important;
         min-width: 60px !important;
     }
+
+    /* Keep score and records/seeds columns nowrap in head-to-head table */
+    #datatable-versus td.versus-nowrap {
+        white-space: nowrap !important;
+    }
     
     /* Make the specific wins table mobile-friendly */
     #datatable-wins thead th,
@@ -667,17 +1188,6 @@ div.dt-container div.dt-layout-row {
         overflow-x: hidden;
         width: 100vw;
         box-sizing: border-box;
-    }
-    
-    /* Ensure footer doesn't cause overflow */
-    .footer {
-        margin-left: 60px !important; /* Mobile sidebar width */
-        margin-right: 0 !important;
-        width: calc(100vw - 60px) !important; /* Account for mobile sidebar width */
-        box-sizing: border-box !important;
-        overflow-x: hidden !important;
-        clear: both !important;
-        position: relative !important;
     }
     
     /* Make DataTables responsive on mobile */
@@ -765,12 +1275,6 @@ div.dt-container div.dt-layout-row {
     /* Ensure the table container takes full width */
     #roster-history .card-body > div {
         padding: 0.5rem !important;
-    }
-    
-    /* Fix tab overlap with subtitle on mobile - ONLY for profile page */
-    .profile-page .content-body .tab-buttons-container {
-        margin-top: 30px !important;
-        padding-top: 20px !important;
     }
     
     /* Make Top Performers table full width on mobile */

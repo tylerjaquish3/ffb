@@ -159,9 +159,7 @@ while ($row = fetch_array($result)) {
                             <h4>Roster Position History</h4>
                         </div>
                         <div class="card-body" style="padding: 0;">
-                            <div style="overflow-x: auto; overflow-y: hidden; padding: 1rem;">
-                            
-                            <table id="datatable-settings" class="table table-striped nowrap" style="width: auto;">
+                            <table id="datatable-settings" class="table table-striped nowrap" style="width: 100%;">
                                 <thead>
                                     <th>Count</th>
                                     <?php
@@ -192,7 +190,6 @@ while ($row = fetch_array($result)) {
                                     } ?>
                                 </tbody>
                             </table>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -402,7 +399,9 @@ while ($row = fetch_array($result)) {
         searching: false,
         paging: false,
         info: false,
-        autoWidth: false
+        autoWidth: false,
+        scrollX: true,
+        scrollCollapse: true
     });
 
     // Initialize the page with League Info tab active

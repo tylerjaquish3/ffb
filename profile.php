@@ -70,67 +70,43 @@ if (isset($_GET['id'])) {
             <!-- Overview Tab -->
             <div class="row card-section" id="overview">
                 <!-- Headline Statistics -->
-                <div class="col-sm-12">
-                    <div class="row">
-                        <div class="col-xl-3 col-lg-6 col-sm-12">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="media">
-                                        <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                            <i class="icon-star-full font-large-2 white"></i>
-                                        </div>
-                                        <div class="p-2 bg-green-ffb media-body">
-                                            <h5>Total Points</h5>
-                                            <h5 class="text-bold-400"><?php echo $profileNumbers['totalPoints'] . ' (Rank: ' . $profileNumbers['totalPointsRank'] . ')'; ?>&#x200E;</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="col-xl-3 col-lg-6 col-sm-12">
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-star-full"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Total Points</div>
+                            <div class="dash-stat-value"><?php echo $profileNumbers['totalPoints']; ?></div>
+                            <div class="dash-stat-label" style="margin-top:3px;">Rank: <?php echo $profileNumbers['totalPointsRank']; ?></div>
                         </div>
-                        <div class="col-xl-3 col-lg-6 col-sm-12">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="media">
-                                        <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                            <i class="icon-stats-bars font-large-2 white"></i>
-                                        </div>
-                                        <div class="p-2 bg-green-ffb media-body">
-                                            <h5>Postseason Record</h5>
-                                            <h5 class="text-bold-400"><?php echo $profileNumbers['playoffRecord'] . ' (Rank: ' . $profileNumbers['playoffRecordRank'] . ')'; ?>&#x200E;</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-sm-12">
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-stats-bars"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Postseason Record</div>
+                            <div class="dash-stat-value"><?php echo $profileNumbers['playoffRecord']; ?></div>
+                            <div class="dash-stat-label" style="margin-top:3px;">Rank: <?php echo $profileNumbers['playoffRecordRank']; ?></div>
                         </div>
-                        <div class="col-xl-3 col-lg-6 col-sm-12">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="media">
-                                        <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                            <i class="icon-trophy font-large-2 white"></i>
-                                        </div>
-                                        <div class="p-2 bg-green-ffb media-body">
-                                            <h5>Championships</h5>
-                                            <h5 class="text-bold-400"><?php echo $profileNumbers['championships'] . ' (' . $profileNumbers['championshipYears'] . ')'; ?>&#x200E;</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-sm-12">
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-trophy"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Championships</div>
+                            <div class="dash-stat-value"><?php echo $profileNumbers['championships']; ?></div>
+                            <div class="dash-stat-label" style="margin-top:3px;"><?php echo $profileNumbers['championshipYears']; ?></div>
                         </div>
-                        <div class="col-xl-3 col-lg-6 col-sm-12">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="media">
-                                        <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                            <i class="icon-calendar font-large-2 white"></i>
-                                        </div>
-                                        <div class="p-2 bg-green-ffb media-body">
-                                            <h5>Reg. Season Record</h5>
-                                            <h5 class="text-bold-400"><?php echo $profileNumbers['record'] . ' (Rank: ' . $profileNumbers['recordRank'] . ')'; ?>&#x200E;</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-sm-12">
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-calendar"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Reg. Season Record</div>
+                            <div class="dash-stat-value"><?php echo $profileNumbers['record']; ?></div>
+                            <div class="dash-stat-label" style="margin-top:3px;">Rank: <?php echo $profileNumbers['recordRank']; ?></div>
                         </div>
                     </div>
                 </div>
@@ -144,7 +120,8 @@ if (isset($_GET['id'])) {
                             <div class="card-block">
                                 <canvas id="finishesChart" class="height-400"></canvas>
                                 <br />
-                                <table class="table table-responsive table-striped nowrap" id="datatable-seasons">
+                                <div style="overflow-x: auto; width: 100%;">
+                                <table class="table table-striped nowrap" id="datatable-seasons">
                                     <thead>
                                         <th>Year</th>
                                         <th>Team Name</th>
@@ -175,6 +152,7 @@ if (isset($_GET['id'])) {
                                         <?php } ?>
                                     </tbody>
                                 </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -539,7 +517,7 @@ if (isset($_GET['id'])) {
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <div class="card-block">
-                                <canvas id="posByRoundChart" height="500px;"></canvas>
+                                <canvas id="posByRoundChart" style="height: 700px;"></canvas>
                             </div>
                         </div>
                     </div>
@@ -806,7 +784,7 @@ if (isset($_GET['id'])) {
                                                     echo '<td><span class="badge badge-secondary">'.$managerName.'</span></td>';
                                                 }
 
-                                                echo '<td><a href="/rosters.php?year='.$array["year"].'&week='.$linkWeek.'&manager='.$managerName.'">'.
+                                                echo '<td style="white-space: nowrap;"><a href="/rosters.php?year='.$array["year"].'&week='.$linkWeek.'&manager='.$managerName.'">'.
                                                     $managerScore.' - '.$opponentScore.'</a></td>';
 
                                                 if ($array['winning_manager_id'] == $versus) {
@@ -824,18 +802,18 @@ if (isset($_GET['id'])) {
                                                     $opponentRecord = getRecordBeforeWeek($versus, $array['year'], $array['week_number']);
                                                     
                                                     if ($managerRecord == '-') {
-                                                        echo '<td><small>0-0</small></td>';
+                                                        echo '<td style="white-space: nowrap;"><small>0-0</small></td>';
                                                     } else {
                                                         $managerRank = getRankBeforeWeek($managerId, $array['year'], $array['week_number']);
                                                         $opponentRank = getRankBeforeWeek($versus, $array['year'], $array['week_number']);
-                                                        echo '<td><small>'.$managerRecord.' (#'.$managerRank.') vs '.$opponentRecord.' (#'.$opponentRank.')</small></td>';
+                                                        echo '<td style="white-space: nowrap;"><small>'.$managerRecord.' (#'.$managerRank.') vs '.$opponentRecord.' (#'.$opponentRank.')</small></td>';
                                                     }
                                                 } else {
                                                     // Playoff - show seeds
                                                     $managerSeed = $isManagerFirst ? $array['manager1_seed'] : $array['manager2_seed'];
                                                     $opponentSeed = $isManagerFirst ? $array['manager2_seed'] : $array['manager1_seed'];
 
-                                                    echo '<td><small>'.$managerSeed.' Seed vs '.$opponentSeed.' Seed</small></td>';
+                                                    echo '<td style="white-space: nowrap;"><small>'.$managerSeed.' Seed vs '.$opponentSeed.' Seed</small></td>';
                                                 }
                                                 
                                                 echo '</tr>';
@@ -950,25 +928,26 @@ if (isset($_GET['id'])) {
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <div class="card-block">
+                                <div class="row mb-2">
+                                    <div class="col-12" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                        <button class="btn btn-primary" id="allSeasons">All Seasons</button>
+                                        <button class="btn btn-primary" id="currentSeason">Current Season</button>
+                                        <button class="btn btn-primary" id="lastSeason">Last Season</button>
+                                        <button class="btn btn-primary" id="lastFiveSeasons">Last 5 Seasons</button>
+                                    </div>
+                                </div>
                                 <div class="row">
-                                    <div class="col-sm-12" style="display: flex">
-                                        <button class="btn btn-primary" id="allSeasons">All Seasons</button>&nbsp;&nbsp;
-                                        <button class="btn btn-primary" id="currentSeason">Current Season</button>&nbsp;&nbsp;
-                                        <button class="btn btn-primary" id="lastSeason">Last Season</button>&nbsp;&nbsp;
-                                        <button class="btn btn-primary" id="lastFiveSeasons">Last 5 Seasons</button>&nbsp;&nbsp;
-                                        <h4>Start</h4>
-                                        &nbsp;&nbsp;
-                                        <select id="startWeek" class="dropdown form-control">
+                                    <div class="col-12 col-sm-auto mb-1" style="display: flex; align-items: center; gap: 8px;">
+                                        <strong>Start</strong>
+                                        <select id="startWeek" class="dropdown form-control" style="width: auto;">
                                             <?php
                                             foreach ($allWeeks as $week) {
                                                 echo '<option value="'.$week['week_id'].'">'.$week['week_display'].'</option>';
                                             }
                                             ?>
                                         </select>
-                                        &nbsp;&nbsp;
-                                        <h4>End</h4>
-                                        &nbsp;&nbsp;
-                                        <select id="endWeek" class="dropdown form-control">
+                                        <strong>End</strong>
+                                        <select id="endWeek" class="dropdown form-control" style="width: auto;">
                                             <?php
                                             foreach ($allWeeks as $week) {
                                                 // if last, select it
@@ -980,10 +959,10 @@ if (isset($_GET['id'])) {
                                             }
                                             ?>
                                         </select>
-                                        &nbsp;&nbsp;
-                                        <h4>Week</h4>
-                                        &nbsp;&nbsp;
-                                        <select id="onlyWeek" class="dropdown form-control">
+                                    </div>
+                                    <div class="col-12 col-sm-auto" style="display: flex; align-items: center; gap: 8px;">
+                                        <strong>Week</strong>
+                                        <select id="onlyWeek" class="dropdown form-control" style="width: auto;">
                                             <option value="0">All Weeks</option>
                                             <?php
                                             for ($i = 1; $i <= 14; $i++) {
@@ -994,8 +973,10 @@ if (isset($_GET['id'])) {
                                     </div>
                                 </div>
                                 <div class="row mt-2">
-                                    <div class="col-sm-12" style="height: 600px;">
-                                        <canvas id="pointsByWeekChart"></canvas>
+                                    <div class="col-sm-12" style="overflow-x: auto;">
+                                        <div style="min-width: 1400px; height: 600px;">
+                                            <canvas id="pointsByWeekChart"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1204,10 +1185,18 @@ if (isset($_GET['id'])) {
                 [0, "desc"],
                 [1, "desc"]
             ],
-            columnDefs: [{
-                type: 'week',
-                targets: 1  // Week column
-            }]
+            columnDefs: [
+                {
+                    type: 'week',
+                    targets: 1  // Week column
+                },
+                {
+                    targets: [3, 7],  // Score, Records/Seeds
+                    createdCell: function(td) {
+                        $(td).addClass('versus-nowrap');
+                    }
+                }
+            ]
         });
 
         var ctx = $('#finishesChart');
@@ -1500,8 +1489,6 @@ if (isset($_GET['id'])) {
         });
     }
 
-    updatePointsChart();
-
     // Points by Season Chart
     function renderPointsBySeasonChart() {
         managerName = "<?php echo $managerName; ?>";
@@ -1605,6 +1592,12 @@ if (isset($_GET['id'])) {
     });
 
     let allWeeks = <?php echo json_encode($allWeeks); ?>;
+
+    // Default to last 5 seasons on load
+    $('#startWeek').val('1_'+(season-5));
+    $('#endWeek').val(allWeeks[allWeeks.length-1]['week_id']);
+    updatePointsChart();
+
     $('#allSeasons').click(function() {
         // change startWeek to first week of first season
         $('#startWeek').val('1_2006');

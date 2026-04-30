@@ -13,62 +13,38 @@ include 'sidebar.php';
             <!-- Statistics -->
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-sm-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-star-full font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Most Wins</h5>
-                                    <h5 class="text-bold-400" id="most-wins">Loading...</h5>
-                                </div>
-                            </div>
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-star-full"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Most Wins</div>
+                            <div class="dash-stat-value" id="most-wins">—</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-sm-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-trophy font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Most Championships</h5>
-                                    <h5 class="text-bold-400" id="most-championships">Loading...</h5>
-                                </div>
-                            </div>
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-trophy"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Most Championships</div>
+                            <div class="dash-stat-value" id="most-championships">—</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-sm-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-user font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Defending Champion</h5>
-                                    <h5 class="text-bold-400" id="defending-champ">Loading...</h5>
-                                </div>
-                            </div>
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-user"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Defending Champion</div>
+                            <div class="dash-stat-value" id="defending-champ">—</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-sm-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-calendar font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Seasons</h5>
-                                    <h5 class="text-bold-400" id="seasons">Loading...</h5>
-                                </div>
-                            </div>
+                    <div class="dash-stat-card">
+                        <div class="dash-stat-icon"><i class="icon-calendar"></i></div>
+                        <div>
+                            <div class="dash-stat-label">Seasons</div>
+                            <div class="dash-stat-value" id="seasons">—</div>
                         </div>
                     </div>
                 </div>
@@ -77,7 +53,7 @@ include 'sidebar.php';
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title"><a href="trophy.php">Trophy</a></h4>
+                            <h4><a href="trophy.php">Trophy</a></h4>
                         </div>
                         <div class="card-body" style="direction: ltr;">
                             <div class="row">
@@ -86,7 +62,7 @@ include 'sidebar.php';
                                     while ($row = fetch_array($result)) {
                                         $year = $row['year'];
                                         $name = strtoupper($row['name']);
-                                        echo '<div class="col-md-3 col-xs-6"><div class="plaque"><a href="seasonRecaps.php?id=' . $year . '">' . $year . ' CHAMPION<br />' . $name . '</a></div></div>';
+                                        echo '<div class="col-md-3 col-xs-6"><div class="plaque-mod"><a href="seasonRecaps.php?id=' . $year . '"><span class="plaque-year">' . $year . ' Champion</span><span class="plaque-name">' . $name . '</span></a></div></div>';
                                     }
                                     ?>
                             </div>
@@ -98,7 +74,7 @@ include 'sidebar.php';
                 <div class="col-xl-4 col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title"><a href="regularSeason.php">Regular Season Record</a></h4>
+                            <h4><a href="regularSeason.php">Regular Season Record</a></h4>
                         </div>
                         <div class="card-body">
                             <div class="position-relative">
@@ -147,7 +123,7 @@ include 'sidebar.php';
                 <div class="col-xl-8 col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title"><a href="postseason.php">Postseason</a></h4>
+                            <h4><a href="postseason.php">Postseason</a></h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block">

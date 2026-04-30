@@ -312,6 +312,7 @@ include 'sidebar.php';
                     <div class="card">
                         <div class="card-header">
                             <h4>NFL Teams by Manager</h4>
+                            <small class="text-white">Unique players rostered from each NFL team, all-time</small>
                         </div>
                         <div class="card-body" style="direction: ltr;">
                             <div class="row">
@@ -374,6 +375,47 @@ include 'sidebar.php';
                                     </table>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Points by Team</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <table class="table table-striped nowrap" id="datatable-nfl-team-detail">
+                                <thead>
+                                    <tr>
+                                        <th>Year</th>
+                                        <th>Manager</th>
+                                        <th>NFL Team</th>
+                                        <th>Players</th>
+                                        <th>Points</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $result = query("SELECT year, manager, team,
+                                        COUNT(DISTINCT player) as players,
+                                        ROUND(SUM(points), 2) as points
+                                        FROM rosters
+                                        WHERE team IS NOT NULL AND team != ''
+                                        AND roster_spot NOT IN ('IR','BN')
+                                        GROUP BY year, manager, team
+                                        ORDER BY year DESC, manager, team");
+                                    while ($row = fetch_array($result)) {
+                                        echo '<tr>';
+                                        echo '<td>' . $row['year'] . '</td>';
+                                        echo '<td>' . htmlspecialchars($row['manager']) . '</td>';
+                                        echo '<td>' . htmlspecialchars($row['team']) . '</td>';
+                                        echo '<td>' . $row['players'] . '</td>';
+                                        echo '<td>' . $row['points'] . '</td>';
+                                        echo '</tr>';
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -558,8 +600,13 @@ include 'sidebar.php';
         });
 
         $('#datatable-nfl-teams').DataTable({
-            pageLength: 50,
+            pageLength: 10,
             order: [[0, "asc"]]
+        });
+
+        $('#datatable-nfl-team-detail').DataTable({
+            pageLength: 10,
+            order: [[4, "desc"]]
         });
     });
 </script>

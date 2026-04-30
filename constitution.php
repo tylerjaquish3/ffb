@@ -56,26 +56,15 @@ while ($row = fetch_array($result)) {
                         </div>
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">
-                                <p>We, the members of Suntown Fantasy Football League, in order to promote and encourage interest in Fantasy Football,
-                                    do ordain and establish this Constitution for the government of our association, including the heathens that do not hail from Sunnyside, WA.
-                                </p>
+                                <p>We, the members of Suntown Fantasy Football League, hereby establish this Constitution to govern our association — including the heathens who don't hail from Sunnyside, WA.</p>
 
-                                <p>The Suntown Fantasy Football league began many moons ago, as a group of college students that enjoyed watching football together.
-                                    The core of the league began in 2004 with just six members: Gavin, Tyler, AJ, Andy, Everett, and Ben. In 2005, the league grew to 
-                                    eight members, as Cole and Matt joined the league. In 2006, the league remained at eight members, however, Justin replaced Andy
-                                    in the league. And finally in 2008, the league grew to ten members, as Cameron and Andy (re)joined the league.
-                                    The coveted league trophy was introduced in 2006, where the league only contained eight members. 
-                                    Henceforth, the data on this website dates back to 2006 to correlate with the league trophy.</p>
+                                <p>The league kicked off in 2004 with six founding members: Gavin, Tyler, AJ, Andy, Everett, and Ben. Cole and Matt joined in 2005, bringing it to eight. In 2006, Justin came aboard as Andy stepped out (temporarily — he'd return in 2008 along with Cameron, rounding the league out to its current ten-man format). The league trophy was introduced that same year, so all records on this site start in 2006.</p>
 
-                                <p>This league will always be a free, head-to-head league hosted by Yahoo. The only prize is a plaque with the champion's name inscribed that gets added to the league trophy,
-                                    as well as the trophy living with the champion until a new champion is crowned. The league has also voted that the 10th place finisher
-                                    must pay for the new plaque at the end of each season, sit on a toilet during the next draft, and their team name (for the following season) shall be set by the champion.</p>
+                                <p>This is a free, head-to-head league hosted on Yahoo — no money, no buy-in. The only hardware is a physical trophy and an engraved plaque added each year for the champion, who gets to keep the trophy until someone takes it from them. Last place isn't without consequence, though: the 10th-place finisher pays for that plaque and gets their team name assigned by the champion for the following season.</p>
 
-                                <p>The league matchups schedule shall use data from prior seasons to determine the optimal weekly schedules for each manager to face all opponents as equally as possible.
-                                </p>
+                                <p>Weekly matchups are scheduled using historical data to ensure every manager faces all opponents as evenly as possible over the course of a season.</p>
 
-                                <p>All parts of this constitution, including rules and practices, may be modified or amended with a majority vote. However, if deemed minor, changes may be made by the commissioner without
-                                    whining or complaining by the members. Questions concerning the interpretation of this document shall be reviewed and <u>swiftly</u> deleted by the commissioner.</p>
+                                <p>This site exists to document the history of the league — the wins, the losses, the bad trades, and the bragging rights. Browse around.</p>
                             </div>
                         </div>
                     </div>
@@ -405,7 +394,7 @@ while ($row = fetch_array($result)) {
         paging: false,
         info: false,
         autoWidth: false,
-        scrollX: true,
+        scrollX: "100%",
         scrollCollapse: true
     });
 

@@ -42,6 +42,8 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 
 - record for best free agent pick is not using player aliases to match players
 - misc stats start streaks says cam started 0-3 in 2025 and finished 10th but the season isnt over yet
+- records page card doesnt have rounded corners on right
+- recap page isnt showing bracket for some years
 
 # Ideas
 
@@ -72,6 +74,7 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 - page just for charts
     - pie chart for points by position with filters for manager or all
     - lineup accuracy
+    - D3 bar chart race for all time points or something with lots of data
 - page for random league facts
     - all Marvin's since 2009 have been Jrs
     - Baltimore has been owned the most but only by 7 managers
@@ -80,7 +83,9 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
     - do this on a new branch in case it gets messy
 - check points missed to see which teams missed out on the most wins
 - add an easy way to get the game times from that website and save it to the storage folder
-- make newsletter show random additional data so its not the same every week    
+- make newsletter show random additional data so its not the same every week
+- change purple buttons to match theme better
+- show season recap text, if saved, on the season recap page   
 
 Notes:
 Moved to 18 week schedule in 2021

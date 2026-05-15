@@ -81,20 +81,14 @@ function buildSeasonPromptData($year, $conn) {
         return "No season data found for $year.";
     }
 
-    // Regular season W/L records and total points
+    // Regular season W/L records and total points (from final regular-season week in standings)
     $records = [];
     $res = $conn->query("
-        SELECT m.name,
-            SUM(CASE WHEN rsm.winning_manager_id = m.id THEN 1 ELSE 0 END) as wins,
-            SUM(CASE WHEN rsm.winning_manager_id != m.id THEN 1 ELSE 0 END) as losses,
-            ROUND(SUM(CASE WHEN rsm.manager1_id = m.id THEN rsm.manager1_score
-                          WHEN rsm.manager2_id = m.id THEN rsm.manager2_score
-                          ELSE 0 END), 1) as pf
-        FROM managers m
-        JOIN finishes f ON f.manager_id = m.id AND f.year = $year
-        LEFT JOIN regular_season_matchups rsm ON rsm.year = $year
-            AND (rsm.manager1_id = m.id OR rsm.manager2_id = m.id)
-        GROUP BY m.id
+        SELECT m.name, s.wins, s.losses, ROUND(s.points, 1) as pf
+        FROM standings s
+        JOIN managers m ON m.id = s.manager_id
+        WHERE s.year = $year
+          AND s.week = (SELECT MAX(week) FROM standings WHERE year = $year)
         ORDER BY pf DESC
     ");
     while ($row = $res->fetchArray(SQLITE3_ASSOC)) {
@@ -114,18 +108,36 @@ function buildSeasonPromptData($year, $conn) {
         LIMIT 1
     ", true);
 
-    // Trade count
-    $tradeCount = $conn->querySingle("SELECT COUNT(DISTINCT trade_identifier) FROM trades WHERE year = $year") ?? 0;
-
     // Build prompt
     $champion = '';
+    $championName = '';
     $runnerUp = '';
     foreach ($standingsData as $s) {
         if ($s['finish'] == 1) {
             $champion = $s['name'] . ' ("' . $s['team_name'] . '")';
+            $championName = $s['name'];
         }
         if ($s['finish'] == 2) {
             $runnerUp = $s['name'];
+        }
+    }
+
+    // Top 3 players on the champion's team (starters only, by total points)
+    $topPlayers = [];
+    if ($championName !== '') {
+        $escChamp = SQLite3::escapeString($championName);
+        $res = $conn->query("
+            SELECT player, position, ROUND(SUM(points), 1) as total_points
+            FROM rosters
+            WHERE year = $year
+              AND manager = '$escChamp'
+              AND roster_spot NOT IN ('BN', 'IR')
+            GROUP BY player
+            ORDER BY total_points DESC
+            LIMIT 3
+        ");
+        while ($row = $res->fetchArray(SQLITE3_ASSOC)) {
+            $topPlayers[] = $row;
         }
     }
 
@@ -149,8 +161,14 @@ function buildSeasonPromptData($year, $conn) {
         $prompt .= "\nHighest Single-Game Score: {$highScoreRow['score']} pts ({$highScoreRow['name']})\n";
     }
 
-    $prompt .= "Total Trades Made: $tradeCount\n\n";
-    $prompt .= "Instructions: Keep it under 300 words. Write in a fun, friendly tone — like you're texting the group chat. ";
+    if (!empty($topPlayers)) {
+        $prompt .= "\nChampion's Top 3 Players (starter points only):\n";
+        foreach ($topPlayers as $p) {
+            $prompt .= "  - {$p['player']} ({$p['position']}) — {$p['total_points']} pts\n";
+        }
+    }
+
+    $prompt .= "\nInstructions: Keep it under 300 words. Write in a fun, friendly tone — like you're texting the group chat. ";
     $prompt .= "Mention the champion, the top scorer, and a few interesting storylines from the data. Use first names only.";
 
     return $prompt;
@@ -214,22 +232,18 @@ include 'sidebar.php';
                         <div class="card-header">
                             <h4>Generate Season Recap</h4>
                         </div>
-                        <div class="card-body" style="background: #fff;">
+                        <div class="card-body" style="background: #fff; padding: 20px 24px;">
                             <form method="GET" id="yearForm">
-                                <div class="row align-items-end">
-                                    <div class="col-sm-12 col-md-3">
-                                        <label for="year-select">Season:</label>
-                                        <select id="year-select" name="year" class="form-control" onchange="this.form.submit()">
-                                            <?php foreach ($availableYears as $yr): ?>
-                                                <option value="<?php echo $yr; ?>"<?php if ($yr == $recapYear) echo ' selected'; ?>><?php echo $yr; ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-sm-12 col-md-3" style="margin-top: 10px;">
-                                        <a href="/seasonRecaps.php?id=<?php echo $recapYear; ?>" target="_blank" class="btn btn-secondary btn-sm">
-                                            View <?php echo $recapYear; ?> Season Page
-                                        </a>
-                                    </div>
+                                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; direction: ltr;">
+                                    <label for="year-select" style="margin: 0; font-weight: 600; line-height: 38px;">Season</label>
+                                    <select id="year-select" name="year" class="form-control" style="width: auto; height: 38px; padding: 0 12px; margin: 0;" onchange="this.form.submit()">
+                                        <?php foreach ($availableYears as $yr): ?>
+                                            <option value="<?php echo $yr; ?>"<?php if ($yr == $recapYear) echo ' selected'; ?>><?php echo $yr; ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <a href="/seasonRecaps.php?id=<?php echo $recapYear; ?>" target="_blank" class="btn btn-primary" style="height: 38px; line-height: 1; padding: 0 16px; display: inline-flex; align-items: center;">
+                                        View <?php echo $recapYear; ?> Season Page
+                                    </a>
                                 </div>
                             </form>
                         </div>
@@ -245,21 +259,27 @@ include 'sidebar.php';
             </div>
             <?php endif; ?>
 
-            <!-- Saved recap -->
-            <?php if ($savedRecap): ?>
+            <!-- Saved / Manual recap -->
             <div class="row" style="direction: ltr;">
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Saved Recap — <?php echo $recapYear; ?></h4>
+                            <h4><?php echo $savedRecap ? "Saved Recap — $recapYear" : "Manual Recap — $recapYear"; ?></h4>
                         </div>
-                        <div class="card-body" style="background: #fff;">
-                            <p style="line-height: 1.8; margin: 0;"><?php echo nl2br(htmlspecialchars($savedRecap)); ?></p>
+                        <div class="card-body" style="background: #fff; padding: 20px 24px;">
+                            <form method="POST" action="generateSeasonRecap.php" style="direction: ltr;">
+                                <input type="hidden" name="year" value="<?php echo $recapYear; ?>">
+                                <input type="hidden" name="action" value="save">
+                                <label for="manual-recap" style="display: block; margin-bottom: 6px; font-weight: 600;">Recap Text</label>
+                                <textarea id="manual-recap" name="recap_text" class="form-control" rows="8" style="direction: ltr; line-height: 1.7; font-size: 14px;"><?php echo htmlspecialchars($savedRecap); ?></textarea>
+                                <button type="submit" class="btn btn-primary" style="margin-top: 14px;">
+                                    <i class="icon-checkmark"></i> Save Recap
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
-            <?php endif; ?>
 
             <!-- AI generator -->
             <div class="row" style="direction: ltr;">
@@ -268,12 +288,12 @@ include 'sidebar.php';
                         <div class="card-header">
                             <h4>AI Generator</h4>
                         </div>
-                        <div class="card-body" style="background: #fff;">
+                        <div class="card-body" style="background: #fff; padding: 20px 24px; direction: ltr;">
 
                             <form method="POST" action="generateSeasonRecap.php" style="margin-bottom: 0;">
                                 <input type="hidden" name="year" value="<?php echo $recapYear; ?>">
                                 <input type="hidden" name="action" value="generate">
-                                <button type="submit" class="btn btn-secondary">
+                                <button type="submit" class="btn btn-primary">
                                     Generate Recap for <?php echo $recapYear; ?>
                                 </button>
                                 <small style="margin-left: 10px; color: #888;">Uses Gemini 2.5 Flash (free tier)</small>
@@ -285,13 +305,13 @@ include 'sidebar.php';
                                 <input type="hidden" name="year" value="<?php echo $recapYear; ?>">
                                 <input type="hidden" name="action" value="save">
                                 <div style="margin-bottom: 12px;">
-                                    <label><strong>Generated text — edit before saving:</strong></label>
-                                    <textarea name="recap_text" class="form-control" rows="6" style="margin-top: 8px; direction: ltr;"><?php echo htmlspecialchars($generatedText); ?></textarea>
+                                    <label style="display: block; margin-bottom: 6px; font-weight: 600;">Generated text — edit before saving</label>
+                                    <textarea name="recap_text" class="form-control" rows="6" style="direction: ltr; line-height: 1.7; font-size: 14px;"><?php echo htmlspecialchars($generatedText); ?></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-success">
+                                <button type="submit" class="btn btn-primary">
                                     <i class="icon-checkmark"></i> Save Recap
                                 </button>
-                                <a href="generateSeasonRecap.php?year=<?php echo $recapYear; ?>" class="btn btn-secondary" style="margin-left: 8px;">Discard</a>
+                                <a href="generateSeasonRecap.php?year=<?php echo $recapYear; ?>" class="btn btn-primary" style="margin-left: 8px;">Discard</a>
                             </form>
                             <?php endif; ?>
 

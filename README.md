@@ -43,7 +43,6 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 - record for best free agent pick is not using player aliases to match players
 - misc stats start streaks says cam started 0-3 in 2025 and finished 10th but the season isnt over yet
 - records page card doesnt have rounded corners on right
-- recap page isnt showing bracket for some years
 
 # Ideas
 
@@ -69,7 +68,6 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
     - profile
 - analyze text messages by manager in group text
 - milestones about to happen
-    - Matt about to go over 10,000 QB points
     - league on pace to break record
 - page just for charts
     - pie chart for points by position with filters for manager or all
@@ -84,8 +82,6 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 - check points missed to see which teams missed out on the most wins
 - add an easy way to get the game times from that website and save it to the storage folder
 - make newsletter show random additional data so its not the same every week
-- change purple buttons to match theme better
-- show season recap text, if saved, on the season recap page   
 
 Notes:
 Moved to 18 week schedule in 2021

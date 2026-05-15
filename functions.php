@@ -164,6 +164,7 @@ function getManagerId($name) {
     return array_search($name, $managers) + 1;
 }
 
+
 /**
  * Undocumented function
  */
@@ -1362,7 +1363,7 @@ function getSeasonStandings($season = null)
     }
 
     $return = [];
-    $colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
+    $colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#2dd4bf"," #f87598"];
     $i = 0;
     foreach ($managers as $name => $ranks) {
         $return[] = [

@@ -1154,7 +1154,7 @@ include 'sidebar.php';
                     }
                     
                     // Define colors for each manager
-                    var colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6","#f87598"];
+                    var colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#2dd4bf","#f87598"];
                     var datasets = [];
                     var colorIndex = 0;
                     
@@ -1474,7 +1474,7 @@ include 'sidebar.php';
                 const winsChart = document.getElementById('winsChart').getContext('2d');
                 const yearLabels = data.winsChart.years.split(',');
                 const teams = data.winsChart.wins;
-                let colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6","#f87598"];
+                let colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#2dd4bf","#f87598"];
                 let x = 0;
                 let dataset = [];
                 for (const [key, value] of Object.entries(teams)) {

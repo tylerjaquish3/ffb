@@ -1265,7 +1265,7 @@ if (isset($_GET['id'])) {
         var ctx = $('#winsChart');
         var managers = <?php echo json_encode($winsChart['managers']); ?>;
         var wins = <?php echo json_encode($winsChart['wins']); ?>;
-        let colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
+        let colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#2dd4bf"," #f87598"];
         
         let obj = {};
         obj.label = 'Wins';

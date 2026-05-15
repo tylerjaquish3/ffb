@@ -356,7 +356,7 @@ include 'sidebar.php';
         var years = <?php echo json_encode($draftSpotChart['years']); ?>;
         var yearLabels = years.split(",");
         var teams = <?php echo json_encode($draftSpotChart['spot']); ?>;
-        let colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#ecb2b6"," #f87598"];
+        let colors = ["#9c68d9","#a6c6fa","#3cf06e","#f33c47","#c0f6e6","#def89f","#dca130","#ff7f2c","#2dd4bf"," #f87598"];
         let x = 0;
         let dataset = [];
         for (const [key, value] of Object.entries(teams)) {

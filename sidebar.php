@@ -63,6 +63,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <span data-i18n="nav.dash.main" class="menu-title">Records</span>
                 </a>
             </li>
+            <li class="nav-item<?php if ($currentPage == 'milestones.php') echo ' active'; ?>">
+                <a href="/milestones.php">
+                    <i class="icon-diamond"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">Milestones</span>
+                </a>
+            </li>
             <li class="nav-item<?php if ($currentPage == 'draft.php') echo ' active'; ?>">
                 <a href="/draft.php">
                     <i class="icon-table"></i>
@@ -105,6 +111,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <span class="menu-title">Suggestions</span>
                 </a>
             </li> -->
+            <?php if (!isset($APP_ENV) || $APP_ENV !== 'production'): ?>
+            <li class="nav-item<?php if ($currentPage == 'generateSeasonRecap.php') echo ' active'; ?>">
+                <a href="/generateSeasonRecap.php">
+                    <i class="icon-magic-wand"></i>
+                    <span class="menu-title">Generate Recap</span>
+                </a>
+            </li>
+            <?php endif; ?>
         </ul>
     </div>
 </div>

@@ -278,15 +278,130 @@ a {
     text-decoration: underline;
 }
 
+/* ── Primary button: liquid-glass refraction over the page ──
+   Navy gradient fades dark→lighter right-to-left, strong backdrop blur,
+   sharp top-edge specular. No drop shadow — depth is purely refractive. */
+.btn-primary,
 a.btn.btn-primary,
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active,
 .btn-primary:active:hover {
-    background-color: #9c68d9 !important;
-    width: 215px;
+    background: linear-gradient(to left,
+        rgba(4, 19, 30, 0.85) 0%,
+        rgba(22, 58, 88, 0.55) 100%) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.30) !important;
+    border-radius: 6px !important;
+    padding: 9px 20px !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+        inset 0 -10px 18px -12px rgba(0, 0, 0, 0.45) !important;
+    transition: background 0.35s ease, border-color 0.3s ease,
+                transform 0.18s ease !important;
 }
 
+a.btn.btn-primary { width: 215px; }
+
+.btn-primary:hover,
 a.btn.btn-primary:hover {
-    /* color: #2eff37; */
-    color: #2eb82e;
+    background: linear-gradient(to left,
+        rgba(4, 19, 30, 0.88) 0%,
+        rgba(28, 78, 56, 0.62) 60%,
+        rgba(46, 184, 46, 0.45) 100%) !important;
+    color: #fff !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.10),
+        inset 0 -12px 22px -14px rgba(0, 0, 0, 0.55) !important;
+}
+
+.btn-primary:active,
+a.btn.btn-primary:active,
+.btn-primary:not(:disabled):not(.disabled):active {
+    transform: translateY(1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+.btn-primary:focus,
+.btn-primary.focus,
+a.btn.btn-primary:focus {
+    outline: none !important;
+    border-color: rgba(46, 184, 46, 0.6) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+        inset 0 -10px 18px -12px rgba(0, 0, 0, 0.45),
+        0 0 0 3px rgba(46, 184, 46, 0.28) !important;
+}
+
+/* ── Outline variant: paired ghost state. Even more translucent — the page
+   reads through almost fully so it disappears when not the active toggle. */
+.btn-outline-primary {
+    background: linear-gradient(to left,
+        rgba(4, 19, 30, 0.45) 0%,
+        rgba(22, 58, 88, 0.22) 100%) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.30) !important;
+    border-radius: 6px !important;
+    padding: 9px 20px !important;
+    font-family: 'Barlow Condensed', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.30),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+        inset 0 -8px 14px -10px rgba(0, 0, 0, 0.30) !important;
+    transition: background 0.35s ease, border-color 0.3s ease,
+                transform 0.18s ease !important;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(to left,
+        rgba(4, 19, 30, 0.6) 0%,
+        rgba(28, 78, 56, 0.42) 60%,
+        rgba(46, 184, 46, 0.28) 100%) !important;
+    color: #fff !important;
+    border-color: rgba(255, 255, 255, 0.48) !important;
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+        inset 0 -10px 18px -12px rgba(0, 0, 0, 0.45) !important;
+}
+
+.btn-outline-primary:active {
+    transform: translateY(1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 2px 6px rgba(0, 0, 0, 0.30) !important;
+}
+
+.btn-outline-primary:focus,
+.btn-outline-primary.focus {
+    outline: none !important;
+    border-color: rgba(46, 184, 46, 0.55) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.30),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+        0 0 0 3px rgba(46, 184, 46, 0.24) !important;
 }
 
 a:hover {

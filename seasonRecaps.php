@@ -120,6 +120,18 @@ foreach ($seasonNumbers as $standings) {
                     </div>
                 </div>
 
+                <?php
+                $recapRow = $conn->querySingle("SELECT recap FROM season_recaps WHERE year = " . (int)$season, true);
+                if ($recapRow && !empty($recapRow['recap'])): ?>
+                <div class="col-12" style="margin-bottom: 8px;">
+                    <div class="card">
+                        <div class="card-body" style="background: #fff;">
+                            <p style="line-height: 1.8; margin: 0; font-size: 15px;"><?php echo nl2br(htmlspecialchars($recapRow['recap'])); ?></p>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <div class="row" style="direction: ltr;">
                     <div class="col-md-6 col-sm-12"></div>
                     <div class="col-md-6 col-sm-12 table-padding">

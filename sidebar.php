@@ -51,6 +51,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <span data-i18n="nav.dash.main" class="menu-title">Postseason</span>
                 </a>
             </li>
+            <li class="nav-item<?php if ($currentPage == 'charts.php') echo ' active'; ?>">
+                <a href="/charts.php">
+                    <i class="icon-line-chart"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">Charts</span>
+                </a>
+            </li>
             <li class="nav-item<?php if ($currentPage == 'awards.php') echo ' active'; ?>">
                 <a href="/awards.php">
                     <i class="icon-trophy"></i>

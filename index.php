@@ -191,9 +191,7 @@ include 'sidebar.php';
                                         <option value="16">Points by Position & Week</option>
                                         <option value="17">Scoring by Week/Season</option>
                                     </select>
-                                    <div style="direction: ltr;">
-                                        <?php include 'regMiscStats.php'; ?>
-                                    </div>
+                                    <div style="direction: ltr;" id="reg-misc-stats-container"></div>
                                 </div>
                             </div>
                         </div>
@@ -231,7 +229,7 @@ include 'sidebar.php';
 <script type="text/javascript">
 
     $('#regMiscStats').change(function() {
-        showRegTable($(this).val());
+        loadRegTable($(this).val());
     });
 
     $('#postMiscStats').change(function() {
@@ -310,7 +308,82 @@ include 'sidebar.php';
 
     });
 
-    setTimeout(showRegTable(3), 1000);
+    const regTableConfigs = {
+        1:  { order: [[1, 'desc']], columnDefs: [{ orderable: false, targets: [2, 3, 5, 6] }] },
+        2:  { order: [[1, 'desc']] },
+        3:  { order: [[1, 'desc']] },
+        4:  { order: [[3, 'desc']] },
+        5:  { order: [[1, 'desc']] },
+        6:  { order: [[3, 'desc']] },
+        7:  { order: [[1, 'desc']] },
+        8:  { order: [[3, 'desc']] },
+        9:  { order: [[3, 'desc']] },
+        10: { order: [[3, 'desc']] },
+        11: { order: [[3, 'asc']] },
+        12: { order: [[3, 'desc']] },
+        13: { order: [[3, 'desc']] },
+        14: { order: [[1, 'desc']] },
+        15: { order: [[2, 'desc']], fixedColumns: { left: 1 }, paging: true, info: true },
+        16: { order: [[3, 'desc']], scrollCollapse: true, fixedColumns: { leftColumns: 1 }, paging: true, info: true },
+        17: { order: [[1, 'desc']] },
+    };
+
+    const loadedRegTables = new Set();
+
+    function hideAllRegTables() {
+        const container = document.getElementById('reg-misc-stats-container');
+        Array.from(container.children).forEach(el => el.style.display = 'none');
+    }
+
+    function showRegTableById(statId) {
+        const wrapper = document.getElementById('datatable-misc' + statId + '_wrapper');
+        if (wrapper) wrapper.style.display = '';
+    }
+
+    function loadRegTable(statId) {
+        statId = parseInt(statId);
+        const container = document.getElementById('reg-misc-stats-container');
+
+        if (loadedRegTables.has(statId)) {
+            hideAllRegTables();
+            showRegTableById(statId);
+            return;
+        }
+
+        hideAllRegTables();
+        const loader = document.createElement('div');
+        loader.id = 'reg-misc-loader';
+        loader.className = 'text-center p-3 text-muted';
+        loader.textContent = 'Loading...';
+        container.appendChild(loader);
+
+        fetch('data/regMiscStats.php?stat=' + statId)
+            .then(r => r.text())
+            .then(html => {
+                document.getElementById('reg-misc-loader')?.remove();
+
+                const temp = document.createElement('div');
+                temp.innerHTML = html;
+                container.appendChild(temp.firstElementChild);
+
+                loadedRegTables.add(statId);
+
+                const config = Object.assign(
+                    { searching: false, paging: false, info: false },
+                    regTableConfigs[statId] || {}
+                );
+                $('#datatable-misc' + statId).DataTable(config);
+            })
+            .catch(() => {
+                document.getElementById('reg-misc-loader')?.remove();
+                const err = document.createElement('div');
+                err.className = 'text-center p-3 text-danger';
+                err.textContent = 'Error loading data';
+                container.appendChild(err);
+            });
+    }
+
+    loadRegTable(3);
     setTimeout(showLeagueTable(30), 1000);
 
 </script>

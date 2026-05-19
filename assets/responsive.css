@@ -81,11 +81,15 @@
 }
 
 @media only screen and (max-width: 975px) and (min-width: 700px) {
+  ul.nav.navbar-nav {
+      padding: 8px 0;
+  }
   .tab-size {
       display: none;
   }
   .tab-size-alt {
       display: block;
+      margin-right: 9px;
   }
 
   .app-content.content{

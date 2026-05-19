@@ -2547,11 +2547,12 @@ function getMatchupRecapNumbers()
         }
     }
     $recap = [
-        'man1' => '', 'man2' => '', 'margin1' => 0, 'margin2' => 0, 
+        'man1' => '', 'man2' => '', 'margin1' => 0, 'margin2' => 0,
         'top_scorer1' => 0, 'top_scorer2' => 0, 'bottom_scorer1' => 417, 'bottom_scorer2' => 417,
         'top_scorer_name1' => '', 'top_scorer_name2' => '', 'bottom_scorer_name1' => '', 'bottom_scorer_name2' => '',
         'bench1' => 0, 'bench2' => 0, 'points1' => 0, 'points2' => 0,
-        'record1before' => '', 'record2before' => '', 'record1after' => '', 'record2after' => ''
+        'record1before' => '', 'record2before' => '', 'record1after' => '', 'record2after' => '',
+        'optimal1' => null, 'optimal2' => null
     ];
 
     $versus = '';
@@ -2590,10 +2591,18 @@ function getMatchupRecapNumbers()
             $versusId = $row['manager2_id'];
             $managerPoints = $row['manager1_score'];
             $versusPoints = $row['manager2_score'];
+            if ($recap['optimal1'] === null && isset($row['manager1_optimal'])) {
+                $recap['optimal1'] = $row['manager1_optimal'];
+                $recap['optimal2'] = $row['manager2_optimal'];
+            }
         } else {
             $versusId = $row['manager1_id'];
             $managerPoints = $row['manager2_score'];
             $versusPoints = $row['manager1_score'];
+            if ($recap['optimal1'] === null && isset($row['manager2_optimal'])) {
+                $recap['optimal1'] = $row['manager2_optimal'];
+                $recap['optimal2'] = $row['manager1_optimal'];
+            }
         }
         $margin1 = $managerPoints - $versusPoints;
         $margin2 = $versusPoints - $managerPoints;

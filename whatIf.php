@@ -13,19 +13,16 @@
     $chartData        = getWhatIfChartData();
     $winLossData      = getWhatIfWinLoss();
     $winLossBySeason  = getWhatIfWinLossBySeason();
-    $missedPlayoffs   = getMissedPlayoffOpportunities();
+    $accuracyBySeason = getWhatIfChartDataBySeason();
     $scenarioData     = getPlayoffScenarios();
     $matchups      = $scenarioData['matchups'];
     $summary       = $scenarioData['summary'];
 
-    // Pagination for season table
-    $rowsPerPage = 10;
-    $currentPage = isset($_GET['season_page']) ? max(1, (int)$_GET['season_page']) : 1;
-    $totalRows = count($winLossBySeason);
-    $totalPages = ceil($totalRows / $rowsPerPage);
-    $currentPage = min($currentPage, max(1, $totalPages));
-    $offset = ($currentPage - 1) * $rowsPerPage;
-    $winLossSeasonPaged = array_slice($winLossBySeason, $offset, $rowsPerPage);
+    // Build lookup for accuracy by year-manager
+    $accuracyLookup = [];
+    foreach ($accuracyBySeason as $data) {
+        $accuracyLookup[$data['id'] . '-' . $data['year']] = $data['accuracy'];
+    }
 
     // Sort accuracy chart data DESC
     $accuracyData = $chartData;
@@ -229,41 +226,6 @@
         height: 2px;
         border-top: 2px dashed #999;
     }
-    .pagination-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 16px;
-        padding-top: 12px;
-        border-top: 1px solid #e9ecef;
-        font-size: 0.875rem;
-    }
-    .pagination-info {
-        color: #6c757d;
-    }
-    .pagination-controls {
-        display: flex;
-        gap: 8px;
-    }
-    .pagination-btn {
-        padding: 4px 10px;
-        border: 1px solid #dee2e6;
-        background: #fff;
-        border-radius: 3px;
-        cursor: pointer;
-        font-size: 0.85rem;
-        color: #495057;
-        transition: all 0.15s ease;
-    }
-    .pagination-btn:hover:not(:disabled) {
-        background: #f8f9fa;
-        border-color: #adb5bd;
-    }
-    .pagination-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        color: #adb5bd;
-    }
 </style>
 
 <div class="app-content content">
@@ -335,42 +297,6 @@
 
             <!-- ===== SCENARIOS TAB ===== -->
             <div class="card-section" id="scenarios" style="display:none">
-
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">Missed Playoff Opportunities</h4>
-                    </div>
-                    <div class="card-body">
-                        <p class="whatif-section-heading">Last-Week Losses That Would Have Made the Playoffs</p>
-                        <?php if (count($missedPlayoffs) > 0): ?>
-                        <div class="table-responsive">
-                            <table class="table table-striped nowrap table-scenario">
-                                <thead>
-                                    <tr>
-                                        <th>Manager</th>
-                                        <th class="text-center">Times</th>
-                                        <th>Years</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($missedPlayoffs as $name => $data): ?>
-                                    <tr>
-                                        <td><strong><?php echo htmlspecialchars($name); ?></strong></td>
-                                        <td class="text-center"><strong><?php echo $data['count']; ?></strong></td>
-                                        <td><?php echo implode(', ', $data['years']); ?></td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        <?php else: ?>
-                        <p style="color:#6c757d;font-style:italic;margin:0;">No instances of a last-week loss keeping a manager out of the playoffs.</p>
-                        <?php endif; ?>
-                        <div class="scenario-note">
-                            Shows managers who missed the playoffs but would have made it if they'd set their optimal lineup in the final week of the regular season.
-                        </div>
-                    </div>
-                </div>
 
                 <div class="card">
                     <div class="card-header">
@@ -570,10 +496,9 @@
                             <div class="card-header">
                                 <h4 class="card-title">Season-by-Season Breakdown</h4>
                             </div>
-                            <div class="card-body">
-                                <p class="whatif-section-heading">Regular Season Record Under Each Scenario (by Year)</p>
+                            <div class="card-body" style="padding: 0;">
                                 <div class="table-responsive">
-                                    <table class="table table-striped table-hover nowrap table-scenario">
+                                    <table class="table table-striped table-hover nowrap table-scenario" id="seasonBreakdownTable">
                                         <thead>
                                             <tr>
                                                 <th>Year</th>
@@ -582,15 +507,18 @@
                                                 <th class="text-center">I Play Optimal<br><small class="text-muted">W&nbsp;–&nbsp;L&nbsp;&nbsp;Δ</small></th>
                                                 <th class="text-center">Opp Plays Optimal<br><small class="text-muted">W&nbsp;–&nbsp;L&nbsp;&nbsp;Δ</small></th>
                                                 <th class="text-center">Both Play Optimal<br><small class="text-muted">W&nbsp;–&nbsp;L&nbsp;&nbsp;Δ</small></th>
+                                                <th class="text-center">Lineup Accuracy<br><small class="text-muted">%</small></th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($winLossSeasonPaged as $m):
+                                            <?php foreach ($winLossBySeason as $m):
                                                 $fmtDelta = function(int $d): string {
                                                     if ($d > 0) return '<span style="color:#1a7a3a;font-weight:700">+' . $d . '</span>';
                                                     if ($d < 0) return '<span style="color:#c0392b;font-weight:700">' . $d . '</span>';
                                                     return '<span style="color:#adb5bd">0</span>';
                                                 };
+                                                $accuracyKey = $m['id'] . '-' . $m['year'];
+                                                $accuracy = $accuracyLookup[$accuracyKey] ?? 0;
                                             ?>
                                             <tr>
                                                 <td><strong><?php echo $m['year']; ?></strong></td>
@@ -598,48 +526,26 @@
                                                 <td class="text-center score-cell">
                                                     <?php echo $m['actual_wins']; ?>&nbsp;–&nbsp;<?php echo $m['actual_losses']; ?>
                                                 </td>
-                                                <td class="text-center score-cell">
+                                                <td class="text-center score-cell" data-sort="<?php echo $m['self_opt_delta']; ?>">
                                                     <?php echo $m['self_opt_wins']; ?>&nbsp;–&nbsp;<?php echo $m['self_opt_losses']; ?>
                                                     &nbsp;&nbsp;<?php echo $fmtDelta($m['self_opt_delta']); ?>
                                                 </td>
-                                                <td class="text-center score-cell">
+                                                <td class="text-center score-cell" data-sort="<?php echo $m['opp_opt_delta']; ?>">
                                                     <?php echo $m['opp_opt_wins']; ?>&nbsp;–&nbsp;<?php echo $m['opp_opt_losses']; ?>
                                                     &nbsp;&nbsp;<?php echo $fmtDelta($m['opp_opt_delta']); ?>
                                                 </td>
-                                                <td class="text-center score-cell">
+                                                <td class="text-center score-cell" data-sort="<?php echo $m['both_opt_delta']; ?>">
                                                     <?php echo $m['both_opt_wins']; ?>&nbsp;–&nbsp;<?php echo $m['both_opt_losses']; ?>
                                                     &nbsp;&nbsp;<?php echo $fmtDelta($m['both_opt_delta']); ?>
+                                                </td>
+                                                <td class="text-center score-cell" data-sort="<?php echo $accuracy; ?>">
+                                                    <?php echo number_format($accuracy, 1); ?>%
                                                 </td>
                                             </tr>
                                             <?php endforeach; ?>
                                         </tbody>
                                     </table>
                                 </div>
-
-                                <?php if ($totalRows > $rowsPerPage): ?>
-                                <div class="pagination-container">
-                                    <div class="pagination-info">
-                                        Showing <?php echo $offset + 1; ?> – <?php echo min($offset + $rowsPerPage, $totalRows); ?> of <?php echo $totalRows; ?> entries
-                                    </div>
-                                    <div class="pagination-controls">
-                                        <?php if ($currentPage > 1): ?>
-                                        <a href="?season_page=<?php echo $currentPage - 1; ?>#winloss" class="pagination-btn">← Previous</a>
-                                        <?php else: ?>
-                                        <button class="pagination-btn" disabled>← Previous</button>
-                                        <?php endif; ?>
-
-                                        <span style="color:#6c757d;font-size:0.85rem;">
-                                            Page <?php echo $currentPage; ?> of <?php echo $totalPages; ?>
-                                        </span>
-
-                                        <?php if ($currentPage < $totalPages): ?>
-                                        <a href="?season_page=<?php echo $currentPage + 1; ?>#winloss" class="pagination-btn">Next →</a>
-                                        <?php else: ?>
-                                        <button class="pagination-btn" disabled>Next →</button>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -984,6 +890,23 @@
                     grid: { color: 'rgba(0,0,0,0.05)' }
                 }
             }
+        }
+    });
+
+    // ── Season Breakdown DataTable ──────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!$.fn.dataTable.isDataTable('#seasonBreakdownTable')) {
+            $('#seasonBreakdownTable').DataTable({
+                paging: true,
+                pageLength: 10,
+                lengthChange: false,
+                searching: false,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                dom: 'tp',
+                order: [[3, 'desc']]
+            });
         }
     });
 

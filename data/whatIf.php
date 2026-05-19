@@ -30,6 +30,33 @@ function getWhatIfChartData(): array {
     return $managers;
 }
 
+function getWhatIfChartDataBySeason(): array {
+    $result = query("
+        SELECT rsm.year, m.id, m.name,
+            SUM(rsm.manager1_score)   AS total_actual,
+            SUM(rsm.manager1_optimal) AS total_optimal
+        FROM regular_season_matchups rsm
+        JOIN managers m ON m.id = rsm.manager1_id
+        WHERE rsm.manager1_optimal IS NOT NULL AND rsm.manager1_optimal > 0
+        GROUP BY rsm.year, m.id, m.name
+        ORDER BY rsm.year DESC, m.name
+    ");
+
+    $data = [];
+    while ($row = fetch_array($result)) {
+        $actual  = (float)$row['total_actual'];
+        $optimal = (float)$row['total_optimal'];
+        $key = $row['id'] . '-' . $row['year'];
+        $data[$key] = [
+            'id'        => (int)$row['id'],
+            'name'      => $row['name'],
+            'year'      => (int)$row['year'],
+            'accuracy'  => $optimal > 0 ? round($actual / $optimal * 100, 2) : 0,
+        ];
+    }
+    return $data;
+}
+
 function getWhatIfWinLoss(): array {
     // regular_season_matchups has one row per manager per matchup (duplicated),
     // so using only manager1 gives each manager's complete game history without double-counting.
@@ -147,127 +174,6 @@ function getWhatIfWinLossBySeason(): array {
         $b['year'] <=> $a['year'] ?: $b['self_opt_delta'] <=> $a['self_opt_delta']
     );
     return $stats;
-}
-
-function getMissedPlayoffOpportunities(): array {
-    // Get final standings per year (top 6 by W-L, tiebreak by total points)
-    $standings = query("
-        SELECT rsm.year, m.id, m.name,
-            COUNT(CASE WHEN rsm.manager1_score > rsm.manager2_score THEN 1 END) as wins,
-            COUNT(CASE WHEN rsm.manager1_score <= rsm.manager2_score THEN 1 END) as losses,
-            SUM(rsm.manager1_score) as total_points
-        FROM regular_season_matchups rsm
-        JOIN managers m ON m.id = rsm.manager1_id
-        WHERE rsm.manager1_optimal IS NOT NULL AND rsm.manager1_optimal > 0
-        GROUP BY rsm.year, m.id, m.name
-        ORDER BY rsm.year DESC, wins DESC, total_points DESC
-    ");
-
-    // Build standings and identify top 6 per year
-    $standingsByYear = [];
-    $top6ByYear = [];
-    $top6IdsByYear = [];
-    while ($row = fetch_array($standings)) {
-        $year = (int)$row['year'];
-        if (!isset($standingsByYear[$year])) {
-            $standingsByYear[$year] = [];
-            $top6ByYear[$year] = [];
-            $top6IdsByYear[$year] = [];
-        }
-        $standingsByYear[$year][] = [
-            'id' => (int)$row['id'],
-            'name' => $row['name'],
-            'wins' => (int)$row['wins'],
-            'losses' => (int)$row['losses'],
-            'points' => (float)$row['total_points']
-        ];
-    }
-
-    // Identify top 6 in each year
-    foreach ($standingsByYear as $year => $managers) {
-        $top6ByYear[$year] = array_slice($managers, 0, 6);
-        foreach ($top6ByYear[$year] as $m) {
-            $top6IdsByYear[$year][$m['id']] = true;
-        }
-    }
-
-    // Check last-week losses where optimal would have changed standings
-    $lastWeek = query("
-        SELECT rsm.year, m.id, m.name,
-            rsm.manager1_score, rsm.manager2_score,
-            rsm.manager1_optimal, rsm.manager2_optimal
-        FROM regular_season_matchups rsm
-        JOIN managers m ON m.id = rsm.manager1_id
-        WHERE rsm.manager1_optimal IS NOT NULL AND rsm.manager1_optimal > 0
-          AND rsm.manager2_optimal IS NOT NULL AND rsm.manager2_optimal > 0
-          AND rsm.week_number = (SELECT MAX(week_number) FROM regular_season_matchups WHERE year = rsm.year)
-          AND rsm.manager1_score < rsm.manager2_score
-          AND rsm.manager1_optimal > rsm.manager2_score
-        ORDER BY rsm.year DESC, m.name
-    ");
-
-    $summary = [];
-    while ($row = fetch_array($lastWeek)) {
-        $year = (int)$row['year'];
-        $mgrId = (int)$row['id'];
-        $name = $row['name'];
-
-        // Skip if already in top 6
-        if (isset($top6IdsByYear[$year][$mgrId])) {
-            continue;
-        }
-
-        // Find this manager's actual record
-        $mgr = null;
-        foreach ($standingsByYear[$year] as $m) {
-            if ($m['id'] === $mgrId) {
-                $mgr = $m;
-                break;
-            }
-        }
-
-        if (!$mgr) continue;
-
-        // Simulate adding the optimal win: wins +1, losses -1, points += (optimal - actual)
-        $simWins = $mgr['wins'] + 1;
-        $simLosses = $mgr['losses'] - 1;
-        $simPoints = $mgr['points'] + ((float)$row['manager1_optimal'] - (float)$row['manager1_score']);
-
-        // Re-rank standings with simulated record
-        $simStandings = $standingsByYear[$year];
-        foreach ($simStandings as &$m) {
-            if ($m['id'] === $mgrId) {
-                $m['wins'] = $simWins;
-                $m['losses'] = $simLosses;
-                $m['points'] = $simPoints;
-            }
-        }
-        unset($m);
-
-        usort($simStandings, fn($a, $b) =>
-            $b['wins'] <=> $a['wins'] ?: (($b['points'] <=> $a['points']))
-        );
-
-        // Check if now in top 6
-        $inTop6Now = false;
-        foreach (array_slice($simStandings, 0, 6) as $m) {
-            if ($m['id'] === $mgrId) {
-                $inTop6Now = true;
-                break;
-            }
-        }
-
-        if ($inTop6Now) {
-            if (!isset($summary[$name])) {
-                $summary[$name] = ['id' => $mgrId, 'count' => 0, 'years' => []];
-            }
-            $summary[$name]['count']++;
-            $summary[$name]['years'][] = $year;
-        }
-    }
-
-    uasort($summary, fn($a, $b) => $b['count'] <=> $a['count']);
-    return $summary;
 }
 
 function getPlayoffScenarios(): array {

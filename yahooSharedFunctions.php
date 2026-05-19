@@ -296,4 +296,143 @@ function firstOrCreate(string $table, array $params, array $values) {
     }
 }
 
+function calculateOptimalForManager(string $managerName, int $year, int $week): float
+{
+    // Get season position slots (excluding bench/IR), ordered by sort_order
+    $positions = [];
+    $positionCounts = [];
+    $result = query("SELECT position FROM season_positions WHERE year = $year AND position NOT IN ('BN', 'IR') ORDER BY sort_order ASC");
+    while ($row = fetch_array($result)) {
+        $pos = strtolower($row['position']);
+        $positions[] = $pos;
+        $positionCounts[$pos] = isset($positionCounts[$pos]) ? $positionCounts[$pos] + 1 : 1;
+    }
+
+    if (empty($positions)) {
+        return 0.0;
+    }
+
+    // Build optimal roster slot array (multi-slot positions get numbered keys: rb1, rb2, wr1, wr2, etc.)
+    $optimalRoster = [];
+    $slotCounters = [];
+    foreach ($positions as $pos) {
+        if ($positionCounts[$pos] > 1) {
+            $slotCounters[$pos] = isset($slotCounters[$pos]) ? $slotCounters[$pos] + 1 : 1;
+            $optimalRoster[$pos . $slotCounters[$pos]] = 0;
+        } else {
+            $optimalRoster[$pos] = 0;
+        }
+    }
+
+    // Detect flex and super-flex keys
+    $flexKey = null;
+    if (array_key_exists('w/r/t', $optimalRoster)) {
+        $flexKey = 'w/r/t';
+    } elseif (array_key_exists('wrt', $optimalRoster)) {
+        $flexKey = 'wrt';
+    } elseif (array_key_exists('w/r', $optimalRoster)) {
+        $flexKey = 'w/r';
+    } elseif (array_key_exists('w/t', $optimalRoster)) {
+        $flexKey = 'w/t';
+    }
+
+    $superFlexKey = null;
+    if (array_key_exists('q/w/r/t', $optimalRoster)) {
+        $superFlexKey = 'q/w/r/t';
+    } elseif (array_key_exists('qwrt', $optimalRoster)) {
+        $superFlexKey = 'qwrt';
+    }
+
+    $totalSlots = count($positions);
+
+    // Fetch all rostered players (including bench, excluding IR) sorted descending by points
+    // Bench players are included so the algorithm can determine the true optimal starting lineup
+    $safeManager = str_replace("'", "''", $managerName);
+    $roster = [];
+    $result = query("SELECT position, points FROM rosters WHERE manager = '$safeManager' AND year = $year AND week = $week AND roster_spot NOT IN ('IR', 'N/A') ORDER BY points DESC");
+    while ($row = fetch_array($result)) {
+        $roster[] = ['pos' => $row['position'], 'points' => (float)$row['points']];
+    }
+
+    $fullRoster = 0;
+    foreach ($roster as $player) {
+        if ($fullRoster >= $totalSlots) {
+            break;
+        }
+        $pos = $player['pos'];
+        $pts = $player['points'];
+
+        if ($pos === 'QB') {
+            if (isset($optimalRoster['qb1']) && $optimalRoster['qb1'] == 0) {
+                $optimalRoster['qb1'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster['qb2']) && $optimalRoster['qb2'] == 0) {
+                $optimalRoster['qb2'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster['qb']) && $optimalRoster['qb'] == 0) {
+                $optimalRoster['qb'] = $pts; $fullRoster++;
+            } elseif ($superFlexKey && $optimalRoster[$superFlexKey] == 0) {
+                $optimalRoster[$superFlexKey] = $pts; $fullRoster++;
+            }
+        } elseif ($pos === 'RB') {
+            if (isset($optimalRoster['rb1']) && $optimalRoster['rb1'] == 0) {
+                $optimalRoster['rb1'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster['rb2']) && $optimalRoster['rb2'] == 0) {
+                $optimalRoster['rb2'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster['rb']) && $optimalRoster['rb'] == 0) {
+                $optimalRoster['rb'] = $pts; $fullRoster++;
+            } elseif ($flexKey && $optimalRoster[$flexKey] == 0) {
+                $optimalRoster[$flexKey] = $pts; $fullRoster++;
+            } elseif ($superFlexKey && $optimalRoster[$superFlexKey] == 0) {
+                $optimalRoster[$superFlexKey] = $pts; $fullRoster++;
+            }
+        } elseif ($pos === 'WR') {
+            if (isset($optimalRoster['wr1']) && $optimalRoster['wr1'] == 0) {
+                $optimalRoster['wr1'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster['wr2']) && $optimalRoster['wr2'] == 0) {
+                $optimalRoster['wr2'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster['wr3']) && $optimalRoster['wr3'] == 0) {
+                $optimalRoster['wr3'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster['wr4']) && $optimalRoster['wr4'] == 0) {
+                $optimalRoster['wr4'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster['wr']) && $optimalRoster['wr'] == 0) {
+                $optimalRoster['wr'] = $pts; $fullRoster++;
+            } elseif ($flexKey && $optimalRoster[$flexKey] == 0) {
+                $optimalRoster[$flexKey] = $pts; $fullRoster++;
+            } elseif ($superFlexKey && $optimalRoster[$superFlexKey] == 0) {
+                $optimalRoster[$superFlexKey] = $pts; $fullRoster++;
+            }
+        } elseif ($pos === 'TE') {
+            if (isset($optimalRoster['te']) && $optimalRoster['te'] == 0) {
+                $optimalRoster['te'] = $pts; $fullRoster++;
+            } elseif ($flexKey && $optimalRoster[$flexKey] == 0) {
+                $optimalRoster[$flexKey] = $pts; $fullRoster++;
+            } elseif ($superFlexKey && $optimalRoster[$superFlexKey] == 0) {
+                $optimalRoster[$superFlexKey] = $pts; $fullRoster++;
+            }
+        } elseif ($pos === 'K') {
+            if (isset($optimalRoster['k']) && $optimalRoster['k'] == 0) {
+                $optimalRoster['k'] = $pts; $fullRoster++;
+            }
+        } elseif ($pos === 'DEF') {
+            if (isset($optimalRoster['def1']) && $optimalRoster['def1'] == 0) {
+                $optimalRoster['def1'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster['def2']) && $optimalRoster['def2'] == 0) {
+                $optimalRoster['def2'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster['def']) && $optimalRoster['def'] == 0) {
+                $optimalRoster['def'] = $pts; $fullRoster++;
+            }
+        } elseif (in_array($pos, ['D', 'DL', 'LB', 'DB'])) {
+            $posLower = strtolower($pos);
+            if (isset($optimalRoster[$posLower.'1']) && $optimalRoster[$posLower.'1'] == 0) {
+                $optimalRoster[$posLower.'1'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster[$posLower.'2']) && $optimalRoster[$posLower.'2'] == 0) {
+                $optimalRoster[$posLower.'2'] = $pts; $fullRoster++;
+            } elseif (isset($optimalRoster[$posLower]) && $optimalRoster[$posLower] == 0) {
+                $optimalRoster[$posLower] = $pts; $fullRoster++;
+            }
+        }
+    }
+
+    return (float)array_sum($optimalRoster);
+}
+
 ?>

@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 
     <title><?php echo isset($pageName) ? $pageName. ' | Suntown FFB' : 'Suntown FFB'; ?></title>
-    <?php $version = "v5.6.0";
-    $vDate = "(05/15/26)"; ?>
+    <?php $version = "v5.7.0";
+    $vDate = "(05/19/26)"; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">
 
@@ -66,7 +66,7 @@
                         <a href="/"><img src="/images/logo-cropped.png" alt="Suntown FFB" class="navbar-logo"></a>
                     </li>
                     <li class="nav-item tab-size-alt">
-                        <a href="/"><img src="/images/logo-cropped.png" alt="Suntown FFB" class="navbar-logo navbar-logo-sm"></a>
+                        <a href="/"><img src="/images/football.ico" alt="Suntown FFB" class="navbar-logo navbar-logo-favicon"></a>
                     </li>
                     <li class="nav-item hidden-md-up float-xs-right">
                         <a data-toggle="collapse" data-target="#navbar-mobile" class="nav-link open-navbar-container">

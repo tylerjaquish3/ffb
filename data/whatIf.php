@@ -88,6 +88,67 @@ function getWhatIfWinLoss(): array {
     return array_values($stats);
 }
 
+function getWhatIfWinLossBySeason(): array {
+    $result = query("
+        SELECT
+            rsm.year,
+            m1.id AS m1_id, m1.name AS m1_name,
+            rsm.manager1_score   AS my_score,
+            rsm.manager2_score   AS opp_score,
+            rsm.manager1_optimal AS my_opt,
+            rsm.manager2_optimal AS opp_opt
+        FROM regular_season_matchups rsm
+        JOIN managers m1 ON m1.id = rsm.manager1_id
+        WHERE rsm.manager1_optimal IS NOT NULL AND rsm.manager1_optimal > 0
+          AND rsm.manager2_optimal IS NOT NULL AND rsm.manager2_optimal > 0
+    ");
+
+    $stats = [];
+
+    while ($row = fetch_array($result)) {
+        $my     = (float)$row['my_score'];
+        $opp    = (float)$row['opp_score'];
+        $myOpt  = (float)$row['my_opt'];
+        $oppOpt = (float)$row['opp_opt'];
+        $id     = $row['m1_id'];
+        $name   = $row['m1_name'];
+        $year   = (int)$row['year'];
+
+        $key = "$id-$year";
+        if (!isset($stats[$key])) {
+            $stats[$key] = [
+                'id' => (int)$id, 'name' => $name, 'year' => $year,
+                'games'         => 0,
+                'actual_wins'   => 0,
+                'self_opt_wins' => 0,
+                'opp_opt_wins'  => 0,
+                'both_opt_wins' => 0,
+            ];
+        }
+        $stats[$key]['games']++;
+        if ($my    > $opp)    $stats[$key]['actual_wins']++;
+        if ($myOpt > $opp)    $stats[$key]['self_opt_wins']++;
+        if ($my    > $oppOpt) $stats[$key]['opp_opt_wins']++;
+        if ($myOpt > $oppOpt) $stats[$key]['both_opt_wins']++;
+    }
+
+    foreach ($stats as &$m) {
+        $m['actual_losses']   = $m['games'] - $m['actual_wins'];
+        $m['self_opt_losses'] = $m['games'] - $m['self_opt_wins'];
+        $m['opp_opt_losses']  = $m['games'] - $m['opp_opt_wins'];
+        $m['both_opt_losses'] = $m['games'] - $m['both_opt_wins'];
+        $m['self_opt_delta']  = $m['self_opt_wins']  - $m['actual_wins'];
+        $m['opp_opt_delta']   = $m['opp_opt_wins']   - $m['actual_wins'];
+        $m['both_opt_delta']  = $m['both_opt_wins']  - $m['actual_wins'];
+    }
+    unset($m);
+
+    usort($stats, fn($a, $b) =>
+        $b['year'] <=> $a['year'] ?: $b['self_opt_delta'] <=> $a['self_opt_delta']
+    );
+    return $stats;
+}
+
 function getMissedPlayoffOpportunities(): array {
     // Get final standings per year (top 6 by W-L, tiebreak by total points)
     $standings = query("

@@ -237,84 +237,49 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'all-players') {
 }
 
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
-    
+
     $selectedSeason = $_GET['season'];
     $response = [];
 
-    $result1 = query("SELECT distinct week FROM rosters WHERE YEAR = $selectedSeason");
-    while ($week = fetch_array($result1)) {
-        $week = $week['week'];
+    $result = query("SELECT
+            m1.name AS manager,
+            m2.name AS opponent,
+            rsm.week_number AS week,
+            rsm.manager1_score AS points,
+            rsm.manager2_score AS opp_points,
+            COALESCE(rsm.manager1_optimal, rsm.manager1_score) AS optimal,
+            COALESCE(rsm.manager2_optimal, rsm.manager2_score) AS opp_optimal
+        FROM regular_season_matchups rsm
+        JOIN managers m1 ON m1.id = rsm.manager1_id
+        JOIN managers m2 ON m2.id = rsm.manager2_id
+        WHERE rsm.year = $selectedSeason
+        ORDER BY rsm.week_number, m1.name");
 
-        $result2 = query("SELECT distinct manager FROM rosters
-            WHERE YEAR = $selectedSeason AND week = $week");
-        while ($manager = fetch_array($result2)) {
-            $manager = $manager['manager'];
+    while ($row = fetch_array($result)) {
+        $manager  = $row['manager'];
+        $week     = $row['week'];
+        $points   = (float)$row['points'];
+        $oppPts   = (float)$row['opp_points'];
+        $optimal  = (float)$row['optimal'];
+        $oppOpt   = (float)$row['opp_optimal'];
+        $winLoss  = $points > $oppPts ? 'Win' : 'Loss';
 
-            $points = 0;
-            $roster = [];
-
-            $result3 = query("SELECT * FROM rosters
-                WHERE YEAR = $selectedSeason AND week = $week and manager = '".$manager."'");
-            while ($row = fetch_array($result3)) {
-
-                $result4 = query("SELECT * FROM regular_season_matchups
-                    join managers on regular_season_matchups.manager1_id = managers.id
-                    WHERE YEAR = $selectedSeason AND week_number = $week and managers.name = '".$manager."'");
-                while ($row2 = fetch_array($result4)) {
-
-                    $winLoss = ($row2['manager1_score'] > $row2['manager2_score']) ? 'Win' : 'Loss';
-                    $manager2 = $row2['manager2_id'];
-
-                    $opponentPoints = 0;
-                    $opponentRoster = [];
-
-                    $result5 = query("SELECT * FROM managers
-                        JOIN rosters on rosters.manager = managers.name
-                        WHERE YEAR = $selectedSeason AND week = $week and managers.id = $manager2");
-                    while ($team = fetch_array($result5)) {
-                        $opponent = $team['name'];
-
-                        $opponentRoster[] = [
-                            'pos' => $team['position'],
-                            'points' => (float)$team['points']
-                        ];
-
-                        if ($team['roster_spot'] != 'BN' && $team['roster_spot'] != 'IR') {
-                            $opponentPoints += (float)$team['points'];
-                        }
-                    }
-                }
-
-                $roster[] = [
-                    'pos' => $row['position'],
-                    'points' => (float)$row['points']
-                ];
-
-                if ($row['roster_spot'] != 'BN' && $row['roster_spot'] != 'IR') {
-                    $points += (float)$row['points'];
-                }
-            }
-
-            $optimal = checkRosterForOptimal($roster, $selectedSeason);
-            $opponentOptimal = checkRosterForOptimal($opponentRoster, $selectedSeason);
-
-            $response[] = [
-                'manager' => $manager,
-                'week' => $week,
-                'roster_link' => '<a href="/rosters.php?year='.$selectedSeason.'&week='.$week.'&manager='.$manager.'"><i class="icon-clipboard"></i></a>',
-                'year' => $selectedSeason,
-                'optimal' => round($optimal, 2),
-                'points' => round($points, 2),
-                'pointsMissed' => round($optimal - $points, 2),
-                'result' => $winLoss,
-                'opponent' => $opponent,
-                'oppPoints' => round($opponentPoints, 2),
-                'oppOptimal' => round($opponentOptimal, 2),
-                'margin' => abs(round($points - $opponentPoints, 2)),
-                'optimalMargin' => abs(round($optimal - $opponentOptimal, 2)),
-                'accuracy' => round($points * 100 / $optimal, 2).'%'
-            ];
-        }
+        $response[] = [
+            'manager'       => $manager,
+            'week'          => $week,
+            'roster_link'   => '<a href="/rosters.php?year='.$selectedSeason.'&week='.$week.'&manager='.$manager.'"><i class="icon-clipboard"></i></a>',
+            'year'          => $selectedSeason,
+            'optimal'       => round($optimal, 2),
+            'points'        => round($points, 2),
+            'pointsMissed'  => round($optimal - $points, 2),
+            'result'        => $winLoss,
+            'opponent'      => $row['opponent'],
+            'oppPoints'     => round($oppPts, 2),
+            'oppOptimal'    => round($oppOpt, 2),
+            'margin'        => abs(round($points - $oppPts, 2)),
+            'optimalMargin' => abs(round($optimal - $oppOpt, 2)),
+            'accuracy'      => $optimal > 0 ? round($points * 100 / $optimal, 2).'%' : '0%',
+        ];
     }
 
     $content = new \stdClass();

@@ -38,6 +38,8 @@ CREATE TABLE IF NOT EXISTS "playoff_matchups" (
 	manager2_seed integer DEFAULT 0,
 	manager1_score float(12) DEFAULT 0,
 	manager2_score float(12) DEFAULT 0,
+	manager1_optimal DECIMAL(12),
+	manager2_optimal DECIMAL(12),
 	PRIMARY KEY (id)
 );
 CREATE TABLE team_names (
@@ -52,7 +54,7 @@ CREATE TABLE team_names (
 CREATE TABLE fun_facts (id integer NOT NULL, fact varchar (100) NOT NULL, is_positive integer DEFAULT 1 NOT NULL, type VARCHAR, sort_order INTEGER DEFAULT 0, PRIMARY KEY (id));
 CREATE TABLE trades (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, trade_identifier INTEGER NOT NULL, year INTEGER, manager_from_id INTEGER, manager_to_id INTEGER, player STRING, week INTEGER);
 CREATE TABLE stats (id integer NOT NULL, roster_id integer, pass_yds integer, pass_tds integer, ints integer, rush_yds integer, rush_tds integer, receptions integer, rec_yds integer, rec_tds integer, fumbles integer, fg_made integer, fg_yards integer, pat_made integer, def_sacks integer, def_int integer, def_fum integer, PRIMARY KEY (id));
-CREATE TABLE IF NOT EXISTS "regular_season_matchups" (id integer NOT NULL, year integer DEFAULT 0 NOT NULL, week_number integer DEFAULT 0 NOT NULL, manager1_id integer DEFAULT 0 NOT NULL, manager2_id integer DEFAULT 0 NOT NULL, manager1_score float (12) DEFAULT 0 NOT NULL, manager2_score float (12) DEFAULT 0 NOT NULL, winning_manager_id integer, losing_manager_id integer, manager1_projected DECIMAL (12), manager2_projected DECIMAL (12), PRIMARY KEY (id));
+CREATE TABLE IF NOT EXISTS "regular_season_matchups" (id integer NOT NULL, year integer DEFAULT 0 NOT NULL, week_number integer DEFAULT 0 NOT NULL, manager1_id integer DEFAULT 0 NOT NULL, manager2_id integer DEFAULT 0 NOT NULL, manager1_score float (12) DEFAULT 0 NOT NULL, manager2_score float (12) DEFAULT 0 NOT NULL, winning_manager_id integer, losing_manager_id integer, manager1_projected DECIMAL (12), manager2_projected DECIMAL (12), manager1_optimal DECIMAL (12), manager2_optimal DECIMAL (12), PRIMARY KEY (id));
 CREATE TABLE season_managers (id INTEGER PRIMARY KEY AUTOINCREMENT, year INTEGER, manager_id INTEGER, yahoo_id INTEGER);
 CREATE TABLE managers (id integer NOT NULL, name varchar (50) NOT NULL, PRIMARY KEY (id));
 CREATE TABLE season_positions (id INTEGER PRIMARY KEY AUTOINCREMENT, year INTEGER NOT NULL, position VARCHAR (11) NOT NULL, sort_order INTEGER (11));

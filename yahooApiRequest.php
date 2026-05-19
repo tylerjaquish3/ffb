@@ -445,7 +445,7 @@ function handle_team_rosters(int $yahooId, int $week, object $data)
         ]);
 
         if ($spot != 'IR' && isset($stats['stats']) && is_array($stats['stats'])) {
-            
+
             // Insert stats - make sure we have valid stats array
             // Convert any nulls to 0 to prevent SQL issues
             $cleanStats = array_map(function($value) {
@@ -455,9 +455,28 @@ function handle_team_rosters(int $yahooId, int $week, object $data)
             updateOrCreate('stats', [
                 'roster_id' => $rosterId
             ], $cleanStats);
-            
+
         }
     }
+
+    // Calculate optimal lineup for this manager/week and persist to matchup row
+    $optimal = calculateOptimalForManager($manager, $year, $week);
+    $safeManager = str_replace("'", "''", $manager);
+    $optimalVal = round($optimal, 2);
+
+    // Update manager1_optimal on this manager's own matchup row
+    query("UPDATE regular_season_matchups
+        SET manager1_optimal = $optimalVal
+        WHERE manager1_id = (SELECT id FROM managers WHERE name = '$safeManager')
+        AND year = $year AND week_number = $week");
+
+    // Update manager2_optimal on the opponent's matchup row (where this manager is manager2)
+    query("UPDATE regular_season_matchups
+        SET manager2_optimal = $optimalVal
+        WHERE manager2_id = (SELECT id FROM managers WHERE name = '$safeManager')
+        AND year = $year AND week_number = $week");
+
+    echo "Optimal for $manager week $week: $optimalVal<br>";
 }
 
 function get_player_stats(string $playerKey, int $week)

@@ -228,9 +228,19 @@ function lookupGameTime(?int $id) {
                                             <td><?php echo $recap['points2']; ?></td>
                                         </tr>
                                         <tr>
+                                            <td><strong>Optimal</strong></td>
+                                            <td><?php echo $recap['optimal1'] !== null ? round($recap['optimal1'], 2) : '—'; ?></td>
+                                            <td><?php echo $recap['optimal2'] !== null ? round($recap['optimal2'], 2) : '—'; ?></td>
+                                        </tr>
+                                        <tr>
                                             <td><strong>Margin</strong></td>
                                             <td><?php echo round($recap['margin1'], 2); ?></td>
                                             <td><?php echo round($recap['margin2'], 2); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Lineup Accuracy</strong></td>
+                                            <td><?php echo ($recap['optimal1'] > 0) ? round($recap['points1'] / $recap['optimal1'] * 100, 1).'%' : '—'; ?></td>
+                                            <td><?php echo ($recap['optimal2'] > 0) ? round($recap['points2'] / $recap['optimal2'] * 100, 1).'%' : '—'; ?></td>
                                         </tr>
                                         <tr>
                                             <td><strong>Top Scorer</strong></td>

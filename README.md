@@ -81,8 +81,6 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 - add an easy way to get the game times from that website and save it to the storage folder
 - make newsletter show random additional data so its not the same every week
     - make newsletter look like a newspaper?
-- Scenario page
-    - check points missed to see which teams missed out on the most wins
 
 Notes:
 Moved to 18 week schedule in 2021
@@ -91,7 +89,6 @@ Chargers moved to LA between 2016 & 2017
 Raiders moved to LV between 2019 & 2020
 
 Draft ideas:
-- magic 8 ball or mystic pickle?
 - movie like the Mean Girls one i saw, but still random
 
 
@@ -134,13 +131,3 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 - Baseball, golf, olympics
 - Mexican, italian, canadian
 - Pirates, animals, space, casino, school (report card), race car
-
-
-Billy madison
-have 5 daquiris? opening scene
-tallyhoo - early scene with business men
-pickle race 
-4 and 7 in 1st grade classroom
-
-Storyline
-A decathlon to determine the draft order

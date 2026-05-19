@@ -12,10 +12,20 @@
 
     $chartData        = getWhatIfChartData();
     $winLossData      = getWhatIfWinLoss();
+    $winLossBySeason  = getWhatIfWinLossBySeason();
     $missedPlayoffs   = getMissedPlayoffOpportunities();
     $scenarioData     = getPlayoffScenarios();
     $matchups      = $scenarioData['matchups'];
     $summary       = $scenarioData['summary'];
+
+    // Pagination for season table
+    $rowsPerPage = 10;
+    $currentPage = isset($_GET['season_page']) ? max(1, (int)$_GET['season_page']) : 1;
+    $totalRows = count($winLossBySeason);
+    $totalPages = ceil($totalRows / $rowsPerPage);
+    $currentPage = min($currentPage, max(1, $totalPages));
+    $offset = ($currentPage - 1) * $rowsPerPage;
+    $winLossSeasonPaged = array_slice($winLossBySeason, $offset, $rowsPerPage);
 
     // Sort accuracy chart data DESC
     $accuracyData = $chartData;
@@ -218,6 +228,41 @@
         width: 24px;
         height: 2px;
         border-top: 2px dashed #999;
+    }
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid #e9ecef;
+        font-size: 0.875rem;
+    }
+    .pagination-info {
+        color: #6c757d;
+    }
+    .pagination-controls {
+        display: flex;
+        gap: 8px;
+    }
+    .pagination-btn {
+        padding: 4px 10px;
+        border: 1px solid #dee2e6;
+        background: #fff;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: #495057;
+        transition: all 0.15s ease;
+    }
+    .pagination-btn:hover:not(:disabled) {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+    }
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        color: #adb5bd;
     }
 </style>
 
@@ -516,6 +561,85 @@
                                     <span><span style="display:inline-block;width:12px;height:12px;background:#ef5350;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Opp Plays Optimal</span>
                                     <span><span style="display:inline-block;width:12px;height:12px;background:#5c6bc0;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Both Play Optimal</span>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Season-by-Season Breakdown</h4>
+                            </div>
+                            <div class="card-body">
+                                <p class="whatif-section-heading">Regular Season Record Under Each Scenario (by Year)</p>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover nowrap table-scenario">
+                                        <thead>
+                                            <tr>
+                                                <th>Year</th>
+                                                <th>Manager</th>
+                                                <th class="text-center">Actual<br><small class="text-muted">W&nbsp;–&nbsp;L</small></th>
+                                                <th class="text-center">I Play Optimal<br><small class="text-muted">W&nbsp;–&nbsp;L&nbsp;&nbsp;Δ</small></th>
+                                                <th class="text-center">Opp Plays Optimal<br><small class="text-muted">W&nbsp;–&nbsp;L&nbsp;&nbsp;Δ</small></th>
+                                                <th class="text-center">Both Play Optimal<br><small class="text-muted">W&nbsp;–&nbsp;L&nbsp;&nbsp;Δ</small></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($winLossSeasonPaged as $m):
+                                                $fmtDelta = function(int $d): string {
+                                                    if ($d > 0) return '<span style="color:#1a7a3a;font-weight:700">+' . $d . '</span>';
+                                                    if ($d < 0) return '<span style="color:#c0392b;font-weight:700">' . $d . '</span>';
+                                                    return '<span style="color:#adb5bd">0</span>';
+                                                };
+                                            ?>
+                                            <tr>
+                                                <td><strong><?php echo $m['year']; ?></strong></td>
+                                                <td><strong><?php echo htmlspecialchars($m['name']); ?></strong></td>
+                                                <td class="text-center score-cell">
+                                                    <?php echo $m['actual_wins']; ?>&nbsp;–&nbsp;<?php echo $m['actual_losses']; ?>
+                                                </td>
+                                                <td class="text-center score-cell">
+                                                    <?php echo $m['self_opt_wins']; ?>&nbsp;–&nbsp;<?php echo $m['self_opt_losses']; ?>
+                                                    &nbsp;&nbsp;<?php echo $fmtDelta($m['self_opt_delta']); ?>
+                                                </td>
+                                                <td class="text-center score-cell">
+                                                    <?php echo $m['opp_opt_wins']; ?>&nbsp;–&nbsp;<?php echo $m['opp_opt_losses']; ?>
+                                                    &nbsp;&nbsp;<?php echo $fmtDelta($m['opp_opt_delta']); ?>
+                                                </td>
+                                                <td class="text-center score-cell">
+                                                    <?php echo $m['both_opt_wins']; ?>&nbsp;–&nbsp;<?php echo $m['both_opt_losses']; ?>
+                                                    &nbsp;&nbsp;<?php echo $fmtDelta($m['both_opt_delta']); ?>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <?php if ($totalRows > $rowsPerPage): ?>
+                                <div class="pagination-container">
+                                    <div class="pagination-info">
+                                        Showing <?php echo $offset + 1; ?> – <?php echo min($offset + $rowsPerPage, $totalRows); ?> of <?php echo $totalRows; ?> entries
+                                    </div>
+                                    <div class="pagination-controls">
+                                        <?php if ($currentPage > 1): ?>
+                                        <a href="?season_page=<?php echo $currentPage - 1; ?>#winloss" class="pagination-btn">← Previous</a>
+                                        <?php else: ?>
+                                        <button class="pagination-btn" disabled>← Previous</button>
+                                        <?php endif; ?>
+
+                                        <span style="color:#6c757d;font-size:0.85rem;">
+                                            Page <?php echo $currentPage; ?> of <?php echo $totalPages; ?>
+                                        </span>
+
+                                        <?php if ($currentPage < $totalPages): ?>
+                                        <a href="?season_page=<?php echo $currentPage + 1; ?>#winloss" class="pagination-btn">Next →</a>
+                                        <?php else: ?>
+                                        <button class="pagination-btn" disabled>Next →</button>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

@@ -1,5 +1,5 @@
 <?php
-    $pageName = "What If?";
+    $pageName = "What If";
     include 'header.php';
     include 'sidebar.php';
     include 'data/whatIf.php';
@@ -230,16 +230,16 @@
 
 <div class="app-content content">
     <div class="content-wrapper">
-        <div class="content-body" dir="ltr">
+        <div class="content-body">
 
             <div class="tab-buttons-container">
-                <button class="tab-button active" id="charts-tab" onclick="showCard('charts')">Charts</button>
-                <button class="tab-button" id="winloss-tab" onclick="showCard('winloss')">Wins / Losses</button>
+                <button class="tab-button active" id="winloss-tab" onclick="showCard('winloss')">Wins / Losses</button>
                 <button class="tab-button" id="scenarios-tab" onclick="showCard('scenarios')">Playoff Scenarios</button>
+                <button class="tab-button" id="charts-tab" onclick="showCard('charts')">Charts</button>
             </div>
 
             <!-- ===== CHARTS TAB ===== -->
-            <div class="card-section" id="charts">
+            <div class="card-section" id="charts" style="display:none">
                 <div class="row">
 
                     <!-- Lineup Accuracy -->
@@ -296,7 +296,7 @@
             </div><!-- /charts -->
 
             <!-- ===== SCENARIOS TAB ===== -->
-            <div class="card-section" id="scenarios" style="display:none">
+            <div class="card-section" id="scenarios" style="display:none;" dir="ltr">
 
                 <div class="card">
                     <div class="card-header">
@@ -412,7 +412,7 @@
             </div><!-- /scenarios -->
 
             <!-- ===== WINS/LOSSES TAB ===== -->
-            <div class="card-section" id="winloss" style="display:none">
+            <div class="card-section" id="winloss" style="display:block;" dir="ltr">
                 <div class="row">
 
                     <div class="col-sm-12">

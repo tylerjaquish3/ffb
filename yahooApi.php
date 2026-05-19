@@ -1,15 +1,14 @@
 <?php
-// Increase maximum execution time to 300 seconds (5 minutes)
 set_time_limit(300);
 
-$pageName = 'Yahoo API';
-include 'header.php';
+include_once 'connections.php';
+include_once 'functions.php';
 
 // Get managers for the current year
 $currentYear = date('Y');
-$managersResult = query("SELECT sm.yahoo_id, m.name FROM season_managers sm 
-    JOIN managers m ON sm.manager_id = m.id 
-    WHERE sm.year = $currentYear 
+$managersResult = query("SELECT sm.yahoo_id, m.name FROM season_managers sm
+    JOIN managers m ON sm.manager_id = m.id
+    WHERE sm.year = $currentYear
     ORDER BY m.name");
 $managers = [];
 while ($row = fetch_array($managersResult)) {
@@ -24,15 +23,8 @@ $weekResult = query("SELECT MAX(week_number) as latest_week FROM regular_season_
 $weekRow = fetch_array($weekResult);
 $defaultWeek = $weekRow ? $weekRow['latest_week'] + 1 : 1;
 
-// Check if environment is set to production
-if (isset($APP_ENV) && $APP_ENV === 'production') {
-    header("Location: 404.php");
-    exit;
-}
-
-include 'sidebar.php';
-
-if (isset($_GET['archive'])) {
+$consumer_key = $CONSUMER_KEY ?? '';
+if (isset($_GET['archive']) && isset($archive_key)) {
     $consumer_key = $archive_key;
 }
 
@@ -180,248 +172,6 @@ if( ! $request_token_url ) {
         </div>
     </div>
 </div>
-
-<?php include 'footer.php'; ?>
-
-<script type="text/javascript">
-
-    var access_token = null;
-
-    // Handle manager selection logic
-    $(document).ready(function() {
-        // When "All" is clicked
-        $('input[name="managers[]"][value="all"]').change(function() {
-            if ($(this).is(':checked')) {
-                // Deselect all individual managers
-                $('input[name="managers[]"]:not([value="all"])').prop('checked', false);
-            }
-        });
-
-        // When any individual manager is clicked
-        $('input[name="managers[]"]:not([value="all"])').change(function() {
-            if ($(this).is(':checked')) {
-                // Deselect "All"
-                $('input[name="managers[]"][value="all"]').prop('checked', false);
-            }
-        });
-    });
-
-    $('#make_request').click(function () {
-        var year = $('input[name="year"]').val();
-        var weeks = [];
-        $('input[name="weeks[]"]:checked').each(function () {
-            weeks.push(parseInt($(this).val()));
-        });
-
-        var managers = [];
-        $('input[name="managers[]"]:checked').each(function () {
-            managers.push($(this).val());
-        });
-
-        // Check if matchups is selected with playoff weeks
-        var matchupsSelected = $('input[name="sections[]"][value="matchups"]:checked').length > 0;
-        var playoffWeeksSelected = weeks.some(function(week) {
-            return week > 14;
-        });
-        
-        if (matchupsSelected && playoffWeeksSelected) {
-            $('#output').html('<div class="alert alert-danger"><strong>Error:</strong> Playoff matchups (weeks 15+) are not available from the Yahoo API. Please deselect weeks 15-17 when updating matchups, or deselect the Matchups option.</div>');
-            return false; // Prevent submission
-        }
-
-        // Show the loading spinner
-        $('#loading').show();
-        $('#output').html('');
-        
-        if (!access_token) {
-            $.ajax({
-                url: 'yahooApiToken.php',
-                type: 'POST',
-                data: {
-                    code: $('input[name="code"]').val(),
-                    year: year
-                },
-                success: function(response) {
-                    access_token = response;
-    
-                    makeRequest(year, weeks, managers);
-                },
-                error: function() {
-                    $('#loading').hide();
-                    $('#output').html('<div class="alert alert-danger">Error fetching access token. Please try again.</div>');
-                }
-            });
-        } else {
-            makeRequest(year, weeks, managers);
-        }
-    });
-
-    function makeRequest(year, weeks, managers) {
-        // Count selected sections for tracking completion
-        var pendingRequests = $('input[name="sections[]"]:checked').length;
-        var hasRosters = $('input[name="sections[]"][value="rosters"]:checked').length > 0;
-        
-        // If no sections are selected, hide the spinner
-        if (pendingRequests === 0) {
-            $('#loading').hide();
-            $('#output').html('<div class="alert alert-warning">Please select at least one section to update.</div>');
-            return;
-        }
-        
-        // If rosters is selected, we handle it differently because of its recursive nature
-        if (hasRosters) {
-            pendingRequests--;
-        }
-
-        // For each selected section, make request
-        $('input[name="sections[]"]:checked').each(function () {
-            let section = $(this).val();
-            if (section == 'rosters') {
-                makeRosterRequest(year, weeks, managers, 0, function() {
-                    // Hide spinner when rosters are complete
-                    if (pendingRequests === 0) {
-                        $('#loading').hide();
-                    }
-                });
-            } else {
-                $.ajax({
-                    url: 'yahooApiRequest.php',
-                    type: 'POST',
-                    data: {
-                        token: access_token,
-                        year: year,
-                        section: section,
-                        weeks: weeks
-                    },
-                    success: function(response) {
-                        $('#output').append(response);
-                        pendingRequests--;
-                        
-                        // Hide spinner when all requests are complete
-                        if (pendingRequests === 0 && !hasRosters) {
-                            $('#loading').hide();
-                        }
-                    },
-                    error: function() {
-                        $('#output').append('<div class="alert alert-danger">Error processing ' + section + '. Please try again.</div>');
-                        pendingRequests--;
-                        
-                        // Hide spinner when all requests are complete
-                        if (pendingRequests === 0 && !hasRosters) {
-                            $('#loading').hide();
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    function makeRosterRequest(year, weeks, managers, managerIndex, callback) 
-    {
-        // Determine which managers to process
-        var managersToProcess = [];
-        
-        if (managers.includes('all')) {
-            // If "all" is selected, process managers 1-10
-            for (var i = 1; i <= 10; i++) {
-                managersToProcess.push(i);
-            }
-        } else {
-            // Only process selected managers (convert yahoo_ids to manager numbers)
-            managersToProcess = managers.filter(function(manager) {
-                return manager !== 'all' && !isNaN(manager);
-            });
-        }
-        
-        // Check if we've processed all managers
-        if (managerIndex >= managersToProcess.length) {
-            // All managers processed, call the callback to signal completion
-            if (callback) callback();
-            return;
-        }
-        
-        var currentManager = managersToProcess[managerIndex];
-        
-        $.ajax({
-            url: 'yahooApiRequest.php',
-            type: 'POST',
-            data: {
-                token: access_token,
-                year: year,
-                section: 'rosters',
-                weeks: weeks,
-                manager: currentManager
-            },
-            success: function(response) {
-                $('#output').append(response);
-                setTimeout(function () {
-                    makeRosterRequest(year, weeks, managers, managerIndex + 1, callback);
-                }, 2000);
-            },
-            error: function() {
-                $('#output').append('<div class="alert alert-danger">Error processing rosters for manager ' + currentManager + '. Continuing with next manager.</div>');
-                setTimeout(function () {
-                    makeRosterRequest(year, weeks, managers, managerIndex + 1, callback);
-                }, 2000);
-            }
-        });   
-    }
-
-    // Clipboard copy functionality
-    $(document).ready(function() {
-        $('.copy-btn').click(function(e) {
-            e.preventDefault();
-            var textToCopy = $(this).data('clipboard-text');
-            
-            // Modern clipboard API
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(textToCopy).then(function() {
-                    showCopyFeedback($(e.target));
-                }).catch(function(err) {
-                    console.error('Failed to copy: ', err);
-                    fallbackCopyTextToClipboard(textToCopy, $(e.target));
-                });
-            } else {
-                // Fallback for older browsers
-                fallbackCopyTextToClipboard(textToCopy, $(e.target));
-            }
-        });
-    });
-
-    function fallbackCopyTextToClipboard(text, button) {
-        var textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-999999px";
-        textArea.style.top = "-999999px";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
-        try {
-            var successful = document.execCommand('copy');
-            if (successful) {
-                showCopyFeedback(button);
-            }
-        } catch (err) {
-            console.error('Fallback: Unable to copy', err);
-        }
-        
-        document.body.removeChild(textArea);
-    }
-
-    function showCopyFeedback(button) {
-        var originalText = button.text();
-        button.text('✓ Copied!');
-        button.removeClass('btn-outline-primary').addClass('btn-success');
-        
-        setTimeout(function() {
-            button.text(originalText);
-            button.removeClass('btn-success').addClass('btn-outline-primary');
-        }, 2000);
-    }
-
-</script>
 
 <?php
   

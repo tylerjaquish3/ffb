@@ -1,15 +1,5 @@
 <?php
 
-include_once 'connections.php';
-
-// Local-only admin tool
-if (isset($APP_ENV) && $APP_ENV === 'production') {
-    header("Location: /404.php");
-    exit;
-}
-
-include_once 'functions.php';
-
 $recapYear = isset($_GET['year']) ? (int)$_GET['year'] : (int)(date('Y') - 1);
 $generatedText = '';
 $savedRecap = '';
@@ -216,9 +206,6 @@ function callGeminiApi($prompt, $apiKey) {
     return trim($data['candidates'][0]['content']['parts'][0]['text'] ?? '[No text in response]');
 }
 
-$pageName = "Generate Season Recap";
-include 'header.php';
-include 'sidebar.php';
 ?>
 
 <div class="app-content content">
@@ -323,5 +310,3 @@ include 'sidebar.php';
         </div>
     </div>
 </div>
-
-<?php include 'footer.php'; ?>

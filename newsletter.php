@@ -124,13 +124,6 @@ if ($previewRow && !empty($previewRow['preview'])) {
             
             <!-- Dropdown selections -->
             <div class="row" style="direction: ltr;">
-                <div class="col-sm-12 col-md-2 text-right">
-                    <?php
-                    if (isset($APP_ENV) && $APP_ENV !== 'production') {
-                        echo '<a class="btn btn-secondary" href="/editNewsletter.php">Edit Newsletter</a>';
-                    }
-                    ?>
-                </div>
                 <div class="col-sm-12 col-md-2">
                     <label for="year-select" style="color: #fff;">Season:</label>
                     <select id="year-select" class="form-control">

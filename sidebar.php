@@ -123,14 +123,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <span class="menu-title">Suggestions</span>
                 </a>
             </li> -->
-            <?php if (!isset($APP_ENV) || $APP_ENV !== 'production'): ?>
-            <li class="nav-item<?php if ($currentPage == 'generateSeasonRecap.php') echo ' active'; ?>">
-                <a href="/generateSeasonRecap.php">
-                    <i class="icon-magic-wand"></i>
-                    <span class="menu-title">Generate Recap</span>
-                </a>
-            </li>
-            <?php endif; ?>
         </ul>
     </div>
 </div>

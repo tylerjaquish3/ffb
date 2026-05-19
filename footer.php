@@ -3,7 +3,7 @@
         &nbsp;|&nbsp;
         <?php echo $version.' '.$vDate; ?>
         &nbsp;|&nbsp;
-        <a href="/yahooApi.php">Admin</a>
+        <a href="/admin.php">Admin</a>
     </div>
     
     <!-- BEGIN VENDOR JS-->

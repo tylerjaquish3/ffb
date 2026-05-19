@@ -1,6 +1,6 @@
 <?php
 
-// Include functions for database access
+include_once 'connections.php';
 include_once 'functions.php';
 
 // Initialize variables
@@ -71,18 +71,6 @@ if ($contentRow) {
     $preview = $contentRow['preview'] ?? '';
 }
 
-// Now include the HTML output files
-$pageName = "Edit Newsletter";
-include 'header.php';
-
-// Password protection for production
-if (isset($APP_ENV) && $APP_ENV === 'production') {
-    // Redirect to 404
-    header("Location: /404.php");
-    exit;
-}
-
-include 'sidebar.php';
 
 ?>
 
@@ -100,7 +88,7 @@ include 'sidebar.php';
                         </div>
                         <div class="card-body" style="background: #fff;">
                             <form method="GET" id="yearWeekForm">
-                                <div class="row">
+                                <div class="row" style="direction: ltr;">
                                     <div class="col-sm-12 col-md-3">
                                         <label for="year-select">Season:</label>
                                         <select id="year-select" name="year" class="form-control" onchange="updateURL()">
@@ -244,67 +232,45 @@ include 'sidebar.php';
             </div>
 
             <!-- Edit Form -->
-            <form method="POST" action="editNewsletter.php" enctype="multipart/form-data">
+            <form method="POST" action="editNewsletter.php" style="direction: ltr;">
                 <input type="hidden" name="year" value="<?php echo $editYear; ?>">
                 <input type="hidden" name="week" value="<?php echo $editWeek; ?>">
-                
-                <div class="row">
-                    <div class="col-sm-12 col-lg-6">
+
+                <div class="row" style="direction: ltr;">
+                    <div class="col-sm-12">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header" style="direction: ltr;">
                                 <h4>Week <?php echo $editWeek - 1; ?> Recap</h4>
                             </div>
-                            <div class="card-body" style="background: #fff;">
-                                <textarea id="recap" name="recap" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the recap content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($recap); ?></textarea>
+                            <div class="card-body" style="background: #fff; direction: ltr;">
+                                <textarea id="newsletter-recap" name="recap" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the recap content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($recap); ?></textarea>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="col-sm-12 col-lg-6">
+                </div>
+
+                <div class="row" style="direction: ltr;">
+                    <div class="col-sm-12">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header" style="direction: ltr;">
                                 <h4>Week <?php echo $editWeek; ?> Preview</h4>
                             </div>
-                            <div class="card-body" style="background: #fff;">
+                            <div class="card-body" style="background: #fff; direction: ltr;">
                                 <textarea id="preview" name="preview" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the preview content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($preview); ?></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Metadata Image Upload -->
-                <div class="row">
-                    <div class="col-sm-12 col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Metadata Image</h4>
-                            </div>
-                            <div class="card-body" style="background: #fff;">
-                                <input type="file" name="metadata_image" id="metadata_image" accept="image/*" class="form-control">
-                                <?php
-                                // Show current image if exists
-                                $imgQuery = query("SELECT metadata_image FROM newsletters WHERE year = $editYear AND week = $editWeek");
-                                $imgRow = fetch_array($imgQuery);
-                                if ($imgRow && !empty($imgRow['metadata_image'])) {
-                                    echo '<div style="margin-top:10px;"><img src="' . htmlspecialchars($imgRow['metadata_image']) . '" alt="Current Metadata Image" style="max-width:200px;max-height:200px;" /></div>';
-                                }
-                                ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row">
+                <div class="row" style="direction: ltr;">
                     <div class="col-sm-12">
-                        <div class="card">
-                            <div class="card-body" style="background: #fff; text-align: center;">
-                                <button type="submit" name="save" class="btn btn-secondary btn-lg" style="margin-right: 10px;">
-                                    <i class="icon-checkmark"></i> Save Changes
-                                </button>
-                                <button type="button" class="btn btn-secondary btn-lg" onclick="window.location.href='newsletter.php'">
-                                    <i class="icon-cross"></i> Cancel
-                                </button>
-                            </div>
+                        <div style="padding: 10px 0;">
+                            <button type="submit" name="save" class="btn btn-primary" style="margin-right: 8px;">
+                                <i class="icon-checkmark"></i> Save Changes
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="window.location.href='newsletter.php'">
+                                <i class="icon-cross"></i> Cancel
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -320,54 +286,4 @@ function updateURL() {
     const week = document.getElementById('week-select').value;
     window.location.href = 'editNewsletter.php?year=' + year + '&week=' + week;
 }
-</script>
-
-<?php include 'footer.php'; ?>
-
-
-<!-- CKEditor 5 CDN integration for Recap and Preview fields (must be after all other scripts) -->
-<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/47.3.0/ckeditor5.css" crossorigin>
-<script src="https://cdn.ckeditor.com/ckeditor5/47.3.0/ckeditor5.umd.js" crossorigin></script>
-<script src="https://cdn.ckbox.io/ckbox/2.9.2/ckbox.js" crossorigin></script>
-
-<script>
-    $( document ).ready( () => {
-        const {
-            ClassicEditor,Autoformat,AutoImage,Autosave,BlockQuote,Bold,Emoji,
-            Essentials,Heading,Indent,IndentBlock,Italic,Link,List,MediaEmbed,Mention,Paragraph,
-		    Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline
-        } = CKEDITOR;
-
-        let plugins = [
-            Autoformat,AutoImage,Autosave,BlockQuote,Bold,Emoji,
-            Essentials,Heading,Indent,IndentBlock,Italic,Link,List,MediaEmbed,Mention,Paragraph,
-		    Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline
-        ];
-
-        let toolbar = ['undo','redo','|',
-            'heading','|',
-            'bold','italic','underline','|',
-            'emoji','link','mediaEmbed','insertTable','blockQuote','|',
-            'bulletedList','numberedList','todoList','outdent','indent'
-        ];
-
-        ClassicEditor.create( $( '#recap' )[ 0 ], {
-            licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
-            plugins: plugins,
-            toolbar: toolbar
-        })
-        .catch( error => {
-            console.error( 'Error initializing CKEditor 5:', error );
-        });
-        
-        ClassicEditor.create( $( '#preview' )[ 0 ], {
-            licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
-            plugins: plugins,
-            toolbar: toolbar
-        })
-        .catch( error => {
-            console.error( 'Error initializing CKEditor 5:', error );
-        });
-    } );
-    
 </script>

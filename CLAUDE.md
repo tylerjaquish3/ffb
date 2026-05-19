@@ -52,7 +52,7 @@ Handles background data processing only. No public web routes are used in produc
 
 ### Database
 
-Single SQLite file: `database/ffb.sqlite`. Connection setup is in `connections.php` (root) and `fun-facts/.env`.
+Single SQLite file: `database/ffb.sqlite` (always lives at `/database/ffb.sqlite` relative to the repo root). Connection setup is in `connections.php` (root) and `fun-facts/.env`.
 
 Key table groups:
 - **League:** `managers`, `rosters`, `regular_season_matchups`, `playoff_matchups`, `finishes`
@@ -70,3 +70,5 @@ GitHub Actions (`.github/workflows/main.yml`) auto-deploys to production via FTP
 - NFL team relocations: Rams (LA, 2016), Chargers (LA, 2017), Raiders (LV, 2020).
 - Player aliases exist in the DB to handle name variations — queries matching player names should join/use aliases.
 - `functions.php` is intentionally monolithic; new shared helpers go there until a refactor separates pages into folders.
+- Bootstrap version in use requires `col-sm-*` grid classes (e.g. `col-sm-12`, `col-sm-6`) — plain `col-*` classes (e.g. `col-12`) do not apply correctly.
+- `regular_season_matchups` stores **one row per manager per matchup** (each matchup appears twice — once with each manager as `manager1`). To get a manager's full stats without double-counting, query only the `manager1` side. `playoff_matchups` is **not** duplicated — each matchup appears once.

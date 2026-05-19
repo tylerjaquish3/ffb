@@ -75,6 +75,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <span data-i18n="nav.dash.main" class="menu-title">Milestones</span>
                 </a>
             </li>
+            <li class="nav-item<?php if ($currentPage == 'whatIf.php') echo ' active'; ?>">
+                <a href="/whatIf.php">
+                    <i class="icon-question"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">What If</span>
+                </a>
+            </li>
             <li class="nav-item<?php if ($currentPage == 'draft.php') echo ' active'; ?>">
                 <a href="/draft.php">
                     <i class="icon-table"></i>

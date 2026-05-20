@@ -715,7 +715,7 @@ function pollForUpdates() {
     // Skip poll while modal is open to avoid disrupting an active selection
     if ($('#matchModal').hasClass('show')) return;
 
-    fetch('/data/draftOrderBracket.php')
+    fetch('/data/draftOrderBracket.json')
         .then(r => r.json())
         .then(data => {
             const hash = JSON.stringify(data.results || {});
@@ -728,12 +728,16 @@ function pollForUpdates() {
 }
 
 // Initial load
-fetch('/data/draftOrderBracket.php')
-    .then(r => r.json())
+fetch('/data/draftOrderBracket.json')
+    .then(r => r.ok ? r.json() : { results: {} })
     .then(data => {
         lastResultsHash = JSON.stringify(data.results || {});
         applyServerState(data.results || {});
-        setInterval(pollForUpdates, 5000);
+        setInterval(pollForUpdates, 10000);
+    })
+    .catch(() => {
+        applyServerState({});
+        setInterval(pollForUpdates, 10000);
     });
 </script>
 

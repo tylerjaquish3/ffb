@@ -7,7 +7,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class DownloadGamesCsv implements ShouldQueue
@@ -15,51 +14,49 @@ class DownloadGamesCsv implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     // Source: https://www.pro-football-reference.com/years/YYYY/games.htm
+    // Select all table content, copy, paste into storage/app/games/raw.txt, then run: php artisan importGames
 
     public function handle(): void
     {
         $year = date('Y');
-        $url = "https://www.pro-football-reference.com/years/{$year}/games.htm";
 
-        $response = Http::withHeaders([
-            'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language' => 'en-US,en;q=0.5',
-        ])->get($url);
-
-        if (!$response->successful()) {
-            throw new \Exception("Failed to fetch {$url}: HTTP {$response->status()}");
+        if (!Storage::exists('games/raw.txt')) {
+            throw new \Exception(
+                "No raw.txt found at storage/app/games/raw.txt\n" .
+                "Go to https://www.pro-football-reference.com/years/{$year}/games.htm, " .
+                "select and copy the entire games table, then paste it into storage/app/games/raw.txt"
+            );
         }
 
-        $dom = new \DOMDocument();
-        libxml_use_internal_errors(true);
-        $dom->loadHTML($response->body());
-        libxml_clear_errors();
-
-        $xpath = new \DOMXPath($dom);
-
-        $table = $xpath->query('//table[@id="games"]')->item(0);
-        if (!$table) {
-            throw new \Exception('Could not find #games table on page — PFR may have changed their layout');
-        }
+        $raw = Storage::get('games/raw.txt');
+        $lines = preg_split('/\r?\n/', trim($raw));
 
         $rows = [];
         $rows[] = implode(',', ['Week', 'Day', 'Date', 'Time', 'Winner/tie', '', 'Loser/tie']);
 
-        foreach ($xpath->query('.//tr', $table) as $tr) {
-            $week   = $this->cellText($xpath, $tr, 'week_num');
-            $winner = $this->cellText($xpath, $tr, 'winner');
-
-            // Skip header rows, bye weeks, and unplayed games
-            if (!is_numeric($week) || empty($winner)) {
+        foreach ($lines as $line) {
+            if (empty(trim($line))) {
                 continue;
             }
 
-            $day    = $this->cellText($xpath, $tr, 'game_day_of_week');
-            $date   = $this->formatDate($this->cellText($xpath, $tr, 'game_date'));
-            $time   = $this->cellText($xpath, $tr, 'gametime');
-            $at     = $this->cellText($xpath, $tr, 'game_location');
-            $loser  = $this->cellText($xpath, $tr, 'loser');
+            $cols = explode("\t", $line);
+            $week = trim($cols[0] ?? '');
+
+            if (!is_numeric($week)) {
+                continue;
+            }
+
+            $winner = trim($cols[4] ?? '');
+            $loser  = trim($cols[6] ?? '');
+
+            if (empty($winner) || empty($loser)) {
+                continue;
+            }
+
+            $day  = trim($cols[1] ?? '');
+            $date = $this->formatDate(trim($cols[2] ?? ''));
+            $time = trim($cols[3] ?? '');
+            $at   = trim($cols[5] ?? '');
 
             $rows[] = implode(',', [
                 $week,
@@ -74,18 +71,15 @@ class DownloadGamesCsv implements ShouldQueue
 
         $gameCount = count($rows) - 1;
         if ($gameCount === 0) {
-            throw new \Exception('Parsed 0 games — season may not have started yet or PFR layout changed');
+            throw new \Exception(
+                'Parsed 0 games from raw.txt — make sure the file contains tab-separated data copied from the PFR games table'
+            );
         }
 
         Storage::put("games/{$year}.csv", implode(PHP_EOL, $rows));
+        Storage::delete('games/raw.txt');
 
         echo "Saved games/{$year}.csv with {$gameCount} games." . PHP_EOL;
-    }
-
-    private function cellText(\DOMXPath $xpath, \DOMElement $row, string $dataStat): string
-    {
-        $nodes = $xpath->query(".//*[@data-stat='{$dataStat}']", $row);
-        return $nodes->length > 0 ? trim($nodes->item(0)->textContent) : '';
     }
 
     // Reformat whatever PFR gives us (e.g. "September 4, 2025") to "9/4/25"

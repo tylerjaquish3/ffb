@@ -31,7 +31,7 @@ Each manager must appear in exactly 5 rematch pairs (since they play 5 rematches
 php artisan importGames
 ```
 
-This converts the tab-separated paste into `storage/app/games/YYYY.csv` (matching the format of the existing CSVs) and deletes `raw.txt`. Do this once at the start of the season after Week 1 kickoff so all game times are published. Re-run mid-season if flex scheduling changes kick in.
+This converts the tab-separated paste into `storage/app/games/YYYY.csv` (matching the format of the existing CSVs) and deletes `raw.txt`. Run once per year, at the start of the season after Week 1 kickoff so all game times are published.
 
 ## 3. Pull Data from Yahoo API
 Use the admin page to fetch the current season's data from the Yahoo Fantasy Sports API. Do this each week during the season to keep scores, rosters, and standings current.

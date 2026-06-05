@@ -15,6 +15,8 @@ class DownloadGamesCsv implements ShouldQueue
 
     // Source: https://www.pro-football-reference.com/years/YYYY/games.htm
     // Select all table content, copy, paste into storage/app/games/raw.txt, then run: php artisan importGames
+    //
+    // Pasted columns: Week(0) Day(1) Date(2) VisTm(3) Pts(4) @(5) HomeTm(6) Pts(7) Time(8)
 
     public function handle(): void
     {
@@ -46,26 +48,25 @@ class DownloadGamesCsv implements ShouldQueue
                 continue;
             }
 
-            $winner = trim($cols[4] ?? '');
-            $loser  = trim($cols[6] ?? '');
+            $visTm  = trim($cols[3] ?? '');
+            $homeTm = trim($cols[6] ?? '');
 
-            if (empty($winner) || empty($loser)) {
+            if (empty($visTm) || empty($homeTm)) {
                 continue;
             }
 
             $day  = trim($cols[1] ?? '');
-            $date = $this->formatDate(trim($cols[2] ?? ''));
-            $time = trim($cols[3] ?? '');
-            $at   = trim($cols[5] ?? '');
+            $date = $this->formatDate(trim($cols[2] ?? ''), (int) $year);
+            $time = $this->formatTime(trim($cols[8] ?? ''));
 
             $rows[] = implode(',', [
                 $week,
                 $day,
                 $date,
                 $time,
-                $this->csvEscape($winner),
-                $at,
-                $this->csvEscape($loser),
+                $this->csvEscape($visTm),
+                '@',
+                $this->csvEscape($homeTm),
             ]);
         }
 
@@ -82,11 +83,35 @@ class DownloadGamesCsv implements ShouldQueue
         echo "Saved games/{$year}.csv with {$gameCount} games." . PHP_EOL;
     }
 
-    // Reformat whatever PFR gives us (e.g. "September 4, 2025") to "9/4/25"
-    private function formatDate(string $raw): string
+    // NFL seasons span Sept–Jan across two calendar years.
+    // If raw date has no year, Sept–Dec = $seasonYear, Jan–Aug = $seasonYear + 1.
+    private function formatDate(string $raw, int $seasonYear): string
     {
+        if (empty($raw)) {
+            return $raw;
+        }
+
+        if (preg_match('/\d{4}/', $raw)) {
+            $ts = strtotime($raw);
+            return $ts ? date('n/j/y', $ts) : $raw;
+        }
+
         $ts = strtotime($raw);
+        if (!$ts) {
+            return $raw;
+        }
+
+        $month = (int) date('n', $ts);
+        $fullYear = ($month >= 9) ? $seasonYear : ($seasonYear + 1);
+
+        $ts = strtotime("{$raw} {$fullYear}");
         return $ts ? date('n/j/y', $ts) : $raw;
+    }
+
+    // Normalize "8:20 PM" → "8:20PM" to match existing CSV format
+    private function formatTime(string $raw): string
+    {
+        return str_replace(' ', '', $raw);
     }
 
     private function csvEscape(string $value): string

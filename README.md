@@ -21,7 +21,20 @@ ORDER BY COUNT(*) ASC;
 
 Each manager must appear in exactly 5 rematch pairs (since they play 5 rematches). The 25 total rematch pairs must also form 5 valid weeks (each week has all 10 managers playing once). Ask Claude to do this — it will optimize the pairing and handle the scheduling math.
 
-## 2. Pull Data from Yahoo API
+## 2. Download NFL Game Schedule CSV
+
+Run from `fun-facts/`:
+```bash
+php artisan downloadGames
+```
+
+This fetches the season schedule from [Pro Football Reference](https://www.pro-football-reference.com/years/YYYY/games.htm) and writes `storage/app/games/YYYY.csv`. Run it once at the start of the season (after Week 1 kickoff so all game times are published), then re-run during the season if bye-week or flex scheduling changes come through.
+
+After downloading, run `php artisan gameTimes` to parse the CSV and update game times and slots in the database.
+
+> **Note:** PFR has rate limiting. If the request fails with an HTTP error, wait a few minutes and retry. Running before the season starts (no games yet) will throw a "0 games" error.
+
+## 3. Pull Data from Yahoo API
 Use the admin page to fetch the current season's data from the Yahoo Fantasy Sports API. Do this each week during the season to keep scores, rosters, and standings current.
 
 
@@ -31,7 +44,8 @@ All environments now use sqlite for the database.
 To get new data, use the admin page that will interact with the Yahoo API. 
 There is a laravel project inside the fun-facts folder so that jobs can be run. Here are the jobs:
 php artisan funFacts : update all of the manager fun facts. 
-php artisan gameTimes : get game times from the storage/app/games CSVs and update rosters table. Also update game_slot based on game_time
+php artisan downloadGames : download current season's NFL schedule from Pro Football Reference into storage/app/games/YYYY.csv
+php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + game_slot on rosters table
 
 
 # Bugs
@@ -41,7 +55,6 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
     - make sure it doesnt add duplicate rows, this happens for names with an apostrophe in the name
 
 - record for best free agent pick is not using player aliases to match players
-- misc stats start streaks says cam started 0-3 in 2025 and finished 10th but the season isnt over yet
 - records page card doesnt have rounded corners on right
 
 # Ideas
@@ -78,7 +91,6 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
 - separate pages now into a folder with an index and include other page parts
     - need to update links to that page to just go to that folder rather than .php file
     - do this on a new branch in case it gets messy
-- add an easy way to get the game times from that website and save it to the storage folder
 - make newsletter show random additional data so its not the same every week
 - newsletter doesnt do matchup stats based on that week (snapshot), it just grabs the latest
 

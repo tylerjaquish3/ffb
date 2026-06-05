@@ -21,18 +21,17 @@ ORDER BY COUNT(*) ASC;
 
 Each manager must appear in exactly 5 rematch pairs (since they play 5 rematches). The 25 total rematch pairs must also form 5 valid weeks (each week has all 10 managers playing once). Ask Claude to do this — it will optimize the pairing and handle the scheduling math.
 
-## 2. Download NFL Game Schedule CSV
+## 2. Import NFL Game Schedule CSV
 
-Run from `fun-facts/`:
+1. Go to `https://www.pro-football-reference.com/years/YYYY/games.htm` (replace YYYY with the season year)
+2. Select all content in the games table and copy it
+3. Paste into `fun-facts/storage/app/games/raw.txt`
+4. Run from `fun-facts/`:
 ```bash
-php artisan downloadGames
+php artisan importGames
 ```
 
-This fetches the season schedule from [Pro Football Reference](https://www.pro-football-reference.com/years/YYYY/games.htm) and writes `storage/app/games/YYYY.csv`. Run it once at the start of the season (after Week 1 kickoff so all game times are published), then re-run during the season if bye-week or flex scheduling changes come through.
-
-After downloading, run `php artisan gameTimes` to parse the CSV and update game times and slots in the database.
-
-> **Note:** PFR has rate limiting. If the request fails with an HTTP error, wait a few minutes and retry. Running before the season starts (no games yet) will throw a "0 games" error.
+This converts the tab-separated paste into `storage/app/games/YYYY.csv` (matching the format of the existing CSVs) and deletes `raw.txt`. Do this once at the start of the season after Week 1 kickoff so all game times are published. Re-run mid-season if flex scheduling changes kick in.
 
 ## 3. Pull Data from Yahoo API
 Use the admin page to fetch the current season's data from the Yahoo Fantasy Sports API. Do this each week during the season to keep scores, rosters, and standings current.
@@ -44,7 +43,7 @@ All environments now use sqlite for the database.
 To get new data, use the admin page that will interact with the Yahoo API. 
 There is a laravel project inside the fun-facts folder so that jobs can be run. Here are the jobs:
 php artisan funFacts : update all of the manager fun facts. 
-php artisan downloadGames : download current season's NFL schedule from Pro Football Reference into storage/app/games/YYYY.csv
+php artisan importGames : convert pasted PFR table (storage/app/games/raw.txt) into storage/app/games/YYYY.csv
 php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + game_slot on rosters table
 
 

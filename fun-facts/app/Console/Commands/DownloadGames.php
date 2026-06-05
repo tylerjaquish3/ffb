@@ -7,9 +7,9 @@ use App\Jobs\DownloadGamesCsv;
 
 class DownloadGames extends Command
 {
-    protected $signature = 'downloadGames';
+    protected $signature = 'importGames';
 
-    protected $description = 'Download the current season\'s NFL schedule from Pro Football Reference and save to storage/app/games/YYYY.csv';
+    protected $description = 'Parse a pasted Pro Football Reference games table (storage/app/games/raw.txt) into storage/app/games/YYYY.csv';
 
     public function __construct()
     {

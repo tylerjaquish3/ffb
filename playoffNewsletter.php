@@ -27,15 +27,12 @@ $selectedSeason = isset($_GET['year']) ? $_GET['year'] : $currentYear;
 
 // Determine current week based on roster data
 if (!isset($_GET['week'])) {
-    // Get the latest week from rosters table for the current year
     $weekResult = query("SELECT MAX(week) as maxWeek FROM rosters WHERE year = $selectedSeason");
     $weekRow = fetch_array($weekResult);
-    
+
     if ($weekRow && $weekRow['maxWeek']) {
-        // Use the week after the latest week in rosters
         $selectedWeek = $weekRow['maxWeek'] + 1;
     } else {
-        // No records for current year, default to week 1
         $selectedWeek = 1;
     }
 } else {
@@ -45,7 +42,6 @@ if (!isset($_GET['week'])) {
 // Check if selected week is NOT in playoffs and redirect to regular newsletter
 $playoffStartWeek = ($selectedSeason >= 2021) ? 15 : 14;
 if ($selectedWeek < $playoffStartWeek) {
-    // Redirect to regular newsletter with same parameters
     $redirectUrl = 'newsletter.php?year=' . $selectedSeason . '&week=' . $selectedWeek;
     header('Location: ' . $redirectUrl);
     exit;
@@ -54,440 +50,405 @@ if ($selectedWeek < $playoffStartWeek) {
 // Determine playoff round name
 $weeksSincePlayoffStart = $selectedWeek - $playoffStartWeek;
 switch ($weeksSincePlayoffStart) {
-    case 0:
-        $playoffRound = 'Quarterfinal';
-        break;
-    case 1:
-        $playoffRound = 'Semifinal';
-        break;
-    case 2:
-        $playoffRound = 'Final';
-        break;
-    default:
-        $playoffRound = 'Playoff';
+    case 0:  $playoffRound = 'Quarterfinal'; break;
+    case 1:  $playoffRound = 'Semifinal';    break;
+    case 2:  $playoffRound = 'Final';        break;
+    default: $playoffRound = 'Playoff';
 }
 
-// Set up custom meta properties for playoff newsletter before including header
+// Meta properties
 $customMetaTitle = "Week $selectedWeek $playoffRound Newsletter | $selectedSeason Suntown FFB";
 $customMetaDescription = "The best league in all the land";
-$customMetaImage = "http://suntownffb.us/images/football.ico"; // default
+$customMetaImage = "http://suntownffb.us/images/football.ico";
 
-// Pass $customMetaImage to header.php
-include 'header.php';
-include 'sidebar.php';
-
-// Get playoff schedule info specifically for this newsletter's selected week
+// Get playoff schedule info
 $scheduleInfo = getPlayoffScheduleInfo($selectedSeason, $selectedWeek, $playoffRound);
 
-// Get statistics data for playoff newsletter
+// Get statistics data
 $topPerformers = getCurrentSeasonTopPerformers();
 $everyoneRecord = getRecordAgainstEveryone();
 
-// Fetch newsletter content from database
+// Fetch newsletter content
 $recapContent = "Recap content is not available for this week.";
 $previewContent = "Preview content is not available for this week.";
+$newsletterDate = null;
 
-// For playoffs, get recap from current week (previous round) and preview for current round
-$recapQuery = query("SELECT recap FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
+$recapQuery = query("SELECT recap, preview, created_at FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
 $recapRow = fetch_array($recapQuery);
-
-if ($recapRow && !empty($recapRow['recap'])) {
-    $recapContent = $recapRow['recap'];
+if ($recapRow) {
+    if (!empty($recapRow['recap'])) {
+        $recapContent = $recapRow['recap'];
+    }
+    if (!empty($recapRow['preview'])) {
+        $previewContent = $recapRow['preview'];
+    }
+    if (!empty($recapRow['created_at'])) {
+        $newsletterDate = new DateTime($recapRow['created_at'], new DateTimeZone('UTC'));
+        $newsletterDate->setTimezone(new DateTimeZone('America/Los_Angeles'));
+    }
 }
 
-// Get preview for current playoff round
-$previewQuery = query("SELECT preview FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
-$previewRow = fetch_array($previewQuery);
-if ($previewRow && !empty($previewRow['preview'])) {
-    $previewContent = $previewRow['preview'];
+// Recap headline label
+if ($playoffRound === 'Quarterfinal') {
+    $lastRegularWeek = ($selectedSeason >= 2021) ? 14 : 13;
+    $recapLabel = "Week $lastRegularWeek Recap";
+} else {
+    $recapLabel = ($playoffRound === 'Semifinal' ? 'Quarterfinal' : 'Semifinal') . " Recap";
 }
 
+$version = "v5.7.1";
+$vDate = "(05/19/26)";
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($customMetaTitle); ?></title>
 
-<div class="app-content content">
-    <div class="content-wrapper">
-        <div class="content-body">
-            
-            <!-- Dropdown selections -->
-            <div class="row" style="direction: ltr;">
-                <div class="col-sm-12 col-md-2 text-right">
-                    <?php
-                    if (isset($APP_ENV) && $APP_ENV !== 'production') {
-                        echo '<a class="btn btn-secondary" href="/editNewsletter.php">Edit Newsletter</a>';
-                    }
-                    ?>
-                </div>
-                <div class="col-sm-12 col-md-2">
-                    <label for="year-select" style="color: #fff;">Season:</label>
-                    <select id="year-select" class="form-control">
-                        <?php
-                        // Use the already defined $currentYear from above
-                        $result = query("SELECT DISTINCT year FROM rosters ORDER BY year DESC");
-                        $yearsInDB = array();
-                        
-                        // Collect all years from database
-                        while ($row = fetch_array($result)) {
-                            $yearsInDB[] = $row['year'];
-                        }
-                        
-                        // Add current year if not in database
-                        if (!in_array($currentYear, $yearsInDB)) {
-                            array_unshift($yearsInDB, $currentYear);
-                        }
-                        
-                        // Sort years in descending order
-                        rsort($yearsInDB);
-                        
-                        // Display options
-                        foreach ($yearsInDB as $year) {
-                            if ($year == $selectedSeason) {
-                                echo '<option selected value="'.$year.'">'.$year.'</option>';
-                            } else {
-                                echo '<option value="'.$year.'">'.$year.'</option>';
-                            }
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div class="col-sm-12 col-md-2">
-                    <label for="week-select" style="color: #fff;">Week:</label>
-                    <select id="week-select" class="form-control">
-                        <?php
-                        // Get weeks for the selected season including playoffs
-                        $weeks = [];
-                        $playoffStartWeek = ($selectedSeason >= 2021) ? 15 : 14;
-                        $maxPlayoffWeek = ($selectedSeason >= 2021) ? 17 : 16;
-                        
-                        // First try to get weeks from schedule table
-                        $scheduleResult = query("SELECT DISTINCT week FROM schedule WHERE year = $selectedSeason ORDER BY week ASC");
-                        while ($row = fetch_array($scheduleResult)) {
-                            if ($row['week'] < $playoffStartWeek) {
-                                $weeks[] = $row['week'];
-                            }
-                        }
-                        
-                        // If no weeks in schedule (especially for current year), check rosters
-                        if (empty($weeks)) {
-                            $rosterResult = query("SELECT DISTINCT week FROM rosters WHERE year = $selectedSeason ORDER BY week ASC");
-                            while ($row = fetch_array($rosterResult)) {
-                                if ($row['week'] < $playoffStartWeek) {
-                                    $weeks[] = $row['week'];
-                                }
-                            }
-                            
-                            // For current year, if we have roster data, add the next week too (if it's regular season)
-                            if ($selectedSeason == $currentYear && !empty($weeks)) {
-                                $maxWeekResult = query("SELECT MAX(week) as maxWeek FROM rosters WHERE year = $selectedSeason");
-                                $maxWeekRow = fetch_array($maxWeekResult);
-                                if ($maxWeekRow && isset($maxWeekRow['maxWeek'])) {
-                                    $nextWeek = $maxWeekRow['maxWeek'] + 1;
-                                    if (!in_array($nextWeek, $weeks) && $nextWeek < $playoffStartWeek) {
-                                        $weeks[] = $nextWeek;
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Add playoff weeks 
-                        for ($playoffWeek = $playoffStartWeek; $playoffWeek <= $maxPlayoffWeek; $playoffWeek++) {
-                            $weeks[] = $playoffWeek;
-                        }
-                        
-                        // If still no weeks found, default to Week 1
-                        if (empty($weeks)) {
-                            $weeks[] = 1;
-                        }
-                        
-                        // Sort weeks in ascending order
-                        sort($weeks);
-                        
-                        // Display week options with playoff round names
-                        foreach ($weeks as $week) {
-                            $weekLabel = "Week $week";
-                            if ($week >= $playoffStartWeek) {
-                                $weeksSincePlayoffStart = $week - $playoffStartWeek;
-                                switch ($weeksSincePlayoffStart) {
-                                    case 0:
-                                        $weekLabel = "Week $week (Quarterfinal)";
-                                        break;
-                                    case 1:
-                                        $weekLabel = "Week $week (Semifinal)";
-                                        break;
-                                    case 2:
-                                        $weekLabel = "Week $week (Final)";
-                                        break;
-                                    default:
-                                        $weekLabel = "Week $week";
-                                }
-                            }
-                            
-                            if ($week == $selectedWeek) {
-                                echo '<option selected value="'.$week.'">'.$weekLabel.'</option>';
-                            } else {
-                                echo '<option value="'.$week.'">'.$weekLabel.'</option>';
-                            }
-                        }
-                        ?>
-                    </select>
-                </div>
-            </div>
-            <br>
-            
-            <!-- Schedule Table - visible for all weeks -->
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="card">
-                        <div class="card-header" style="direction: ltr;">
-                            <h4>Week <?php echo $selectedWeek; ?> Schedule (<?php echo $playoffRound; ?>)</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff;">
-                            <?php if (!empty($scheduleInfo)): ?>
-                                <table id="datatable-schedule" class="table table-striped table-bordered table-responsive" style="direction: ltr;">
-                                    <thead>
-                                        <tr>
-                                            <th>Manager 1</th>
-                                            <th>Manager 2</th>
-                                            <th>Regular Season H2H</th>
-                                            <th>Postseason H2H</th>
-                                            <th>Current Streak</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($scheduleInfo as $matchup): ?>
-                                            <tr>
-                                                <td>
-                                                    <?php if ($matchup['is_bye'] || empty($matchup['manager1_id'])): ?>
-                                                        <?php echo htmlspecialchars($matchup['manager1']); ?>
-                                                    <?php else: ?>
-                                                        <?php 
-                                                        $manager1_name = getManagerName($matchup['manager1_id']); 
-                                                        ?>
-                                                        <a href="profile.php?id=<?php echo urlencode($manager1_name); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>" target="_blank" rel="noopener">
-                                                            <?php echo htmlspecialchars($matchup['manager1']); ?>
-                                                        </a>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <?php if ($matchup['is_bye'] || empty($matchup['manager2_id'])): ?>
-                                                        <?php echo empty($matchup['manager2']) ? '—' : htmlspecialchars($matchup['manager2']); ?>
-                                                    <?php else: ?>
-                                                        <?php 
-                                                        $manager2_name = getManagerName($matchup['manager2_id']); 
-                                                        ?>
-                                                        <a href="profile.php?id=<?php echo urlencode($manager2_name); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>" target="_blank" rel="noopener">
-                                                            <?php echo htmlspecialchars($matchup['manager2']); ?>
-                                                        </a>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td><?php echo ($matchup['is_bye'] || empty($matchup['record'])) ? '—' : htmlspecialchars($matchup['record']); ?></td>
-                                                <td><?php echo ($matchup['is_bye'] || empty($matchup['postseason_record'])) ? '—' : htmlspecialchars($matchup['postseason_record']); ?></td>
-                                                <td><?php echo ($matchup['is_bye'] || empty($matchup['streak'])) ? '—' : htmlspecialchars($matchup['streak']); ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            <?php else: ?>
-                                <p>No playoff schedule information available for the <?php echo $playoffRound; ?> (Week <?php echo $selectedWeek; ?>) of the <?php echo $selectedSeason; ?> season. 
-                                <?php if ($playoffRound === 'Quarterfinal'): ?>
-                                    This could be because the regular season standings are not yet available.
-                                <?php else: ?>
-                                    Matchups will be determined based on previous round results.
-                                <?php endif; ?>
-                                </p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Playoff Newsletter Content -->
-            <div class="row">
-                <div class="col-sm-12 col-lg-6">
-                    <div class="card">
-                        <div class="card-header" style="direction: ltr;">
-                            <h4>
-                                <?php 
-                                if ($playoffRound === 'Quarterfinal') {
-                                    $lastRegularWeek = ($selectedSeason >= 2021) ? 14 : 13;
-                                    echo "Week $lastRegularWeek Recap";
-                                } else {
-                                    echo ($playoffRound === 'Semifinal' ? 'Quarterfinal' : 'Semifinal') . " Recap";
-                                }
-                                ?>
-                            </h4>
-                        </div>
-                        <div class="card-body p-1" style="background: #fff; direction: ltr">
-                            <?php echo nl2br($recapContent); ?>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-12 col-lg-6">
-                    <div class="card">
-                        <div class="card-header" style="direction: ltr;">
-                            <h4><?php echo $playoffRound; ?> Preview</h4>
-                        </div>
-                        <div class="card-body p-1" style="background: #fff; direction: ltr">
-                            <?php echo nl2br($previewContent); ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Playoff Statistics Section -->
-            <div class="row">
-                <div class="col-sm-12 col-lg-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-coin-dollar font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Top Week Performance</h5>
-                                    <h5 class="text-bold-400"><?php echo isset($topPerformers['topPerformer']) ? $topPerformers['topPerformer']['manager'].' - Week '.$topPerformers['topPerformer']['week'] : 'N/A'; ?><br />
-                                        <?php echo isset($topPerformers['topPerformer']) ? $topPerformers['topPerformer']['player'].' - '.$topPerformers['topPerformer']['points'].' points' : 'Data not available'; ?>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-clipboard font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Best Draft Pick</h5>
-                                    <h5 class="text-bold-400"><?php echo isset($topPerformers['bestDraftPick']) ? $topPerformers['bestDraftPick']['manager'] : 'N/A'; ?><br />
-                                        <?php echo isset($topPerformers['bestDraftPick']) ? $topPerformers['bestDraftPick']['player'].' - '.$topPerformers['bestDraftPick']['points'].' points' : 'Data not available'; ?>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-flag font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Most Total TDs (incl. BN)</h5>
-                                    <h5 class="text-bold-400"><?php echo isset($topPerformers['mostTds']) ? $topPerformers['mostTds']['manager'] : 'N/A'; ?><br />
-                                        <?php echo isset($topPerformers['mostTds']) ? $topPerformers['mostTds']['points'] : 'Data not available'; ?>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-earth font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Most Total Yards (incl. BN)</h5>
-                                    <h5 class="text-bold-400"><?php echo isset($topPerformers['mostYds']) ? $topPerformers['mostYds']['manager'] : 'N/A'; ?><br />
-                                        <?php echo isset($topPerformers['mostYds']) ? $topPerformers['mostYds']['points'] : 'Data not available'; ?>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media">
-                                <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-power-cord font-large-2 white"></i>
-                                </div>
-                                <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Best Bench</h5>
-                                    <h5 class="text-bold-400"><?php echo isset($topPerformers['bestBench']) ? $topPerformers['bestBench']['manager'] : 'N/A'; ?><br />
-                                        <?php echo isset($topPerformers['bestBench']) ? $topPerformers['bestBench']['points'] : 'Data not available'; ?>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-12 col-lg-4 table-padding">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 style="float: right">Record Against Everyone</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-striped nowrap" id="datatable-everyone">
-                                <thead>
-                                    <th>Manager</th>
-                                    <th>Wins</th>
-                                    <th>Losses</th>
-                                    <th>Win %</th>
-                                </thead>
-                                <tbody>
-                                    <?php if (isset($everyoneRecord)): ?>
-                                        <?php foreach ($everyoneRecord as $manager => $array): ?>
-                                            <tr>
-                                                <td><?php echo $manager; ?></td>
-                                                <td><?php echo $array['wins']; ?></td>
-                                                <td><?php echo $array['losses']; ?></td>
-                                                <td><?php echo round(($array['wins'] / ($array['wins'] + $array['losses'])) * 100, 1) . ' %'; ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="4">Data not available</td>
-                                        </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <meta property="og:title" content="<?php echo htmlspecialchars($customMetaTitle); ?>" />
+    <meta property="og:description" content="<?php echo htmlspecialchars($customMetaDescription); ?>" />
+    <meta property="og:url" content="http://suntownffb.us/playoffNewsletter.php" />
+    <meta property="og:image" content="<?php echo htmlspecialchars($customMetaImage); ?>" />
 
+    <link rel="icon" type="image/png" href="/images/football.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/assets/datatables.min.css">
+    <link rel="stylesheet" href="/assets/icomoon.css">
+    <link rel="stylesheet" href="/assets/newsletter.css">
+</head>
+
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead-wrapper">
+    <div class="masthead-top-bar">
+        <a href="/">&larr; Back to Dashboard</a>
+        <span>
+            <?php
+                $dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                $monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                $displayDate = $newsletterDate ?? new DateTime('now', new DateTimeZone('America/Los_Angeles'));
+                echo $dayNames[(int)$displayDate->format('w')] . ', ' . $monthNames[(int)$displayDate->format('n')-1] . ' ' . $displayDate->format('j') . ', ' . $displayDate->format('Y');
+            ?>
+        </span>
+        <span>Suntown Fantasy Football League &mdash; Since 2006</span>
+    </div>
+
+    <div class="masthead-main">
+        <div class="masthead-title">Weekly Sun News</div>
+        <div class="masthead-rule-set">
+            <span></span>
+            <em>Official Fantasy Football Newsletter</em>
+            <span></span>
         </div>
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const yearSelect = document.getElementById('year-select');
-        const weekSelect = document.getElementById('week-select');
-        
-        yearSelect.addEventListener('change', function() {
-            const selectedYear = this.value;
-            const selectedWeek = weekSelect.value;
-            window.location.href = `playoffNewsletter.php?year=${selectedYear}&week=${selectedWeek}`;
-        });
-        
-        weekSelect.addEventListener('change', function() {
-            const selectedWeek = this.value;
-            const selectedYear = yearSelect.value;
-            
-            // Determine if this week should go to regular newsletter or playoff newsletter
-            const playoffStartWeek = (selectedYear >= 2021) ? 15 : 14;
-            
-            if (selectedWeek < playoffStartWeek) {
-                window.location.href = `newsletter.php?year=${selectedYear}&week=${selectedWeek}`;
-            } else {
-                window.location.href = `playoffNewsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+<!-- Edition selector -->
+<div class="edition-bar">
+    <span style="opacity:0.5;letter-spacing:0.2em;font-size:0.62rem;text-transform:uppercase;">Edition:</span>
+    <div class="edition-field">
+        <label for="year-select">Season</label>
+        <select id="year-select">
+            <?php
+            $result = query("SELECT DISTINCT year FROM rosters ORDER BY year DESC");
+            $yearsInDB = array();
+            while ($row = fetch_array($result)) {
+                $yearsInDB[] = $row['year'];
             }
-        });
-        
-        // Initialize DataTable for Record Against Everyone
-        if ($('#datatable-everyone').length) {
-            $('#datatable-everyone').DataTable({
-                searching: false,
-                paging: false,
-                info: false,
-                order: [
-                    [3, "desc"]
-                ]
-            });
+            if (!in_array($currentYear, $yearsInDB)) {
+                array_unshift($yearsInDB, $currentYear);
+            }
+            rsort($yearsInDB);
+            foreach ($yearsInDB as $year) {
+                if ($year == $selectedSeason) {
+                    echo '<option selected value="'.$year.'">'.$year.'</option>';
+                } else {
+                    echo '<option value="'.$year.'">'.$year.'</option>';
+                }
+            }
+            ?>
+        </select>
+    </div>
+    <div class="edition-field">
+        <label for="week-select">Week</label>
+        <select id="week-select">
+            <?php
+            $weeks = [];
+            $maxPlayoffWeek = ($selectedSeason >= 2021) ? 17 : 16;
+
+            $scheduleResult = query("SELECT DISTINCT week FROM schedule WHERE year = $selectedSeason ORDER BY week ASC");
+            while ($row = fetch_array($scheduleResult)) {
+                if ($row['week'] < $playoffStartWeek) {
+                    $weeks[] = $row['week'];
+                }
+            }
+
+            if (empty($weeks)) {
+                $rosterResult = query("SELECT DISTINCT week FROM rosters WHERE year = $selectedSeason ORDER BY week ASC");
+                while ($row = fetch_array($rosterResult)) {
+                    if ($row['week'] < $playoffStartWeek) {
+                        $weeks[] = $row['week'];
+                    }
+                }
+                if ($selectedSeason == $currentYear && !empty($weeks)) {
+                    $maxWeekResult = query("SELECT MAX(week) as maxWeek FROM rosters WHERE year = $selectedSeason");
+                    $maxWeekRow = fetch_array($maxWeekResult);
+                    if ($maxWeekRow && isset($maxWeekRow['maxWeek'])) {
+                        $nextWeek = $maxWeekRow['maxWeek'] + 1;
+                        if (!in_array($nextWeek, $weeks) && $nextWeek < $playoffStartWeek) {
+                            $weeks[] = $nextWeek;
+                        }
+                    }
+                }
+            }
+
+            for ($playoffWeek = $playoffStartWeek; $playoffWeek <= $maxPlayoffWeek; $playoffWeek++) {
+                $weeks[] = $playoffWeek;
+            }
+
+            if (empty($weeks)) { $weeks[] = 1; }
+            sort($weeks);
+
+            foreach ($weeks as $week) {
+                $weekLabel = "Week $week";
+                if ($week >= $playoffStartWeek) {
+                    $wk = $week - $playoffStartWeek;
+                    switch ($wk) {
+                        case 0: $weekLabel = "Week $week (Quarterfinal)"; break;
+                        case 1: $weekLabel = "Week $week (Semifinal)";    break;
+                        case 2: $weekLabel = "Week $week (Final)";        break;
+                        default: $weekLabel = "Week $week";
+                    }
+                }
+                if ($week == $selectedWeek) {
+                    echo '<option selected value="'.$week.'">'.$weekLabel.'</option>';
+                } else {
+                    echo '<option value="'.$week.'">'.$weekLabel.'</option>';
+                }
+            }
+            ?>
+        </select>
+    </div>
+</div>
+
+<!-- PAGE BODY -->
+<div class="newspaper-page">
+
+    <!-- SCHEDULE -->
+    <div class="section-label accent-label"><span><?php echo $playoffRound; ?> Matchups &mdash; Week <?php echo $selectedWeek; ?></span></div>
+    <div class="schedule-section box-score-wrapper">
+        <?php if (!empty($scheduleInfo)): ?>
+            <table id="datatable-schedule" class="box-score-table">
+                <thead>
+                    <tr>
+                        <th>Manager</th>
+                        <th class="vs-col">&mdash;</th>
+                        <th>Opponent</th>
+                        <th>H2H (Reg)</th>
+                        <th>H2H (Post)</th>
+                        <th>Streak</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($scheduleInfo as $matchup): ?>
+                        <tr>
+                            <td>
+                                <?php if ($matchup['is_bye'] || empty($matchup['manager1_id'])): ?>
+                                    <?php echo htmlspecialchars($matchup['manager1']); ?>
+                                <?php else: ?>
+                                    <?php $manager1_name = getManagerName($matchup['manager1_id']); ?>
+                                    <a href="profile.php?id=<?php echo urlencode($manager1_name); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>" target="_blank" rel="noopener">
+                                        <?php echo htmlspecialchars($matchup['manager1']); ?>
+                                    </a>
+                                <?php endif; ?>
+                            </td>
+                            <td class="vs-col">vs</td>
+                            <td>
+                                <?php if ($matchup['is_bye'] || empty($matchup['manager2_id'])): ?>
+                                    <?php echo empty($matchup['manager2']) ? '&mdash;' : htmlspecialchars($matchup['manager2']); ?>
+                                <?php else: ?>
+                                    <?php $manager2_name = getManagerName($matchup['manager2_id']); ?>
+                                    <a href="profile.php?id=<?php echo urlencode($manager2_name); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>" target="_blank" rel="noopener">
+                                        <?php echo htmlspecialchars($matchup['manager2']); ?>
+                                    </a>
+                                <?php endif; ?>
+                            </td>
+                            <td><?php echo ($matchup['is_bye'] || empty($matchup['record'])) ? '&mdash;' : htmlspecialchars($matchup['record']); ?></td>
+                            <td><?php echo ($matchup['is_bye'] || empty($matchup['postseason_record'])) ? '&mdash;' : htmlspecialchars($matchup['postseason_record']); ?></td>
+                            <td><?php echo ($matchup['is_bye'] || empty($matchup['streak'])) ? '&mdash;' : htmlspecialchars($matchup['streak']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <div class="not-available">
+                No playoff schedule information available for the <?php echo $playoffRound; ?> (Week <?php echo $selectedWeek; ?>) of the <?php echo $selectedSeason; ?> season.
+                <?php if ($playoffRound === 'Quarterfinal'): ?>
+                    Regular season standings may not yet be finalized.
+                <?php else: ?>
+                    Matchups will be determined based on previous round results.
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- RECAP + PREVIEW -->
+    <div class="section-label accent-label"><span><?php echo $recapLabel; ?> &amp; <?php echo $playoffRound; ?> Preview</span></div>
+    <div class="content-columns">
+        <div class="column-divider">
+            <div class="article-headline"><?php echo $recapLabel; ?></div>
+            <div class="article-byline">By the Weekly Sun News Editorial Staff &middot; <?php echo $selectedSeason; ?></div>
+            <div class="article-body has-dropcap"><?php echo nl2br($recapContent); ?></div>
+        </div>
+        <div class="preview-column">
+            <div class="article-headline"><?php echo $playoffRound; ?> Preview</div>
+            <div class="article-byline">What to Watch &middot; <?php echo $selectedSeason; ?></div>
+            <div class="article-body"><?php echo nl2br($previewContent); ?></div>
+        </div>
+    </div>
+
+    <!-- TOP PERFORMERS + RECORD AGAINST EVERYONE -->
+    <div class="section-label"><span>Season Leaders &amp; Standings</span></div>
+    <div class="stats-grid">
+        <!-- Top Performers Sidebar -->
+        <div>
+            <div class="section-label accent-label" style="margin-top:0;"><span>Top Performers</span></div>
+            <ul class="performers-list">
+                <li>
+                    <div class="perf-icon"><i class="icon-coin-dollar"></i></div>
+                    <div>
+                        <div class="perf-label">Top Week Performance</div>
+                        <div class="perf-manager"><?php echo isset($topPerformers['topPerformer']) ? htmlspecialchars($topPerformers['topPerformer']['manager']).' &mdash; Wk '.$topPerformers['topPerformer']['week'] : 'N/A'; ?></div>
+                        <div class="perf-detail"><?php echo isset($topPerformers['topPerformer']) ? htmlspecialchars($topPerformers['topPerformer']['player']).' &mdash; '.$topPerformers['topPerformer']['points'].' pts' : 'Data not available'; ?></div>
+                    </div>
+                </li>
+                <li>
+                    <div class="perf-icon"><i class="icon-clipboard"></i></div>
+                    <div>
+                        <div class="perf-label">Best Draft Pick</div>
+                        <div class="perf-manager"><?php echo isset($topPerformers['bestDraftPick']) ? htmlspecialchars($topPerformers['bestDraftPick']['manager']) : 'N/A'; ?></div>
+                        <div class="perf-detail"><?php echo isset($topPerformers['bestDraftPick']) ? htmlspecialchars($topPerformers['bestDraftPick']['player']).' &mdash; '.$topPerformers['bestDraftPick']['points'].' pts' : 'Data not available'; ?></div>
+                    </div>
+                </li>
+                <li>
+                    <div class="perf-icon"><i class="icon-flag"></i></div>
+                    <div>
+                        <div class="perf-label">Most Total TDs (incl. BN)</div>
+                        <div class="perf-manager"><?php echo isset($topPerformers['mostTds']) ? htmlspecialchars($topPerformers['mostTds']['manager']) : 'N/A'; ?></div>
+                        <div class="perf-detail"><?php echo isset($topPerformers['mostTds']) ? $topPerformers['mostTds']['points'] : 'Data not available'; ?></div>
+                    </div>
+                </li>
+                <li>
+                    <div class="perf-icon"><i class="icon-earth"></i></div>
+                    <div>
+                        <div class="perf-label">Most Total Yards (incl. BN)</div>
+                        <div class="perf-manager"><?php echo isset($topPerformers['mostYds']) ? htmlspecialchars($topPerformers['mostYds']['manager']) : 'N/A'; ?></div>
+                        <div class="perf-detail"><?php echo isset($topPerformers['mostYds']) ? $topPerformers['mostYds']['points'] : 'Data not available'; ?></div>
+                    </div>
+                </li>
+                <li>
+                    <div class="perf-icon"><i class="icon-power-cord"></i></div>
+                    <div>
+                        <div class="perf-label">Best Bench</div>
+                        <div class="perf-manager"><?php echo isset($topPerformers['bestBench']) ? htmlspecialchars($topPerformers['bestBench']['manager']) : 'N/A'; ?></div>
+                        <div class="perf-detail"><?php echo isset($topPerformers['bestBench']) ? $topPerformers['bestBench']['points'] : 'Data not available'; ?></div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Record Against Everyone -->
+        <div>
+            <div class="section-label accent-label" style="margin-top:0;"><span>Record Against Everyone</span></div>
+            <table class="news-table" id="datatable-everyone">
+                <thead>
+                    <tr>
+                        <th>Manager</th>
+                        <th>W</th>
+                        <th>L</th>
+                        <th>Win %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (isset($everyoneRecord)): ?>
+                        <?php foreach ($everyoneRecord as $manager => $array): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($manager); ?></td>
+                                <td><?php echo $array['wins']; ?></td>
+                                <td><?php echo $array['losses']; ?></td>
+                                <td><?php echo round(($array['wins'] / ($array['wins'] + $array['losses'])) * 100, 1) . '%'; ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr><td colspan="4">Data not available</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div><!-- /.newspaper-page -->
+
+<!-- FOOTER -->
+<div class="newspaper-footer">
+    Copyright <?php echo date("Y"); ?> &copy; Suntown FFB &nbsp;&middot;&nbsp;
+    <?php echo $version.' '.$vDate; ?> &nbsp;&middot;&nbsp;
+    <a href="/admin.php">Admin</a>
+</div>
+
+<script src="/assets/datatables.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const yearSelect = document.getElementById('year-select');
+    const weekSelect = document.getElementById('week-select');
+
+    yearSelect.addEventListener('change', function() {
+        const selectedYear = this.value;
+        const selectedWeek = weekSelect.value;
+        const playoffStartWeek = (selectedYear >= 2021) ? 15 : 14;
+        if (selectedWeek < playoffStartWeek) {
+            window.location.href = `newsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+        } else {
+            window.location.href = `playoffNewsletter.php?year=${selectedYear}&week=${selectedWeek}`;
         }
     });
+
+    weekSelect.addEventListener('change', function() {
+        const selectedWeek = this.value;
+        const selectedYear = yearSelect.value;
+        const playoffStartWeek = (selectedYear >= 2021) ? 15 : 14;
+        if (selectedWeek < playoffStartWeek) {
+            window.location.href = `newsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+        } else {
+            window.location.href = `playoffNewsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+        }
+    });
+
+    if ($('#datatable-schedule').length) {
+        $('#datatable-schedule').DataTable({
+            searching: false,
+            paging: false,
+            info: false,
+            order: []
+        });
+    }
+
+    if ($('#datatable-everyone').length) {
+        $('#datatable-everyone').DataTable({
+            searching: false,
+            paging: false,
+            info: false,
+            order: [[3, "desc"]]
+        });
+    }
+});
 </script>
 
-<?php include 'footer.php'; ?>
+</body>
+</html>

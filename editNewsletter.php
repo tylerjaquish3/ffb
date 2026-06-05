@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     $existingRow = fetch_array($existingQuery);
     if ($existingRow) {
         // Update existing record
-        $updateQuery = "UPDATE newsletters SET recap = '" . SQLite3::escapeString($recap) . "', preview = '" . SQLite3::escapeString($preview) . "'";
+        $updateQuery = "UPDATE newsletters SET recap = '" . SQLite3::escapeString($recap) . "', preview = '" . SQLite3::escapeString($preview) . "', created_at = datetime('now')";
         if ($metadataImagePath) {
             $updateQuery .= ", metadata_image = '" . SQLite3::escapeString($metadataImagePath) . "'";
         }
@@ -48,8 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
         query($updateQuery);
     } else {
         // Insert new record
-        $insertQuery = "INSERT INTO newsletters (year, week, recap, preview";
-        $insertValues = "$editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "'";
+        $insertQuery = "INSERT INTO newsletters (year, week, recap, preview, created_at";
+        $insertValues = "$editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "', datetime('now')";
         if ($metadataImagePath) {
             $insertQuery .= ", metadata_image";
             $insertValues .= ", '" . SQLite3::escapeString($metadataImagePath) . "'";

@@ -80,7 +80,7 @@ php artisan gameTimes : get game times from the storage/app/games CSVs and updat
     - do this on a new branch in case it gets messy
 - add an easy way to get the game times from that website and save it to the storage folder
 - make newsletter show random additional data so its not the same every week
-    - make newsletter look like a newspaper?
+- newsletter doesnt do matchup stats based on that week (snapshot), it just grabs the latest
 
 Notes:
 Moved to 18 week schedule in 2021

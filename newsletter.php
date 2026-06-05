@@ -30,7 +30,7 @@ if (!isset($_GET['week'])) {
     // Get the latest week from rosters table for the current year
     $weekResult = query("SELECT MAX(week) as maxWeek FROM rosters WHERE year = $selectedSeason");
     $weekRow = fetch_array($weekResult);
-    
+
     if ($weekRow && $weekRow['maxWeek']) {
         // Use the week after the latest week in rosters
         $selectedWeek = $weekRow['maxWeek'] + 1;
@@ -57,8 +57,9 @@ $customMetaTitle = "Week $selectedWeek Newsletter | $selectedSeason Suntown FFB"
 $customMetaDescription = "The best league in all the land";
 $customMetaImage = "http://suntownffb.us/images/football.ico"; // default
 
-$metaQuery = query("SELECT recap, metadata_image FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
+$metaQuery = query("SELECT recap, metadata_image, created_at FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
 $metaRow = fetch_array($metaQuery);
+$newsletterDate = null;
 if ($metaRow) {
     if (!empty($metaRow['recap'])) {
         $cleanRecap = strip_tags($metaRow['recap']);
@@ -71,14 +72,13 @@ if ($metaRow) {
         }
     }
     if (!empty($metaRow['metadata_image'])) {
-        // Use absolute URL for meta image
         $customMetaImage = "http://suntownffb.us" . $metaRow['metadata_image'];
     }
+    if (!empty($metaRow['created_at'])) {
+        $newsletterDate = new DateTime($metaRow['created_at'], new DateTimeZone('UTC'));
+        $newsletterDate->setTimezone(new DateTimeZone('America/Los_Angeles'));
+    }
 }
-
-// Pass $customMetaImage to header.php
-include 'header.php';
-include 'sidebar.php';
 
 // Check for rosters with the selected year and week
 $rosterQuery = query("SELECT * FROM rosters WHERE year = $selectedSeason AND week = $selectedWeek-1");
@@ -116,779 +116,639 @@ if ($previewRow && !empty($previewRow['preview'])) {
     $previewContent = $previewRow['preview'];
 }
 
+$version = "v5.7.1";
+$vDate = "(05/19/26)";
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($customMetaTitle); ?></title>
 
-<div class="app-content content">
-    <div class="content-wrapper">
-        <div class="content-body">
-            
-            <!-- Dropdown selections -->
-            <div class="row" style="direction: ltr;">
-                <div class="col-sm-12 col-md-2">
-                    <label for="year-select" style="color: #fff;">Season:</label>
-                    <select id="year-select" class="form-control">
-                        <?php
-                        // Use the already defined $currentYear from above
-                        $result = query("SELECT DISTINCT year FROM rosters ORDER BY year DESC");
-                        $yearsInDB = array();
-                        
-                        // Collect all years from database
-                        while ($row = fetch_array($result)) {
-                            $yearsInDB[] = $row['year'];
-                        }
-                        
-                        // Add current year if not in database
-                        if (!in_array($currentYear, $yearsInDB)) {
-                            array_unshift($yearsInDB, $currentYear);
-                        }
-                        
-                        // Sort years in descending order
-                        rsort($yearsInDB);
-                        
-                        // Display options
-                        foreach ($yearsInDB as $year) {
-                            if ($year == $selectedSeason) {
-                                echo '<option selected value="'.$year.'">'.$year.'</option>';
-                            } else {
-                                echo '<option value="'.$year.'">'.$year.'</option>';
-                            }
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div class="col-sm-12 col-md-2">
-                    <label for="week-select" style="color: #fff;">Week:</label>
-                    <select id="week-select" class="form-control">
-                        <?php
-                        // Get weeks for the selected season including playoffs
-                        $weeks = [];
-                        $playoffStartWeek = ($selectedSeason >= 2021) ? 15 : 14;
-                        $maxPlayoffWeek = ($selectedSeason >= 2021) ? 17 : 16;
-                        
-                        // First try to get weeks from schedule table
-                        $scheduleResult = query("SELECT DISTINCT week FROM schedule WHERE year = $selectedSeason ORDER BY week ASC");
-                        while ($row = fetch_array($scheduleResult)) {
-                            if ($row['week'] < $playoffStartWeek) {
-                                $weeks[] = $row['week'];
-                            }
-                        }
-                        
-                        // If no weeks in schedule (especially for current year), check rosters
-                        if (empty($weeks)) {
-                            $rosterResult = query("SELECT DISTINCT week FROM rosters WHERE year = $selectedSeason ORDER BY week ASC");
-                            while ($row = fetch_array($rosterResult)) {
-                                if ($row['week'] < $playoffStartWeek) {
-                                    $weeks[] = $row['week'];
-                                }
-                            }
-                            
-                            // For current year, if we have roster data, add the next week too (if it's regular season)
-                            if ($selectedSeason == $currentYear && !empty($weeks)) {
-                                $maxWeekResult = query("SELECT MAX(week) as maxWeek FROM rosters WHERE year = $selectedSeason");
-                                $maxWeekRow = fetch_array($maxWeekResult);
-                                if ($maxWeekRow && isset($maxWeekRow['maxWeek'])) {
-                                    $nextWeek = $maxWeekRow['maxWeek'] + 1;
-                                    if (!in_array($nextWeek, $weeks) && $nextWeek < $playoffStartWeek) {
-                                        $weeks[] = $nextWeek;
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Add playoff weeks 
-                        for ($playoffWeek = $playoffStartWeek; $playoffWeek <= $maxPlayoffWeek; $playoffWeek++) {
-                            $weeks[] = $playoffWeek;
-                        }
-                        
-                        // If still no weeks found, default to Week 1
-                        if (empty($weeks)) {
-                            $weeks[] = 1;
-                        }
-                        
-                        // Sort weeks in ascending order
-                        sort($weeks);
-                        
-                        // Display week options with playoff round names
-                        foreach ($weeks as $week) {
-                            $weekLabel = "Week $week";
-                            if ($week >= $playoffStartWeek) {
-                                $weeksSincePlayoffStart = $week - $playoffStartWeek;
-                                switch ($weeksSincePlayoffStart) {
-                                    case 0:
-                                        $weekLabel = "Week $week (Quarterfinal)";
-                                        break;
-                                    case 1:
-                                        $weekLabel = "Week $week (Semifinal)";
-                                        break;
-                                    case 2:
-                                        $weekLabel = "Week $week (Final)";
-                                        break;
-                                    default:
-                                        $weekLabel = "Week $week";
-                                }
-                            }
-                            
-                            if ($week == $selectedWeek) {
-                                echo '<option selected value="'.$week.'">'.$weekLabel.'</option>';
-                            } else {
-                                echo '<option value="'.$week.'">'.$weekLabel.'</option>';
-                            }
-                        }
-                        ?>
-                    </select>
-                </div>
-            </div>
-            <br>
-            
-            <!-- Schedule Table - visible for all weeks -->
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="card">
-                        <div class="card-header" style="direction: ltr;">
-                            <h4>Week <?php echo $selectedWeek; ?> Schedule</h4>
-                        </div>
-                        <div class="card-body" style="background: #fff;">
-                            <?php if (!empty($scheduleInfo)): ?>
-                                <table id="datatable-schedule" class="table table-striped table-bordered table-responsive" style="direction: ltr;">
-                                    <thead>
-                                        <tr>
-                                            <th>Manager 1</th>
-                                            <th>Manager 2</th>
-                                            <th>Regular Season H2H</th>
-                                            <th>Postseason H2H</th>
-                                            <th>Current Streak</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($scheduleInfo as $matchup): ?>
-                                            <tr>
-                                                <td>
-                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager1_clean'] ?? $matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>" target="_blank" rel="noopener">
-                                                        <?php echo htmlspecialchars($matchup['manager1']); ?>
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    <a href="profile.php?id=<?php echo urlencode($matchup['manager2_clean'] ?? $matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>" target="_blank" rel="noopener">
-                                                        <?php echo htmlspecialchars($matchup['manager2']); ?>
-                                                    </a>
-                                                </td>
-                                                <td><?php echo htmlspecialchars($matchup['record']); ?></td>
-                                                <td><?php echo htmlspecialchars($matchup['postseason_record']); ?></td>
-                                                <td><?php echo htmlspecialchars($matchup['streak']); ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            <?php else: ?>
-                                <p>No schedule information available for Week <?php echo $selectedWeek; ?> of the <?php echo $selectedSeason; ?> season.</p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <?php if (!$contentAvailable): ?>
-                <!-- Content Not Available Message -->
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div class="card">
-                            <div class="card-header" style="direction: ltr;">
-                                <h4>Newsletter Content</h4>
-                            </div>
-                            <div class="card-body p-1" style="background: #fff; direction: ltr;">
-                                <h4 class="alert-heading">Content Not Available</h4>
-                                <p>The newsletter for Week <?php echo $selectedWeek; ?> of the <?php echo $selectedSeason; ?> season is not available.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <?php elseif ($selectedWeek == 1): ?>
-                <!-- Week 1: Show year recap and preview -->
-                <div class="row">
-                    <div class="col-sm-12 col-lg-6">
-                        <div class="card">
-                            <div class="card-header" style="direction: ltr;">
-                                <h4><?php echo ($selectedSeason - 1); ?> Recap</h4>
-                            </div>
-                            <div class="card-body p-1" style="background: #fff; direction: ltr">
-                                <?php echo nl2br($recapContent); ?>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-lg-6">
-                        <div class="card">
-                            <div class="card-header" style="direction: ltr;">
-                                <h4>Week <?php echo $selectedWeek; ?> Preview</h4>
-                            </div>
-                            <div class="card-body p-1" style="background: #fff; direction: ltr">
-                                <?php echo nl2br($previewContent); ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <?php else: ?>
-                <!-- Week 2+: Show week recap and preview -->
-                <div class="row">
-                    <div class="col-sm-12 col-lg-6">
-                        <div class="card">
-                            <div class="card-header" style="direction: ltr;">
-                                <h4>Week <?php echo ($selectedWeek - 1); ?> Recap</h4>
-                            </div>
-                            <div class="card-body p-1" style="background: #fff; direction: ltr">
-                                <?php echo nl2br($recapContent); ?>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-lg-6">
-                        <div class="card">
-                            <div class="card-header" style="direction: ltr;">
-                                <h4>Week <?php echo $selectedWeek; ?> Preview</h4>
-                            </div>
-                            <div class="card-body p-1" style="background: #fff; direction: ltr">
-                                <?php echo nl2br($previewContent); ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
-            <?php if ($selectedWeek > 1 && $rosterAvailable): ?>
-                <!-- Week 2+: Show full content -->
-                <div class="row">
-                    <div class="col-sm-12 col-lg-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="media">
-                                    <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                        <i class="icon-coin-dollar font-large-2 white"></i>
-                                    </div>
-                                    <div class="p-2 bg-green-ffb media-body">
-                                        <h5>Top Week Performance</h5>
-                                        <h5 class="text-bold-400"><?php echo $topPerformers['topPerformer']['manager'].' - Week '.$topPerformers['topPerformer']['week']; ?><br />
-                                            <?php echo $topPerformers['topPerformer']['player'].' - '.$topPerformers['topPerformer']['points'].' points'; ?>
-                                        </h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="media">
-                                    <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                        <i class="icon-clipboard font-large-2 white"></i>
-                                    </div>
-                                    <div class="p-2 bg-green-ffb media-body">
-                                        <h5>Best Draft Pick</h5>
-                                        <h5 class="text-bold-400"><?php echo $topPerformers['bestDraftPick']['manager']; ?><br />
-                                            <?php echo $topPerformers['bestDraftPick']['player'].' - '.$topPerformers['bestDraftPick']['points'].' points'; ?>
-                                        </h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="media">
-                                    <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                        <i class="icon-flag font-large-2 white"></i>
-                                    </div>
-                                    <div class="p-2 bg-green-ffb media-body">
-                                        <h5>Most Total TDs (incl. BN)</h5>
-                                        <h5 class="text-bold-400"><?php echo $topPerformers['mostTds']['manager']; ?><br />
-                                            <?php echo $topPerformers['mostTds']['points']; ?>
-                                        </h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="media">
-                                    <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                        <i class="icon-earth font-large-2 white"></i>
-                                    </div>
-                                    <div class="p-2 bg-green-ffb media-body">
-                                        <h5>Most Total Yards (incl. BN)</h5>
-                                        <h5 class="text-bold-400"><?php echo $topPerformers['mostYds']['manager']; ?><br />
-                                            <?php echo $topPerformers['mostYds']['points']; ?>
-                                        </h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="media">
-                                    <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                        <i class="icon-power-cord font-large-2 white"></i>
-                                    </div>
-                                    <div class="p-2 bg-green-ffb media-body">
-                                        <h5>Best Bench</h5>
-                                        <h5 class="text-bold-400"><?php echo $topPerformers['bestBench']['manager']; ?><br />
-                                            <?php echo $topPerformers['bestBench']['points']; ?>
-                                        </h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-lg-4 table-padding">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 style="float: right">Record Against Everyone</h4>
-                            </div>
-                            <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="table table-striped nowrap" id="datatable-everyone">
-                                    <thead>
-                                        <th>Manager</th>
-                                        <th>Wins</th>
-                                        <th>Losses</th>
-                                        <th>Win %</th>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        foreach ($everyoneRecord as $manager => $array) { ?>
-                                            <tr>
-                                                <td><?php echo $manager; ?></td>
-                                                <td><?php echo $array['wins']; ?></td>
-                                                <td><?php echo $array['losses']; ?></td>
-                                                <td><?php echo round(($array['wins'] / ($array['wins'] + $array['losses'])) * 100, 1) . ' %'; ?></td>
-                                            </tr>
-                                        <?php } ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12 table-padding">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 style="float: right">Week <?php echo $selectedWeek - 1; ?> Top Performers</h4>
-                            </div>
-                            <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="stripe responsive" id="datatable-bestWeek2">
-                                    <thead>
-                                        <?php
-                                        foreach ($bestWeek as $manager => $values) {
-                                            $headers = array_keys($values);
-                                            $currentPointsColCount = count($headers);
-                                            foreach ($headers as $header) {
-                                                echo '<th>Top '.$header.'</th>';
-                                            }
-                                            break;
-                                        }
-                                        ?>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        
-                                        foreach ($bestWeek as $week => $players) { 
-                                            if ($week != ($selectedWeek - 1)) {
-                                                continue;
-                                            }
-                                            ?>
-                                            <tr>
-                                                <?php foreach ($players as $pos => $stuff) { ?>
-                                                    <td data-order="<?php echo $stuff['points']; ?>">
-                                                        <strong><?php echo $stuff['manager']; ?></strong><br />
-                                                        <?php echo $stuff['player']; ?><br />
-                                                        <i><?php echo $stuff['points']. ' points'; ?></i>
-                                                    </td>
-                                                <?php } ?>
-                                            </tr>
-                                        <?php } ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <?php if ($selectedWeek != 2): ?>
-                        <div class="col-sm-12 col-lg-6 table-padding">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 style="float: right">Season Stats</h4>
-                                </div>
-                                <div class="card-body" style="background: #fff; direction: ltr">
-                                    <table class="stripe nowrap row-border order-column" id="datatable-currentStats">
-                                        <thead>
-                                            <th>Manager</th>
-                                            <th>Total Yds</th>
-                                            <th>Total TDs</th>
-                                            <th>Pass Yds</th>
-                                            <th>Pass TDs</th>
-                                            <th>Ints</th>
-                                            <th>Rush Yds</th>
-                                            <th>Rush TDs</th>
-                                            <th>Rec</th>
-                                            <th>Rec Yds</th>
-                                            <th>Rec TDs</th>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            while ($row = fetch_array($stats)) { ?>
-                                                <tr>
-                                                    <td><?php echo $row['manager']; ?></td>
-                                                    <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
-                                                    <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
-                                                    <td><?php echo $row['pass_yds']; ?></td>
-                                                    <td><?php echo $row['pass_tds']; ?></td>
-                                                    <td><?php echo $row['ints']; ?></td>
-                                                    <td><?php echo $row['rush_yds']; ?></td>
-                                                    <td><?php echo $row['rush_tds']; ?></td>
-                                                    <td><?php echo $row['rec']; ?></td>
-                                                    <td><?php echo $row['rec_yds']; ?></td>
-                                                    <td><?php echo $row['rec_tds']; ?></td>
-                                                </tr>
-                                            <?php } ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                    <div class="col-sm-12 col-lg-6 table-padding">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 style="float: right">Week <?php echo $selectedWeek - 1; ?> Stats</h4>
-                            </div>
-                            <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="stripe nowrap row-border order-column" id="datatable-currentWeekStats">
-                                    <thead>
-                                        <th>Manager</th>
-                                        <th>Total Yds</th>
-                                        <th>Total TDs</th>
-                                        <th>Pass Yds</th>
-                                        <th>Pass TDs</th>
-                                        <th>Ints</th>
-                                        <th>Rush Yds</th>
-                                        <th>Rush TDs</th>
-                                        <th>Rec</th>
-                                        <th>Rec Yds</th>
-                                        <th>Rec TDs</th>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        while ($row = fetch_array($weekStats)) { 
-                                            if ($row['week'] != ($selectedWeek - 1)) {
-                                                continue;
-                                            }
-                                            ?>
-                                            <tr>
-                                                <td><?php echo $row['manager']; ?></td>
-                                                <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
-                                                <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
-                                                <td><?php echo $row['pass_yds']; ?></td>
-                                                <td><?php echo $row['pass_tds']; ?></td>
-                                                <td><?php echo $row['ints']; ?></td>
-                                                <td><?php echo $row['rush_yds']; ?></td>
-                                                <td><?php echo $row['rush_tds']; ?></td>
-                                                <td><?php echo $row['rec']; ?></td>
-                                                <td><?php echo $row['rec_yds']; ?></td>
-                                                <td><?php echo $row['rec_tds']; ?></td>
-                                            </tr>
-                                        <?php } ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-               
-                    <?php if ($selectedWeek != 2): ?>
-                        <div class="col-sm-12 col-lg-8 table-padding">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 style="float: right">Standings By Week</h4>
-                                </div>
-                                <div class="card-body chart-block" style="background: #fff; direction: ltr">
-                                    <canvas id="standingsChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
+    <meta property="og:title" content="<?php echo htmlspecialchars($customMetaTitle); ?>" />
+    <meta property="og:description" content="<?php echo htmlspecialchars($customMetaDescription); ?>" />
+    <meta property="og:url" content="http://suntownffb.us/newsletter.php" />
+    <meta property="og:image" content="<?php echo htmlspecialchars($customMetaImage); ?>" />
 
+    <link rel="icon" type="image/png" href="/images/football.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <!-- DataTables CSS only (needed for table functionality) -->
+    <link rel="stylesheet" href="/assets/datatables.min.css">
+    <link rel="stylesheet" href="/assets/icomoon.css">
+    <link rel="stylesheet" href="/assets/newsletter.css">
+</head>
+
+<body>
+
+<!-- ============================================================
+     MASTHEAD
+     ============================================================ -->
+<div class="masthead-wrapper">
+    <div class="masthead-top-bar">
+        <a href="/">&larr; Back to Dashboard</a>
+        <span>
+            <?php
+                $dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                $monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                $displayDate = $newsletterDate ?? new DateTime('now', new DateTimeZone('America/Los_Angeles'));
+                echo $dayNames[(int)$displayDate->format('w')] . ', ' . $monthNames[(int)$displayDate->format('n')-1] . ' ' . $displayDate->format('j') . ', ' . $displayDate->format('Y');
+            ?>
+        </span>
+        <span>Suntown Fantasy Football League &mdash; Since 2006</span>
+    </div>
+
+    <div class="masthead-main">
+        <div class="masthead-title">Weekly Sun News</div>
+        <div class="masthead-rule-set">
+            <span></span>
+            <em>Official Fantasy Football Newsletter</em>
+            <span></span>
         </div>
     </div>
 </div>
 
-<?php include 'footer.php'; ?>
+<!-- Edition selector -->
+<div class="edition-bar">
+    <span style="opacity:0.5;letter-spacing:0.2em;font-size:0.62rem;text-transform:uppercase;">Edition:</span>
+    <div class="edition-field">
+        <label for="year-select">Season</label>
+        <select id="year-select">
+            <?php
+            $result = query("SELECT DISTINCT year FROM rosters ORDER BY year DESC");
+            $yearsInDB = array();
+            while ($row = fetch_array($result)) {
+                $yearsInDB[] = $row['year'];
+            }
+            if (!in_array($currentYear, $yearsInDB)) {
+                array_unshift($yearsInDB, $currentYear);
+            }
+            rsort($yearsInDB);
+            foreach ($yearsInDB as $year) {
+                if ($year == $selectedSeason) {
+                    echo '<option selected value="'.$year.'">'.$year.'</option>';
+                } else {
+                    echo '<option value="'.$year.'">'.$year.'</option>';
+                }
+            }
+            ?>
+        </select>
+    </div>
+    <div class="edition-field">
+        <label for="week-select">Week</label>
+        <select id="week-select">
+            <?php
+            $weeks = [];
+            $playoffStartWeek = ($selectedSeason >= 2021) ? 15 : 14;
+            $maxPlayoffWeek = ($selectedSeason >= 2021) ? 17 : 16;
+
+            $scheduleResult = query("SELECT DISTINCT week FROM schedule WHERE year = $selectedSeason ORDER BY week ASC");
+            while ($row = fetch_array($scheduleResult)) {
+                if ($row['week'] < $playoffStartWeek) {
+                    $weeks[] = $row['week'];
+                }
+            }
+
+            if (empty($weeks)) {
+                $rosterResult = query("SELECT DISTINCT week FROM rosters WHERE year = $selectedSeason ORDER BY week ASC");
+                while ($row = fetch_array($rosterResult)) {
+                    if ($row['week'] < $playoffStartWeek) {
+                        $weeks[] = $row['week'];
+                    }
+                }
+                if ($selectedSeason == $currentYear && !empty($weeks)) {
+                    $maxWeekResult = query("SELECT MAX(week) as maxWeek FROM rosters WHERE year = $selectedSeason");
+                    $maxWeekRow = fetch_array($maxWeekResult);
+                    if ($maxWeekRow && isset($maxWeekRow['maxWeek'])) {
+                        $nextWeek = $maxWeekRow['maxWeek'] + 1;
+                        if (!in_array($nextWeek, $weeks) && $nextWeek < $playoffStartWeek) {
+                            $weeks[] = $nextWeek;
+                        }
+                    }
+                }
+            }
+
+            for ($playoffWeek = $playoffStartWeek; $playoffWeek <= $maxPlayoffWeek; $playoffWeek++) {
+                $weeks[] = $playoffWeek;
+            }
+
+            if (empty($weeks)) {
+                $weeks[] = 1;
+            }
+            sort($weeks);
+
+            foreach ($weeks as $week) {
+                $weekLabel = "Week $week";
+                if ($week >= $playoffStartWeek) {
+                    $weeksSincePlayoffStart = $week - $playoffStartWeek;
+                    switch ($weeksSincePlayoffStart) {
+                        case 0: $weekLabel = "Week $week (Quarterfinal)"; break;
+                        case 1: $weekLabel = "Week $week (Semifinal)"; break;
+                        case 2: $weekLabel = "Week $week (Final)"; break;
+                        default: $weekLabel = "Week $week";
+                    }
+                }
+                if ($week == $selectedWeek) {
+                    echo '<option selected value="'.$week.'">'.$weekLabel.'</option>';
+                } else {
+                    echo '<option value="'.$week.'">'.$weekLabel.'</option>';
+                }
+            }
+            ?>
+        </select>
+    </div>
+</div>
+
+<!-- ============================================================
+     PAGE BODY
+     ============================================================ -->
+<div class="newspaper-page">
+
+    <!-- SCHEDULE -->
+    <div class="section-label accent-label"><span>This Week&rsquo;s Matchups</span></div>
+    <div class="schedule-section box-score-wrapper">
+        <?php if (!empty($scheduleInfo)): ?>
+            <table id="datatable-schedule" class="box-score-table">
+                <thead>
+                    <tr>
+                        <th>Manager</th>
+                        <th class="vs-col">&mdash;</th>
+                        <th>Opponent</th>
+                        <th>H2H (Reg)</th>
+                        <th>H2H (Post)</th>
+                        <th>Streak</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($scheduleInfo as $matchup): ?>
+                        <tr>
+                            <td>
+                                <a href="profile.php?id=<?php echo urlencode($matchup['manager1_clean'] ?? $matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>" target="_blank" rel="noopener">
+                                    <?php echo htmlspecialchars($matchup['manager1']); ?>
+                                </a>
+                            </td>
+                            <td class="vs-col">vs</td>
+                            <td>
+                                <a href="profile.php?id=<?php echo urlencode($matchup['manager2_clean'] ?? $matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>" target="_blank" rel="noopener">
+                                    <?php echo htmlspecialchars($matchup['manager2']); ?>
+                                </a>
+                            </td>
+                            <td><?php echo htmlspecialchars($matchup['record']); ?></td>
+                            <td><?php echo htmlspecialchars($matchup['postseason_record']); ?></td>
+                            <td><?php echo htmlspecialchars($matchup['streak']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <div class="not-available">No schedule information available for Week <?php echo $selectedWeek; ?> of the <?php echo $selectedSeason; ?> season.</div>
+        <?php endif; ?>
+    </div>
+
+    <?php if (!$contentAvailable): ?>
+        <!-- Content Not Available -->
+        <div class="section-label"><span>Newsletter</span></div>
+        <div class="not-available">
+            The newsletter for Week <?php echo $selectedWeek; ?> of the <?php echo $selectedSeason; ?> season is not yet available.
+        </div>
+
+    <?php elseif ($selectedWeek == 1): ?>
+        <!-- Week 1: Year Recap + Season Preview -->
+        <div class="section-label accent-label"><span><?php echo ($selectedSeason - 1); ?> Season Recap &amp; <?php echo $selectedSeason; ?> Preview</span></div>
+        <div class="content-columns">
+            <div class="column-divider">
+                <div class="article-headline"><?php echo ($selectedSeason - 1); ?> Season &mdash; Year in Review</div>
+                <div class="article-byline">By the Editorial Staff &middot; <?php echo $selectedSeason; ?></div>
+                <div class="article-body has-dropcap"><?php echo nl2br($recapContent); ?></div>
+            </div>
+            <div class="preview-column">
+                <div class="article-headline">Week <?php echo $selectedWeek; ?> Preview</div>
+                <div class="article-byline">Looking Ahead &middot; <?php echo $selectedSeason; ?></div>
+                <div class="article-body"><?php echo nl2br($previewContent); ?></div>
+            </div>
+        </div>
+
+    <?php else: ?>
+        <!-- Week 2+: Week Recap + Preview -->
+        <div class="section-label accent-label"><span>Week <?php echo ($selectedWeek - 1); ?> Recap &amp; Week <?php echo $selectedWeek; ?> Preview</span></div>
+        <div class="content-columns">
+            <div class="column-divider">
+                <div class="article-headline">Week <?php echo ($selectedWeek - 1); ?> &mdash; Full Recap</div>
+                <div class="article-byline">By the Editorial Staff &middot; <?php echo $selectedSeason; ?></div>
+                <div class="article-body has-dropcap"><?php echo nl2br($recapContent); ?></div>
+            </div>
+            <div class="preview-column">
+                <div class="article-headline">Week <?php echo $selectedWeek; ?> Preview</div>
+                <div class="article-byline">What to Watch &middot; <?php echo $selectedSeason; ?></div>
+                <div class="article-body"><?php echo nl2br($previewContent); ?></div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($selectedWeek > 1 && $rosterAvailable): ?>
+
+        <!-- TOP PERFORMERS + RECORD AGAINST EVERYONE -->
+        <div class="section-label"><span>League Standings &amp; Performers</span></div>
+        <div class="stats-grid">
+            <!-- Top Performers Sidebar -->
+            <div>
+                <div class="section-label accent-label" style="margin-top:0;"><span>Top Performers</span></div>
+                <ul class="performers-list">
+                    <li>
+                        <div class="perf-icon"><i class="icon-coin-dollar"></i></div>
+                        <div>
+                            <div class="perf-label">Top Week Performance</div>
+                            <div class="perf-manager"><?php echo $topPerformers['topPerformer']['manager'].' &mdash; Wk '.$topPerformers['topPerformer']['week']; ?></div>
+                            <div class="perf-detail"><?php echo $topPerformers['topPerformer']['player'].' &mdash; '.$topPerformers['topPerformer']['points'].' pts'; ?></div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="perf-icon"><i class="icon-clipboard"></i></div>
+                        <div>
+                            <div class="perf-label">Best Draft Pick</div>
+                            <div class="perf-manager"><?php echo $topPerformers['bestDraftPick']['manager']; ?></div>
+                            <div class="perf-detail"><?php echo $topPerformers['bestDraftPick']['player'].' &mdash; '.$topPerformers['bestDraftPick']['points'].' pts'; ?></div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="perf-icon"><i class="icon-flag"></i></div>
+                        <div>
+                            <div class="perf-label">Most Total TDs (incl. BN)</div>
+                            <div class="perf-manager"><?php echo $topPerformers['mostTds']['manager']; ?></div>
+                            <div class="perf-detail"><?php echo $topPerformers['mostTds']['points']; ?></div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="perf-icon"><i class="icon-earth"></i></div>
+                        <div>
+                            <div class="perf-label">Most Total Yards (incl. BN)</div>
+                            <div class="perf-manager"><?php echo $topPerformers['mostYds']['manager']; ?></div>
+                            <div class="perf-detail"><?php echo $topPerformers['mostYds']['points']; ?></div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="perf-icon"><i class="icon-power-cord"></i></div>
+                        <div>
+                            <div class="perf-label">Best Bench</div>
+                            <div class="perf-manager"><?php echo $topPerformers['bestBench']['manager']; ?></div>
+                            <div class="perf-detail"><?php echo $topPerformers['bestBench']['points']; ?></div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Record Against Everyone -->
+            <div>
+                <div class="section-label accent-label" style="margin-top:0;"><span>Record Against Everyone</span></div>
+                <table class="news-table" id="datatable-everyone">
+                    <thead>
+                        <tr>
+                            <th>Manager</th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>Win %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($everyoneRecord as $manager => $array) { ?>
+                            <tr>
+                                <td><?php echo $manager; ?></td>
+                                <td><?php echo $array['wins']; ?></td>
+                                <td><?php echo $array['losses']; ?></td>
+                                <td><?php echo round(($array['wins'] / ($array['wins'] + $array['losses'])) * 100, 1) . '%'; ?></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- WEEK TOP PERFORMERS CARDS -->
+        <div class="section-label accent-label"><span>Week <?php echo $selectedWeek - 1; ?> Top Performers by Position</span></div>
+        <div class="position-cards">
+            <?php
+            foreach ($bestWeek as $week => $players) {
+                if ($week != ($selectedWeek - 1)) { continue; }
+                foreach ($players as $pos => $stuff) { ?>
+                    <div class="pos-card">
+                        <div class="pos-card-label"><?php echo htmlspecialchars($pos); ?></div>
+                        <div class="pos-card-manager"><?php echo htmlspecialchars($stuff['manager']); ?></div>
+                        <div class="pos-card-player"><?php echo htmlspecialchars($stuff['player']); ?></div>
+                        <div class="pos-card-points"><?php echo $stuff['points']; ?> <span>pts</span></div>
+                    </div>
+                <?php }
+            }
+            ?>
+        </div>
+
+        <!-- SEASON STATS + WEEK STATS -->
+        <?php if ($selectedWeek != 2): ?>
+            <div class="section-label"><span>Season Stats</span></div>
+            <div class="full-table-section">
+                <table class="news-table" id="datatable-currentStats">
+                    <thead>
+                        <tr>
+                            <th>Manager</th>
+                            <th>Tot Yds</th>
+                            <th>Tot TDs</th>
+                            <th>Pass Yds</th>
+                            <th>Pass TDs</th>
+                            <th>INTs</th>
+                            <th>Rush Yds</th>
+                            <th>Rush TDs</th>
+                            <th>Rec</th>
+                            <th>Rec Yds</th>
+                            <th>Rec TDs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($row = fetch_array($stats)) { ?>
+                            <tr>
+                                <td><?php echo $row['manager']; ?></td>
+                                <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
+                                <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
+                                <td><?php echo $row['pass_yds']; ?></td>
+                                <td><?php echo $row['pass_tds']; ?></td>
+                                <td><?php echo $row['ints']; ?></td>
+                                <td><?php echo $row['rush_yds']; ?></td>
+                                <td><?php echo $row['rush_tds']; ?></td>
+                                <td><?php echo $row['rec']; ?></td>
+                                <td><?php echo $row['rec_yds']; ?></td>
+                                <td><?php echo $row['rec_tds']; ?></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+
+        <div class="section-label"><span>Week <?php echo $selectedWeek - 1; ?> Stats</span></div>
+        <div class="full-table-section">
+            <table class="news-table" id="datatable-currentWeekStats">
+                <thead>
+                    <tr>
+                        <th>Manager</th>
+                        <th>Tot Yds</th>
+                        <th>Tot TDs</th>
+                        <th>Pass Yds</th>
+                        <th>Pass TDs</th>
+                        <th>INTs</th>
+                        <th>Rush Yds</th>
+                        <th>Rush TDs</th>
+                        <th>Rec</th>
+                        <th>Rec Yds</th>
+                        <th>Rec TDs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while ($row = fetch_array($weekStats)) {
+                        if ($row['week'] != ($selectedWeek - 1)) { continue; }
+                        ?>
+                        <tr>
+                            <td><?php echo $row['manager']; ?></td>
+                            <td><?php echo $row['pass_yds'] + $row['rush_yds'] + $row['rec_yds']; ?></td>
+                            <td><?php echo $row['pass_tds'] + $row['rush_tds'] + $row['rec_tds']; ?></td>
+                            <td><?php echo $row['pass_yds']; ?></td>
+                            <td><?php echo $row['pass_tds']; ?></td>
+                            <td><?php echo $row['ints']; ?></td>
+                            <td><?php echo $row['rush_yds']; ?></td>
+                            <td><?php echo $row['rush_tds']; ?></td>
+                            <td><?php echo $row['rec']; ?></td>
+                            <td><?php echo $row['rec_yds']; ?></td>
+                            <td><?php echo $row['rec_tds']; ?></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- STANDINGS CHART -->
+        <?php if ($selectedWeek != 2): ?>
+            <div class="section-label accent-label"><span>Standings By Week</span></div>
+            <div class="chart-section">
+                <div class="chart-canvas-wrapper">
+                    <canvas id="standingsChart"></canvas>
+                </div>
+            </div>
+        <?php endif; ?>
+
+    <?php endif; ?>
+
+</div><!-- /.newspaper-page -->
+
+<!-- FOOTER -->
+<div class="newspaper-footer">
+    Copyright <?php echo date("Y"); ?> &copy; Suntown FFB &nbsp;&middot;&nbsp;
+    <?php echo $version.' '.$vDate; ?> &nbsp;&middot;&nbsp;
+    <a href="/admin.php">Admin</a>
+</div>
+
+<!-- Scripts -->
+<script src="/assets/datatables.min.js"></script>
+<script src="/assets/chart.min.js"></script>
+<script src="/assets/chartjs-plugin-datalabels.min.js"></script>
 
 <script type="text/javascript">
-    $(document).ready(function() {
+$(document).ready(function() {
 
-        let baseUrl = "<?php echo $BASE_URL; ?>";
-        
-        // Year and week selectors
-        $('#year-select').change(function() {
-            var selectedYear = $('#year-select').val();
-            
-            // Update week dropdown based on selected year
-            $.ajax({
-                url: 'dataLookup.php',
-                type: 'GET',
-                data: {
-                    dataType: 'weeks-by-year',
-                    year: selectedYear
-                },
-                success: function(response) {
-                    var weeks = JSON.parse(response);
-                    var weekSelect = $('#week-select');
-                    weekSelect.empty();
-                    
-                    $.each(weeks, function(index, week) {
-                        weekSelect.append('<option value="' + week.value + '">' + week.text + '</option>');
-                    });
-                    
-                    // Auto-select the latest week
-                    if (weeks.length > 0) {
-                        weekSelect.val(weeks[weeks.length - 1].value);
-                    }
-                    
-                    // Navigate to the new page
-                    var selectedWeek = weekSelect.val();
-                    window.location = baseUrl+'newsletter.php?year='+selectedYear+'&week='+selectedWeek;
+    let baseUrl = "<?php echo $BASE_URL; ?>";
+
+    // Year and week selectors
+    $('#year-select').change(function() {
+        var selectedYear = $('#year-select').val();
+        $.ajax({
+            url: 'dataLookup.php',
+            type: 'GET',
+            data: { dataType: 'weeks-by-year', year: selectedYear },
+            success: function(response) {
+                var weeks = JSON.parse(response);
+                var weekSelect = $('#week-select');
+                weekSelect.empty();
+                $.each(weeks, function(index, week) {
+                    weekSelect.append('<option value="' + week.value + '">' + week.text + '</option>');
+                });
+                if (weeks.length > 0) {
+                    weekSelect.val(weeks[weeks.length - 1].value);
                 }
-            });
+                var selectedWeek = weekSelect.val();
+                window.location = baseUrl+'newsletter.php?year='+selectedYear+'&week='+selectedWeek;
+            }
         });
-        
-        $('#week-select').change(function() {
-            var selectedYear = $('#year-select').val();
-            var selectedWeek = $('#week-select').val();
-            window.location = baseUrl+'newsletter.php?year='+selectedYear+'&week='+selectedWeek;
+    });
+
+    $('#week-select').change(function() {
+        var selectedYear = $('#year-select').val();
+        var selectedWeek = $('#week-select').val();
+        window.location = baseUrl+'newsletter.php?year='+selectedYear+'&week='+selectedWeek;
+    });
+
+    // Schedule table
+    if ($('#datatable-schedule').length) {
+        $('#datatable-schedule').DataTable({
+            searching: false,
+            paging: false,
+            info: false,
+            order: []
         });
-        
-        // Initialize schedule DataTable for all weeks
-        if ($('#datatable-schedule').length) {
-            $('#datatable-schedule').DataTable({
+    }
+
+    <?php if ($selectedWeek != 1 && $rosterAvailable): ?>
+
+        if ($('#datatable-currentPoints').length) {
+            let currentPointsColCount = <?php echo isset($currentPointsColCount) ? 'parseInt("'.$currentPointsColCount.'")' : '0'; ?>;
+            $('#datatable-currentPoints').DataTable({
                 searching: false,
                 paging: false,
                 info: false,
-                order: []
-            });
-        }
-        
-        <?php if ($selectedWeek != 1 && $rosterAvailable): ?>
-            // Initialize DataTables for weeks with roster data
-            
-            if ($('#datatable-currentPoints').length) {
-                let currentPointsColCount = <?php echo isset($currentPointsColCount) ? 'parseInt("'.$currentPointsColCount.'")' : '0'; ?>;
-                $('#datatable-currentPoints').DataTable({
-                    searching: false,
-                    paging: false,
-                    info: false,
-                    scrollX: "100%",
-                    scrollCollapse: true,
-                    fixedColumns: {
-                        leftColumns: 1
-                    },
-                    order: [
-                        [currentPointsColCount+1, "desc"]
-                    ],
-                    initComplete: function() {
-                        var api = this.api();
-                        
-                        api.columns(':not(:first)').every(function() {
-                            var col = this.index();
-                            var array = [];
-                            api.cells(null, col).every(function() {
-                                var cell = this.node();
-                                var record_id = $(cell).attr("data-order");
-                                array.push(record_id)
-                            })
-
-                            last = array.length-1;
-                            array.sort(function(a, b){return b-a});
-
-                            api.cells(null, col).every( function() {
-                                var cell = this.node();
-                                var record_id = $( cell ).attr( "data-order" );
-                                if (record_id === array[0]) {
-                                    $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                                } else if (record_id === array[last]) {
-                                    $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                                }
-                            });
+                scrollX: "100%",
+                scrollCollapse: true,
+                fixedColumns: { leftColumns: 1 },
+                order: [[currentPointsColCount+1, "desc"]],
+                initComplete: function() {
+                    var api = this.api();
+                    api.columns(':not(:first)').every(function() {
+                        var col = this.index();
+                        var array = [];
+                        api.cells(null, col).every(function() {
+                            array.push($(this.node()).attr("data-order"));
                         });
-                    }
-                });
-            }
-
-            <?php if ($selectedWeek != 2): ?>
-                if ($('#datatable-currentStats').length) {
-                    $('#datatable-currentStats').DataTable({
-                        searching: false,
-                        paging: false,
-                        info: false,
-                        scrollX: "100%",
-                        scrollCollapse: true,
-                        fixedColumns: {
-                            left: 1
-                        },
-                        order: [
-                            [2, "desc"]
-                        ],
-                        initComplete: function() {
-                            var api = this.api();
-                            api.columns(':not(:first)').every(function() {
-                                var col = this.index();
-                                var data = this.data().unique().map(function(value) {
-                                    return parseInt(value);
-                                }).toArray().sort(function(a, b){return b-a});
-
-                                last = data.length-1;
-                                api.cells(null, col).every(function() {
-                                    var cell = parseInt(this.data());
-                                    if (cell === data[0]) {
-                                        $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                                    } else if (cell === data[last]) {
-                                        $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                                    }
-                                });
-                            });
-                        }
+                        last = array.length-1;
+                        array.sort(function(a,b){return b-a});
+                        api.cells(null, col).every(function() {
+                            var record_id = $(this.node()).attr("data-order");
+                            if (record_id === array[0]) {
+                                $(this.node()).css('background-color', 'rgb(172, 240, 172)');
+                            } else if (record_id === array[last]) {
+                                $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)');
+                            }
+                        });
                     });
                 }
-            <?php endif; ?>
+            });
+        }
 
-            if ($('#datatable-currentWeekStats').length) {
-                $('#datatable-currentWeekStats').DataTable({
-                    scrollX: "100%",
+        <?php if ($selectedWeek != 2): ?>
+            if ($('#datatable-currentStats').length) {
+                $('#datatable-currentStats').DataTable({
                     searching: false,
                     paging: false,
                     info: false,
+                    scrollX: "100%",
                     scrollCollapse: true,
-                    fixedColumns: {
-                        left: 1
-                    },
-                    order: [
-                        [2, "desc"]
-                    ],
+                    fixedColumns: { left: 1 },
+                    order: [[2, "desc"]],
                     initComplete: function() {
                         var api = this.api();
                         api.columns(':not(:first)').every(function() {
                             var col = this.index();
-                            var data = this.data().unique().map(function(value) {
-                                return parseInt(value);
-                            }).toArray().sort(function(a, b){return b-a});
-
+                            var data = this.data().unique().map(function(v){ return parseInt(v); }).toArray().sort(function(a,b){return b-a});
                             last = data.length-1;
                             api.cells(null, col).every(function() {
                                 var cell = parseInt(this.data());
-                                if (cell === data[0]) {
-                                    $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                                } else if (cell === data[last]) {
-                                    $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                                }
+                                if (cell === data[0]) { $(this.node()).css('background-color', 'rgb(172, 240, 172)'); }
+                                else if (cell === data[last]) { $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)'); }
                             });
                         });
                     }
                 });
             }
-
-            if ($('#datatable-bestWeek2').length) {
-                $('#datatable-bestWeek2').DataTable({
-                    searching: false,
-                    paging: false,
-                    info: false,
-                    sort: false,
-                    scrollX: "100%",
-                    scrollCollapse: true,
-                });
-            }
-
-            if ($('#datatable-everyone').length) {
-                $('#datatable-everyone').DataTable({
-                    searching: false,
-                    paging: false,
-                    info: false,
-                    order: [
-                        [3, "desc"]
-                    ]
-                });
-            }
-
-            <?php if (isset($weekStandings) && isset($weekStandings['weeks']) && isset($weekStandings['managers']) && $selectedWeek != 2): ?>
-                if ($('#standingsChart').length) {
-                    let weeks = <?php echo json_encode($weekStandings['weeks']); ?>;
-                    let managers = <?php echo json_encode($weekStandings['managers']); ?>;
-                    
-                    var ctx = $('#standingsChart');
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: weeks,
-                            datasets: managers
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                y: {
-                                    display: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Rank',
-                                        font: {
-                                            size: 20
-                                        }
-                                    },
-                                    reverse: true
-                                },
-                                x: {
-                                    display: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Week',
-                                        font: {
-                                            size: 20
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-            <?php endif; ?>
         <?php endif; ?>
-        
-        // Handle dropdown changes
-        const yearSelect = document.getElementById('year-select');
-        const weekSelect = document.getElementById('week-select');
-        
-        if (yearSelect && weekSelect) {
-            yearSelect.addEventListener('change', function() {
-                const selectedYear = this.value;
-                const selectedWeek = weekSelect.value;
-                
-                // Determine if this week should go to regular newsletter or playoff newsletter
-                const playoffStartWeek = (selectedYear >= 2021) ? 15 : 14;
-                
-                if (selectedWeek < playoffStartWeek) {
-                    window.location.href = `newsletter.php?year=${selectedYear}&week=${selectedWeek}`;
-                } else {
-                    window.location.href = `playoffNewsletter.php?year=${selectedYear}&week=${selectedWeek}`;
-                }
-            });
-            
-            weekSelect.addEventListener('change', function() {
-                const selectedWeek = this.value;
-                const selectedYear = yearSelect.value;
-                
-                // Determine if this week should go to regular newsletter or playoff newsletter
-                const playoffStartWeek = (selectedYear >= 2021) ? 15 : 14;
-                
-                if (selectedWeek < playoffStartWeek) {
-                    window.location.href = `newsletter.php?year=${selectedYear}&week=${selectedWeek}`;
-                } else {
-                    window.location.href = `playoffNewsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+
+        if ($('#datatable-currentWeekStats').length) {
+            $('#datatable-currentWeekStats').DataTable({
+                scrollX: "100%",
+                searching: false,
+                paging: false,
+                info: false,
+                scrollCollapse: true,
+                fixedColumns: { left: 1 },
+                order: [[2, "desc"]],
+                initComplete: function() {
+                    var api = this.api();
+                    api.columns(':not(:first)').every(function() {
+                        var col = this.index();
+                        var data = this.data().unique().map(function(v){ return parseInt(v); }).toArray().sort(function(a,b){return b-a});
+                        last = data.length-1;
+                        api.cells(null, col).every(function() {
+                            var cell = parseInt(this.data());
+                            if (cell === data[0]) { $(this.node()).css('background-color', 'rgb(172, 240, 172)'); }
+                            else if (cell === data[last]) { $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)'); }
+                        });
+                    });
                 }
             });
         }
-    });
+
+        if ($('#datatable-everyone').length) {
+            $('#datatable-everyone').DataTable({
+                searching: false,
+                paging: false,
+                info: false,
+                order: [[3, "desc"]]
+            });
+        }
+
+        <?php if (isset($weekStandings) && isset($weekStandings['weeks']) && isset($weekStandings['managers']) && $selectedWeek != 2): ?>
+            if ($('#standingsChart').length) {
+                let weeks = <?php echo json_encode($weekStandings['weeks']); ?>;
+                let managers = <?php echo json_encode($weekStandings['managers']); ?>;
+                var ctx = $('#standingsChart');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: weeks, datasets: managers },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                display: true,
+                                title: { display: true, text: 'Rank', font: { size: 20 } },
+                                reverse: true
+                            },
+                            x: {
+                                display: true,
+                                title: { display: true, text: 'Week', font: { size: 20 } }
+                            }
+                        }
+                    }
+                });
+            }
+        <?php endif; ?>
+
+    <?php endif; ?>
+
+    // Handle dropdown navigation
+    const yearSelect = document.getElementById('year-select');
+    const weekSelect = document.getElementById('week-select');
+
+    if (yearSelect && weekSelect) {
+        yearSelect.addEventListener('change', function() {
+            const selectedYear = this.value;
+            const selectedWeek = weekSelect.value;
+            const playoffStartWeek = (selectedYear >= 2021) ? 15 : 14;
+            if (selectedWeek < playoffStartWeek) {
+                window.location.href = `newsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+            } else {
+                window.location.href = `playoffNewsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+            }
+        });
+
+        weekSelect.addEventListener('change', function() {
+            const selectedWeek = this.value;
+            const selectedYear = yearSelect.value;
+            const playoffStartWeek = (selectedYear >= 2021) ? 15 : 14;
+            if (selectedWeek < playoffStartWeek) {
+                window.location.href = `newsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+            } else {
+                window.location.href = `playoffNewsletter.php?year=${selectedYear}&week=${selectedWeek}`;
+            }
+        });
+    }
+});
 </script>
+
+</body>
+</html>

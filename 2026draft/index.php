@@ -408,7 +408,7 @@ const QUESTION_TEMPLATES = [
     'Does {p1} deserve a higher pick than {p2}?',
     'Should {p1} diet and exercise more than {p2}?',
     'Does {p1} need a shower more than {p2}?',
-    "Is {p1}'s dad prouder of him than {p2}'s dad is of him?"
+    "Will {p1} finish ahead of {p2} this year?"
 ];
 
 let questionQueue = [];
@@ -715,7 +715,7 @@ function pollForUpdates() {
     // Skip poll while modal is open to avoid disrupting an active selection
     if ($('#matchModal').hasClass('show')) return;
 
-    fetch('/data/draftOrderBracket.json')
+    fetch('/data/draftOrderBracket.json?t=' + Date.now())
         .then(r => r.json())
         .then(data => {
             const hash = JSON.stringify(data.results || {});
@@ -728,7 +728,7 @@ function pollForUpdates() {
 }
 
 // Initial load
-fetch('/data/draftOrderBracket.json')
+fetch('/data/draftOrderBracket.json?t=' + Date.now())
     .then(r => r.ok ? r.json() : { results: {} })
     .then(data => {
         lastResultsHash = JSON.stringify(data.results || {});

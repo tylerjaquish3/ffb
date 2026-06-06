@@ -327,11 +327,13 @@
 				$manager = $row2['name'];
 			}
 
+			$winYearFinish = '-';
 			$result3 = query("SELECT * FROM finishes WHERE manager_id = $x AND year = $winYear");
 			while ($row3 = fetch_array($result3)) {
 				$winYearFinish = $row3['finish'];
 			}
 
+			$loseYearFinish = '-';
 			$result4 = query("SELECT * FROM finishes WHERE manager_id = $x AND year = $loseYear");
 			while ($row4 = fetch_array($result4)) {
 				$loseYearFinish = $row4['finish'];

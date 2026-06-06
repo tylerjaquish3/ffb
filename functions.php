@@ -3235,36 +3235,42 @@ function getScheduleInfo($year, $week)
         $manager2 = $row['manager2'];
         
         // Get historical head-to-head record - only count each game once by looking at one direction
-        $h2hResult = query("SELECT 
+        // Filter to games already played as of the selected week (snapshot)
+        $h2hResult = query("SELECT
             SUM(CASE WHEN manager1_score > manager2_score THEN 1 ELSE 0 END) as manager1_wins,
             SUM(CASE WHEN manager2_score > manager1_score THEN 1 ELSE 0 END) as manager2_wins
-            FROM regular_season_matchups 
-            WHERE manager1_id = $manager1_id AND manager2_id = $manager2_id");
-        
+            FROM regular_season_matchups
+            WHERE manager1_id = $manager1_id AND manager2_id = $manager2_id
+            AND (year < $year OR (year = $year AND week_number < $week))");
+
         $h2hRow = fetch_array($h2hResult);
         $manager1_wins = $h2hRow['manager1_wins'] ?? 0;
         $manager2_wins = $h2hRow['manager2_wins'] ?? 0;
         $record = $manager1_wins . '-' . $manager2_wins;
-        
+
         // Get postseason head-to-head record between these two managers
-        $postseasonH2HResult = query("SELECT 
+        // Only count seasons completed before the selected year
+        $postseasonH2HResult = query("SELECT
             SUM(CASE WHEN manager1_id = $manager1_id AND manager1_score > manager2_score THEN 1 ELSE 0 END) +
             SUM(CASE WHEN manager2_id = $manager1_id AND manager2_score > manager1_score THEN 1 ELSE 0 END) as manager1_wins,
             SUM(CASE WHEN manager1_id = $manager2_id AND manager1_score > manager2_score THEN 1 ELSE 0 END) +
             SUM(CASE WHEN manager2_id = $manager2_id AND manager2_score > manager1_score THEN 1 ELSE 0 END) as manager2_wins
-            FROM playoff_matchups 
-            WHERE (manager1_id = $manager1_id AND manager2_id = $manager2_id) 
-               OR (manager1_id = $manager2_id AND manager2_id = $manager1_id)");
-        
+            FROM playoff_matchups
+            WHERE ((manager1_id = $manager1_id AND manager2_id = $manager2_id)
+               OR (manager1_id = $manager2_id AND manager2_id = $manager1_id))
+            AND year < $year");
+
         $postseasonH2HRow = fetch_array($postseasonH2HResult);
         $manager1_postseason_wins = $postseasonH2HRow['manager1_wins'] ?? 0;
         $manager2_postseason_wins = $postseasonH2HRow['manager2_wins'] ?? 0;
         $postseason_record = $manager1_postseason_wins . '-' . $manager2_postseason_wins;
-        
+
         // Get current streak - only look at one direction to avoid duplicates
+        // Filter to games already played as of the selected week (snapshot)
         $streakResult = query("SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score
-            FROM regular_season_matchups 
+            FROM regular_season_matchups
             WHERE (manager1_id = $manager1_id AND manager2_id = $manager2_id)
+            AND (year < $year OR (year = $year AND week_number < $week))
             ORDER BY year DESC, week_number DESC");
         
         $streak = 0;

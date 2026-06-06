@@ -6,6 +6,9 @@ include_once 'functions.php';
 // Initialize variables
 $recap = '';
 $preview = '';
+$headline = '';
+$notes = '';
+$heroImagePath = '';
 $editYear = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
 $editWeek = isset($_GET['week']) ? (int)$_GET['week'] : 1;
 
@@ -15,9 +18,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     $editWeek = isset($_POST['week']) ? (int)$_POST['week'] : $editWeek;
     $recap = isset($_POST['recap']) ? $_POST['recap'] : '';
     $preview = isset($_POST['preview']) ? $_POST['preview'] : '';
+    $headline = isset($_POST['headline']) ? $_POST['headline'] : '';
+    $notes = isset($_POST['notes']) ? $_POST['notes'] : '';
     $metadataImagePath = '';
+    $heroImagePath = '';
 
-    // Handle file upload if present
+    // Handle hero image upload
+    if (isset($_FILES['hero_image']) && $_FILES['hero_image']['error'] === UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['hero_image']['tmp_name'];
+        $fileName = $_FILES['hero_image']['name'];
+        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (in_array($fileExt, $allowedExts)) {
+            $newFileName = "newsletter_{$editYear}_wk{$editWeek}_hero.{$fileExt}";
+            $destPath = "images/newsletter_metadata/" . $newFileName;
+            if (move_uploaded_file($fileTmpPath, $destPath)) {
+                $heroImagePath = '/' . $destPath;
+            }
+        }
+    }
+
+    // Handle metadata image upload
     if (isset($_FILES['metadata_image']) && $_FILES['metadata_image']['error'] === UPLOAD_ERR_OK) {
         $fileTmpPath = $_FILES['metadata_image']['tmp_name'];
         $fileName = $_FILES['metadata_image']['name'];
@@ -40,35 +61,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     $existingRow = fetch_array($existingQuery);
     if ($existingRow) {
         // Update existing record
-        $updateQuery = "UPDATE newsletters SET recap = '" . SQLite3::escapeString($recap) . "', preview = '" . SQLite3::escapeString($preview) . "', created_at = datetime('now')";
+        $updateQuery = "UPDATE newsletters SET recap = '" . SQLite3::escapeString($recap) . "', preview = '" . SQLite3::escapeString($preview) . "', headline = '" . SQLite3::escapeString($headline) . "', notes = '" . SQLite3::escapeString($notes) . "', created_at = datetime('now')";
         if ($metadataImagePath) {
             $updateQuery .= ", metadata_image = '" . SQLite3::escapeString($metadataImagePath) . "'";
+        }
+        if (!empty($_POST['remove_hero_image'])) {
+            $updateQuery .= ", hero_image = NULL";
+        } elseif ($heroImagePath) {
+            $updateQuery .= ", hero_image = '" . SQLite3::escapeString($heroImagePath) . "'";
         }
         $updateQuery .= " WHERE year = $editYear AND week = $editWeek";
         query($updateQuery);
     } else {
         // Insert new record
-        $insertQuery = "INSERT INTO newsletters (year, week, recap, preview, created_at";
-        $insertValues = "$editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "', datetime('now')";
+        $insertQuery = "INSERT INTO newsletters (year, week, recap, preview, headline, notes, created_at";
+        $insertValues = "$editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "', '" . SQLite3::escapeString($headline) . "', '" . SQLite3::escapeString($notes) . "', datetime('now')";
         if ($metadataImagePath) {
             $insertQuery .= ", metadata_image";
             $insertValues .= ", '" . SQLite3::escapeString($metadataImagePath) . "'";
+        }
+        if ($heroImagePath) {
+            $insertQuery .= ", hero_image";
+            $insertValues .= ", '" . SQLite3::escapeString($heroImagePath) . "'";
         }
         $insertQuery .= ") VALUES (" . $insertValues . ")";
         query($insertQuery);
     }
 
-    // Redirect to newsletter page with the saved year and week
-    header("Location: newsletter.php?year=$editYear&week=$editWeek");
-    exit;
+    $saved = true;
 }
 
 // Fetch existing content if any
-$contentQuery = query("SELECT recap, preview FROM newsletters WHERE year = $editYear AND week = $editWeek");
+$contentQuery = query("SELECT recap, preview, headline, notes, hero_image FROM newsletters WHERE year = $editYear AND week = $editWeek");
 $contentRow = fetch_array($contentQuery);
+$existingHeroImage = null;
 if ($contentRow) {
     $recap = $contentRow['recap'] ?? '';
     $preview = $contentRow['preview'] ?? '';
+    $headline = $contentRow['headline'] ?? '';
+    $notes = $contentRow['notes'] ?? '';
+    $existingHeroImage = !empty($contentRow['hero_image']) ? $contentRow['hero_image'] : null;
 }
 
 
@@ -137,7 +169,48 @@ if ($contentRow) {
                 </div>
             </div>
 
-            <!-- Week's Matchups Card -->
+            <!-- Edit Form (wraps everything that saves) -->
+            <form method="POST" action="admin.php?tab=newsletter" enctype="multipart/form-data" style="direction: ltr;">
+                <input type="hidden" name="year" value="<?php echo $editYear; ?>">
+                <input type="hidden" name="week" value="<?php echo $editWeek; ?>">
+
+                <!-- Headline & Hero Image -->
+                <div class="row" style="direction: ltr;">
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-header" style="direction: ltr;">
+                                <h4>Headline &amp; Hero Image</h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr;">
+                                <div class="row" style="direction: ltr;">
+                                    <div class="col-sm-12">
+                                        <label for="headline">Headline</label>
+                                        <input type="text" id="headline" name="headline" class="form-control" value="<?php echo htmlspecialchars($headline); ?>" placeholder="Enter a headline for this newsletter edition...">
+                                    </div>
+                                </div>
+                                <div class="row" style="direction: ltr; margin-top: 1rem;">
+                                    <div class="col-sm-12">
+                                        <label for="hero_image">Hero Image</label>
+                                        <input type="file" id="hero_image" name="hero_image" class="form-control" accept="image/*">
+                                        <?php if ($existingHeroImage): ?>
+                                            <div style="margin-top: 0.75rem;">
+                                                <p style="font-size: 0.8rem; color: #666; margin-bottom: 0.4rem;">Current hero image:</p>
+                                                <img src="<?php echo htmlspecialchars($existingHeroImage); ?>" alt="Current hero image" style="max-width: 400px; max-height: 200px; object-fit: cover; border: 1px solid #ddd;">
+                                                <div style="margin-top: 0.5rem;">
+                                                    <label style="font-size: 0.85rem; color: #c00; cursor: pointer;">
+                                                        <input type="checkbox" name="remove_hero_image" value="1"> Remove hero image
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Week's Matchups Card (inside form so hidden inputs are available) -->
             <div class="row">
                 <div class="col-sm-12">
                     <div class="card">
@@ -194,7 +267,7 @@ if ($contentRow) {
                                                     <?php if (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['manager1_id'])): ?>
                                                         <?php echo htmlspecialchars($matchup['manager1']); ?>
                                                     <?php else: ?>
-                                                        <a href="profile.php?id=<?php echo urlencode($matchup['manager1_clean'] ?? $matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>" target="_blank" rel="noopener">
+                                                                        <a href="profile.php?id=<?php echo urlencode($matchup['manager1_clean'] ?? $matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>#head-to-head" target="_blank" rel="noopener">
                                                             <?php echo htmlspecialchars($matchup['manager1']); ?>
                                                         </a>
                                                     <?php endif; ?>
@@ -203,7 +276,7 @@ if ($contentRow) {
                                                     <?php if (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['manager2_id'])): ?>
                                                         <?php echo htmlspecialchars($matchup['manager2']); ?>
                                                     <?php else: ?>
-                                                        <a href="profile.php?id=<?php echo urlencode($matchup['manager2_clean'] ?? $matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>" target="_blank" rel="noopener">
+                                                        <a href="profile.php?id=<?php echo urlencode($matchup['manager2_clean'] ?? $matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>#head-to-head" target="_blank" rel="noopener">
                                                             <?php echo htmlspecialchars($matchup['manager2']); ?>
                                                         </a>
                                                     <?php endif; ?>
@@ -231,10 +304,19 @@ if ($contentRow) {
                 </div>
             </div>
 
-            <!-- Edit Form -->
-            <form method="POST" action="editNewsletter.php" style="direction: ltr;">
-                <input type="hidden" name="year" value="<?php echo $editYear; ?>">
-                <input type="hidden" name="week" value="<?php echo $editWeek; ?>">
+                <!-- Notes Card -->
+                <div class="row" style="direction: ltr;">
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-header" style="direction: ltr;">
+                                <h4>Notes <small style="font-weight:normal;font-size:0.8rem;color:#999;">(internal only)</small></h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr;">
+                                <textarea id="newsletter-notes" name="notes" class="form-control" rows="10" style="direction: ltr;" placeholder="Internal notes for this week..."><?php echo htmlspecialchars($notes); ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="row" style="direction: ltr;">
                     <div class="col-sm-12">
@@ -280,10 +362,35 @@ if ($contentRow) {
     </div>
 </div>
 
+<?php if (!empty($saved)): ?>
+<!-- Success modal (fallback when SweetAlert is not available) -->
+<div id="save-success-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:6px;padding:2rem 2.5rem;max-width:380px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem;">&#10003;</div>
+        <h3 style="margin:0 0 0.5rem;font-size:1.2rem;">Saved successfully!</h3>
+        <p style="color:#666;font-size:0.9rem;margin-bottom:1.5rem;">Newsletter Week <?php echo $editWeek; ?> &middot; <?php echo $editYear; ?></p>
+        <div style="display:flex;gap:0.75rem;justify-content:center;">
+            <a href="newsletter.php?year=<?php echo $editYear; ?>&week=<?php echo $editWeek; ?>" class="btn btn-primary">Preview</a>
+            <button onclick="document.getElementById('save-success-modal').style.display='none';" class="btn btn-default">OK</button>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <script>
 function updateURL() {
     const year = document.getElementById('year-select').value;
     const week = document.getElementById('week-select').value;
-    window.location.href = 'editNewsletter.php?year=' + year + '&week=' + week;
+    window.location.href = 'admin.php?tab=newsletter&year=' + year + '&week=' + week;
 }
+
+<?php if (!empty($saved)): ?>
+(function() {
+    var modal = document.getElementById('save-success-modal');
+    modal.style.display = 'flex';
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) modal.style.display = 'none';
+    });
+})();
+<?php endif; ?>
 </script>

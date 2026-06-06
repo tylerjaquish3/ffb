@@ -57,9 +57,11 @@ $customMetaTitle = "Week $selectedWeek Newsletter | $selectedSeason Suntown FFB"
 $customMetaDescription = "The best league in all the land";
 $customMetaImage = "http://suntownffb.us/images/football.ico"; // default
 
-$metaQuery = query("SELECT recap, metadata_image, created_at FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
+$metaQuery = query("SELECT recap, metadata_image, headline, hero_image, created_at FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
 $metaRow = fetch_array($metaQuery);
 $newsletterDate = null;
+$newsletterHeadline = null;
+$heroImage = null;
 if ($metaRow) {
     if (!empty($metaRow['recap'])) {
         $cleanRecap = strip_tags($metaRow['recap']);
@@ -78,6 +80,8 @@ if ($metaRow) {
         $newsletterDate = new DateTime($metaRow['created_at'], new DateTimeZone('UTC'));
         $newsletterDate->setTimezone(new DateTimeZone('America/Los_Angeles'));
     }
+    $newsletterHeadline = !empty($metaRow['headline']) ? $metaRow['headline'] : null;
+    $heroImage = !empty($metaRow['hero_image']) ? $metaRow['hero_image'] : null;
 }
 
 // Check for rosters with the selected year and week
@@ -158,7 +162,6 @@ $vDate = "(05/19/26)";
                 echo $dayNames[(int)$displayDate->format('w')] . ', ' . $monthNames[(int)$displayDate->format('n')-1] . ' ' . $displayDate->format('j') . ', ' . $displayDate->format('Y');
             ?>
         </span>
-        <span>Suntown Fantasy Football League &mdash; Since 2006</span>
     </div>
 
     <div class="masthead-main">
@@ -267,6 +270,37 @@ $vDate = "(05/19/26)";
      ============================================================ -->
 <div class="newspaper-page">
 
+    <?php if ($heroImage): ?>
+        <div class="hero-image-wrapper">
+            <img src="<?php echo htmlspecialchars($heroImage); ?>" alt="">
+        </div>
+    <?php endif; ?>
+    <?php if ($newsletterHeadline): ?>
+        <h1 class="newsletter-headline"><?php echo htmlspecialchars($newsletterHeadline); ?></h1>
+    <?php endif; ?>
+
+    <!-- RECAP (above matchups) -->
+    <?php if (!$contentAvailable): ?>
+        <div class="section-label"><span>Newsletter</span></div>
+        <div class="not-available">
+            The newsletter for Week <?php echo $selectedWeek; ?> of the <?php echo $selectedSeason; ?> season is not yet available.
+        </div>
+    <?php elseif ($selectedWeek == 1): ?>
+        <div class="section-label accent-label"><span><?php echo ($selectedSeason - 1); ?> Season Recap</span></div>
+        <div class="article-full">
+            <div class="article-headline"><?php echo ($selectedSeason - 1); ?> Season &mdash; Year in Review</div>
+            <div class="article-byline">By the Editorial Staff &middot; <?php echo $selectedSeason; ?></div>
+            <div class="article-body has-dropcap"><?php echo nl2br($recapContent); ?></div>
+        </div>
+    <?php else: ?>
+        <div class="section-label accent-label"><span>Week <?php echo ($selectedWeek - 1); ?> Recap</span></div>
+        <div class="article-full">
+            <div class="article-headline">Week <?php echo ($selectedWeek - 1); ?> &mdash; Recap</div>
+            <div class="article-byline">By the Editorial Staff &middot; <?php echo $selectedSeason; ?></div>
+            <div class="article-body has-dropcap"><?php echo nl2br($recapContent); ?></div>
+        </div>
+    <?php endif; ?>
+
     <!-- SCHEDULE -->
     <div class="section-label accent-label"><span>This Week&rsquo;s Matchups</span></div>
     <div class="schedule-section box-score-wrapper">
@@ -308,44 +342,23 @@ $vDate = "(05/19/26)";
         <?php endif; ?>
     </div>
 
-    <?php if (!$contentAvailable): ?>
-        <!-- Content Not Available -->
-        <div class="section-label"><span>Newsletter</span></div>
-        <div class="not-available">
-            The newsletter for Week <?php echo $selectedWeek; ?> of the <?php echo $selectedSeason; ?> season is not yet available.
-        </div>
-
-    <?php elseif ($selectedWeek == 1): ?>
-        <!-- Week 1: Year Recap + Season Preview -->
-        <div class="section-label accent-label"><span><?php echo ($selectedSeason - 1); ?> Season Recap &amp; <?php echo $selectedSeason; ?> Preview</span></div>
-        <div class="content-columns">
-            <div class="column-divider">
-                <div class="article-headline"><?php echo ($selectedSeason - 1); ?> Season &mdash; Year in Review</div>
-                <div class="article-byline">By the Editorial Staff &middot; <?php echo $selectedSeason; ?></div>
-                <div class="article-body has-dropcap"><?php echo nl2br($recapContent); ?></div>
-            </div>
-            <div class="preview-column">
+    <!-- PREVIEW (below matchups) -->
+    <?php if ($contentAvailable): ?>
+        <?php if ($selectedWeek == 1): ?>
+            <div class="section-label accent-label"><span><?php echo $selectedSeason; ?> Season Preview</span></div>
+            <div class="article-full">
                 <div class="article-headline">Week <?php echo $selectedWeek; ?> Preview</div>
-                <div class="article-byline">Looking Ahead &middot; <?php echo $selectedSeason; ?></div>
-                <div class="article-body"><?php echo nl2br($previewContent); ?></div>
+                <div class="article-byline">Looking Ahead</div>
+                <div class="article-body has-dropcap"><?php echo nl2br($previewContent); ?></div>
             </div>
-        </div>
-
-    <?php else: ?>
-        <!-- Week 2+: Week Recap + Preview -->
-        <div class="section-label accent-label"><span>Week <?php echo ($selectedWeek - 1); ?> Recap &amp; Week <?php echo $selectedWeek; ?> Preview</span></div>
-        <div class="content-columns">
-            <div class="column-divider">
-                <div class="article-headline">Week <?php echo ($selectedWeek - 1); ?> &mdash; Full Recap</div>
-                <div class="article-byline">By the Editorial Staff &middot; <?php echo $selectedSeason; ?></div>
-                <div class="article-body has-dropcap"><?php echo nl2br($recapContent); ?></div>
-            </div>
-            <div class="preview-column">
+        <?php else: ?>
+            <div class="section-label accent-label"><span>Week <?php echo $selectedWeek; ?> Preview</span></div>
+            <div class="article-full">
                 <div class="article-headline">Week <?php echo $selectedWeek; ?> Preview</div>
-                <div class="article-byline">What to Watch &middot; <?php echo $selectedSeason; ?></div>
-                <div class="article-body"><?php echo nl2br($previewContent); ?></div>
+                <div class="article-byline">What to Watch</div>
+                <div class="article-body has-dropcap"><?php echo nl2br($previewContent); ?></div>
             </div>
-        </div>
+        <?php endif; ?>
     <?php endif; ?>
 
     <?php if ($selectedWeek > 1 && $rosterAvailable): ?>

@@ -157,6 +157,17 @@ $( document ).ready( () => {
         });
     }
 
+    if ($('textarea#newsletter-notes').length) {
+        ClassicEditor.create( $( 'textarea#newsletter-notes' )[ 0 ], {
+            licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
+            plugins: plugins,
+            toolbar: toolbar
+        })
+        .catch( error => {
+            console.error( 'Error initializing CKEditor 5 for notes:', error );
+        });
+    }
+
     // Yahoo API functionality - Manager selection
     $('input[name="managers[]"][value="all"]').change(function() {
         if ($(this).is(':checked')) {

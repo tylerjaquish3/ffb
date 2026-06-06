@@ -43,7 +43,6 @@ All environments now use sqlite for the database.
 To get new data, use the admin page that will interact with the Yahoo API. 
 There is a laravel project inside the fun-facts folder so that jobs can be run. Here are the jobs:
 php artisan funFacts : update all of the manager fun facts. 
-php artisan importGames : convert pasted PFR table (storage/app/games/raw.txt) into storage/app/games/YYYY.csv
 php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + game_slot on rosters table
 
 
@@ -91,7 +90,7 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
     - need to update links to that page to just go to that folder rather than .php file
     - do this on a new branch in case it gets messy
 - make newsletter show random additional data so its not the same every week
-- newsletter doesnt do matchup stats based on that week (snapshot), it just grabs the latest
+- if newsletter has bullets, they need to be indented
 
 Notes:
 Moved to 18 week schedule in 2021

@@ -90,11 +90,13 @@ include 'sidebar.php';
                                         <th>Wins</th>
                                         <th>Losses</th>
                                         <th>Win %&#x200E;</th>
+                                        <th>Diff</th>
                                     </thead>
                                     <tbody>
                                         <?php
                                         $result = query(
-                                            "SELECT name, wins, losses, total, 100.0*wins/total AS win_pct
+                                            "SELECT name, wins, losses, total, 100.0*wins/total AS win_pct,
+                                                wins - losses AS diff
                                             FROM managers
                                             JOIN (
                                                 SELECT COUNT(manager1_id) AS wins, manager1_id FROM regular_season_matchups rsm
@@ -111,12 +113,17 @@ include 'sidebar.php';
                                                 GROUP BY manager1_id
                                             ) t ON t.manager1_id = managers.id"
                                         );
-                                        while ($row = fetch_array($result)) { ?>
+                                        while ($row = fetch_array($result)) {
+                                            $diff = (int)$row['diff'];
+                                            $diffColor = $diff > 0 ? '#2eb82e' : ($diff < 0 ? '#e05252' : 'inherit');
+                                            $diffLabel = $diff > 0 ? '+' . $diff : $diff;
+                                        ?>
                                             <tr>
                                                 <td><a href="profile.php?id=<?php echo $row['name'];?>"><?php echo $row['name']; ?></a></td>
                                                 <td><?php echo $row['wins']; ?></td>
                                                 <td><?php echo $row['losses']; ?></td>
                                                 <td><?php echo number_format($row['win_pct'], 1) . ' %'; ?></td>
+                                                <td data-sort="<?php echo $diff; ?>" style="color: <?php echo $diffColor; ?>; font-weight: 600"><?php echo $diffLabel; ?></td>
                                             </tr>
 
                                         <?php } ?>
@@ -290,6 +297,7 @@ include 'sidebar.php';
                 },
                 options: {
                     indexAxis: 'y',
+                    maintainAspectRatio: false,
                     scales: {
                         x: { stacked: true },
                         y: { stacked: true }

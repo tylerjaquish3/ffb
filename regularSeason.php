@@ -554,6 +554,7 @@ include 'sidebar.php';
                                 <thead>
                                     <th>Year</th>
                                     <th>Champion</th>
+                                    <th>Playoff Finish</th>
                                     <th>Record</th>
                                     <th>Points</th>
                                     <th>Runner Up</th>
@@ -565,6 +566,7 @@ include 'sidebar.php';
                                         <tr>
                                             <td><?php echo $winner['year']; ?></td>
                                             <td><?php echo $winner['champion']; ?></td>
+                                            <td><?php echo $winner['playoff_finish']; ?></td>
                                             <td><?php echo $winner['record']; ?></td>
                                             <td><?php echo $winner['points']; ?></td>
                                             <td><?php echo $winner['runner_up']; ?></td>
@@ -1462,6 +1464,7 @@ include 'sidebar.php';
                         tr.innerHTML = `
                             <td>${winner.year}</td>
                             <td>${winner.champion}</td>
+                            <td>${winner.playoff_finish}</td>
                             <td>${winner.record}</td>
                             <td>${pointsRounded}</td>
                             <td>${winner.runner_up}</td>

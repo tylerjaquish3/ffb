@@ -48,7 +48,7 @@ include 'sidebar.php';
                                             <td><?php echo $draft['round']; ?></td>
                                             <td><?php echo $draft['round_pick']; ?></td>
                                             <td><?php echo $draft['overall_pick']; ?></td>
-                                            <td><?php echo $draft['player']; ?></td>
+                                            <td><a href="/players.php?player=<?php echo urlencode($draft['player']); ?>"><?php echo $draft['player']; ?></a></td>
                                             <td><?php echo $draft['name']; ?></td>
                                             <td><?php echo $draft['position']; ?></td>
                                             <td><?php echo $draft['points'] ? round($draft['points'], 1) : 0; ?></td>

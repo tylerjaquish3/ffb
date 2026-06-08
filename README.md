@@ -52,12 +52,11 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
     - make sure it doesnt add duplicate rows, this happens for names with an apostrophe in the name
 
-- record for best free agent pick is not using player aliases to match players
 - records page card doesnt have rounded corners on right
+    - same with Draft Analysis tab on Current Season page
 
 # Ideas
 
-- Current season, worst draft picks remove players that got traded midseason
 - add trophy graphic on trophy page
 - add more fun facts
     - record against everyone
@@ -68,7 +67,6 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
     - matchup combined score high/low
     - highest/lowest avg margin
 
-- fun fact finder page
 - allow people add comments/smack talk to profile
 
 - Add league stats
@@ -86,9 +84,6 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 - page for random league facts
     - all Marvin's since 2009 have been Jrs
     - Baltimore has been owned the most but only by 7 managers
-- separate pages now into a folder with an index and include other page parts
-    - need to update links to that page to just go to that folder rather than .php file
-    - do this on a new branch in case it gets messy
 - make newsletter show random additional data so its not the same every week
 - if newsletter has bullets, they need to be indented
 

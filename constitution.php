@@ -203,7 +203,7 @@ while ($row = fetch_array($result)) {
                                 <strong>Vote on the following: </strong>
                                 <ol>
                                     <li>Add stat category for Pick 6s Thrown worth -4 points. Burrow had 3, 2 QBs had 2, and 20 QBs had 1.</li>
-                                    <li>Increase points for DEF turnovers &amp; sacks.
+                                    <li>Increase points for DEF turnovers
                                         <div class="table-responsive mt-2 mb-2">
                                             <table class="table table-sm table-bordered text-center small" style="max-width: 320px; line-height: 1.2;">
                                                 <thead class="thead-light">

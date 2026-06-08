@@ -6,7 +6,7 @@ include 'sidebar.php';
 
 ?>
 
-<div class="app-content content">
+<div class="app-content content container-fluid">
     <div class="content-wrapper">
 
         <div class="content-body">
@@ -470,12 +470,13 @@ include 'sidebar.php';
                 
                 <div class="row">
                     <div class="col-sm-12 col-md-6">
-                        <div class="card">
+                        <div class="card" style="overflow: hidden">
                             <div class="card-header">
                                 <h4 style="float: right">Worst Draft Picks</h4>
                             </div>
-                            <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="stripe nowrap row-border order-column full-width" id="datatable-worstDraft">
+                            <div class="card-body" style="background: #fff; direction: ltr; padding: 0">
+                                <div style="overflow-x: auto; padding: 0.5rem 0.75rem">
+                                <table class="stripe nowrap row-border order-column" id="datatable-worstDraft">
                                     <thead>
                                         <th>Manager</th>
                                         <th>Player</th>
@@ -501,6 +502,7 @@ include 'sidebar.php';
                                         <?php } ?>
                                     </tbody>
                                 </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -544,12 +546,13 @@ include 'sidebar.php';
 
                 <div class="row">
                     <div class="col-sm-12 col-lg-6">
-                        <div class="card">
+                        <div class="card" style="overflow: hidden">
                             <div class="card-header">
                                 <h4 style="float: right">Points From Draft</h4>
                             </div>
-                            <div class="card-body" style="background: #fff; direction: ltr">
-                                <table class="stripe nowrap row-border order-column full-width" id="datatable-drafted">
+                            <div class="card-body" style="background: #fff; direction: ltr; padding: 0">
+                                <div style="overflow-x: auto; padding: 0.5rem 0.75rem">
+                                <table class="stripe nowrap row-border order-column" id="datatable-drafted">
                                     <thead>
                                         <th>Manager</th>
                                         <th>All Drafted</th>
@@ -573,10 +576,11 @@ include 'sidebar.php';
                                         <?php } ?>
                                     </tbody>
                                 </table>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="col-sm-12 col-lg-6">
                         <div class="card">
                             <div class="card-header">
@@ -997,11 +1001,6 @@ include 'sidebar.php';
             searching: false,
             paging: false,
             info: false,
-            scrollX: "100%",
-            scrollCollapse: true,
-            fixedColumns:   {
-                left: 1
-            },
             order: [
                 [1, "desc"]
             ],
@@ -1054,11 +1053,6 @@ include 'sidebar.php';
         });
 
         $('#datatable-worstDraft').DataTable({
-            scrollX: "100%",
-            scrollCollapse: true,
-            fixedColumns:   {
-                leftColumns: 1
-            },
             searching: false,
             paging: false,
             info: false,
@@ -1358,20 +1352,35 @@ include 'sidebar.php';
 </script>
 
 <style>
-    /* Removed max-width constraint to allow tables to stretch */
-    #datatable-drafted_wrapper {
-        max-width: 800px;
+    /* Bootstrap theme zeroes card border-radius; restore right-side rounding */
+    #draft-analysis .card,
+    #player-stats .card,
+    #stats-against .card {
+        border-top-right-radius: 0.5rem !important;
+        border-bottom-right-radius: 0.5rem !important;
     }
+
+    /*
+     * Bootstrap rows use margin-right: -15px which extends the row exactly to the overflow-x: hidden
+     * clip boundary, leaving no gap for rounded right corners to show. Zeroing the right margin
+     * on inner rows gives columns 15px of breathing room on the right so the corner is visible.
+     */
+    #draft-analysis .row,
+    #player-stats .row,
+    #stats-against .row {
+        margin-right: 0;
+    }
+
     #datatable-optimal_wrapper {
         max-width: 1465px;
-        overflow-x: hidden; /* Prevent double scrollbars */
+        overflow-x: hidden;
     }
-    
+
     /* Fix for DataTables header alignment */
     #datatable-optimal_wrapper .dataTables_scroll {
         overflow: visible;
     }
-    
+
     /* Ensure charts fit properly within their containers */
     .chart-block canvas {
         max-width: 100% !important;

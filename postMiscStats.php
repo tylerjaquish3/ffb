@@ -1,15 +1,18 @@
 <!-- Average finish -->
-<table class="table table-responsive table-striped nowrap" id="datatable-misc20">
+<div style="overflow-x: auto">
+<table class="table table-striped nowrap" id="datatable-misc20">
     <thead>
         <th>Manager</th>
         <th>Average Finish</th>
-        <th>Trophies</th>
+        <th><i class="icon-trophy" style="color: gold;"></i></th>
+        <th><i class="icon-trophy" style="color: silver;"></i></th>
+        <th><i class="icon-trophy" style="color: #cd7f32;"></i></th>
     </thead>
     <tbody>
         <?php
         $result = query("SELECT managers.name, AVG(finish) as avg_finish,
-			SUM(CASE WHEN finish = 1 THEN 1 ELSE 0 END) as gold, 
-			SUM(CASE WHEN finish = 2 THEN 1 ELSE 0 END) as silver, 
+			SUM(CASE WHEN finish = 1 THEN 1 ELSE 0 END) as gold,
+			SUM(CASE WHEN finish = 2 THEN 1 ELSE 0 END) as silver,
 			SUM(CASE WHEN finish = 3 THEN 1 ELSE 0 END) as bronze
 			FROM finishes
 			JOIN managers ON managers.id = finishes.manager_id
@@ -18,35 +21,20 @@
             <tr>
                 <td><?php echo $row['name']; ?></td>
                 <td><?php echo number_format($row['avg_finish'], 2, '.', ','); ?></td>
-                <td data-sort="<?php echo $row['gold']; ?>"> 
-                    <?php 
-                        if ($row['gold'] > 0) {
-                            echo '<i class="icon-trophy" style="color: gold;"></i> x'.$row['gold'].'&nbsp;&nbsp;&nbsp;';
-                        } else {
-                            echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-                        }
-                        if ($row['silver'] > 0) {
-                            echo '<i class="icon-trophy" style="color: silver;"></i> x'.$row['silver'].'&nbsp;&nbsp;&nbsp;';
-                        } else {
-                            echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-                        }
-                        if ($row['bronze'] > 0) {
-                            echo '<i class="icon-trophy" style="color: #cd7f32;"></i> x'.$row['bronze'];
-                        } else {
-                            echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-                        }
-                    ?>
-                </td>
+                <td><?php echo $row['gold'] > 0 ? 'x'.$row['gold'] : ''; ?></td>
+                <td><?php echo $row['silver'] > 0 ? 'x'.$row['silver'] : ''; ?></td>
+                <td><?php echo $row['bronze'] > 0 ? 'x'.$row['bronze'] : ''; ?></td>
             </tr>
 
         <?php } ?>
     </tbody>
     <tfoot>
         <tr>
-            <td colspan=3>Average placing in league</td>
+            <td colspan=5>Average placing in league</td>
         </tr>
     </tfoot>
 </table>
+</div>
 <!-- First round byes -->
 <table class="table table-responsive table-striped nowrap" id="datatable-misc21" style="display:none;">
     <thead>

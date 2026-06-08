@@ -103,9 +103,9 @@ class UpdateFunFacts implements ShouldQueue
             $this->currentPostseasonStreak();
             // 58,59
             $this->postseasonWinPct();
-            // 81,82,84,85,86,87
+            // 81,83,84,85,86,87
             $this->currentSeasonPoints();
-            // 83,88
+            // 82,88
             $this->getOptimalLineupPoints();
             // 92,93
             $this->weeklyRanks();
@@ -258,9 +258,10 @@ class UpdateFunFacts implements ShouldQueue
      */
     private function insertFunFact(int $ffId, string $manId, string $value, array $notes, array $tops)
     {
-        // Get the current year and week from the job context
-        $year = $this->asOfYear ?? $this->currentSeason;
-        $week = $this->asOfWeek ?? $this->currentWeek;
+        // Skip if the leading value is 0 — no data yet (e.g. current-season facts before the season starts)
+        if (!isset($tops[0]) || round($tops[0]->{$value}, 2) == 0) {
+            return;
+        }
 
         // Get all record_log entries for this fun_fact_id for the latest week
         $latestLogs = RecordLog::where('fun_fact_id', $ffId)
@@ -282,29 +283,23 @@ class UpdateFunFacts implements ShouldQueue
             }
         }
 
-        // Helper to determine new_leader for a given manager
-        $determineNewLeader = function($currentTopManagers) use ($ffId) {
-            // Get previous leaders from manager_fun_facts table
-            $previousLeaders = ManagerFunFact::where('fun_fact_id', $ffId)
-                ->pluck('manager_id')
-                ->toArray();
-            // If there are no previous leaders, always new leader
-            if (empty($previousLeaders)) {
+        // Helper to determine new_leader for a given manager.
+        // Uses the new_leader flag already computed by UpdateWeeklyRecords in record_log,
+        // which correctly compares the latest week's leader against the prior week.
+        $determineNewLeader = function() use ($ffId, $latestYear, $latestWeek, $latestManagers) {
+            if (empty($latestManagers)) {
                 return 1;
             }
-            // Only mark as new leader if none of the previous leaders are in the current set
-            $currentSet = array_map('strval', (array)$currentTopManagers);
-            $previousSet = array_map('strval', (array)$previousLeaders);
-            $overlap = array_intersect($currentSet, $previousSet);
-            return empty($overlap) ? 1 : 0;
+            return RecordLog::where('fun_fact_id', $ffId)
+                ->where('year', $latestYear)
+                ->where('week', $latestWeek)
+                ->where('new_leader', 1)
+                ->exists() ? 1 : 0;
         };
 
         if (count($tops) > 1) {
             // Multiple managers are tied for the top spot
-            $currentTopManagers = array_map(function($top) use ($manId) {
-                return $top->{$manId};
-            }, $tops);
-            $isNewLeader = $determineNewLeader($currentTopManagers);
+            $isNewLeader = $determineNewLeader();
             foreach ($tops as $top) {
                 $top->new_leader = $isNewLeader;
             }
@@ -330,8 +325,7 @@ class UpdateFunFacts implements ShouldQueue
                 return;
             }
             $top = $tops[0];
-            $currentTopManagers = [$top->{$manId}];
-            $newLeader = $determineNewLeader($currentTopManagers);
+            $newLeader = $determineNewLeader();
 
     // dd('fun fact: '.$ffId.' new leader: '.$newLeader);
             // ...existing code...
@@ -1781,19 +1775,22 @@ class UpdateFunFacts implements ShouldQueue
     {
         echo 'Current Season Points'.PHP_EOL;
         
-        // Get current week from calculateLeaderForFunFact
-        $currentWeek = $this->currentWeek ?? PHP_INT_MAX; // Default to max if not set
-        
+        // Use the most recent year with actual roster data so off-season runs overwrite stale values.
+        // Playoff rosters are in a separate table, so rosters only contains regular season weeks.
+        $seasonToUse = $this->isHistoricalCalculation
+            ? ($this->asOfYear ?? $this->currentSeason)
+            : (Roster::max('year') ?? $this->currentSeason);
+
+        $currentWeek = $this->currentWeek ?? PHP_INT_MAX;
+
         // Most points in week
         $r = Roster::selectRaw('managers.id, week, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->where('roster_spot', '!=', 'BN')
-            ->where('year', $this->currentSeason)
-            ->when($currentWeek < PHP_INT_MAX, function($query) use ($currentWeek) {
-                return $query->where('week', '<=', $currentWeek);
-            })
+            ->where('year', $seasonToUse)
+            ->when($currentWeek < PHP_INT_MAX, fn($q) => $q->where('week', '<=', $currentWeek))
             ->orderBy('pts', 'desc')
-            ->groupBy('week','managers.id')
+            ->groupBy('week', 'managers.id')
             ->get();
 
         $tops = $this->checkMultiple($r, 'pts');
@@ -1803,25 +1800,21 @@ class UpdateFunFacts implements ShouldQueue
         $r = Roster::selectRaw('managers.id, week, sum(points) as pts')
             ->join('managers', 'managers.name', '=', 'rosters.manager')
             ->where('roster_spot', '!=', 'BN')
-            ->where('year', $this->currentSeason)
-            ->when($currentWeek < PHP_INT_MAX, function($query) use ($currentWeek) {
-                return $query->where('week', '<=', $currentWeek);
-            })
+            ->where('year', $seasonToUse)
+            ->when($currentWeek < PHP_INT_MAX, fn($q) => $q->where('week', '<=', $currentWeek))
             ->orderBy('pts', 'asc')
-            ->groupBy('week','managers.id')
+            ->groupBy('week', 'managers.id')
             ->get();
-        
+
         $tops = $this->checkMultiple($r, 'pts');
         $this->insertFunFact(83, 'id', 'pts', ['Wk','week'], $tops);
 
         // Win/loss margins
         $i = RegularSeasonMatchup::selectRaw('year, week_number, MAX(ABS(manager1_score - manager2_score)) as diff,
-            CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner, 
+            CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner,
             CASE WHEN manager1_score > manager2_score THEN manager2_id ELSE manager1_id END as loser')
-            ->where('year', $this->currentSeason)
-            ->when($currentWeek < PHP_INT_MAX, function($query) use ($currentWeek) {
-                return $query->where('week_number', '<=', $currentWeek);
-            })
+            ->where('year', $seasonToUse)
+            ->when($currentWeek < PHP_INT_MAX, fn($q) => $q->where('week_number', '<=', $currentWeek))
             ->groupBy('winner', 'loser', 'year', 'week_number')
             ->orderBy('diff', 'desc')
             ->limit(50)
@@ -1832,12 +1825,10 @@ class UpdateFunFacts implements ShouldQueue
         $this->insertFunFact(86, 'loser', 'diff', ['Wk','week_number','year'], $tops);
 
         $i = RegularSeasonMatchup::selectRaw('year, week_number, MAX(ABS(manager1_score - manager2_score)) as diff,
-            CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner, 
+            CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END as winner,
             CASE WHEN manager1_score > manager2_score THEN manager2_id ELSE manager1_id END as loser')
-            ->where('year', $this->currentSeason)
-            ->when($currentWeek < PHP_INT_MAX, function($query) use ($currentWeek) {
-                return $query->where('week_number', '<=', $currentWeek);
-            })
+            ->where('year', $seasonToUse)
+            ->when($currentWeek < PHP_INT_MAX, fn($q) => $q->where('week_number', '<=', $currentWeek))
             ->groupBy('winner', 'loser', 'year', 'week_number')
             ->orderBy('diff', 'asc')
             ->limit(50)
@@ -1854,22 +1845,28 @@ class UpdateFunFacts implements ShouldQueue
     private function getOptimalLineupPoints()
     {
         echo 'Optimal Lineup Points'.PHP_EOL;
+        $seasonToUse = $this->isHistoricalCalculation
+            ? ($this->asOfYear ?? $this->currentSeason)
+            : (Roster::max('year') ?? $this->currentSeason);
+
         $response = [];
 
-        $r = Roster::selectRaw('distinct week')->where('year', $this->currentSeason)->get();
-        
+        $r = Roster::selectRaw('distinct week')->where('year', $seasonToUse)->get();
+
         foreach ($r as $week) {
             $week = $week->week;
 
-            $r2 = Roster::selectRaw('distinct manager')->where('week', $week)->where('year', $this->currentSeason)->get();
+            $r2 = Roster::selectRaw('distinct manager')->where('week', $week)->where('year', $seasonToUse)->get();
             foreach ($r2 as $manager) {
-            
+
                 $manager = $manager->manager;
 
                 $points = 0;
                 $roster = [];
 
-                $r3 = Roster::where('manager', $manager)->where('week', $week)->where('year', $this->currentSeason)->get();
+                $r3 = Roster::where('manager', $manager)->where('week', $week)->where('year', $seasonToUse)
+                    ->where('roster_spot', '!=', 'IR')
+                    ->get();
                 foreach ($r3 as $row) {
 
                     $roster[] = [
@@ -2492,16 +2489,16 @@ class UpdateFunFacts implements ShouldQueue
 
             $best = (object) $yearResponse[0];
             $this->insertFunFact(107, 'manager_id', 'points', ['player'], [$best]);
+
+            usort($yearResponse, function($a, $b) {
+                return $a['score'] <=> $b['score'];
+            });
+
+            $worst = (object) $yearResponse[0];
+            $this->insertFunFact(97, 'manager_id', 'points', ['player'], [$worst]);
         } else {
             echo "No responses found for current year draft picks".PHP_EOL;
         }
-
-        usort($yearResponse, function($a, $b) {
-            return $a['score'] <=> $b['score'];
-        });
-        
-        $worst = (object) $yearResponse[0];
-        $this->insertFunFact(97, 'manager_id', 'points', ['player'], [$worst]);
     }
 
     /**
@@ -2522,7 +2519,7 @@ class UpdateFunFacts implements ShouldQueue
             $count++;
         }
 
-        return $total / $count;
+        return $count > 0 ? $total / $count : 0;
     }
 
     /**
@@ -2536,7 +2533,7 @@ class UpdateFunFacts implements ShouldQueue
             ->groupBy('position')
             ->first();
 
-        return $result->overall_pick;
+        return $result ? $result->overall_pick : 0;
     }
 
     // 129-134
@@ -2614,81 +2611,44 @@ class UpdateFunFacts implements ShouldQueue
     public function comeback()
     {
         echo 'Comeback'.PHP_EOL;
-        // Get points before MNF with historical filtering
-        $query = Roster::selectRaw('rosters.year, week, manager, managers.id, sum(points) as pts')
-            ->join('managers', 'managers.name', '=', 'rosters.manager')
-            ->whereNotIn('roster_spot', ['BN', 'IR'])
-            ->where('game_slot', '<', 6)
-            ->groupBy(['rosters.year', 'week', 'manager']);
-        
-        // Apply historical filter if in historical calculation mode
-        if ($this->isHistoricalCalculation) {
-            $this->applyHistoricalFilter($query, 'rosters.year', 'rosters.week');
-        }
-        $r = $query->get();
 
-        // Get matchups with historical filtering
-        $matchupQuery = RegularSeasonMatchup::query();
-        if ($this->isHistoricalCalculation) {
-            $this->applyHistoricalFilter($matchupQuery, 'year', 'week_number');
-        }
-        $allMatchups = $matchupQuery->get();
-        
-        // if ($this->isHistoricalCalculation) {
-        //     echo "DEBUG: Found " . $r->count() . " roster records and " . $allMatchups->count() . " matchup records for historical calculation\n";
-        // }
+        // Single query: join pre-MNF points for both managers against the matchup table,
+        // filter to games where manager1 won but was trailing before MNF, pick the largest deficit.
+        // When isHistoricalCalculation is true, the table-swap mechanism already limits the
+        // rosters/matchup tables to the target year/week, so no additional filter is needed.
+        $preMnf = '(
+            SELECT ro.year, ro.week, mn.id, SUM(ro.points) AS pts
+            FROM rosters ro
+            JOIN managers mn ON mn.name = ro.manager
+            WHERE ro.roster_spot NOT IN (\'BN\', \'IR\')
+              AND ro.game_slot < 6
+            GROUP BY ro.year, ro.week, ro.manager
+        )';
 
-        $response = [];
-        foreach ($r as $row) {
-            // Figure out who the manager played that week
-            $opp = $allMatchups->where('year', $row->year)
-                ->where('week_number', $row->week)
-                ->where('manager1_id', $row->id)
-                ->first();
+        $result = DB::table('regular_season_matchups AS m')
+            ->select([
+                'm.manager1_id AS manager',
+                'm.year',
+                'm.week_number AS week',
+                DB::raw('ABS(r1.pts - r2.pts) AS diff'),
+            ])
+            ->join(DB::raw("{$preMnf} r1"), function ($join) {
+                $join->on('r1.year', '=', 'm.year')
+                     ->on('r1.week', '=', 'm.week_number')
+                     ->on('r1.id',   '=', 'm.manager1_id');
+            })
+            ->join(DB::raw("{$preMnf} r2"), function ($join) {
+                $join->on('r2.year', '=', 'm.year')
+                     ->on('r2.week', '=', 'm.week_number')
+                     ->on('r2.id',   '=', 'm.manager2_id');
+            })
+            ->whereColumn('m.winning_manager_id', 'm.manager1_id')
+            ->whereRaw('r1.pts < r2.pts')
+            ->orderByDesc('diff')
+            ->first();
 
-            // if opponent won (no comeback), move on
-            if ($opp->winning_manager_id == $opp->manager2_id) {
-                continue;
-            }
-
-            // Find points before MNF for that manager in the same week
-            $oppPoints = $r->where('year', $row->year)
-                ->where('week', $row->week)
-                ->where('id', $opp->manager2_id)
-                ->first()->pts;
-
-            // If manager points was higher than opp points (they were already leading), move on
-            if ($row->pts > $oppPoints) {
-                continue;
-            }
-
-            // Get diff between the two
-            $diff = $row->pts - $oppPoints;
-            $response[] = (object)[
-                'manager' => $row->id,
-                'week' => $row->week,
-                'year' => $row->year,
-                'diff' => abs($diff)
-            ];
-            
-            // if ($this->isHistoricalCalculation) {
-            //     echo "DEBUG: Found comeback - Manager {$row->id} in {$row->year} Week {$row->week} with diff {$diff}\n";
-            // }
-        }
-
-        // sort responses by comeback
-        usort($response, function($a, $b) {
-            return $b->diff <=> $a->diff;
-        });
-
-        // Check if there are any comebacks before trying to access the first element
-        if (!empty($response)) {
-            $best = (object) $response[0];
-            $this->insertFunFact(135, 'manager', 'diff', ['Wk', 'week', 'year'], [$best]);
-            
-            // if ($this->isHistoricalCalculation) {
-            //     echo "DEBUG: Best comeback - Manager {$best->manager} in {$best->year} Week {$best->week} with diff {$best->diff}\n";
-            // }
+        if ($result) {
+            $this->insertFunFact(135, 'manager', 'diff', ['Wk', 'week', 'year'], [$result]);
         } else {
             echo "No comebacks found for the current period".PHP_EOL;
         }
@@ -2711,21 +2671,12 @@ class UpdateFunFacts implements ShouldQueue
         $r = $query->get();
 
         $response = [];
-        // Check if that player was drafted
+        // Check if that player was drafted (including alias name variations)
         foreach ($r as $row) {
-            $draftQuery = Draft::where('player', 'LIKE', $row->player.'%')
-                ->where('year', $row->year);
-            
-            // Apply historical filter if in historical calculation mode
-            if ($this->isHistoricalCalculation) {
-                $this->applyHistoricalFilter($draftQuery, 'year');
-            }
-            $drafted = $draftQuery->first();
-
-            if ($drafted) {
+            if ($this->wasPlayerDrafted($row->player, $row->year)) {
                 continue;
             }
-            $response[] = $row; 
+            $response[] = $row;
         }
 
         if (!empty($response)) {
@@ -2735,26 +2686,23 @@ class UpdateFunFacts implements ShouldQueue
             echo "No free agents found for any season".PHP_EOL;
         }
 
+        // Use the most recent year with actual roster data rather than the calendar year,
+        // so the current-season fact stays accurate during the off-season.
+        $latestRosterYear = $this->isHistoricalCalculation
+            ? ($this->asOfYear ?? $this->currentSeason)
+            : (Roster::max('year') ?? $this->currentSeason);
+
         $response = [];
-        // Check if that player was drafted
+        // Check if that player was drafted (including alias name variations)
         foreach ($r as $row) {
-            if ($row->year != $this->currentSeason) {
+            if ($row->year != $latestRosterYear) {
                 continue;
             }
 
-            $draftQuery = Draft::where('player', 'LIKE', $row->player.'%')
-                ->where('year', $row->year);
-                
-            // Apply historical filter if in historical calculation mode
-            if ($this->isHistoricalCalculation) {
-                $this->applyHistoricalFilter($draftQuery, 'year');
-            }
-            $drafted = $draftQuery->first();
-
-            if ($drafted) {
+            if ($this->wasPlayerDrafted($row->player, $row->year)) {
                 continue;
             }
-            $response[] = $row; 
+            $response[] = $row;
         }
 
         if (!empty($response)) {
@@ -2763,6 +2711,35 @@ class UpdateFunFacts implements ShouldQueue
         } else {
             echo "No free agents found for current season".PHP_EOL;
         }
+    }
+
+    private function wasPlayerDrafted(string $playerName, int $year): bool
+    {
+        // Direct / prefix match
+        if (Draft::where('year', $year)->where('player', 'LIKE', $playerName . '%')->exists()) {
+            return true;
+        }
+
+        // Look up all name variations via player_aliases
+        $alias = DB::table('player_aliases')
+            ->where('player', $playerName)
+            ->orWhere('alias_1', $playerName)
+            ->orWhere('alias_2', $playerName)
+            ->orWhere('alias_3', $playerName)
+            ->first();
+
+        if (!$alias) {
+            return false;
+        }
+
+        $names = array_values(array_filter([
+            $alias->player,
+            $alias->alias_1,
+            $alias->alias_2,
+            $alias->alias_3,
+        ]));
+
+        return Draft::where('year', $year)->whereIn('player', $names)->exists();
     }
 
     public function pointsInWinLoss()
@@ -2873,28 +2850,115 @@ class UpdateFunFacts implements ShouldQueue
     public function weeklyPositionPlayers()
     {
         echo 'Weekly Position Players'.PHP_EOL;
-        
-        // Process each position to find top performers by position per week
+
         $positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF', 'D', 'DL', 'DB', 'LB'];
-        
-        // ALL SEASONS COMBINED - Fun fact ID 144
-        $this->trackTopPerformanceByPosition($positions, null, 144);
-        
-        // CURRENT SEASON ONLY - Fun fact ID 142
-        $this->trackTopPerformanceByPosition($positions, $this->currentSeason, 142);
-        
-        // BEST SEASON for each manager - Fun fact ID 143
-        $this->trackBestSeasonByPosition($positions, 143);
+        $posIn     = "'" . implode("','", $positions) . "'";
+        $baseWhere = "position IN ($posIn) AND roster_spot NOT IN ('BN', 'IR')";
+
+        // Historical filter matches applyHistoricalFilter() logic; tables are already
+        // swapped by UpdateWeeklyRecords, so this is a safety layer only.
+        $histFilter = '';
+        if ($this->isHistoricalCalculation && $this->asOfYear !== null) {
+            $histFilter = $this->asOfWeek !== null
+                ? " AND (year < {$this->asOfYear} OR (year = {$this->asOfYear} AND week <= {$this->asOfWeek}))"
+                : " AND year <= {$this->asOfYear}";
+        }
+
+        // Single query for name→id map, reused for all three facts
+        $nameToId = Manager::pluck('id', 'name')->toArray();
+
+        // --- Fact 144: All-time ---
+        $rows = DB::select("
+            WITH MaxPoints AS (
+                SELECT year, position, week, MAX(points) AS max_points
+                FROM rosters
+                WHERE $baseWhere $histFilter
+                GROUP BY year, position, week
+            )
+            SELECT r.manager, COUNT(*) AS count
+            FROM rosters r
+            JOIN MaxPoints mp
+              ON r.year = mp.year AND r.position = mp.position
+             AND r.week = mp.week AND r.points = mp.max_points
+            WHERE r.$baseWhere $histFilter
+            GROUP BY r.manager
+        ");
+        $tops = $this->buildPosTops($rows, $nameToId);
+        $this->insertFunFact(144, 'manager_id', 'count', [], $this->checkMultiple(collect($tops), 'count'));
+
+        // --- Fact 142: Current season ---
+        $season = $this->isHistoricalCalculation
+            ? ($this->asOfYear ?? $this->currentSeason)
+            : (Roster::max('year') ?? $this->currentSeason);
+        $seasonFilter = "AND year = $season";
+        $weekCap = ($this->currentWeek !== null && $this->currentWeek < PHP_INT_MAX)
+            ? "AND week <= {$this->currentWeek}" : '';
+
+        $rows = DB::select("
+            WITH MaxPoints AS (
+                SELECT position, week, MAX(points) AS max_points
+                FROM rosters
+                WHERE $baseWhere $seasonFilter $weekCap
+                GROUP BY position, week
+            )
+            SELECT r.manager, COUNT(*) AS count
+            FROM rosters r
+            JOIN MaxPoints mp
+              ON r.position = mp.position AND r.week = mp.week AND r.points = mp.max_points
+            WHERE r.$baseWhere $seasonFilter $weekCap
+            GROUP BY r.manager
+        ");
+        $tops = $this->buildPosTops($rows, $nameToId);
+        $this->insertFunFact(142, 'manager_id', 'count', [], $this->checkMultiple(collect($tops), 'count'));
+
+        // --- Fact 143: Best single season per manager ---
+        // SeasonCounts tallies each manager's #1-ranked weeks per season, then
+        // BestSeasons picks each manager's peak season so we can surface the year.
+        $rows = DB::select("
+            WITH MaxPoints AS (
+                SELECT year, position, week, MAX(points) AS max_points
+                FROM rosters
+                WHERE $baseWhere $histFilter
+                GROUP BY year, position, week
+            ),
+            SeasonCounts AS (
+                SELECT r.year, r.manager, COUNT(*) AS season_count
+                FROM rosters r
+                JOIN MaxPoints mp
+                  ON r.year = mp.year AND r.position = mp.position
+                 AND r.week = mp.week AND r.points = mp.max_points
+                WHERE r.$baseWhere $histFilter
+                GROUP BY r.year, r.manager
+            ),
+            BestSeasons AS (
+                SELECT manager, MAX(season_count) AS best_count
+                FROM SeasonCounts
+                GROUP BY manager
+            )
+            SELECT sc.manager, sc.season_count AS count, sc.year
+            FROM SeasonCounts sc
+            JOIN BestSeasons bs ON sc.manager = bs.manager AND sc.season_count = bs.best_count
+        ");
+        $tops = $this->buildPosTops($rows, $nameToId, includeYear: true);
+        $this->insertFunFact(143, 'manager_id', 'count', ['year'], $this->checkMultiple(collect($tops), 'count'));
+    }
+
+    private function buildPosTops(array $rows, array $nameToId, bool $includeYear = false): array
+    {
+        $tops = [];
+        foreach ($rows as $row) {
+            $managerId = $nameToId[$row->manager] ?? null;
+            if ($managerId === null) continue;
+            $item = (object)['manager_id' => $managerId, 'count' => (int)$row->count];
+            if ($includeYear) {
+                $item->year = $row->year;
+            }
+            $tops[] = $item;
+        }
+        usort($tops, fn($a, $b) => $b->count <=> $a->count);
+        return $tops;
     }
     
-    /**
-     * Helper function to track top performances by position
-     * Uses a more efficient GROUP BY query to find top performers for all positions at once
-     * 
-     * @param array $positions Array of positions to track
-     * @param int|null $year Specific year to track (null for all years)
-     * @param int $funFactId The fun fact ID to store results in
-     */
     private function trackTopPerformanceByPosition(array $positions, ?int $year, int $funFactId)
     {
         // Initialize counts for each manager

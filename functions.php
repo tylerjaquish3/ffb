@@ -1091,20 +1091,30 @@ function getChampions()
         }
         
         // Get top waiver/free agent pickup (highest scoring non-drafted player)
-        $topAddResult = query("SELECT r.player, SUM(r.points) as total_points 
-            FROM rosters r 
-            WHERE r.year = $year AND r.manager = '$name' 
+        $topAddResult = query("SELECT r.player, SUM(r.points) as total_points
+            FROM rosters r
+            WHERE r.year = $year AND r.manager = '$name'
             AND r.player NOT IN (
-                SELECT DISTINCT COALESCE(pa.player, d.player) 
-                FROM draft d 
-                LEFT JOIN player_aliases pa ON d.player = pa.player 
-                    OR d.player = pa.alias_1 
-                    OR d.player = pa.alias_2 
-                    OR d.player = pa.alias_3
+                SELECT d.player FROM draft d WHERE d.year = $year
+                UNION
+                SELECT pa.player
+                FROM draft d JOIN player_aliases pa ON d.player = pa.player OR d.player = pa.alias_1 OR d.player = pa.alias_2 OR d.player = pa.alias_3
                 WHERE d.year = $year
+                UNION
+                SELECT pa.alias_1
+                FROM draft d JOIN player_aliases pa ON d.player = pa.player OR d.player = pa.alias_1 OR d.player = pa.alias_2 OR d.player = pa.alias_3
+                WHERE d.year = $year AND pa.alias_1 IS NOT NULL
+                UNION
+                SELECT pa.alias_2
+                FROM draft d JOIN player_aliases pa ON d.player = pa.player OR d.player = pa.alias_1 OR d.player = pa.alias_2 OR d.player = pa.alias_3
+                WHERE d.year = $year AND pa.alias_2 IS NOT NULL
+                UNION
+                SELECT pa.alias_3
+                FROM draft d JOIN player_aliases pa ON d.player = pa.player OR d.player = pa.alias_1 OR d.player = pa.alias_2 OR d.player = pa.alias_3
+                WHERE d.year = $year AND pa.alias_3 IS NOT NULL
             )
-            GROUP BY r.player 
-            ORDER BY total_points DESC 
+            GROUP BY r.player
+            ORDER BY total_points DESC
             LIMIT 1");
         if ($topAddRow = fetch_array($topAddResult)) {
             $champion['top_add'] = $topAddRow['player'] . ' (' . round($topAddRow['total_points'], 1) . ' pts)';
@@ -1154,12 +1164,30 @@ function getDraftResults()
 {
     $results = [];
 
-    $result = query("SELECT draft.year, round, round_pick, overall_pick, position, draft.player, name, points 
+    $result = query("SELECT draft.year, round, round_pick, overall_pick, position, draft.player, name, r_agg.points
         FROM draft
         JOIN managers m ON m.id = draft.manager_id
-        LEFT JOIN (SELECT sum(points) as points, YEAR, player
-            FROM rosters r GROUP BY r.year, r.player) AS rosters 
-        ON draft.player = rosters.player and draft.year = rosters.year");
+        LEFT JOIN (
+            SELECT year, draft_name, sum(points) as points FROM (
+                SELECT year, player as draft_name, sum(points) as points FROM rosters GROUP BY year, player
+                UNION ALL
+                SELECT r.year, pa.player as draft_name, sum(r.points) as points
+                FROM rosters r JOIN player_aliases pa ON r.player = pa.alias_1 OR r.player = pa.alias_2 OR r.player = pa.alias_3
+                GROUP BY r.year, pa.player
+                UNION ALL
+                SELECT r.year, pa.alias_1 as draft_name, sum(r.points) as points
+                FROM rosters r JOIN player_aliases pa ON r.player = pa.player WHERE pa.alias_1 IS NOT NULL
+                GROUP BY r.year, pa.alias_1
+                UNION ALL
+                SELECT r.year, pa.alias_2 as draft_name, sum(r.points) as points
+                FROM rosters r JOIN player_aliases pa ON r.player = pa.player WHERE pa.alias_2 IS NOT NULL
+                GROUP BY r.year, pa.alias_2
+                UNION ALL
+                SELECT r.year, pa.alias_3 as draft_name, sum(r.points) as points
+                FROM rosters r JOIN player_aliases pa ON r.player = pa.player WHERE pa.alias_3 IS NOT NULL
+                GROUP BY r.year, pa.alias_3
+            ) GROUP BY year, draft_name
+        ) AS r_agg ON r_agg.draft_name = draft.player AND r_agg.year = draft.year");
     while ($row = fetch_array($result)) {
         $results[] = $row;
     }
@@ -1945,15 +1973,21 @@ function getWorstDraftPicks()
             OR r.player = pa2.alias_2 
             OR r.player = pa2.alias_3
         WHERE r.year = $year
-            AND (r.player = d.player OR 
-                 r.player = pa1.player OR 
-                 r.player = pa1.alias_1 OR 
-                 r.player = pa1.alias_2 OR 
+            AND (r.player = d.player OR
+                 r.player = pa1.player OR
+                 r.player = pa1.alias_1 OR
+                 r.player = pa1.alias_2 OR
                  r.player = pa1.alias_3 OR
-                 d.player = pa2.player OR 
-                 d.player = pa2.alias_1 OR 
-                 d.player = pa2.alias_2 OR 
+                 d.player = pa2.player OR
+                 d.player = pa2.alias_1 OR
+                 d.player = pa2.alias_2 OR
                  d.player = pa2.alias_3)
+            AND NOT EXISTS (
+                SELECT 1 FROM trades t
+                WHERE t.year = $year
+                AND t.manager_from_id = m.id
+                AND t.player = d.player
+            )
         GROUP BY r.manager, d.overall_pick, COALESCE(pa1.player, pa2.player, d.player), d.position";
 
     $result = query($sql);
@@ -1998,7 +2032,7 @@ function getWorstDraftPicks()
         $row['score'] = $row['points_diff'] + $row['pick_diff'];
         $response[] = $row;
     }
-    
+
     usort($response, function($a, $b) {
         return $a['score'] <=> $b['score'];
     });
@@ -3154,12 +3188,35 @@ function getRegularSeasonWinners()
         
         // Make sure we have at least 2 managers for each year
         if (count($standings) >= 2) {
+            $championName = $standings[0]['name'];
+            $finishResult = query("SELECT f.finish FROM finishes f
+                JOIN managers m ON m.id = f.manager_id
+                WHERE m.name = '$championName' AND f.year = $year LIMIT 1");
+            $playoffFinish = '';
+            if ($finishRow = fetch_array($finishResult)) {
+                $n = (int)$finishRow['finish'];
+                $mod100 = $n % 100;
+                $mod10 = $n % 10;
+                if ($mod100 >= 11 && $mod100 <= 13) {
+                    $suffix = 'th';
+                } elseif ($mod10 === 1) {
+                    $suffix = 'st';
+                } elseif ($mod10 === 2) {
+                    $suffix = 'nd';
+                } elseif ($mod10 === 3) {
+                    $suffix = 'rd';
+                } else {
+                    $suffix = 'th';
+                }
+                $playoffFinish = $n . $suffix;
+            }
             $winners[] = [
                 'year' => $year,
-                'champion' => $standings[0]['name'],
+                'champion' => $championName,
                 'record' => $standings[0]['wins'] . '-' . $standings[0]['losses'],
                 'points' => $standings[0]['points'],
-                'runner_up' => $standings[1]['name']
+                'runner_up' => $standings[1]['name'],
+                'playoff_finish' => $playoffFinish
             ];
         }
     }

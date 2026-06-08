@@ -370,10 +370,25 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'player-info') {
     $player = str_replace("'", "''", $_GET['player']);
     $details = [];
 
+    // Collect all name forms (canonical + aliases) so alias players are found in rosters
+    $nameFormsResult = query("SELECT player, alias_1, alias_2, alias_3 FROM player_aliases
+        WHERE player = '$player' OR alias_1 = '$player' OR alias_2 = '$player' OR alias_3 = '$player'
+        LIMIT 1");
+    $nameForms = ["'$player'"];
+    if ($aliasRow = fetch_array($nameFormsResult)) {
+        foreach (['player', 'alias_1', 'alias_2', 'alias_3'] as $col) {
+            if (!empty($aliasRow[$col]) && $aliasRow[$col] !== str_replace("''", "'", $player)) {
+                $escaped = str_replace("'", "''", $aliasRow[$col]);
+                $nameForms[] = "'$escaped'";
+            }
+        }
+    }
+    $nameIn = implode(',', array_unique($nameForms));
+
     $result = query("SELECT year, manager, player, team, COUNT(week) as weeks, SUM(points) as points
-        FROM rosters 
+        FROM rosters
         JOIN managers ON rosters.manager = managers.name
-        WHERE player = '$player'
+        WHERE player IN ($nameIn)
         GROUP BY year, manager, player, team
         ORDER BY year DESC");
     while ($row = fetch_array($result)) {

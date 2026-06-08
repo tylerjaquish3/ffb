@@ -7,11 +7,6 @@ include 'sidebar.php';
 $type = 'all';
 if (isset($_GET['id'])) {
     $type = $_GET['id'];
-} 
-if (isset($_GET['new_leader'])) {
-    $new_leader = $_GET['new_leader'];
-} else {
-    $new_leader = 0;
 }
 ?>
 
@@ -43,18 +38,12 @@ if (isset($_GET['new_leader'])) {
                                     <select class="form-control" id="manager-select">
                                         <option value="all">All Managers</option>
                                         <?php
-                                        $mgr_result = query("SELECT name FROM managers WHERE id BETWEEN 1 AND 10 ORDER BY id");
+                                        $mgr_result = query("SELECT name FROM managers WHERE id BETWEEN 1 AND 10 ORDER BY name");
                                         while ($mgr_row = fetch_array($mgr_result)) {
                                             echo '<option value="' . htmlspecialchars($mgr_row['name']) . '">' . htmlspecialchars($mgr_row['name']) . '</option>';
                                         }
                                         ?>
                                     </select>
-                                </div>
-                                <div class="form-group">
-                                    <div class="form-check">
-                                        <input type="checkbox" id="new_leader" <?php echo $new_leader == 1 ? 'checked' : '' ?>>
-                                        <label class="form-check-label" for="new_leader">New Leader Only</label>
-                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="form-check">
@@ -77,79 +66,74 @@ if (isset($_GET['new_leader'])) {
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr;">
                             <?php
-                            // Collect awards grouped by manager
+                            // Collect awards grouped by manager (alphabetical order)
                             $managers_awards = [];
-                            
-                            for ($x = 1; $x < 11; $x++) {
-                                $manager_result = query("SELECT * FROM managers WHERE id = $x");
-                                while ($manager_row = fetch_array($manager_result)) {
-                                    $manager_name = $manager_row['name'];
-                                    $managers_awards[$manager_name] = [];
-                                    
+
+                            $all_managers_result = query("SELECT * FROM managers WHERE id BETWEEN 1 AND 10 ORDER BY name");
+                            while ($manager_row = fetch_array($all_managers_result)) {
+                                $x = $manager_row['id'];
+                                $manager_name = $manager_row['name'];
+                                $managers_awards[$manager_name] = [];
+
                                     // Get positive awards
                                     $query = "SELECT * FROM manager_fun_facts mff
                                         JOIN fun_facts ff ON mff.fun_fact_id = ff.id
                                         JOIN managers ON managers.id = mff.manager_id
                                         WHERE is_positive = 1 AND manager_id = $x";
 
-                                    if ($new_leader) {
-                                        $query .= " AND new_leader = 1";
-                                    }
                                     if ($type != 'all') {
                                         $query .= " AND type = '$type'";
                                     }
-                                    
+
                                     $query .= " ORDER BY ff.sort_order";
-                                    
+
                                     $result = query($query);
                                     while ($row = fetch_array($result)) {
                                         $value = $row['value'];
-                                        if (isfloat($row['value']) && isDecimal($row['value'])) {
-                                            $value = number_format($row['value'], 2, '.', ',');
+                                        if (is_numeric($row['value'])) {
+                                            $value = isDecimal($row['value'])
+                                                ? number_format($row['value'], 2, '.', ',')
+                                                : number_format($row['value'], 0, '.', ',');
                                         }
-                                        
+
                                         $managers_awards[$manager_name][] = [
                                             'fact' => $row['fact'],
                                             'value' => $value,
                                             'note' => $row['note'],
-                                            'new_leader' => $row['new_leader'],
                                             'is_positive' => true
                                         ];
                                     }
-                                    
+
                                     // Get negative awards
                                     $query = "SELECT * FROM manager_fun_facts mff
                                         JOIN fun_facts ff ON mff.fun_fact_id = ff.id
                                         JOIN managers ON managers.id = mff.manager_id
                                         WHERE is_positive = 0 AND manager_id = $x";
-                                        
-                                    if ($new_leader) {
-                                        $query .= " AND new_leader = 1";
-                                    }
+
                                     if ($type != 'all') {
                                         $query .= " AND type = '$type'";
                                     }
-                                    
+
                                     $query .= " ORDER BY ff.sort_order";
-                                    
+
                                     $result = query($query);
-                                    while ($row = fetch_array($result)) { 
+                                    while ($row = fetch_array($result)) {
                                         $value = $row['value'];
-                                        if (isfloat($row['value']) && isDecimal($row['value'])) {
-                                            $value = number_format($row['value'], 2, '.', ',');
+                                        if (is_numeric($row['value'])) {
+                                            $value = isDecimal($row['value'])
+                                                ? number_format($row['value'], 2, '.', ',')
+                                                : number_format($row['value'], 0, '.', ',');
                                         }
-                                        
+
                                         $managers_awards[$manager_name][] = [
                                             'fact' => $row['fact'],
                                             'value' => $value,
                                             'note' => $row['note'],
-                                            'new_leader' => $row['new_leader'],
                                             'is_positive' => false
                                         ];
                                     }
-                                }
                             }
-                            
+
                             // Display awards grouped by manager
                             foreach ($managers_awards as $manager_name => $awards) {
                                 if (!empty($awards)) {
@@ -158,18 +142,17 @@ if (isset($_GET['new_leader'])) {
                                     echo '<h3><a href="profile.php?id=' . urlencode($manager_name) . '">' . htmlspecialchars($manager_name) . '</a></h3>';
                                     echo '<div class="award-count">' . count($awards) . ' award' . (count($awards) != 1 ? 's' : '') . '</div>';
                                     echo '</div>';
-                                    
+
                                     echo '<div class="awards-grid">';
                                     foreach ($awards as $award) {
                                         $award_class = $award['is_positive'] ? 'award-badge positive' : 'award-badge negative';
-                                        $new_leader_icon = $award['new_leader'] ? '<i class="icon-warning award-new-icon" title="New Leader"></i>' : '';
                                         $is_positive_attr = $award['is_positive'] ? '1' : '0';
 
                                         echo '<div class="' . $award_class . '" data-positive="' . $is_positive_attr . '">';
                                         echo '<div class="award-header-badge">';
                                         echo '</div>';
                                         echo '<div class="award-title">' . htmlspecialchars($award['fact']) . '</div>';
-                                        echo '<div class="award-value">' . htmlspecialchars($award['value']) . ' ' . $new_leader_icon . '</div>';
+                                        echo '<div class="award-value">' . htmlspecialchars($award['value']) . '</div>';
                                         if (!empty($award['note'])) {
                                             echo '<div class="award-note">' . htmlspecialchars($award['note']) . '</div>';
                                         }
@@ -195,13 +178,7 @@ if (isset($_GET['new_leader'])) {
     let baseUrl = "<?php echo $BASE_URL; ?>";
 
     $('#type-select').change(function() {
-        newLeader = $('#new_leader').is(':checked') ? 1 : 0;
-        window.location = baseUrl+'awards.php?id='+$('#type-select').val()+'&new_leader='+newLeader;
-    });
-
-    $('#new_leader').change(function() {
-        newLeader = $('#new_leader').is(':checked') ? 1 : 0;
-        window.location = baseUrl+'awards.php?id='+$('#type-select').val()+'&new_leader='+newLeader;
+        window.location = baseUrl+'awards.php?id='+$('#type-select').val();
     });
 
     function applyClientFilters() {

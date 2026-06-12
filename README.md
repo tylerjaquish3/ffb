@@ -52,9 +52,6 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
     - make sure it doesnt add duplicate rows, this happens for names with an apostrophe in the name
 
-- records page card doesnt have rounded corners on right
-    - same with Draft Analysis tab on Current Season page
-
 # Ideas
 
 - add trophy graphic on trophy page

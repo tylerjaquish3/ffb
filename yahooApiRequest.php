@@ -13,12 +13,12 @@ $manager = isset($_POST['manager']) ? $_POST['manager'] : 0;
 // To get new game codes, uncomment the following lines. Then go to the yahooApi.php page (Admin)
 // Click Verify button, Yahoo will give you a code to copy. Close that window and paste it into the Admin page.
 // Select any options and click Submit. All the game codes will be dumped on the screen. New one on bottom.
-$request_uri = '/games;game_codes=nfl';
-$teams = get_data($request_uri, $access_token);
-do_dump($teams);die;
+// $request_uri = '/games;game_codes=nfl';
+// $teams = get_data($request_uri, $access_token);
+// do_dump($teams);die;
 
 $seasons = [
-    2026 => ['league_id' => 18261, 'game_code' => 461],
+    2026 => ['league_id' => 18261, 'game_code' => 470],
     2025 => ['league_id' => 23237, 'game_code' => 461],
     2024 => ['league_id' => 98957, 'game_code' => 449],
     2023 => ['league_id' => 74490, 'game_code' => 423],

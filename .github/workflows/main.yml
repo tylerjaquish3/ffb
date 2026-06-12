@@ -17,6 +17,7 @@ jobs:
         CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         CKEDITOR_LICENSE: ${{ secrets.CKEDITOR_LICENSE }}
+        DB_SYNC_TOKEN: ${{ secrets.DB_SYNC_TOKEN }}
       run: |
         cat > connections.php << 'PHPEOF'
         <?php
@@ -39,12 +40,15 @@ jobs:
 
         $CKEDITOR_LICENSE = 'CKEDITOR_LICENSE_PLACEHOLDER';
 
+        $DB_SYNC_TOKEN = 'DB_SYNC_TOKEN_PLACEHOLDER';
+
         ?>
         PHPEOF
         sed -i "s|GEMINI_API_KEY_PLACEHOLDER|${GEMINI_API_KEY}|g" connections.php
         sed -i "s|CONSUMER_KEY_PLACEHOLDER|${CONSUMER_KEY}|g" connections.php
         sed -i "s|CONSUMER_SECRET_PLACEHOLDER|${CONSUMER_SECRET}|g" connections.php
         sed -i "s|CKEDITOR_LICENSE_PLACEHOLDER|${CKEDITOR_LICENSE}|g" connections.php
+        sed -i "s|DB_SYNC_TOKEN_PLACEHOLDER|${DB_SYNC_TOKEN}|g" connections.php
 
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.3.0

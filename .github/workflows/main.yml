@@ -29,7 +29,6 @@ jobs:
         $GEMINI_API_KEY = 'GEMINI_API_KEY_PLACEHOLDER';
 
         $conn = new SQLite3(__DIR__.'/database/ffb.sqlite');
-        $conn2 = new SQLite3(__DIR__.'/../draft/database/database.sqlite');
 
         $consumer_data = [
             'key' => 'CONSUMER_KEY_PLACEHOLDER',

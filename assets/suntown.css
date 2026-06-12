@@ -1361,8 +1361,15 @@ div.dt-container .dt-paging-button:not(.disabled):hover {
         flex: none;
     }
 
+    /* Remove content-wrapper padding so cards fill the screen width */
+    .content-wrapper {
+        padding: 0 !important;
+    }
+
     .app-content.content.container-fluid {
-        width: 100%;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
 
     /* Fix negative margin causing overflow */
@@ -1428,8 +1435,17 @@ div.dt-container .dt-paging-button:not(.disabled):hover {
     /* Make Bootstrap grid more mobile-friendly */
     .container-fluid,
     .app-content.content.container-fluid {
-        padding-left: 10px;
-        padding-right: 10px;
+        padding-left: 8px;
+        padding-right: 8px;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* RTL direction causes auto margins to be asymmetric; force the content wrapper to fill width */
+    .content-wrapper,
+    .content-body {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
     
     /* Trophy plaques - make them fit within the card */
@@ -1468,10 +1484,17 @@ div.dt-container .dt-paging-button:not(.disabled):hover {
         -webkit-overflow-scrolling: touch;
     }
     
-    /* Make sure the row doesn't extend beyond card boundaries */
-    .card-body .row {
+    /* Zero out Bootstrap's negative row margins and matching col padding to avoid
+       RTL asymmetry (direction:rtl on body makes the -14px margins clip unevenly) */
+    .row {
         margin-left: 0 !important;
         margin-right: 0 !important;
+    }
+
+    .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6,
+    .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
     }
     
     /* Roster history table - make full width on mobile */

@@ -10,7 +10,43 @@ jobs:
     steps:
     - name: 🚚 Get latest code
       uses: actions/checkout@v2
-    
+
+    - name: 📝 Write connections.php
+      env:
+        CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
+        CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        CKEDITOR_LICENSE: ${{ secrets.CKEDITOR_LICENSE }}
+      run: |
+        cat > connections.php << 'PHPEOF'
+        <?php
+
+        $DB_TYPE = 'sqlite';
+        $BASE_URL = '/';
+
+        $APP_ENV = 'production';
+
+        $GEMINI_API_KEY = 'GEMINI_API_KEY_PLACEHOLDER';
+
+        $conn = new SQLite3(__DIR__.'/database/ffb.sqlite');
+        $conn2 = new SQLite3(__DIR__.'/../draft/database/database.sqlite');
+
+        $consumer_data = [
+            'key' => 'CONSUMER_KEY_PLACEHOLDER',
+            'secret' => 'CONSUMER_SECRET_PLACEHOLDER',
+        ];
+        $consumer_key = $consumer_data['key'];
+        $consumer_secret = $consumer_data['secret'];
+
+        $CKEDITOR_LICENSE = 'CKEDITOR_LICENSE_PLACEHOLDER';
+
+        ?>
+        PHPEOF
+        sed -i "s|GEMINI_API_KEY_PLACEHOLDER|${GEMINI_API_KEY}|g" connections.php
+        sed -i "s|CONSUMER_KEY_PLACEHOLDER|${CONSUMER_KEY}|g" connections.php
+        sed -i "s|CONSUMER_SECRET_PLACEHOLDER|${CONSUMER_SECRET}|g" connections.php
+        sed -i "s|CKEDITOR_LICENSE_PLACEHOLDER|${CKEDITOR_LICENSE}|g" connections.php
+
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.3.0
       with:

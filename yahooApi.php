@@ -31,6 +31,7 @@ if (isset($_GET['archive']) && isset($archive_key)) {
 
 // Seasons config (must match yahooApiRequest.php)
 $seasons = [
+    2026 => ['league_id' => 18261, 'game_code' => 470],
     2025 => ['league_id' => 23237, 'game_code' => 461],
     2024 => ['league_id' => 98957, 'game_code' => 449],
     2023 => ['league_id' => 74490, 'game_code' => 423],

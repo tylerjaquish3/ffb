@@ -23,18 +23,35 @@ $weekResult = query("SELECT MAX(week_number) as latest_week FROM regular_season_
 $weekRow = fetch_array($weekResult);
 $defaultWeek = $weekRow ? $weekRow['latest_week'] + 1 : 1;
 
-$consumer_key = $CONSUMER_KEY ?? '';
+// $consumer_key is already set by connections.php; fall back to $CONSUMER_KEY if that uppercase var exists
+$consumer_key = $CONSUMER_KEY ?? $consumer_key ?? '';
 if (isset($_GET['archive']) && isset($archive_key)) {
     $consumer_key = $archive_key;
 }
 
+// Seasons config (must match yahooApiRequest.php)
+$seasons = [
+    2025 => ['league_id' => 23237, 'game_code' => 461],
+    2024 => ['league_id' => 98957, 'game_code' => 449],
+    2023 => ['league_id' => 74490, 'game_code' => 423],
+    2022 => ['league_id' => 84027, 'game_code' => 414],
+    2021 => ['league_id' => 16064, 'game_code' => 406],
+];
+
+// Setup checks for the current year
+$setupIssues = [];
+if (empty($consumer_key)) {
+    $setupIssues[] = 'Consumer key is not configured in <code>connections.php</code>.';
+}
+if (!isset($seasons[$currentYear])) {
+    $setupIssues[] = "No <code>league_id</code> / <code>game_code</code> for $currentYear in <code>yahooApiRequest.php</code>. Add the new season's values to the <code>\$seasons</code> array there.";
+}
+if (empty($managers)) {
+    $setupIssues[] = "No manager Yahoo IDs found for $currentYear in the database. Once the league_id is configured, run the <strong>Yahoo IDs</strong> section to populate them.";
+}
+
 // 1. Get Request Token URL
 $request_token_url = get_request_token_url($consumer_key);
-
-if( ! $request_token_url ) {
-    print "Could not retrieve request token data\n";
-    exit;
-}
 
 ?>
 
@@ -58,6 +75,23 @@ if( ! $request_token_url ) {
 <div class="app-content content">
     <div class="content-wrapper">
         <div class="content-body">
+
+            <?php if (!empty($setupIssues)): ?>
+            <div class="row">
+                <div class="col-sm-12 table-padding">
+                    <div class="alert alert-warning" style="border-left: 4px solid #f0ad4e;">
+                        <h4 style="margin-top: 0;">&#9888; Setup incomplete for <?php echo $currentYear; ?></h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <?php foreach ($setupIssues as $issue): ?>
+                            <div style="background: rgba(240,173,78,0.15); border: 1px solid #f0ad4e; border-radius: 4px; padding: 6px 10px; flex: 1; min-width: 200px;">
+                                <?php echo $issue; ?>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <div class="row">
                 <div class="col-sm-12 table-padding">
@@ -94,25 +128,12 @@ if( ! $request_token_url ) {
                             <!-- <input type="checkbox" name="sections[]" value="fun_facts"> Fun Facts<br> -->
 
                             <h3>Weeks</h3>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <?php
-                                    // Display weeks 8-14 in second column
-                                    for ($week = 8; $week <= 17; $week++) {
-                                        $checked = ($week == $defaultWeek) ? 'checked' : '';
-                                        echo '<input type="checkbox" name="weeks[]" value="' . $week . '" ' . $checked . '> ' . $week . '<br>';
-                                    }
-                                    ?>
+                            <div style="display: flex; flex-wrap: wrap;">
+                                <?php for ($week = 1; $week <= 17; $week++): $checked = ($week == $defaultWeek) ? 'checked' : ''; ?>
+                                <div style="width: 33%; min-width: 50px; margin-bottom: 4px;">
+                                    <input type="checkbox" name="weeks[]" value="<?php echo $week; ?>" <?php echo $checked; ?>> <?php echo $week; ?>
                                 </div>
-                                <div class="col-md-6">
-                                    <?php
-                                    // Display weeks 1-7 in first column
-                                    for ($week = 1; $week <= 7; $week++) {
-                                        $checked = ($week == $defaultWeek) ? 'checked' : '';
-                                        echo '<input type="checkbox" name="weeks[]" value="' . $week . '" ' . $checked . '> ' . $week . '<br>';
-                                    }
-                                    ?>
-                                </div>
+                                <?php endfor; ?>
                             </div>
 
                             <h3>Managers</h3>

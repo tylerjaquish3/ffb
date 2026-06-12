@@ -83,6 +83,7 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
     - Baltimore has been owned the most but only by 7 managers
 - make newsletter show random additional data so its not the same every week
 - if newsletter has bullets, they need to be indented
+- on profile, head to head, add totals
 
 Notes:
 Moved to 18 week schedule in 2021

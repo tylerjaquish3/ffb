@@ -35,7 +35,7 @@ function get_access_token($consumer_key, $consumer_secret, $verifier)
     $params = [
         'client_id' => $consumer_key,
         'client_secret' => $consumer_secret,
-        'redirect_uri' => 'oob',  // Set OOB for ease of use -- could be a URL
+        'redirect_uri' => 'https://suntownffb.us/yahooCallback.php',
         'code' => $verifier,
         'grant_type' => 'authorization_code'
     ];

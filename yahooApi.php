@@ -205,7 +205,7 @@ function get_request_token_url(string $consumer_key)
     $url = 'https://api.login.yahoo.com/oauth2/request_auth';
     $params = [
         'client_id' => $consumer_key,
-        'redirect_uri' => 'oob',  // Set OOB for ease of use -- could be a URL
+        'redirect_uri' => 'https://suntownffb.us/yahooCallback.php',
         'response_type' => 'code',
         'language' => 'en-us'
     ];

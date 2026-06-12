@@ -263,11 +263,34 @@ if (isset($_GET['id'])) {
                                         <th>Wins</th>
                                         <th>Losses</th>
                                         <th>Win %</th>
+                                        <th>Total</th>
+                                        <th>Streak</th>
                                     </thead>
                                     <tbody>
                                         <?php
+                                        $regStreaks = [];
+                                        $regStreakDone = [];
+                                        $streakResult = query(
+                                            "SELECT manager2_id, manager1_score, manager2_score
+                                             FROM regular_season_matchups
+                                             WHERE manager1_id = $managerId
+                                             ORDER BY year DESC, week_number DESC"
+                                        );
+                                        while ($sm = fetch_array($streakResult)) {
+                                            $oppId = $sm['manager2_id'];
+                                            if (isset($regStreakDone[$oppId])) continue;
+                                            $isWin = $sm['manager1_score'] > $sm['manager2_score'];
+                                            if (!isset($regStreaks[$oppId])) {
+                                                $regStreaks[$oppId] = ['count' => 1, 'isWin' => $isWin];
+                                            } elseif ($isWin === $regStreaks[$oppId]['isWin']) {
+                                                $regStreaks[$oppId]['count']++;
+                                            } else {
+                                                $regStreakDone[$oppId] = true;
+                                            }
+                                        }
+
                                         $result = query(
-                                            "SELECT name, SUM(CASE
+                                            "SELECT managers.id AS manager2_id, name, SUM(CASE
                                                 WHEN manager1_score > manager2_score THEN 1
                                                 ELSE 0
                                             END) AS wins,
@@ -281,12 +304,17 @@ if (isset($_GET['id'])) {
                                             GROUP BY manager2_id
                                             ORDER BY wins DESC"
                                         );
-                                        while ($row = fetch_array($result)) { ?>
+                                        while ($row = fetch_array($result)) {
+                                            $s = $regStreaks[$row['manager2_id']] ?? null;
+                                            $streakDisplay = $s ? (($s['isWin'] ? '+' : '-') . $s['count']) : 'N/A';
+                                            ?>
                                             <tr>
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['wins']; ?></td>
                                                 <td><?php echo $row['losses']; ?></td>
                                                 <td><?php echo ($row['wins'] + $row['losses']) > 0 ? round(($row['wins'] * 100) / ($row['wins'] + $row['losses']), 1) : 'N/A'; ?></td>
+                                                <td><?php echo $row['wins'] + $row['losses']; ?></td>
+                                                <td><?php echo $streakDisplay; ?></td>
                                             </tr>
 
                                         <?php } ?>
@@ -299,11 +327,37 @@ if (isset($_GET['id'])) {
                                         <th>Wins</th>
                                         <th>Losses</th>
                                         <th>Win %</th>
+                                        <th>Total</th>
+                                        <th>Streak</th>
                                     </thead>
                                     <tbody>
                                         <?php
+                                        $postStreaks = [];
+                                        $postStreakDone = [];
+                                        $postStreakResult = query(
+                                            "SELECT
+                                                CASE WHEN manager1_id = $managerId THEN manager2_id ELSE manager1_id END AS opp_id,
+                                                CASE WHEN manager1_id = $managerId THEN manager1_score ELSE manager2_score END AS my_score,
+                                                CASE WHEN manager1_id = $managerId THEN manager2_score ELSE manager1_score END AS opp_score
+                                             FROM playoff_matchups
+                                             WHERE manager1_id = $managerId OR manager2_id = $managerId
+                                             ORDER BY year DESC"
+                                        );
+                                        while ($sm = fetch_array($postStreakResult)) {
+                                            $oppId = $sm['opp_id'];
+                                            if (isset($postStreakDone[$oppId])) continue;
+                                            $isWin = $sm['my_score'] > $sm['opp_score'];
+                                            if (!isset($postStreaks[$oppId])) {
+                                                $postStreaks[$oppId] = ['count' => 1, 'isWin' => $isWin];
+                                            } elseif ($isWin === $postStreaks[$oppId]['isWin']) {
+                                                $postStreaks[$oppId]['count']++;
+                                            } else {
+                                                $postStreakDone[$oppId] = true;
+                                            }
+                                        }
+
                                         $result = query(
-                                            "SELECT name, w.wins+w2.wins AS totalWins, l.losses+l2.losses AS totalLosses
+                                            "SELECT managers.id AS opp_id, name, w.wins+w2.wins AS totalWins, l.losses+l2.losses AS totalLosses
                                             FROM managers
                                             JOIN (
                                                 SELECT SUM(CASE
@@ -342,21 +396,25 @@ if (isset($_GET['id'])) {
                                             ) l2 ON l2.manager1_id = managers.id
                                             WHERE name != '" . $_GET['id'] . "'"
                                         );
-                                        while ($row = fetch_array($result)) { 
+                                        while ($row = fetch_array($result)) {
                                             $total = $row['totalWins'] + $row['totalLosses'];
                                             $sort = ($total == 0) ? 0 : round(($row['totalWins'] * 100) / ($total), 1);
+                                            $ps = $postStreaks[$row['opp_id']] ?? null;
+                                            $postStreakDisplay = $ps ? (($ps['isWin'] ? '+' : '-') . $ps['count']) : 'N/A';
                                             ?>
                                             <tr>
                                                 <td><?php echo $row['name']; ?></td>
                                                 <td><?php echo $row['totalWins']; ?></td>
                                                 <td><?php echo $row['totalLosses']; ?></td>
-                                                <td data-sort="<?php echo $sort; ?>"><?php 
+                                                <td data-sort="<?php echo $sort; ?>"><?php
                                                     if ($total == 0) {
                                                         echo 'N/A';
                                                     } else {
                                                         echo round(($row['totalWins'] * 100) / ($total), 1);
                                                     }
                                                 ?></td>
+                                                <td><?php echo $total; ?></td>
+                                                <td><?php echo $postStreakDisplay; ?></td>
                                             </tr>
                                         <?php } ?>
                                     </tbody>
@@ -551,86 +609,75 @@ if (isset($_GET['id'])) {
                                     </select>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-12 col-md-4">
-                                    <table class="table table-responsive table-striped nowrap">
-                                        <thead>
-                                            <th>Statistic</th>
-                                            <th>Value</th>
-                                        </thead>
-                                    <?php
-                                        $wins = $losses = $total = $pf = $pa = $ptsAvg = $bigWin = $bigLoss = $postTotal = $postWins = $postLosses = 0;
-                                        $closeLoss = -9999;
-                                        $closeWin = 9999;
-                                        $marginsArr = $combinedArr = [];
-                                        $result = query(
-                                            "SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score, winning_manager_id
-                                            FROM regular_season_matchups
-                                            WHERE manager1_id = $managerId
-                                            AND manager2_id = $versus
-                                            UNION
-                                            SELECT year, round, manager1_id, manager2_id, manager1_score, manager2_score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END
-                                            FROM playoff_matchups
-                                            WHERE (manager1_id = $managerId AND manager2_id = $versus) OR (manager1_id = $versus AND manager2_id = $managerId)
-                                            ORDER BY year, week_number DESC"
-                                        );
-                                        while ($array = fetch_array($result)) {
+                            <?php
+                                $wins = $losses = $total = $pf = $pa = $ptsAvg = $bigWin = $bigLoss = $postTotal = $postWins = $postLosses = 0;
+                                $closeLoss = -9999;
+                                $closeWin = 9999;
+                                $marginsArr = $combinedArr = [];
+                                $result = query(
+                                    "SELECT year, week_number, manager1_id, manager2_id, manager1_score, manager2_score, winning_manager_id
+                                    FROM regular_season_matchups
+                                    WHERE manager1_id = $managerId
+                                    AND manager2_id = $versus
+                                    UNION
+                                    SELECT year, round, manager1_id, manager2_id, manager1_score, manager2_score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END
+                                    FROM playoff_matchups
+                                    WHERE (manager1_id = $managerId AND manager2_id = $versus) OR (manager1_id = $versus AND manager2_id = $managerId)
+                                    ORDER BY year, week_number DESC"
+                                );
+                                while ($array = fetch_array($result)) {
+                                    $isPost = (int)$array['week_number'] == 0;
+                                    $wins += (!$isPost && $array['winning_manager_id'] == $managerId) ? 1 : 0;
+                                    $losses += (!$isPost && $array['winning_manager_id'] != $managerId) ? 1 : 0;
+                                    $total += (!$isPost) ? 1: 0;
+                                    $postWins += ($isPost && $array['winning_manager_id'] == $managerId) ? 1 : 0;
+                                    $postLosses += ($isPost && $array['winning_manager_id'] != $managerId) ? 1 : 0;
+                                    $postTotal += ($isPost) ? 1: 0;
+                                    $manager1score = $array['manager1_score'];
+                                    $manager2score = $array['manager2_score'];
+                                    if ($isPost && $array['manager2_id'] == $managerId) {
+                                        $manager1score = $array['manager2_score'];
+                                        $manager2score = $array['manager1_score'];
+                                    }
+                                    $pf += $manager1score;
+                                    $pa += $manager2score;
+                                    $margin = $manager1score - $manager2score;
+                                    $bigWin = ($margin > 0 && $margin > $bigWin) ? $margin : $bigWin;
+                                    $closeLoss = ($margin < 0 && $margin > $closeLoss) ? $margin : $closeLoss;
+                                    $closeWin = ($margin > 0 && $margin < $closeWin) ? $margin : $closeWin;
+                                    $bigLoss = ($margin < 0 && $margin < $bigLoss) ? $margin : $bigLoss;
+                                    $marginsArr[] = $margin;
+                                    $combinedArr[] = $manager1score + $manager2score;
+                                }
+                                $overallTotal = $total + $postTotal;
+                                $overallWins = $wins + $postWins;
+                                $tileStyle = 'background:#f8f9fa;border:1px solid #dee2e6;border-radius:6px;padding:8px 16px;text-align:center;min-width:90px;';
+                                $valStyle = 'font-size:1.15em;font-weight:700;line-height:1.2;';
+                                $lblStyle = 'font-size:0.7em;color:#6c757d;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;';
+                                $tiles = [
+                                    ['Reg Season', $wins.'-'.$losses],
+                                    ['Postseason', $postWins.'-'.$postLosses],
+                                    ['Win %', $overallTotal > 0 ? round($overallWins * 100 / $overallTotal, 1).'%' : 'N/A'],
+                                    ['Avg PF', $overallTotal > 0 ? round($pf / $overallTotal, 1) : 'N/A'],
+                                    ['Avg PA', $overallTotal > 0 ? round($pa / $overallTotal, 1) : 'N/A'],
+                                    ['Avg Margin', count($marginsArr) > 0 ? round(array_sum(array_map('abs', $marginsArr)) / count($marginsArr), 2) : 'N/A'],
+                                    ['Avg Combined', count($combinedArr) > 0 ? round(array_sum($combinedArr) / count($combinedArr), 2) : 'N/A'],
+                                    ['Biggest Win', $wins + $postWins > 0 ? round($bigWin, 2) : 'N/A'],
+                                    ['Biggest Loss', $losses + $postLosses > 0 ? round(abs($bigLoss), 2) : 'N/A'],
+                                    ['Closest Win', $wins + $postWins > 0 ? round($closeWin, 2) : 'N/A'],
+                                    ['Closest Loss', $losses + $postLosses > 0 ? round(abs($closeLoss), 2) : 'N/A'],
+                                ];
+                                ?>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 20px;">
+                                <?php foreach ($tiles as [$label, $value]) { ?>
+                                    <div style="<?php echo $tileStyle; ?>">
+                                        <div style="<?php echo $valStyle; ?>"><?php echo $value; ?></div>
+                                        <div style="<?php echo $lblStyle; ?>"><?php echo $label; ?></div>
+                                    </div>
+                                <?php } ?>
+                            </div>
 
-                                            $isPost = (int)$array['week_number'] == 0;
-
-                                            $wins += (!$isPost && $array['winning_manager_id'] == $managerId) ? 1 : 0;
-                                            $losses += (!$isPost && $array['winning_manager_id'] != $managerId) ? 1 : 0;
-                                            $total += (!$isPost) ? 1: 0;
-                                            $postWins += ($isPost && $array['winning_manager_id'] == $managerId) ? 1 : 0;
-                                            $postLosses += ($isPost && $array['winning_manager_id'] != $managerId) ? 1 : 0;
-                                            $postTotal += ($isPost) ? 1: 0;
-
-                                            $manager1score = $array['manager1_score'];
-                                            $manager2score = $array['manager2_score'];
-
-                                            // Postseason matchup might be flipped!
-                                            if ($isPost && $array['manager2_id'] == $managerId) {
-                                                $manager1score = $array['manager2_score'];
-                                                $manager2score = $array['manager1_score'];
-                                            }
-
-                                            $pf += $manager1score;
-                                            $pa += $manager2score;
-
-                                            $margin = $manager1score - $manager2score;
-                                            $bigWin = ($margin > 0 && $margin > $bigWin) ? $margin : $bigWin;
-                                            $closeLoss = ($margin < 0 && $margin > $closeLoss) ? $margin : $closeLoss;
-                                            $closeWin = ($margin > 0 && $margin < $closeWin) ? $margin : $closeWin;
-                                            $bigLoss = ($margin < 0 && $margin < $bigLoss) ? $margin : $bigLoss;
-                                            $marginsArr[] = $margin;
-                                            $combinedArr[] = $manager1score + $manager2score;
-                                        } ?>
-                                        <tr><td>Reg. Season Matchups</td><td><?php echo $total; ?></td></tr>
-                                        <tr><td>Reg. Season Wins</td><td><?php echo $wins; ?></td></tr>
-                                        <tr><td>Reg. Season Losses</td><td> <?php echo $losses; ?></td></tr>
-
-                                        <tr><td>Postseason Matchups</td><td><?php echo $postTotal; ?></td></tr>
-                                        <tr><td>Postseason Wins</td><td><?php echo $postWins; ?></td></tr>
-                                        <tr><td>Postseason Losses</td><td> <?php echo $postLosses; ?></td></tr>
-
-                                        <tr><td>Overall Winning %</td><td> <?php echo ($total + $postTotal) > 0 ? round(($wins + $postWins) * 100/ ($total + $postTotal), 1).' %' : 'N/A'; ?></td></tr>
-
-                                        <tr><td>Total Points For</td><td><?php echo $pf; ?></td></tr>
-                                        <tr><td>Total Points Against</td><td><?php echo $pa; ?></td></tr>
-                                        <tr><td>Average Points For</td><td><?php echo ($total+$postTotal) > 0 ? round($pf/($total+$postTotal), 1) : 'N/A'; ?></td></tr>
-                                        <tr><td>Average Points Against</td><td><?php echo ($total+$postTotal) > 0 ? round($pa/($total+$postTotal), 1) : 'N/A'; ?></td></tr>
-
-                                        <tr><td>Biggest Win</td><td><?php echo round($bigWin, 2); ?></td></tr>
-                                        <tr><td>Biggest Loss</td><td><?php echo round(abs($bigLoss), 2); ?></td></tr>
-                                        <tr><td>Closest Win</td><td><?php echo round($closeWin, 2); ?></td></tr>
-                                        <tr><td>Closest Loss</td><td><?php echo round(abs($closeLoss), 2); ?></td></tr>
-                                        <tr><td>Average Margin</td><td><?php echo (count($marginsArr) > 0) ? round(array_sum(array_map('abs', $marginsArr))/count($marginsArr), 2) : 'N/A'; ?></td></tr>
-                                        <tr><td>Average Combined</td><td><?php echo (count($combinedArr) > 0) ? round(array_sum($combinedArr)/count($combinedArr), 2) : 'N/A'; ?></td></tr>
-
-                                    </table>
-                                </div>
-
-                                <div class="col-sm-12 col-md-8">
+                            <div class="col-sm-12">
                                     <table class="table table-responsive table-striped nowrap" id="datatable-versus">
                                         <thead>
                                             <th>Year</th>
@@ -821,11 +868,10 @@ if (isset($_GET['id'])) {
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
                         </div>
                     </div>
                 </div>
-            
+
                 <div class="col-sm-12 col-md-4 table-padding">
                     <div class="card">
                         <div class="card-header">

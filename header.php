@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 
     <title><?php echo isset($pageName) ? $pageName. ' | Suntown FFB' : 'Suntown FFB'; ?></title>
-    <?php $version = "v5.7.4";
-    $vDate = "(06/12/26)"; ?>
+    <?php $version = "v5.7.5";
+    $vDate = "(06/16/26)"; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">
 

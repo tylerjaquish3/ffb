@@ -6,6 +6,7 @@
 
     $careerRace      = getCareerPointsRaceData();
     $positionTreemap = getPositionTreemapData();
+    $lineupAccuracy  = getLineupAccuracyData();
 ?>
 <style>
     .charts-card-body { direction: ltr; }
@@ -192,6 +193,70 @@
         .mgr-tile text.mgr-name  { font-size: 10px; }
         .mgr-tile text.mgr-value { font-size: 9.5px; }
     }
+
+    /* ── Lineup Accuracy line chart ───────────────────────────────────── */
+    .acc-wrapper {
+        position: relative;
+        background: #fff;
+        border-radius: 8px;
+        padding: 16px 18px 22px;
+    }
+    .acc-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+    .acc-header h5 {
+        margin: 0;
+        color: #000;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+    .acc-chart-wrap {
+        position: relative;
+        width: 100%;
+    }
+    .acc-chart-wrap svg { width: 100%; height: auto; display: block; }
+    .acc-tooltip {
+        position: absolute;
+        pointer-events: none;
+        background: rgba(0,0,0,0.85);
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 0.78rem;
+        line-height: 1.65;
+        opacity: 0;
+        transition: opacity 0.1s ease;
+        z-index: 20;
+        white-space: nowrap;
+    }
+    .acc-tooltip strong { color: #fff; font-weight: 700; }
+    .acc-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 18px;
+        margin-top: 14px;
+    }
+    .acc-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: rgba(0,0,0,0.7);
+    }
+    .acc-legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .acc-axis text { fill: rgba(0,0,0,0.55); font-size: 11px; font-family: 'Barlow', sans-serif; }
+    .acc-axis line, .acc-axis path { stroke: rgba(0,0,0,0.12); }
 </style>
 <div class="app-content content">
     <div class="content-wrapper">
@@ -258,6 +323,23 @@
                                         </select>
                                     </label>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Lineup Accuracy</h4>
+                        </div>
+                        <div class="card-body charts-card-body">
+                            <div class="acc-wrapper">
+                                <div class="acc-header">
+                                    <h5>Actual vs. optimal points by season</h5>
+                                </div>
+                                <div class="acc-chart-wrap">
+                                    <div id="acc-chart"></div>
+                                    <div class="acc-tooltip" id="acc-tooltip"></div>
+                                </div>
+                                <div class="acc-legend" id="acc-legend"></div>
                             </div>
                         </div>
                     </div>
@@ -731,5 +813,136 @@
     window.addEventListener('resize', () => render(currentIdx, 0));
 
     render(0, 0);
+})();
+</script>
+
+<script>
+(function () {
+    const payload = <?php echo json_encode($lineupAccuracy); ?>;
+    const seasons = (payload.seasons || []).map(String);
+    const series  = payload.series  || [];
+    if (!seasons.length || !series.length) return;
+
+    // Pre-build per-series point arrays using numeric year keys
+    const sData = series.map(s => ({
+        mid:    s.mid,
+        name:   s.name,
+        color:  s.color,
+        byYear: s.byYear,
+        pts:    seasons
+            .filter(yr => s.byYear[+yr] !== undefined)
+            .map(yr => ({ year: yr, acc: +s.byYear[+yr] }))
+    })).filter(s => s.pts.length > 0);
+    if (!sData.length) return;
+
+    // Legend
+    const legendEl = document.getElementById('acc-legend');
+    sData.forEach(s => {
+        const el = document.createElement('div');
+        el.className = 'acc-legend-item';
+        el.innerHTML = `<span class="acc-legend-dot" style="background:${s.color}"></span>${s.name}`;
+        legendEl.appendChild(el);
+    });
+
+    // Layout
+    const margin = { top: 14, right: 16, bottom: 36, left: 52 };
+    const IW = 760, IH = 300;
+    const FW = IW + margin.left + margin.right;
+    const FH = IH + margin.top + margin.bottom;
+
+    const wrap = document.getElementById('acc-chart');
+    const svg = d3.select(wrap).append('svg')
+        .attr('viewBox', `0 0 ${FW} ${FH}`)
+        .attr('preserveAspectRatio', 'xMidYMid meet')
+        .style('width', '100%').style('height', 'auto');
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Scales
+    const x = d3.scalePoint().domain(seasons).range([0, IW]).padding(0.1);
+
+    const allAcc  = sData.flatMap(s => s.pts.map(p => p.acc));
+    const yFloor  = Math.max(0, Math.floor((Math.min(...allAcc) - 2) / 5) * 5);
+    const y = d3.scaleLinear().domain([yFloor, 100]).range([IH, 0]);
+
+    // Horizontal grid
+    g.selectAll('.acc-hg')
+        .data(y.ticks(6)).enter()
+        .append('line')
+        .attr('x1', 0).attr('x2', IW)
+        .attr('y1', d => y(d)).attr('y2', d => y(d))
+        .attr('stroke', 'rgba(0,0,0,0.06)').attr('stroke-width', 1);
+
+    // Axes
+    g.append('g').attr('class', 'acc-axis')
+        .attr('transform', `translate(0,${IH})`)
+        .call(d3.axisBottom(x).tickSizeOuter(0));
+    g.append('g').attr('class', 'acc-axis')
+        .call(d3.axisLeft(y).ticks(6).tickFormat(d => d + '%').tickSizeOuter(0));
+
+    // Line generator
+    const lineGen = d3.line()
+        .x(d => x(d.year)).y(d => y(d.acc))
+        .curve(d3.curveMonotoneX)
+        .defined(d => d.acc != null);
+
+    // Lines and dots
+    sData.forEach(s => {
+        g.append('path')
+            .datum(s.pts)
+            .attr('fill', 'none').attr('stroke', s.color)
+            .attr('stroke-width', 2).attr('stroke-linejoin', 'round')
+            .attr('stroke-linecap', 'round')
+            .attr('d', lineGen);
+        g.selectAll(null).data(s.pts).enter()
+            .append('circle')
+            .attr('cx', d => x(d.year)).attr('cy', d => y(d.acc))
+            .attr('r', 3).attr('fill', s.color)
+            .attr('stroke', '#fff').attr('stroke-width', 1.5);
+    });
+
+    // Hover: vertical rule + tooltip
+    const hLine = g.append('line')
+        .attr('y1', 0).attr('y2', IH)
+        .attr('stroke', 'rgba(0,0,0,0.25)').attr('stroke-width', 1)
+        .attr('stroke-dasharray', '4,3').attr('pointer-events', 'none')
+        .style('opacity', 0);
+
+    const tip = d3.select('#acc-tooltip');
+
+    svg.append('rect')
+        .attr('transform', `translate(${margin.left},${margin.top})`)
+        .attr('width', IW).attr('height', IH)
+        .attr('fill', 'transparent')
+        .on('mousemove', function (event) {
+            const [mx] = d3.pointer(event);
+            let best = seasons[0], bd = Infinity;
+            seasons.forEach(yr => {
+                const dist = Math.abs(x(yr) - mx);
+                if (dist < bd) { bd = dist; best = yr; }
+            });
+
+            hLine.attr('x1', x(best)).attr('x2', x(best)).style('opacity', 1);
+
+            const rows = sData
+                .filter(s => s.byYear[+best] !== undefined)
+                .map(s => ({ name: s.name, color: s.color, acc: s.byYear[+best] }))
+                .sort((a, b) => b.acc - a.acc);
+
+            const html = `<strong>${best}</strong><br>` + rows.map(r =>
+                `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;` +
+                `background:${r.color};margin-right:5px;vertical-align:middle;"></span>` +
+                `${r.name} <strong>${r.acc}%</strong>`
+            ).join('<br>');
+
+            const wr = wrap.getBoundingClientRect();
+            tip.html(html)
+                .style('left', (event.clientX - wr.left + 14) + 'px')
+                .style('top',  (event.clientY - wr.top  + 14) + 'px')
+                .style('opacity', 1);
+        })
+        .on('mouseleave', function () {
+            hLine.style('opacity', 0);
+            tip.style('opacity', 0);
+        });
 })();
 </script>

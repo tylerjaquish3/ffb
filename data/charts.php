@@ -192,3 +192,75 @@ function getPositionTreemapData()
         'frames'         => $frames,
     ];
 }
+
+// Multi-line lineup accuracy chart — accuracy % per manager per season.
+//
+// Uses pre-computed manager1_optimal from regular_season_matchups.
+// Seasons where optimal is NULL (no roster data computed) are omitted.
+//
+// Returns:
+//   [
+//     'seasons' => [2012, 2013, ...],
+//     'series'  => [
+//       ['mid' => 1, 'name' => 'Tyler', 'color' => '#9c68d9',
+//        'byYear' => [2012 => 87.34, 2013 => 91.02, ...]],
+//       ...
+//     ],
+//   ]
+function getLineupAccuracyData()
+{
+    $palette = getChartsManagerPalette();
+
+    $managers = [];
+    $res = query("SELECT id, name FROM managers ORDER BY id");
+    while ($row = fetch_array($res)) {
+        $mid = (int) $row['id'];
+        $managers[$mid] = [
+            'name'  => $row['name'],
+            'color' => $palette[$mid] ?? '#9c68d9',
+        ];
+    }
+
+    $sql = "SELECT rsm.year,
+                   rsm.manager1_id AS mid,
+                   SUM(rsm.manager1_score)   AS total_actual,
+                   SUM(rsm.manager1_optimal) AS total_optimal
+            FROM regular_season_matchups rsm
+            WHERE rsm.manager1_optimal IS NOT NULL
+            GROUP BY rsm.year, rsm.manager1_id
+            HAVING SUM(rsm.manager1_optimal) > 0
+            ORDER BY rsm.year ASC, rsm.manager1_id ASC";
+
+    $byManager = [];
+    $seasonSet = [];
+
+    $res = query($sql);
+    while ($row = fetch_array($res)) {
+        $year    = (int)   $row['year'];
+        $mid     = (int)   $row['mid'];
+        $actual  = (float) $row['total_actual'];
+        $optimal = (float) $row['total_optimal'];
+        if ($optimal <= 0) continue;
+        $byManager[$mid][$year] = round($actual * 100 / $optimal, 2);
+        $seasonSet[$year] = true;
+    }
+
+    $seasons = array_keys($seasonSet);
+    sort($seasons);
+
+    $series = [];
+    foreach ($managers as $mid => $info) {
+        if (empty($byManager[$mid])) continue;
+        $series[] = [
+            'mid'    => $mid,
+            'name'   => $info['name'],
+            'color'  => $info['color'],
+            'byYear' => $byManager[$mid],
+        ];
+    }
+
+    return [
+        'seasons' => $seasons,
+        'series'  => $series,
+    ];
+}

@@ -270,6 +270,14 @@ body {
     color: var(--ink-light);
 }
 
+/* Lists */
+.article-body ul,
+.article-body ol {
+    padding-left: 1.4em;
+    margin: 0.5rem 0;
+}
+.article-body li { margin-bottom: 0.2rem; }
+
 /* Drop cap */
 .article-body.has-dropcap::first-letter {
     float: left;

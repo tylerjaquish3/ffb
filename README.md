@@ -82,7 +82,6 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
     - all Marvin's since 2009 have been Jrs
     - Baltimore has been owned the most but only by 7 managers
 - make newsletter show random additional data so its not the same every week
-- if newsletter has bullets, they need to be indented
 - add lineup accuracy to profile head to head
 
 Notes:

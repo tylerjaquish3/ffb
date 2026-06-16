@@ -222,13 +222,12 @@ if (isset($_GET['id'])) {
                                 echo '<div class="awards-grid">';
                                 foreach ($manager_awards as $award) {
                                     $award_class = $award['is_positive'] ? 'award-badge positive' : 'award-badge negative';
-                                    $new_leader_icon = $award['new_leader'] ? '<i class="icon-warning award-new-icon" title="New Leader"></i>' : '';
-                                    
+
                                     echo '<div class="' . $award_class . '">';
                                     echo '<div class="award-header-badge">';
                                     echo '</div>';
                                     echo '<div class="award-title">' . htmlspecialchars($award['fact']) . '</div>';
-                                    echo '<div class="award-value">' . htmlspecialchars($award['value']) . ' ' . $new_leader_icon . '</div>';
+                                    echo '<div class="award-value">' . htmlspecialchars($award['value']) . '</div>';
                                     if (!empty($award['note'])) {
                                         echo '<div class="award-note">' . htmlspecialchars($award['note']) . '</div>';
                                     }
@@ -459,60 +458,76 @@ if (isset($_GET['id'])) {
                         </div>
                         <div class="card-body">
                             <div class="card-block">
+                                <?php
+                                $playerPos = "player || ' - ' || position";
+                                if ($DB_TYPE == 'mysql') {
+                                    $playerPos = "CONCAT(player,' - ',position)";
+                                }
+                                $maxRoundResult = query("SELECT MAX(round) as max_round FROM draft WHERE manager_id = $managerId");
+                                $maxRoundRow = fetch_array($maxRoundResult);
+                                $maxRound = (int)$maxRoundRow['max_round'];
+
+                                $roundSubqueries = "(SELECT round_pick FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as position";
+                                for ($r = 1; $r <= $maxRound; $r++) {
+                                    $roundSubqueries .= ", (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = $r AND year = d.year) as r{$r}_pick";
+                                }
+
+                                $draftResult = query(
+                                    "SELECT d.year, $roundSubqueries
+                                    FROM draft d
+                                    WHERE manager_id = $managerId AND round = 1"
+                                );
+                                $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th','11th','12th','13th','14th','15th','16th','17th','18th','19th','20th','21st','22nd','23rd','24th','25th'];
+                                // Colors from the newsletter standings chart palette
+                                $draftPosColors = [
+                                    'QB'  => '#f33c47', // red
+                                    'RB'  => '#3cf06e', // green
+                                    'WR'  => '#a6c6fa', // light blue
+                                    'TE'  => '#dca130', // gold
+                                    'K'   => '#9c68d9', // purple
+                                    'DEF' => '#2dd4bf', // teal
+                                ];
+                                // S, LB, DB, DL, CB, DE, DT — all lumped as IDP
+                                $draftIdpPos = ['S','LB','DB','DL','CB','DE','DT'];
+                                $draftIdpColor = '#ff7f2c'; // orange
+                                // Light badges that need dark text
+                                $draftLightColors = ['#a6c6fa', '#3cf06e'];
+                                ?>
                                 <table class="table table-responsive table-striped nowrap" id="datatable-drafts">
                                     <thead>
                                         <th>Year</th>
                                         <th>Pick #</th>
-                                        <th>1st Pick</th>
-                                        <th>2nd Pick</th>
-                                        <th>3rd Pick</th>
-                                        <th>4th Pick</th>
-                                        <th>5th Pick</th>
-                                        <th>6th Pick</th>
-                                        <th>7th Pick</th>
-                                        <th>8th Pick</th>
-                                        <th>9th Pick</th>
-                                        <th>10th Pick</th>
+                                        <?php for ($r = 1; $r <= $maxRound; $r++) { ?>
+                                            <th><?php echo $ordinals[$r - 1]; ?> Pick</th>
+                                        <?php } ?>
                                     </thead>
                                     <tbody>
-                                        <?php
-                                         // Need to do different join for sqlite vs mysql
-                                        $playerPos = "player || ' - ' || position";
-                                        if ($DB_TYPE == 'mysql') {
-                                            $playerPos = "CONCAT(player,' - ',position)";
-                                        }
-                                        $result = query(
-                                            "SELECT d.year,
-                                            (SELECT round_pick FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as position,
-                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 1 AND year = d.year) as r1_pick,
-                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 2 AND year = d.year) as r2_pick,
-                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 3 AND year = d.year) as r3_pick,
-                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 4 AND year = d.year) as r4_pick,
-                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 5 AND year = d.year) as r5_pick,
-                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 6 AND year = d.year) as r6_pick,
-                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 7 AND year = d.year) as r7_pick,
-                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 8 AND year = d.year) as r8_pick,
-                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 9 AND year = d.year) as r9_pick,
-                                            (SELECT $playerPos FROM draft WHERE manager_id = $managerId AND round = 10 AND year = d.year) as r10_pick
-                                            FROM draft d
-                                            WHERE manager_id = $managerId AND round = 1"
-                                        );
-                                        while ($array = fetch_array($result)) { ?>
+                                        <?php while ($array = fetch_array($draftResult)) { ?>
                                             <tr>
                                                 <td><?php echo '<a href="/draft.php?manager='.$managerName.'&year='.$array['year'].'">'.$array['year'].'</a>'; ?></td>
                                                 <td><?php echo $array['position']; ?></td>
-                                                <td><?php echo $array['r1_pick']; ?></td>
-                                                <td><?php echo $array['r2_pick']; ?></td>
-                                                <td><?php echo $array['r3_pick']; ?></td>
-                                                <td><?php echo $array['r4_pick']; ?></td>
-                                                <td><?php echo $array['r5_pick']; ?></td>
-                                                <td><?php echo $array['r6_pick']; ?></td>
-                                                <td><?php echo $array['r7_pick']; ?></td>
-                                                <td><?php echo $array['r8_pick']; ?></td>
-                                                <td><?php echo $array['r9_pick']; ?></td>
-                                                <td><?php echo $array['r10_pick']; ?></td>
+                                                <?php for ($r = 1; $r <= $maxRound; $r++) {
+                                                    $pickVal = $array["r{$r}_pick"];
+                                                    if (empty($pickVal)) { echo '<td></td>'; continue; }
+                                                    $parts = explode(' - ', $pickVal, 2);
+                                                    $playerName = $parts[0];
+                                                    $pos = count($parts) > 1 ? $parts[1] : '';
+                                                    if ($pos) {
+                                                        $primaryPos = explode(',', $pos)[0];
+                                                        if (isset($draftPosColors[$primaryPos])) {
+                                                            $badgeColor = $draftPosColors[$primaryPos];
+                                                        } elseif (in_array($primaryPos, $draftIdpPos)) {
+                                                            $badgeColor = $draftIdpColor;
+                                                        } else {
+                                                            $badgeColor = '#6b7280';
+                                                        }
+                                                        $textColor = in_array($badgeColor, $draftLightColors) ? '#1a1a1a' : '#fff';
+                                                        echo '<td>' . htmlspecialchars($playerName) . ' <span style="display:inline-block;padding:0 5px;border-radius:3px;font-size:10px;font-weight:bold;background-color:' . $badgeColor . ';color:' . $textColor . '">' . htmlspecialchars($pos) . '</span></td>';
+                                                    } else {
+                                                        echo '<td>' . htmlspecialchars($pickVal) . '</td>';
+                                                    }
+                                                } ?>
                                             </tr>
-
                                         <?php } ?>
                                     </tbody>
                                 </table>
@@ -580,6 +595,127 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-12">
+                    <div class="row">
+                <div class="col-sm-12 col-lg-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right"><a href="draft.php">Best Drafts</a></h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-profileBestDrafts">
+                                <thead>
+                                    <th>Year</th>
+                                    <th>Pick #</th>
+                                    <th># Picks</th>
+                                    <th>Points</th>
+                                    <th>Pts/Pick</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $result = query(
+                                        "SELECT r.year,
+                                            (SELECT d2.round_pick FROM draft d2 WHERE d2.manager_id = $managerId AND d2.round = 1 AND d2.year = r.year LIMIT 1) as pick,
+                                            (SELECT COUNT(*) FROM draft d3 WHERE d3.manager_id = $managerId AND d3.year = r.year) as num_picks,
+                                            sum(r.points) as points
+                                        FROM rosters r
+                                        WHERE r.manager = '$managerName'
+                                        AND EXISTS (
+                                            SELECT 1 FROM draft d
+                                            LEFT JOIN player_aliases pa ON d.player = pa.player
+                                                OR d.player = pa.alias_1
+                                                OR d.player = pa.alias_2
+                                                OR d.player = pa.alias_3
+                                            WHERE d.manager_id = $managerId
+                                            AND d.year = r.year
+                                            AND (r.player = d.player
+                                                OR r.player = pa.player
+                                                OR r.player = pa.alias_1
+                                                OR r.player = pa.alias_2
+                                                OR r.player = pa.alias_3)
+                                        )
+                                        GROUP BY r.year
+                                        ORDER BY points DESC"
+                                    );
+                                    while ($row = fetch_array($result)) {
+                                        $ptsPerPick = $row['num_picks'] > 0 ? $row['points'] / $row['num_picks'] : 0;
+                                    ?>
+                                        <tr>
+                                            <td><?php echo '<a href="/draft.php?manager='.$managerName.'&year='.$row['year'].'">'.$row['year'].'</a>'; ?></td>
+                                            <td><?php echo $row['pick']; ?></td>
+                                            <td><?php echo $row['num_picks']; ?></td>
+                                            <td class="text-right"><?php echo number_format($row['points'], 1); ?></td>
+                                            <td class="text-right"><?php echo number_format($ptsPerPick, 1); ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right"><a href="draft.php">Best Drafted Players</a></h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="table table-responsive table-striped nowrap" id="datatable-profileBestDraftedPlayers">
+                                <thead>
+                                    <th>Year</th>
+                                    <th>Round</th>
+                                    <th>Pick</th>
+                                    <th>Overall</th>
+                                    <th>Player</th>
+                                    <th>Position</th>
+                                    <th>Points</th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $result = query(
+                                        "SELECT draft.year, round, round_pick, overall_pick, position, draft.player, r_agg.points
+                                        FROM draft
+                                        LEFT JOIN (
+                                            SELECT year, draft_name, sum(points) as points FROM (
+                                                SELECT year, player as draft_name, sum(points) as points FROM rosters GROUP BY year, player
+                                                UNION ALL
+                                                SELECT r.year, pa.player as draft_name, sum(r.points) as points
+                                                FROM rosters r JOIN player_aliases pa ON r.player = pa.alias_1 OR r.player = pa.alias_2 OR r.player = pa.alias_3
+                                                GROUP BY r.year, pa.player
+                                                UNION ALL
+                                                SELECT r.year, pa.alias_1 as draft_name, sum(r.points) as points
+                                                FROM rosters r JOIN player_aliases pa ON r.player = pa.player WHERE pa.alias_1 IS NOT NULL
+                                                GROUP BY r.year, pa.alias_1
+                                                UNION ALL
+                                                SELECT r.year, pa.alias_2 as draft_name, sum(r.points) as points
+                                                FROM rosters r JOIN player_aliases pa ON r.player = pa.player WHERE pa.alias_2 IS NOT NULL
+                                                GROUP BY r.year, pa.alias_2
+                                                UNION ALL
+                                                SELECT r.year, pa.alias_3 as draft_name, sum(r.points) as points
+                                                FROM rosters r JOIN player_aliases pa ON r.player = pa.player WHERE pa.alias_3 IS NOT NULL
+                                                GROUP BY r.year, pa.alias_3
+                                            ) GROUP BY year, draft_name
+                                        ) AS r_agg ON r_agg.draft_name = draft.player AND r_agg.year = draft.year
+                                        WHERE draft.manager_id = $managerId
+                                        ORDER BY r_agg.points DESC"
+                                    );
+                                    while ($row = fetch_array($result)) { ?>
+                                        <tr>
+                                            <td><?php echo $row['year']; ?></td>
+                                            <td><?php echo $row['round']; ?></td>
+                                            <td><?php echo $row['round_pick']; ?></td>
+                                            <td><?php echo $row['overall_pick']; ?></td>
+                                            <td><a href="/players.php?player=<?php echo urlencode($row['player']); ?>"><?php echo $row['player']; ?></a></td>
+                                            <td><?php echo $row['position']; ?></td>
+                                            <td><?php echo $row['points'] ? number_format($row['points'], 1) : 0; ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                    </div><!-- end inner row -->
+                </div><!-- end col-sm-12 wrapper -->
             </div>
 
             <!-- Head to Head Tab -->
@@ -1205,6 +1341,24 @@ if (isset($_GET['id'])) {
             info: false,
             order: [
                 [1, "desc"]
+            ]
+        });
+
+        $('#datatable-profileBestDrafts').DataTable({
+            searching: false,
+            paging: false,
+            info: false,
+            order: [
+                [4, "desc"]
+            ]
+        });
+
+        $('#datatable-profileBestDraftedPlayers').DataTable({
+            searching: false,
+            pageLength: 25,
+            info: false,
+            order: [
+                [6, "desc"]
             ]
         });
 

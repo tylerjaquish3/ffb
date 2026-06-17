@@ -363,6 +363,70 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'lineup-accuracy') {
     die;
 }
 
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'lineup-accuracy-avg') {
+    $selectedSeason = $_GET['season'];
+    $response = [];
+
+    $query = "SELECT manager, week, roster_spot, position, points
+              FROM rosters
+              WHERE YEAR = $selectedSeason
+              ORDER BY manager, week";
+
+    $result = query($query);
+
+    $managerWeekData = [];
+    while ($row = fetch_array($result)) {
+        $manager = $row['manager'];
+        $week = $row['week'];
+
+        if (!isset($managerWeekData[$manager])) {
+            $managerWeekData[$manager] = [];
+        }
+
+        if (!isset($managerWeekData[$manager][$week])) {
+            $managerWeekData[$manager][$week] = [
+                'actual' => 0,
+                'roster' => []
+            ];
+        }
+
+        $managerWeekData[$manager][$week]['roster'][] = [
+            'pos' => $row['position'],
+            'points' => (float)$row['points']
+        ];
+
+        if ($row['roster_spot'] != 'BN' && $row['roster_spot'] != 'IR') {
+            $managerWeekData[$manager][$week]['actual'] += (float)$row['points'];
+        }
+    }
+
+    foreach ($managerWeekData as $manager => $weeks) {
+        $totalActual = 0;
+        $totalOptimal = 0;
+        $weekCount = count($weeks);
+
+        foreach ($weeks as $weekData) {
+            $totalActual += $weekData['actual'];
+            $totalOptimal += checkRosterForOptimal($weekData['roster'], $selectedSeason);
+        }
+
+        if ($totalOptimal > 0 && $weekCount > 0) {
+            $response[] = [
+                'manager' => $manager,
+                'avg_points' => round($totalActual / $weekCount, 2),
+                'avg_optimal' => round($totalOptimal / $weekCount, 2),
+                'avg_points_missed' => round(($totalOptimal - $totalActual) / $weekCount, 2)
+            ];
+        }
+    }
+
+    $content = new \stdClass();
+    $content->data = $response;
+
+    echo json_encode($content);
+    die;
+}
+
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'player-info') {
 
     $return = '';

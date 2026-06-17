@@ -133,3 +133,10 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 - Baseball, golf, olympics
 - Mexican, italian, canadian
 - Pirates, animals, space, casino, school (report card), race car
+
+
+2026 pre draft order notes
+- Justin has only had 2 picks in the top 3, and hasn't had a top 3 pick in 14 years
+- Cam, Ev, and Justin have never had #1
+- the last 5 champions have picked in the top 5, but none of them were #1
+- the only time #1 pick won was Ben in 2011

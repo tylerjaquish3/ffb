@@ -519,20 +519,26 @@ include 'sidebar.php';
                                     <th>Manager</th>
                                     <th>Game Time</th>
                                     <th>Points</th>
+                                    <th>Count</th>
+                                    <th>Points Per Count</th>
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $sql = "SELECT sum(points) as points, manager, game_slot
+                                    $sql = "SELECT sum(points) as points, count(*) as count, manager, game_slot
                                         FROM rosters
                                         WHERE points > 0
                                         AND roster_spot NOT IN ('IR','BN')
                                         GROUP BY manager, game_slot";
                                     $result = query($sql);
-                                    while ($row = fetch_array($result)) { ?>
+                                    while ($row = fetch_array($result)) {
+                                        $ppc = $row['count'] > 0 ? round($row['points'] / $row['count'], 2) : 0;
+                                    ?>
                                         <tr>
                                             <td><?php echo $row['manager']; ?></td>
                                             <td><?php echo isset($labels[$row['game_slot']]) ? $labels[$row['game_slot']] : null; ?></td>
                                             <td><?php echo $row['points']; ?></td>
+                                            <td><?php echo $row['count']; ?></td>
+                                            <td><?php echo $ppc; ?></td>
                                         </tr>
 
                                     <?php } ?>
@@ -1422,6 +1428,10 @@ include 'sidebar.php';
                         { data: 'manager' },
                         { data: 'game_slot_label' },
                         { data: 'points', render: function(data) {
+                            return Number(data).toFixed(2);
+                        }},
+                        { data: 'count' },
+                        { data: 'points_per_count', render: function(data) {
                             return Number(data).toFixed(2);
                         }}
                     ],

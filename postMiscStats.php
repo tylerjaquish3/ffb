@@ -277,19 +277,26 @@
         <th>Points</th>
         <th># Matchups</th>
         <th>Average</th>
+        <th>High</th>
+        <th>Low</th>
     </thead>
     <tbody>
         <?php
         $result = query(
-            "SELECT name, ptsTop, ptsBottom, gamest, gamesb
-            FROM managers 
+            "SELECT name, ptsTop, ptsBottom, gamest, gamesb,
+                maxTop, minTop, maxBottom, minBottom
+            FROM managers
             LEFT JOIN (
-            SELECT COUNT(id) as gamest, SUM(manager1_score) AS ptsTop, manager1_id FROM playoff_matchups rsm 
+            SELECT COUNT(id) as gamest, SUM(manager1_score) AS ptsTop,
+                MAX(manager1_score) AS maxTop, MIN(manager1_score) AS minTop,
+                manager1_id FROM playoff_matchups rsm
             GROUP BY manager1_id
             ) w ON w.manager1_id = managers.id
 
             LEFT JOIN (
-            SELECT COUNT(id) as gamesb, SUM(manager2_score) AS ptsBottom, manager2_id FROM playoff_matchups rsm 
+            SELECT COUNT(id) as gamesb, SUM(manager2_score) AS ptsBottom,
+                MAX(manager2_score) AS maxBottom, MIN(manager2_score) AS minBottom,
+                manager2_id FROM playoff_matchups rsm
             GROUP BY manager2_id
             ) l ON l.manager2_id = managers.id"
         );
@@ -298,19 +305,26 @@
             $points = $row['ptsTop'] + $row['ptsBottom'];
             $games = $row['gamest'] + $row['gamesb'];
             $average = $points / $games;
+
+            $highVals = array_filter([$row['maxTop'], $row['maxBottom']], function($v) { return $v !== null; });
+            $lowVals  = array_filter([$row['minTop'],  $row['minBottom']],  function($v) { return $v !== null; });
+            $high = !empty($highVals) ? max($highVals) : 0;
+            $low  = !empty($lowVals)  ? min($lowVals)  : 0;
             ?>
             <tr>
                 <td><?php echo $row['name']; ?></td>
                 <td><?php echo number_format($points, 2, '.', ','); ?></td>
                 <td><?php echo $games; ?></td>
                 <td><?php echo number_format($average, 2, '.', ','); ?></td>
+                <td><?php echo number_format($high, 2, '.', ','); ?></td>
+                <td><?php echo number_format($low, 2, '.', ','); ?></td>
             </tr>
 
         <?php } ?>
     </tbody>
     <tfoot>
         <tr>
-            <td colspan=4>Points scored in postseason matchups</td>
+            <td colspan=6>Points scored in postseason matchups</td>
         </tr>
     </tfoot>
 </table>

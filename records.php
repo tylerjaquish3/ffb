@@ -22,40 +22,73 @@
         JOIN fun_facts ff ON rl.fun_fact_id = ff.id
         JOIN managers m ON rl.manager_id = m.id
         ORDER BY rl.fun_fact_id ASC, rl.year DESC,
-            CASE WHEN rl.week = 'Quarterfinal' THEN 20 WHEN rl.week = 'Semifinal' THEN 21 WHEN rl.week = 'Final' THEN 22 ELSE CAST(rl.week AS INTEGER) END DESC
+            CASE WHEN rl.week = 'Quarterfinal' THEN 20 WHEN rl.week = 'Semifinal' THEN 21 WHEN rl.week = 'Final' THEN 22 ELSE CAST(rl.week AS INTEGER) END DESC,
+            rl.manager_id ASC
     ";
     $nl_result = query($nl_query);
 
-    $nl_streaks  = [];
-    $nl_prev_fid = null;
-    $nl_cur_mgr  = null;
-    $nl_done     = false;
-
+    // Group rows into per-(fun_fact_id, year, week) snapshots so co-leaders
+    // (multiple managers holding the same record in the same week) are treated
+    // as a single snapshot rather than breaking the streak counter.
+    $snapshots_by_fid = [];
     while ($nl_row = fetch_array($nl_result)) {
-        $fid = $nl_row['fun_fact_id'];
-        if ($fid !== $nl_prev_fid) {
-            $nl_prev_fid = $fid;
-            $nl_cur_mgr  = $nl_row['manager_id'];
-            $nl_done     = false;
-            $nl_streaks[$fid] = [
+        $fid      = $nl_row['fun_fact_id'];
+        $year     = $nl_row['year'];
+        $week     = $nl_row['week'];
+        $last_idx = isset($snapshots_by_fid[$fid]) ? count($snapshots_by_fid[$fid]) - 1 : -1;
+
+        if ($last_idx >= 0
+            && $snapshots_by_fid[$fid][$last_idx]['year'] == $year
+            && $snapshots_by_fid[$fid][$last_idx]['week'] == $week
+        ) {
+            $snapshots_by_fid[$fid][$last_idx]['manager_ids'][]   = $nl_row['manager_id'];
+            $snapshots_by_fid[$fid][$last_idx]['manager_names'][] = $nl_row['manager_name'];
+        } else {
+            $snapshots_by_fid[$fid][] = [
                 'fun_fact_id'   => $fid,
                 'fact'          => $nl_row['fact'],
                 'type'          => $nl_row['type'],
-                'manager_name'  => $nl_row['manager_name'],
-                'current_value' => $nl_row['value'],
-                'since_year'    => $nl_row['year'],
-                'since_week'    => $nl_row['week'],
-                'streak'        => 1,
+                'year'          => $year,
+                'week'          => $week,
+                'value'         => $nl_row['value'],
+                'manager_ids'   => [$nl_row['manager_id']],
+                'manager_names' => [$nl_row['manager_name']],
             ];
-        } elseif (!$nl_done) {
-            if ($nl_row['manager_id'] == $nl_cur_mgr) {
-                $nl_streaks[$fid]['streak']++;
-                $nl_streaks[$fid]['since_year'] = $nl_row['year'];
-                $nl_streaks[$fid]['since_week'] = $nl_row['week'];
+        }
+    }
+
+    $nl_streaks = [];
+    foreach ($snapshots_by_fid as $fid => $snaps) {
+        if (empty($snaps)) continue;
+        $current  = $snaps[0];
+        $cur_mids = $current['manager_ids'];
+        sort($cur_mids);
+
+        $streak     = 0;
+        $since_year = $current['year'];
+        $since_week = $current['week'];
+        foreach ($snaps as $snap) {
+            $snap_mids = $snap['manager_ids'];
+            sort($snap_mids);
+            if ($snap_mids === $cur_mids) {
+                $streak++;
+                $since_year = $snap['year'];
+                $since_week = $snap['week'];
             } else {
-                $nl_done = true;
+                break;
             }
         }
+
+        $nl_streaks[$fid] = [
+            'fun_fact_id'   => $fid,
+            'fact'          => $current['fact'],
+            'type'          => $current['type'],
+            'manager_name'  => implode(' & ', $current['manager_names']),
+            'current_value' => $current['value'],
+            'since_year'    => $since_year,
+            'since_week'    => $since_week,
+            'streak'        => $streak,
+        ];
     }
     usort($nl_streaks, fn($a, $b) => $a['streak'] - $b['streak']);
 

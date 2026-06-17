@@ -334,10 +334,21 @@ if ($contentRow) {
                 <div class="row" style="direction: ltr;">
                     <div class="col-sm-12">
                         <div class="card">
-                            <div class="card-header" style="direction: ltr;">
-                                <h4>Week <?php echo $editWeek; ?> Preview</h4>
+                            <div class="card-header" style="direction: ltr; display: flex; align-items: center; justify-content: space-between;">
+                                <h4 style="margin: 0;">Week <?php echo $editWeek; ?> Preview</h4>
+                                <button type="button" id="generate-preview-btn" class="btn btn-primary btn-sm">
+                                    Generate with AI
+                                </button>
                             </div>
                             <div class="card-body" style="background: #fff; direction: ltr;">
+                                <div id="preview-ai-result" style="display: none; margin-bottom: 14px; padding: 12px 16px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; direction: ltr;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 0.85rem; color: #555;">AI-generated preview — edit then copy into the editor below</strong>
+                                        <button type="button" id="copy-ai-preview-btn" class="btn btn-sm btn-outline-primary">Copy</button>
+                                    </div>
+                                    <pre id="preview-ai-text" style="white-space: pre-wrap; word-break: break-word; margin: 0; font-family: inherit; font-size: 14px; line-height: 1.7;"></pre>
+                                </div>
+                                <div id="preview-ai-error" style="display: none;" class="alert alert-danger"></div>
                                 <textarea id="preview" name="preview" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the preview content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($preview); ?></textarea>
                             </div>
                         </div>

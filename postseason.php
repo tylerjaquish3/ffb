@@ -7,6 +7,15 @@ include 'sidebar.php';
 ?>
 <style>
 #datatable-champions td, #datatable-champions th { white-space: nowrap !important; }
+.h2h-table th.h2h-col-header {
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    vertical-align: bottom;
+    padding: 4px 6px;
+    font-weight: 600;
+}
+.h2h-table td, .h2h-table th { padding: 4px 6px; }
 </style>
 
 <div class="app-content content">
@@ -73,7 +82,7 @@ include 'sidebar.php';
             </div>
 
             <div class="row card-section" id="matchups">
-                <div class="col-sm-12 table-padding">
+                <div class="col-sm-12 col-lg-8 table-padding">
                     <div class="card">
                         <div class="card-header">
                             <h4 style="float: right">Matchups</h4>
@@ -116,6 +125,44 @@ include 'sidebar.php';
                                         </tr>
 
                                     <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-4 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Head to Head</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr; overflow-x: auto;">
+                            <table class="table table-striped table-bordered h2h-table" style="font-size: 0.82em;">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <?php foreach ($playoffH2H['managers'] as $m): ?>
+                                            <th class="text-center h2h-col-header"><?php echo $m; ?></th>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($playoffH2H['managers'] as $row): ?>
+                                        <tr>
+                                            <td><strong><?php echo $row; ?></strong></td>
+                                            <?php foreach ($playoffH2H['managers'] as $col): ?>
+                                                <?php if ($row === $col): ?>
+                                                    <td class="text-center text-muted">—</td>
+                                                <?php else: ?>
+                                                    <td class="text-center">
+                                                        <?php
+                                                        $count = $playoffH2H['grid'][$row][$col];
+                                                        echo $count > 0 ? $count : '<span class="text-muted">0</span>';
+                                                        ?>
+                                                    </td>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </tr>
+                                    <?php endforeach; ?>
                                 </tbody>
                             </table>
                         </div>

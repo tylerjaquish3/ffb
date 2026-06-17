@@ -1,5 +1,5 @@
     <div class="footer" style="direction: ltr;">
-        Copyright <?php echo date("Y"); ?> &copy; Suntown FFB.
+        Copyright <?php echo date("Y"); ?> &copy;
         &nbsp;|&nbsp;
         <?php echo $version.' '.$vDate; ?>
         &nbsp;|&nbsp;

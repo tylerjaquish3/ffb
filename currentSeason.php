@@ -207,6 +207,23 @@ include 'sidebar.php';
                             <h4 style="float: right">Top Weekly Performers</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
+                            <div id="manager-filter-btns" style="margin-bottom: 10px;">
+                                <?php
+                                $managerNames = [];
+                                foreach ($bestWeek as $week => $players) {
+                                    foreach ($players as $pos => $stuff) {
+                                        if (!empty($stuff['manager']) && !in_array($stuff['manager'], $managerNames)) {
+                                            $managerNames[] = $stuff['manager'];
+                                        }
+                                    }
+                                }
+                                sort($managerNames);
+                                foreach ($managerNames as $name) {
+                                    echo '<button class="btn btn-sm btn-outline-secondary manager-filter-btn" data-manager="' . htmlspecialchars($name) . '" style="margin: 2px;">' . htmlspecialchars($name) . '</button>';
+                                }
+                                ?>
+                                <button class="btn btn-sm btn-secondary" id="manager-filter-clear" style="margin: 2px; display: none;">Clear</button>
+                            </div>
                             <table class="stripe nowrap row-border order-column full-width" id="datatable-bestWeek">
                                 <thead>
                                     <tr>
@@ -231,7 +248,7 @@ include 'sidebar.php';
                                             <?php foreach ($players as $pos => $stuff) {
                                                 if ($pos != 'qb') { ?>
                                                     <td data-order="<?php echo $stuff['points']; ?>">
-                                                        <strong><?php echo $stuff['manager']; ?></strong><br />
+                                                        <strong data-manager="<?php echo htmlspecialchars($stuff['manager']); ?>"><?php echo $stuff['manager']; ?></strong><br />
                                                         <?php echo $stuff['player']; ?><br />
                                                         <i><?php echo $stuff['points']. ' points'; ?></i>
                                                     </td>
@@ -670,7 +687,26 @@ include 'sidebar.php';
                         </div>
                     </div>
                 </div>
-                
+
+                <div class="col-sm-12 col-lg-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Weekly Averages</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <table class="stripe nowrap row-border order-column full-width" id="datatable-lineupAccuracyAvg">
+                                <thead>
+                                    <th>Manager</th>
+                                    <th>Avg Points</th>
+                                    <th>Avg Optimal Points</th>
+                                    <th>Avg Points Missed</th>
+                                </thead>
+                                <tbody> </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <div class="row card-section" id="charts" style="display: none;">
@@ -723,6 +759,34 @@ include 'sidebar.php';
             window.location = baseUrl+'currentSeason.php?id='+$('#year-select').val();
         });
         
+        function highlightColumns(tableId, skipCols, invertCols) {
+            invertCols = invertCols || [];
+            $(tableId).on('draw.dt', function() {
+                var $rows = $(this).find('tbody tr');
+                if ($rows.length === 0) return;
+                var numCols = $rows.first().find('td').length;
+                for (var col = skipCols; col < numCols; col++) {
+                    var vals = [];
+                    $rows.each(function() {
+                        var v = parseFloat($(this).find('td').eq(col).text().trim());
+                        if (!isNaN(v)) vals.push(v);
+                    });
+                    if (vals.length === 0) continue;
+                    var max = Math.max.apply(null, vals);
+                    var min = Math.min.apply(null, vals);
+                    if (max === min) continue;
+                    var invert = invertCols.indexOf(col) !== -1;
+                    $rows.each(function() {
+                        var $cell = $(this).find('td').eq(col);
+                        var v = parseFloat($cell.text().trim());
+                        if (v === max) $cell[0].style.setProperty('background-color', invert ? 'rgb(255, 179, 179)' : 'rgb(172, 240, 172)', 'important');
+                        else if (v === min) $cell[0].style.setProperty('background-color', invert ? 'rgb(172, 240, 172)' : 'rgb(255, 179, 179)', 'important');
+                        else $cell[0].style.removeProperty('background-color');
+                    });
+                }
+            });
+        }
+
         let currentPointsColCount = parseInt("<?php echo $currentPointsColCount; ?>");
         $('#datatable-currentPoints').DataTable({
             searching: false,
@@ -775,27 +839,9 @@ include 'sidebar.php';
             },
             order: [
                 [2, "desc"]
-            ],
-            initComplete: function() {
-                var api = this.api();
-                api.columns(':not(:first)').every(function() {
-                    var col = this.index();
-                    var data = this.data().unique().map(function(value) {
-                        return parseInt(value);
-                    }).toArray().sort(function(a, b){return b-a});
-
-                    last = data.length-1;
-                    api.cells(null, col).every(function() {
-                        var cell = parseInt(this.data());
-                        if (cell === data[0]) {
-                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                        } else if (cell === data[last]) {
-                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                        }
-                    });
-                });
-            }
+            ]
         });
+        highlightColumns('#datatable-currentStats', 1, [5]);
 
         $('#datatable-currentWeekStats').DataTable({
             scrollX: "100%",
@@ -805,27 +851,9 @@ include 'sidebar.php';
             },
             order: [
                 [2, "desc"]
-            ],
-            initComplete: function() {
-                var api = this.api();
-                api.columns(':not(:first)').every(function() {
-                    var col = this.index();
-                    var data = this.data().unique().map(function(value) {
-                        return parseInt(value);
-                    }).toArray().sort(function(a, b){return b-a});
-
-                    last = data.length-1;
-                    api.cells(null, col).every(function() {
-                        var cell = parseInt(this.data());
-                        if (cell === data[0]) {
-                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                        } else if (cell === data[last]) {
-                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                        }
-                    });
-                });
-            }
+            ]
         });
+        highlightColumns('#datatable-currentWeekStats', 2, [6]);
 
         $('#datatable-bestWeek').DataTable({
             searching: false,
@@ -845,6 +873,49 @@ include 'sidebar.php';
             }
         });
 
+        (function() {
+            var activeManager = null;
+
+            function applyHighlight(manager) {
+                $('#datatable-bestWeek tbody strong[data-manager]').each(function() {
+                    var td = $(this).closest('td')[0];
+                    if (!td) return;
+                    if ($(this).attr('data-manager') === manager) {
+                        td.style.setProperty('background-color', 'rgba(255, 220, 80, 0.55)', 'important');
+                    } else {
+                        td.style.removeProperty('background-color');
+                    }
+                });
+            }
+
+            function clearHighlight() {
+                $('#datatable-bestWeek tbody strong[data-manager]').each(function() {
+                    var td = $(this).closest('td')[0];
+                    if (td) td.style.removeProperty('background-color');
+                });
+                activeManager = null;
+                $('.manager-filter-btn').removeClass('active').css({'background-color': '', 'color': '', 'border-color': ''});
+                $('#manager-filter-clear').hide();
+            }
+
+            $(document).on('click', '.manager-filter-btn', function() {
+                var manager = $(this).data('manager');
+                if (activeManager === manager) {
+                    clearHighlight();
+                    return;
+                }
+                activeManager = manager;
+                $('.manager-filter-btn').removeClass('active').css({'background-color': '', 'color': '', 'border-color': ''});
+                $(this).addClass('active').css({'background-color': '#343a40', 'color': '#fff', 'border-color': '#343a40'});
+                $('#manager-filter-clear').show();
+                applyHighlight(manager);
+            });
+
+            $(document).on('click', '#manager-filter-clear', function() {
+                clearHighlight();
+            });
+        })();
+
         $('#datatable-statsAgainst').DataTable({
             searching: false,
             paging: false,
@@ -856,27 +927,9 @@ include 'sidebar.php';
             },
             order: [
                 [2, "desc"]
-            ],
-            initComplete: function() {
-                var api = this.api();
-                api.columns(':not(:first)').every(function() {
-                    var col = this.index();
-                    var data = this.data().unique().map(function(value) {
-                        return parseInt(value);
-                    }).toArray().sort(function(a, b){return b-a});
-
-                    last = data.length-1;
-                    api.cells(null, col).every(function() {
-                        var cell = parseInt(this.data());
-                        if (cell === data[0]) {
-                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                        } else if (cell === data[last]) {
-                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                        }
-                    });
-                });
-            }
+            ]
         });
+        highlightColumns('#datatable-statsAgainst', 1, [5]);
 
         $('#datatable-weekStatsAgainst').DataTable({
             scrollX: "100%",
@@ -886,27 +939,9 @@ include 'sidebar.php';
             },
             order: [
                 [2, "desc"]
-            ],
-            initComplete: function() {
-                var api = this.api();
-                api.columns(':not(:first)').every(function() {
-                    var col = this.index();
-                    var data = this.data().unique().map(function(value) {
-                        return parseInt(value);
-                    }).toArray().sort(function(a, b){return b-a});
-
-                    last = data.length-1;
-                    api.cells(null, col).every(function() {
-                        var cell = parseInt(this.data());
-                        if (cell === data[0]) {
-                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                        } else if (cell === data[last]) {
-                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                        }
-                    });
-                });
-            }
+            ]
         });
+        highlightColumns('#datatable-weekStatsAgainst', 2, [6]);
 
         $('#datatable-bestTeamWeek').DataTable({
             searching: false,
@@ -973,6 +1008,9 @@ include 'sidebar.php';
         });
 
         $('#datatable-lineupAccuracy').DataTable({
+            searching: false,
+            paging: false,
+            info: false,
             scrollX: "100%",
             scrollCollapse: true,
             fixedColumns:   {
@@ -994,6 +1032,33 @@ include 'sidebar.php';
             ],
             order: [
                 [4, "desc"]
+            ]
+        });
+
+        $('#datatable-lineupAccuracyAvg').DataTable({
+            searching: false,
+            paging: false,
+            info: false,
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns:   {
+                leftColumns: 1
+            },
+            ajax: {
+                url: 'dataLookup.php',
+                data: function (d) {
+                    d.dataType = 'lineup-accuracy-avg';
+                    d.season = $('#year-select').val();
+                }
+            },
+            columns: [
+                { data: 'manager' },
+                { data: 'avg_points' },
+                { data: 'avg_optimal' },
+                { data: 'avg_points_missed' }
+            ],
+            order: [
+                [3, "asc"]
             ]
         });
 

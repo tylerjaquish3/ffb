@@ -211,6 +211,9 @@ function showCard(cardId, updateUrl = true) {
             if (typeof $('#datatable-lineupAccuracy').DataTable !== 'undefined') {
                 $('#datatable-lineupAccuracy').DataTable().columns.adjust().draw();
             }
+            if (typeof $('#datatable-lineupAccuracyAvg').DataTable !== 'undefined') {
+                $('#datatable-lineupAccuracyAvg').DataTable().columns.adjust().draw();
+            }
             if (typeof $('#datatable-drafted').DataTable !== 'undefined') {
                 $('#datatable-drafted').DataTable().columns.adjust().draw();
             }

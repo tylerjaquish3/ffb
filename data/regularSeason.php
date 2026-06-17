@@ -60,10 +60,11 @@ $response['gameTimePoints'] = $gameTimePoints;
 
 // Total game time points table
 $totalGameTimePoints = [];
-$sql = "SELECT sum(points) as points, manager, game_slot FROM rosters WHERE points > 0 AND roster_spot NOT IN ('IR','BN') GROUP BY manager, game_slot";
+$sql = "SELECT sum(points) as points, count(*) as count, manager, game_slot FROM rosters WHERE points > 0 AND roster_spot NOT IN ('IR','BN') GROUP BY manager, game_slot";
 $result = query($sql);
 while ($row = fetch_array($result)) {
     $row['game_slot_label'] = isset($labels[$row['game_slot']]) ? $labels[$row['game_slot']] : null;
+    $row['points_per_count'] = $row['count'] > 0 ? round($row['points'] / $row['count'], 2) : 0;
     $totalGameTimePoints[] = $row;
 }
 $response['totalGameTimePoints'] = $totalGameTimePoints;

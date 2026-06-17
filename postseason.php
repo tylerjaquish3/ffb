@@ -5,6 +5,9 @@ include 'header.php';
 include 'sidebar.php';
 
 ?>
+<style>
+#datatable-champions td, #datatable-champions th { white-space: nowrap !important; }
+</style>
 
 <div class="app-content content">
     <div class="content-wrapper">
@@ -25,7 +28,7 @@ include 'sidebar.php';
                             Champion Details
                         </button>
                         <button class="tab-button" id="records-championships-tab" onclick="showCard('records-championships')">
-                            Records
+                            W/L Records
                         </button>
                     </div>
                 </div>
@@ -127,7 +130,8 @@ include 'sidebar.php';
                             <h4 style="float: right">Champion Details</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <table class="table table-responsive table-striped nowrap full-width" id="datatable-champions">
+                            <div style="overflow-x: auto;">
+                            <table class="table table-striped nowrap full-width" id="datatable-champions">
                                 <thead>
                                     <th>Year</th>
                                     <th>Champion</th>
@@ -154,6 +158,19 @@ include 'sidebar.php';
                                     <?php } ?>
                                 </tbody>
                             </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Championships by Draft Pick</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="card-block" style="height: 300px; max-height: 320px;">
+                                <canvas id="draftPickChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -163,7 +180,7 @@ include 'sidebar.php';
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Records</h4>
+                            <h4 style="float: right">W/L Records</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
                             <div class="table-container" style="overflow-x: auto;">
@@ -287,6 +304,72 @@ include 'sidebar.php';
                         color: 'black',
                         font: {
                             weight: 'bold'
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+
+        // Draft pick championship chart
+        <?php
+            $draftPickCounts = array_fill(1, 10, 0);
+            $draftPickDetails = array_fill(1, 10, []);
+            foreach ($champions as $champ) {
+                $pick = $champ['draft_pick'];
+                if (is_numeric($pick) && $pick >= 1 && $pick <= 10) {
+                    $draftPickCounts[$pick]++;
+                    $draftPickDetails[$pick][] = $champ['year'] . ' — ' . $champ['name'];
+                }
+            }
+            $pickCountsOrdered = array_values($draftPickCounts);
+            $pickDetailsOrdered = array_values($draftPickDetails);
+        ?>
+        var draftPickCtx = $('#draftPickChart');
+        var draftPickCounts = <?php echo json_encode($pickCountsOrdered); ?>;
+        var draftPickDetails = <?php echo json_encode($pickDetailsOrdered); ?>;
+        var pickLabels = ['Pick 1','Pick 2','Pick 3','Pick 4','Pick 5','Pick 6','Pick 7','Pick 8','Pick 9','Pick 10'];
+        var barColors = pickLabels.map(function(_, i) {
+            return draftPickCounts[i] > 0 ? '#9c68d9' : '#e0d0f5';
+        });
+
+        new Chart(draftPickCtx, {
+            type: 'bar',
+            data: {
+                labels: pickLabels,
+                datasets: [{
+                    label: 'Championships',
+                    data: draftPickCounts,
+                    backgroundColor: barColors,
+                    datalabels: { anchor: 'end', align: 'end' }
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 },
+                        title: { display: true, text: 'Championships' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Draft Pick Position' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        color: 'black',
+                        font: { weight: 'bold' },
+                        formatter: function(value) { return value > 0 ? value : ''; }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterBody: function(items) {
+                                var idx = items[0].dataIndex;
+                                var details = draftPickDetails[idx];
+                                return details.length ? details : ['No championships'];
+                            }
                         }
                     }
                 }

@@ -152,6 +152,9 @@ $( document ).ready( () => {
             plugins: plugins,
             toolbar: toolbar
         })
+        .then( editor => {
+            window.newsletterPreviewEditor = editor;
+        })
         .catch( error => {
             console.error( 'Error initializing CKEditor 5 for preview:', error );
         });
@@ -162,6 +165,9 @@ $( document ).ready( () => {
             licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
             plugins: plugins,
             toolbar: toolbar
+        })
+        .then( editor => {
+            window.newsletterNotesEditor = editor;
         })
         .catch( error => {
             console.error( 'Error initializing CKEditor 5 for notes:', error );
@@ -226,6 +232,68 @@ $( document ).ready( () => {
             });
         } else {
             makeRequest(year, weeks, managers);
+        }
+    });
+
+    // Generate weekly preview with AI
+    $('#generate-preview-btn').click(function() {
+        var notes = '';
+        if (window.newsletterNotesEditor) {
+            notes = window.newsletterNotesEditor.getData();
+        } else {
+            notes = $('#newsletter-notes').val();
+        }
+
+        if (!notes || notes.replace(/<[^>]*>/g, '').trim() === '') {
+            alert('Please enter some notes first.');
+            return;
+        }
+
+        // Check if preview editor already has content
+        var previewEditor = window.newsletterPreviewEditor;
+        var existingPreview = previewEditor ? previewEditor.getData() : $('#preview').val();
+        if (existingPreview && existingPreview.replace(/<[^>]*>/g, '').trim() !== '') {
+            if (!confirm('The preview field already has content. Generating will show a new AI result above it — your current text will not be changed. Continue?')) {
+                return;
+            }
+        }
+
+        var btn = $(this);
+        var originalText = btn.text();
+        btn.text('Generating...').prop('disabled', true);
+        $('#preview-ai-result').hide();
+        $('#preview-ai-error').hide();
+
+        $.ajax({
+            url: 'generateWeeklyPreview.php',
+            type: 'POST',
+            data: { notes: notes },
+            success: function(response) {
+                btn.text(originalText).prop('disabled', false);
+                if (response.error) {
+                    $('#preview-ai-error').text(response.error).show();
+                } else {
+                    $('#preview-ai-text').text(response.text);
+                    $('#preview-ai-result').show();
+                }
+            },
+            error: function() {
+                btn.text(originalText).prop('disabled', false);
+                $('#preview-ai-error').text('Request failed. Please try again.').show();
+            },
+            dataType: 'json'
+        });
+    });
+
+    // Copy AI preview text to clipboard
+    $('#copy-ai-preview-btn').click(function() {
+        var text = $('#preview-ai-text').text();
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(function() {
+                showCopyFeedback($('#copy-ai-preview-btn'));
+            });
+        } else {
+            fallbackCopyTextToClipboard(text, $('#copy-ai-preview-btn'));
         }
     });
 

@@ -133,7 +133,7 @@ include 'sidebar.php';
                 <div class="col-sm-12 col-lg-4 table-padding">
                     <div class="card">
                         <div class="card-header">
-                            <h4 style="float: right">Head to Head</h4>
+                            <h4 style="float: right">Head to Head Matchup Counts</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr; overflow-x: auto;">
                             <table class="table table-striped table-bordered h2h-table" style="font-size: 0.82em;">

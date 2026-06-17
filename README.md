@@ -54,7 +54,6 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 
 # Ideas
 
-- add trophy graphic on trophy page
 - add more fun facts
     - record against everyone
     - best trade
@@ -83,6 +82,7 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
     - Baltimore has been owned the most but only by 7 managers
 - make newsletter show random additional data so its not the same every week
 - add lineup accuracy to profile head to head
+- add a table for top free agents
 
 Notes:
 Moved to 18 week schedule in 2021

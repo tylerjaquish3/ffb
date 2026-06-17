@@ -219,6 +219,17 @@ function _milestoneFetchCrossings($spec, $top5Rows)
     return $crossings;
 }
 
+function _milestoneOrdinal($n)
+{
+    if ($n % 100 >= 11 && $n % 100 <= 13) return $n . 'th';
+    switch ($n % 10) {
+        case 1: return $n . 'st';
+        case 2: return $n . 'nd';
+        case 3: return $n . 'rd';
+        default: return $n . 'th';
+    }
+}
+
 function _milestoneBuildAlerts($crossings, $categoryLabel, $latestSeason)
 {
     if (empty($crossings)) return [];
@@ -226,6 +237,19 @@ function _milestoneBuildAlerts($crossings, $categoryLabel, $latestSeason)
     $firstByTier = [];
     foreach ($crossings as $c) {
         if (!isset($firstByTier[$c['tier']])) $firstByTier[$c['tier']] = $c;
+    }
+
+    // Compute each manager's rank (place) per tier, ordered by sort_key.
+    $placeByTier = [];
+    foreach ($crossings as $c) {
+        $placeByTier[$c['tier']][] = $c;
+    }
+    $rankByTierAndManager = [];
+    foreach ($placeByTier as $tier => $tierCrossings) {
+        usort($tierCrossings, fn($a, $b) => $a['sort_key'] <=> $b['sort_key']);
+        foreach ($tierCrossings as $i => $tc) {
+            $rankByTierAndManager[$tier][$tc['manager_id']] = $i + 1;
+        }
     }
 
     $alerts = [];
@@ -240,13 +264,15 @@ function _milestoneBuildAlerts($crossings, $categoryLabel, $latestSeason)
             $text = $c['manager_name'] . " was the first to reach $tierStr career $categoryLabel";
             $type = $isRecent ? 'first-recent' : 'first';
         } else {
-            $text = $c['manager_name'] . " just went over $tierStr career $categoryLabel";
-            $type = 'recent';
+            $place = $rankByTierAndManager[$c['tier']][$c['manager_id']] ?? null;
+            $text  = $c['manager_name'] . " just went over $tierStr career $categoryLabel";
+            $type  = 'recent';
         }
 
         $alerts[] = [
             'type'         => $type,
             'text'         => $text,
+            'place'        => $place ?? null,
             'when'         => $c['year'] . ' ' . $c['when'],
             'manager_id'   => $c['manager_id'],
             'manager_name' => $c['manager_name'],

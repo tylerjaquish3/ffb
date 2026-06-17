@@ -75,6 +75,7 @@ if ($pageName == 'Postseason') {
     $postseasonRecord = getPostseasonRecord();
     $winsChart = getChampChartNumbers();
     $champions = getChampions();
+    $playoffH2H = getPlayoffHeadToHead();
 }
 if ($pageName == 'Schedule') {
     $selectedSeason = isset($_GET['id']) ? $_GET['id'] : $season;
@@ -930,6 +931,35 @@ function getPostseasonMatchups()
     }
 
     return $results;
+}
+
+/**
+ * Get head-to-head playoff matchup counts for each manager pair
+ */
+function getPlayoffHeadToHead()
+{
+    $managers = ['AJ', 'Andy', 'Ben', 'Cameron', 'Cole', 'Everett', 'Gavin', 'Justin', 'Matt', 'Tyler'];
+
+    $grid = [];
+    foreach ($managers as $m1) {
+        foreach ($managers as $m2) {
+            $grid[$m1][$m2] = 0;
+        }
+    }
+
+    $result = query("SELECT m1.name as manager1, m2.name as manager2
+        FROM playoff_matchups pm
+        JOIN managers m1 ON m1.id = pm.manager1_id
+        JOIN managers m2 ON m2.id = pm.manager2_id");
+
+    while ($row = fetch_array($result)) {
+        $a = $row['manager1'];
+        $b = $row['manager2'];
+        if (isset($grid[$a][$b])) $grid[$a][$b]++;
+        if (isset($grid[$b][$a])) $grid[$b][$a]++;
+    }
+
+    return ['managers' => $managers, 'grid' => $grid];
 }
 
 /**

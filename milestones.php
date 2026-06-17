@@ -123,6 +123,22 @@
         font-size: 0.8rem;
         color: rgba(0,0,0,0.6);
     }
+    .alert-place {
+        flex: 0 0 auto;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        background: rgba(0,0,0,0.07);
+        color: rgba(0,0,0,0.5);
+    }
+    .alert-place.place-first {
+        background: #f59e0b;
+        color: #000;
+    }
     .alert-empty {
         padding: 1rem;
         background: #fff;
@@ -211,6 +227,11 @@
                                                         <div class="alert-text"><?php echo htmlspecialchars($a['text']); ?></div>
                                                         <div class="alert-when"><?php echo htmlspecialchars($a['when']); ?></div>
                                                     </div>
+                                                    <?php if (!empty($a['place'])): ?>
+                                                    <span class="alert-place<?php echo $a['place'] === 1 ? ' place-first' : ''; ?>">
+                                                        <?php echo _milestoneOrdinal($a['place']); ?>
+                                                    </span>
+                                                    <?php endif; ?>
                                                 </div>
                                                 <?php endforeach; ?>
                                             </div>

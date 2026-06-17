@@ -139,35 +139,47 @@ include 'sidebar.php';
                                     <th>Year</th>
                                     <th>Pick #</th>
                                     <th>Points</th>
+                                    <th># Picks</th>
+                                    <th>Avg Per Pick</th>
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $result = query("SELECT r.manager, r.year, sum(r.points) as points, min(d.overall_pick) as pick
+                                    $draftPicksResult = query("SELECT m.name as manager, d.year, count(*) as picks,
+                                        MAX(CASE WHEN d.round = 1 THEN d.round_pick END) as draft_slot
+                                        FROM draft d
+                                        JOIN managers m ON d.manager_id = m.id
+                                        GROUP BY m.name, d.year");
+                                    $draftPicksByManagerYear = [];
+                                    while ($p = fetch_array($draftPicksResult)) {
+                                        $draftPicksByManagerYear[$p['manager']][$p['year']] = [
+                                            'picks' => $p['picks'],
+                                            'slot'  => $p['draft_slot'],
+                                        ];
+                                    }
+
+                                    $result = query("SELECT r.manager, r.year, sum(r.points) as points
                                         FROM rosters r
-                                        JOIN draft d ON d.year = r.year AND (
-                                            r.player = d.player
+                                        WHERE EXISTS (
+                                            SELECT 1 FROM draft d WHERE d.year = r.year AND d.player = r.player
+                                        ) OR EXISTS (
+                                            SELECT 1 FROM draft d
+                                            JOIN player_aliases pa ON d.player = pa.player OR d.player = pa.alias_1 OR d.player = pa.alias_2 OR d.player = pa.alias_3
+                                            WHERE d.year = r.year AND (r.player = pa.player OR r.player = pa.alias_1 OR r.player = pa.alias_2 OR r.player = pa.alias_3)
                                         )
                                         GROUP BY r.manager, r.year
-                                        UNION
-                                        SELECT r.manager, r.year, sum(r.points) as points, min(d.overall_pick) as pick
-                                        FROM rosters r
-                                        JOIN draft d ON d.year = r.year
-                                        JOIN player_aliases pa ON d.player = pa.player 
-                                            OR d.player = pa.alias_1 
-                                            OR d.player = pa.alias_2 
-                                            OR d.player = pa.alias_3
-                                        WHERE r.player = pa.player OR 
-                                              r.player = pa.alias_1 OR 
-                                              r.player = pa.alias_2 OR 
-                                              r.player = pa.alias_3
-                                        GROUP BY r.manager, r.year
                                         ORDER BY points DESC");
-                                    while ($row = fetch_array($result)) { ?>
+                                    while ($row = fetch_array($result)) {
+                                        $draftInfo = $draftPicksByManagerYear[$row['manager']][$row['year']] ?? ['picks' => 0, 'slot' => ''];
+                                        $picks = $draftInfo['picks'];
+                                        $avgPerPick = $picks > 0 ? $row['points'] / $picks : 0;
+                                    ?>
                                         <tr>
                                             <td><?php echo $row['manager']; ?></td>
                                             <td><?php echo '<a href="/draft.php?manager='.$row['manager'].'&year='.$row['year'].'">'.$row['year'].'</a>'; ?></td>
-                                            <td><?php echo $row['pick']; ?></td>
+                                            <td><?php echo $draftInfo['slot']; ?></td>
                                             <td class="text-right"><?php echo number_format($row['points'], 1); ?></td>
+                                            <td class="text-right"><?php echo $picks; ?></td>
+                                            <td class="text-right"><?php echo number_format($avgPerPick, 1); ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -185,10 +197,22 @@ include 'sidebar.php';
                                 <thead>
                                     <th>Manager</th>
                                     <th>Points</th>
+                                    <th># Drafts</th>
                                     <th>Average</th>
+                                    <th># Picks</th>
+                                    <th>Avg Per Pick</th>
                                 </thead>
                                 <tbody>
                                     <?php
+                                    $picksResult = query("SELECT m.name as manager, count(*) as picks
+                                        FROM draft d
+                                        JOIN managers m ON d.manager_id = m.id
+                                        GROUP BY m.name");
+                                    $picksByManager = [];
+                                    while ($p = fetch_array($picksResult)) {
+                                        $picksByManager[$p['manager']] = $p['picks'];
+                                    }
+
                                     $result = query("SELECT manager, sum(points) as points, count(distinct year) as years
                                         FROM (
                                             SELECT r.manager, r.year, sum(r.points) as points
@@ -199,23 +223,29 @@ include 'sidebar.php';
                                             SELECT r.manager, r.year, sum(r.points) as points
                                             FROM rosters r
                                             JOIN draft d ON d.year = r.year
-                                            JOIN player_aliases pa ON d.player = pa.player 
-                                                OR d.player = pa.alias_1 
-                                                OR d.player = pa.alias_2 
+                                            JOIN player_aliases pa ON d.player = pa.player
+                                                OR d.player = pa.alias_1
+                                                OR d.player = pa.alias_2
                                                 OR d.player = pa.alias_3
-                                            WHERE r.player = pa.player OR 
-                                                  r.player = pa.alias_1 OR 
-                                                  r.player = pa.alias_2 OR 
+                                            WHERE r.player = pa.player OR
+                                                  r.player = pa.alias_1 OR
+                                                  r.player = pa.alias_2 OR
                                                   r.player = pa.alias_3
                                             GROUP BY r.manager, r.year
                                         ) combined
                                         GROUP BY manager
                                         ORDER BY sum(points) DESC");
-                                    while ($row = fetch_array($result)) { ?>
+                                    while ($row = fetch_array($result)) {
+                                        $picks = $picksByManager[$row['manager']] ?? 0;
+                                        $avgPerPick = $picks > 0 ? $row['points'] / $picks : 0;
+                                    ?>
                                         <tr>
                                             <td><?php echo $row['manager']; ?></td>
                                             <td class="text-right"><?php echo number_format($row['points'], 0); ?></td>
+                                            <td class="text-right"><?php echo $row['years']; ?></td>
                                             <td class="text-right"><?php echo number_format($row['points']/$row['years'], 0); ?></td>
+                                            <td class="text-right"><?php echo $picks; ?></td>
+                                            <td class="text-right"><?php echo number_format($avgPerPick, 1); ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -348,7 +378,7 @@ include 'sidebar.php';
             paging: false,
             info: false,
             order: [
-                [2, "desc"]
+                [1, "desc"]
             ]
         });
 

@@ -115,6 +115,9 @@ function showCard(cardId) {
 var access_token = null;
 
 $( document ).ready( () => {
+
+    var newsletterDirty = false;
+
     const {
         ClassicEditor,Autoformat,AutoImage,Autosave,BlockQuote,Bold,Emoji,
         Essentials,Heading,Indent,IndentBlock,Italic,Link,List,MediaEmbed,Mention,Paragraph,
@@ -141,6 +144,9 @@ $( document ).ready( () => {
             plugins: plugins,
             toolbar: toolbar
         })
+        .then( editor => {
+            editor.model.document.on('change:data', function() { newsletterDirty = true; });
+        })
         .catch( error => {
             console.error( 'Error initializing CKEditor 5 for recap:', error );
         });
@@ -154,6 +160,7 @@ $( document ).ready( () => {
         })
         .then( editor => {
             window.newsletterPreviewEditor = editor;
+            editor.model.document.on('change:data', function() { newsletterDirty = true; });
         })
         .catch( error => {
             console.error( 'Error initializing CKEditor 5 for preview:', error );
@@ -168,6 +175,7 @@ $( document ).ready( () => {
         })
         .then( editor => {
             window.newsletterNotesEditor = editor;
+            editor.model.document.on('change:data', function() { newsletterDirty = true; });
         })
         .catch( error => {
             console.error( 'Error initializing CKEditor 5 for notes:', error );
@@ -313,6 +321,18 @@ $( document ).ready( () => {
             fallbackCopyTextToClipboard(textToCopy, $(e.target));
         }
     });
+
+    // Newsletter unsaved-changes guard
+    $('#headline').on('input', function() { newsletterDirty = true; });
+    $('#hero_image, input[name="remove_hero_image"]').on('change', function() { newsletterDirty = true; });
+    $('form[action="admin.php?tab=newsletter"]').on('submit', function() { newsletterDirty = false; });
+    window.addEventListener('beforeunload', function(e) {
+        if (newsletterDirty) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
 } );
 </script>
 

@@ -216,7 +216,7 @@ include 'sidebar.php';
                                         <option value="30" selected>Weekly Points</option>
                                         <option value="31">Season Points</option>
                                         <option value="32">Points by Position</option>
-                                        <!-- <option value="33">Playoff Points</option> -->
+                                        <option value="33">Playoff Points</option>
                                     </select>
                                     <div style="direction: ltr;">
                                         <?php include 'leagueMiscStats.php'; ?>

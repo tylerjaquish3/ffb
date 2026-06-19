@@ -145,6 +145,7 @@ $( document ).ready( () => {
             toolbar: toolbar
         })
         .then( editor => {
+            window.newsletterRecapEditor = editor;
             editor.model.document.on('change:data', function() { newsletterDirty = true; });
         })
         .catch( error => {
@@ -164,6 +165,21 @@ $( document ).ready( () => {
         })
         .catch( error => {
             console.error( 'Error initializing CKEditor 5 for preview:', error );
+        });
+    }
+
+    if ($('textarea#newsletter-recap-notes').length) {
+        ClassicEditor.create( $( 'textarea#newsletter-recap-notes' )[ 0 ], {
+            licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
+            plugins: plugins,
+            toolbar: toolbar
+        })
+        .then( editor => {
+            window.newsletterRecapNotesEditor = editor;
+            editor.model.document.on('change:data', function() { newsletterDirty = true; });
+        })
+        .catch( error => {
+            console.error( 'Error initializing CKEditor 5 for recap-notes:', error );
         });
     }
 
@@ -291,6 +307,67 @@ $( document ).ready( () => {
             },
             dataType: 'json'
         });
+    });
+
+    // Generate weekly recap with AI
+    $('#generate-recap-btn').click(function() {
+        var notes = '';
+        if (window.newsletterRecapNotesEditor) {
+            notes = window.newsletterRecapNotesEditor.getData();
+        } else {
+            notes = $('#newsletter-recap-notes').val();
+        }
+
+        if (!notes || notes.replace(/<[^>]*>/g, '').trim() === '') {
+            alert('Please enter some recap notes first.');
+            return;
+        }
+
+        var recapEditor = window.newsletterRecapEditor;
+        var existingRecap = recapEditor ? recapEditor.getData() : $('#newsletter-recap').val();
+        if (existingRecap && existingRecap.replace(/<[^>]*>/g, '').trim() !== '') {
+            if (!confirm('The recap field already has content. Generating will show a new AI result above it — your current text will not be changed. Continue?')) {
+                return;
+            }
+        }
+
+        var btn = $(this);
+        var originalText = btn.text();
+        btn.text('Generating...').prop('disabled', true);
+        $('#recap-ai-result').hide();
+        $('#recap-ai-error').hide();
+
+        $.ajax({
+            url: 'generateWeeklyRecap.php',
+            type: 'POST',
+            data: { notes: notes },
+            success: function(response) {
+                btn.text(originalText).prop('disabled', false);
+                if (response.error) {
+                    $('#recap-ai-error').text(response.error).show();
+                } else {
+                    $('#recap-ai-text').text(response.text);
+                    $('#recap-ai-result').show();
+                }
+            },
+            error: function() {
+                btn.text(originalText).prop('disabled', false);
+                $('#recap-ai-error').text('Request failed. Please try again.').show();
+            },
+            dataType: 'json'
+        });
+    });
+
+    // Copy AI recap text to clipboard
+    $('#copy-ai-recap-btn').click(function() {
+        var text = $('#recap-ai-text').text();
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(function() {
+                showCopyFeedback($('#copy-ai-recap-btn'));
+            });
+        } else {
+            fallbackCopyTextToClipboard(text, $('#copy-ai-recap-btn'));
+        }
     });
 
     // Copy AI preview text to clipboard

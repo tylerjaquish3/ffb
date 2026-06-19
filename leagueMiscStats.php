@@ -8,29 +8,34 @@
             <th>Total Points</th>
             <th>Avg. Points</th>
             <th>Total Margin</th>
+            <th>Lineup Accuracy</th>
         </tr>
     </thead>
     <tbody>
         <?php
         $result = query("
-            SELECT 
+            SELECT
                 year,
                 week_number,
                 ROUND(SUM(manager1_score), 2) as total_points,
+                ROUND(SUM(manager1_optimal), 2) as optimal_points,
                 ROUND(SUM(ABS(manager1_score - manager2_score)) / 2, 2) as margin,
                 ROUND(AVG(manager1_score), 2) as avg_points
-            FROM regular_season_matchups 
-            GROUP BY year, week_number 
+            FROM regular_season_matchups
+            GROUP BY year, week_number
             ORDER BY year DESC, week_number DESC
         ");
-        
-        while ($row = fetch_array($result)) { ?>
+
+        while ($row = fetch_array($result)) {
+            $accuracy = $row['optimal_points'] > 0 ? round(($row['total_points'] / $row['optimal_points']) * 100, 1) : 0;
+        ?>
             <tr>
                 <td><?php echo $row['year']; ?></td>
                 <td><?php echo $row['week_number']; ?></td>
                 <td><?php echo number_format($row['total_points'], 2, '.', ','); ?></td>
                 <td><?php echo number_format($row['avg_points'], 2, '.', ','); ?></td>
                 <td><?php echo number_format($row['margin'], 2, '.', ','); ?></td>
+                <td><?php echo $accuracy; ?>%</td>
             </tr>
         <?php } ?>
     </tbody>
@@ -42,26 +47,33 @@
         <tr>
             <th>Year</th>
             <th>Total Points</th>
+            <th>Optimal Points</th>
             <th>Total Margin</th>
+            <th>Lineup Accuracy</th>
         </tr>
     </thead>
     <tbody>
         <?php
         $result = query("
-            SELECT 
+            SELECT
                 year,
                 ROUND(SUM(manager1_score), 2) as total_points,
+                ROUND(SUM(manager1_optimal), 2) as optimal_points,
                 ROUND(SUM(ABS(manager1_score - manager2_score)) / 2, 2) as margin
-            FROM regular_season_matchups 
-            GROUP BY year 
+            FROM regular_season_matchups
+            GROUP BY year
             ORDER BY year DESC
         ");
-        
-        while ($row = fetch_array($result)) { ?>
+
+        while ($row = fetch_array($result)) {
+            $accuracy = $row['optimal_points'] > 0 ? round(($row['total_points'] / $row['optimal_points']) * 100, 1) : 0;
+        ?>
             <tr>
                 <td><?php echo $row['year']; ?></td>
                 <td><?php echo number_format($row['total_points'], 2, '.', ','); ?></td>
+                <td><?php echo number_format($row['optimal_points'], 2, '.', ','); ?></td>
                 <td><?php echo number_format($row['margin'], 2, '.', ','); ?></td>
+                <td><?php echo $accuracy; ?>%</td>
             </tr>
         <?php } ?>
     </tbody>
@@ -118,7 +130,44 @@
         <?php } ?>
     </tbody>
 </table>
-                                                    
+
+<!-- Playoff Points Table -->
+<table class="table table-responsive table-striped nowrap" id="datatable-league33" style="display:none;">
+    <thead>
+        <tr>
+            <th>Year</th>
+            <th>Total Points</th>
+            <th>Optimal Points</th>
+            <th>Total Margin</th>
+            <th>Lineup Accuracy</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $result = query("
+            SELECT
+                year,
+                ROUND(SUM(manager1_score + manager2_score), 2) as total_points,
+                ROUND(SUM(manager1_optimal + manager2_optimal), 2) as optimal_points,
+                ROUND(SUM(ABS(manager1_score - manager2_score)), 2) as margin
+            FROM playoff_matchups
+            GROUP BY year
+            ORDER BY year DESC
+        ");
+
+        while ($row = fetch_array($result)) {
+            $accuracy = $row['optimal_points'] > 0 ? round(($row['total_points'] / $row['optimal_points']) * 100, 1) : 0;
+        ?>
+            <tr>
+                <td><?php echo $row['year']; ?></td>
+                <td><?php echo number_format($row['total_points'], 2, '.', ','); ?></td>
+                <td><?php echo number_format($row['optimal_points'], 2, '.', ','); ?></td>
+                <td><?php echo number_format($row['margin'], 2, '.', ','); ?></td>
+                <td><?php echo $accuracy; ?>%</td>
+            </tr>
+        <?php } ?>
+    </tbody>
+</table>
 
 <script src="/assets/datatables.js"></script>
 
@@ -150,6 +199,16 @@
         info: true,
         order: [
             [1, "desc"]
+        ]
+    });
+
+    // Initialize Playoff Points DataTable
+    $('#datatable-league33').DataTable({
+        searching: false,
+        paging: true,
+        info: true,
+        order: [
+            [0, "desc"]
         ]
     });
 

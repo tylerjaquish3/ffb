@@ -8,6 +8,7 @@ $recap = '';
 $preview = '';
 $headline = '';
 $notes = '';
+$recap_notes = '';
 $heroImagePath = '';
 $editYear = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
 $editWeek = isset($_GET['week']) ? (int)$_GET['week'] : 1;
@@ -20,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     $preview = isset($_POST['preview']) ? $_POST['preview'] : '';
     $headline = isset($_POST['headline']) ? $_POST['headline'] : '';
     $notes = isset($_POST['notes']) ? $_POST['notes'] : '';
+    $recap_notes = isset($_POST['recap_notes']) ? $_POST['recap_notes'] : '';
     $metadataImagePath = '';
     $heroImagePath = '';
 
@@ -61,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     $existingRow = fetch_array($existingQuery);
     if ($existingRow) {
         // Update existing record
-        $updateQuery = "UPDATE newsletters SET recap = '" . SQLite3::escapeString($recap) . "', preview = '" . SQLite3::escapeString($preview) . "', headline = '" . SQLite3::escapeString($headline) . "', notes = '" . SQLite3::escapeString($notes) . "', created_at = datetime('now')";
+        $updateQuery = "UPDATE newsletters SET recap = '" . SQLite3::escapeString($recap) . "', preview = '" . SQLite3::escapeString($preview) . "', headline = '" . SQLite3::escapeString($headline) . "', notes = '" . SQLite3::escapeString($notes) . "', recap_notes = '" . SQLite3::escapeString($recap_notes) . "', created_at = datetime('now')";
         if ($metadataImagePath) {
             $updateQuery .= ", metadata_image = '" . SQLite3::escapeString($metadataImagePath) . "'";
         }
@@ -74,8 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
         query($updateQuery);
     } else {
         // Insert new record
-        $insertQuery = "INSERT INTO newsletters (year, week, recap, preview, headline, notes, created_at";
-        $insertValues = "$editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "', '" . SQLite3::escapeString($headline) . "', '" . SQLite3::escapeString($notes) . "', datetime('now')";
+        $insertQuery = "INSERT INTO newsletters (year, week, recap, preview, headline, notes, recap_notes, created_at";
+        $insertValues = "$editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "', '" . SQLite3::escapeString($headline) . "', '" . SQLite3::escapeString($notes) . "', '" . SQLite3::escapeString($recap_notes) . "', datetime('now')";
         if ($metadataImagePath) {
             $insertQuery .= ", metadata_image";
             $insertValues .= ", '" . SQLite3::escapeString($metadataImagePath) . "'";
@@ -92,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 }
 
 // Fetch existing content if any
-$contentQuery = query("SELECT recap, preview, headline, notes, hero_image FROM newsletters WHERE year = $editYear AND week = $editWeek");
+$contentQuery = query("SELECT recap, preview, headline, notes, recap_notes, hero_image FROM newsletters WHERE year = $editYear AND week = $editWeek");
 $contentRow = fetch_array($contentQuery);
 $existingHeroImage = null;
 if ($contentRow) {
@@ -100,6 +102,7 @@ if ($contentRow) {
     $preview = $contentRow['preview'] ?? '';
     $headline = $contentRow['headline'] ?? '';
     $notes = $contentRow['notes'] ?? '';
+    $recap_notes = $contentRow['recap_notes'] ?? '';
     $existingHeroImage = !empty($contentRow['hero_image']) ? $contentRow['hero_image'] : null;
 }
 
@@ -174,10 +177,10 @@ if ($contentRow) {
                 <input type="hidden" name="year" value="<?php echo $editYear; ?>">
                 <input type="hidden" name="week" value="<?php echo $editWeek; ?>">
 
-                <!-- Headline & Hero Image -->
+                <!-- Headline & Hero Image | Schedule -->
                 <div class="row" style="direction: ltr;">
-                    <div class="col-sm-12">
-                        <div class="card">
+                    <div class="col-sm-12 col-md-6">
+                        <div class="card" style="height: 100%;">
                             <div class="card-header" style="direction: ltr;">
                                 <h4>Headline &amp; Hero Image</h4>
                             </div>
@@ -208,132 +211,158 @@ if ($contentRow) {
                             </div>
                         </div>
                     </div>
-                </div>
-
-            <!-- Week's Matchups Card (inside form so hidden inputs are available) -->
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="card">
-                        <div class="card-header" style="direction: ltr;">
-                            <h4>Week <?php echo $editWeek; ?> Schedule<?php if (isset($isPlayoffWeek) && $isPlayoffWeek): ?> (<?php echo $playoffRound; ?>)<?php endif; ?></h4>
-                        </div>
-                        <div class="card-body" style="background: #fff;">
-                            <?php
-                            // Get schedule info for the selected year and week
-                            if (!function_exists('getScheduleInfo')) {
-                                include_once 'functions.php';
-                            }
-                            
-                            // Determine if this is a playoff week
-                            $playoffStartWeek = ($editYear >= 2021) ? 15 : 14;
-                            $isPlayoffWeek = ($editWeek >= $playoffStartWeek);
-                            
-                            if ($isPlayoffWeek) {
-                                // Determine playoff round name
-                                $weeksSincePlayoffStart = $editWeek - $playoffStartWeek;
-                                switch ($weeksSincePlayoffStart) {
-                                    case 0:
-                                        $playoffRound = 'Quarterfinal';
-                                        break;
-                                    case 1:
-                                        $playoffRound = 'Semifinal';
-                                        break;
-                                    case 2:
-                                        $playoffRound = 'Final';
-                                        break;
-                                    default:
-                                        $playoffRound = 'Playoff';
+                    <div class="col-sm-12 col-md-6">
+                        <div class="card" style="height: 100%;">
+                            <div class="card-header" style="direction: ltr;">
+                                <h4>Week <?php echo $editWeek; ?> Schedule<?php if (isset($isPlayoffWeek) && $isPlayoffWeek): ?> (<?php echo $playoffRound; ?>)<?php endif; ?></h4>
+                            </div>
+                            <div class="card-body" style="background: #fff;">
+                                <?php
+                                // Get schedule info for the selected year and week
+                                if (!function_exists('getScheduleInfo')) {
+                                    include_once 'functions.php';
                                 }
-                                $scheduleInfo = getPlayoffScheduleInfo($editYear, $editWeek, $playoffRound);
-                            } else {
-                                $scheduleInfo = getScheduleInfo($editYear, $editWeek);
-                            }
-                            ?>
-                            <?php if (!empty($scheduleInfo)): ?>
-                                <table id="datatable-schedule" class="table table-striped table-bordered table-responsive" style="direction: ltr;">
-                                    <thead>
-                                        <tr>
-                                            <th>Manager 1</th>
-                                            <th>Manager 2</th>
-                                            <th>Regular Season H2H</th>
-                                            <th>Postseason H2H</th>
-                                            <th>Current Streak</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($scheduleInfo as $matchup): ?>
+
+                                // Determine if this is a playoff week
+                                $playoffStartWeek = ($editYear >= 2021) ? 15 : 14;
+                                $isPlayoffWeek = ($editWeek >= $playoffStartWeek);
+
+                                if ($isPlayoffWeek) {
+                                    // Determine playoff round name
+                                    $weeksSincePlayoffStart = $editWeek - $playoffStartWeek;
+                                    switch ($weeksSincePlayoffStart) {
+                                        case 0:
+                                            $playoffRound = 'Quarterfinal';
+                                            break;
+                                        case 1:
+                                            $playoffRound = 'Semifinal';
+                                            break;
+                                        case 2:
+                                            $playoffRound = 'Final';
+                                            break;
+                                        default:
+                                            $playoffRound = 'Playoff';
+                                    }
+                                    $scheduleInfo = getPlayoffScheduleInfo($editYear, $editWeek, $playoffRound);
+                                } else {
+                                    $scheduleInfo = getScheduleInfo($editYear, $editWeek);
+                                }
+
+                                // Auto-fill notes with matchup list if currently empty
+                                if (empty(trim($notes)) && !empty($scheduleInfo)) {
+                                    $matchupLines = [];
+                                    foreach ($scheduleInfo as $matchup) {
+                                        if (empty($matchup['is_bye'])) {
+                                            $matchupLines[] = $matchup['manager1'] . ' vs ' . $matchup['manager2'];
+                                        }
+                                    }
+                                    $notes = implode('', array_map(fn($line) => '<p>' . htmlspecialchars($line) . '</p>', $matchupLines));
+                                }
+                                ?>
+                                <?php if (!empty($scheduleInfo)): ?>
+                                    <table id="datatable-schedule" class="table table-striped table-bordered table-responsive" style="direction: ltr;">
+                                        <thead>
                                             <tr>
-                                                <td>
-                                                    <?php if (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['manager1_id'])): ?>
-                                                        <?php echo htmlspecialchars($matchup['manager1']); ?>
-                                                    <?php else: ?>
-                                                                        <a href="profile.php?id=<?php echo urlencode($matchup['manager1_clean'] ?? $matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>#head-to-head" target="_blank" rel="noopener">
-                                                            <?php echo htmlspecialchars($matchup['manager1']); ?>
-                                                        </a>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <?php if (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['manager2_id'])): ?>
-                                                        <?php echo htmlspecialchars($matchup['manager2']); ?>
-                                                    <?php else: ?>
-                                                        <a href="profile.php?id=<?php echo urlencode($matchup['manager2_clean'] ?? $matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>#head-to-head" target="_blank" rel="noopener">
-                                                            <?php echo htmlspecialchars($matchup['manager2']); ?>
-                                                        </a>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td><?php echo (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['record'])) ? '—' : htmlspecialchars($matchup['record']); ?></td>
-                                                <td><?php echo (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['postseason_record'])) ? '—' : htmlspecialchars($matchup['postseason_record']); ?></td>
-                                                <td><?php echo (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['streak'])) ? '—' : htmlspecialchars($matchup['streak']); ?></td>
+                                                <th>Manager 1</th>
+                                                <th>Manager 2</th>
+                                                <th>Regular Season H2H</th>
+                                                <th>Postseason H2H</th>
+                                                <th>Current Streak</th>
                                             </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            <?php else: ?>
-                                <p>No schedule information available for Week <?php echo $editWeek; ?> of the <?php echo $editYear; ?> season.
-                                <?php if (isset($isPlayoffWeek) && $isPlayoffWeek): ?>
-                                    <?php if ($playoffRound === 'Quarterfinal'): ?>
-                                        This could be because the regular season standings are not yet available.
-                                    <?php else: ?>
-                                        Matchups will be determined based on previous round results.
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($scheduleInfo as $matchup): ?>
+                                                <tr>
+                                                    <td>
+                                                        <?php if (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['manager1_id'])): ?>
+                                                            <?php echo htmlspecialchars($matchup['manager1']); ?>
+                                                        <?php else: ?>
+                                                            <a href="profile.php?id=<?php echo urlencode($matchup['manager1_clean'] ?? $matchup['manager1']); ?>&versus=<?php echo urlencode($matchup['manager2_id']); ?>#head-to-head" target="_blank" rel="noopener">
+                                                                <?php echo htmlspecialchars($matchup['manager1']); ?>
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php if (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['manager2_id'])): ?>
+                                                            <?php echo htmlspecialchars($matchup['manager2']); ?>
+                                                        <?php else: ?>
+                                                            <a href="profile.php?id=<?php echo urlencode($matchup['manager2_clean'] ?? $matchup['manager2']); ?>&versus=<?php echo urlencode($matchup['manager1_id']); ?>#head-to-head" target="_blank" rel="noopener">
+                                                                <?php echo htmlspecialchars($matchup['manager2']); ?>
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td><?php echo (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['record'])) ? '—' : htmlspecialchars($matchup['record']); ?></td>
+                                                    <td><?php echo (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['postseason_record'])) ? '—' : htmlspecialchars($matchup['postseason_record']); ?></td>
+                                                    <td><?php echo (isset($matchup['is_bye']) && $matchup['is_bye'] || empty($matchup['streak'])) ? '—' : htmlspecialchars($matchup['streak']); ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                <?php else: ?>
+                                    <p>No schedule information available for Week <?php echo $editWeek; ?> of the <?php echo $editYear; ?> season.
+                                    <?php if (isset($isPlayoffWeek) && $isPlayoffWeek): ?>
+                                        <?php if ($playoffRound === 'Quarterfinal'): ?>
+                                            This could be because the regular season standings are not yet available.
+                                        <?php else: ?>
+                                            Matchups will be determined based on previous round results.
+                                        <?php endif; ?>
                                     <?php endif; ?>
+                                    </p>
                                 <?php endif; ?>
-                                </p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-                <!-- Notes Card -->
-                <div class="row" style="direction: ltr;">
-                    <div class="col-sm-12">
-                        <div class="card">
-                            <div class="card-header" style="direction: ltr;">
-                                <h4>Notes <small style="font-weight:normal;font-size:0.8rem;color:#999;">(internal only)</small></h4>
-                            </div>
-                            <div class="card-body" style="background: #fff; direction: ltr;">
-                                <textarea id="newsletter-notes" name="notes" class="form-control" rows="10" style="direction: ltr;" placeholder="Internal notes for this week..."><?php echo htmlspecialchars($notes); ?></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Recap Notes | Recap -->
                 <div class="row" style="direction: ltr;">
-                    <div class="col-sm-12">
-                        <div class="card">
+                    <div class="col-sm-12 col-md-6">
+                        <div class="card" style="height: 100%;">
                             <div class="card-header" style="direction: ltr;">
-                                <h4>Week <?php echo $editWeek - 1; ?> Recap</h4>
+                                <h4>Recap Notes <small style="font-weight:normal;font-size:0.8rem;opacity:0.75;">(internal only)</small></h4>
                             </div>
                             <div class="card-body" style="background: #fff; direction: ltr;">
+                                <textarea id="newsletter-recap-notes" name="recap_notes" class="form-control" rows="10" style="direction: ltr;" placeholder="Internal notes for the recap..."><?php echo htmlspecialchars($recap_notes); ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <div class="card" style="height: 100%;">
+                            <div class="card-header" style="direction: ltr; display: flex; align-items: center; justify-content: space-between;">
+                                <h4 style="margin: 0;">Week <?php echo $editWeek - 1; ?> Recap</h4>
+                                <button type="button" id="generate-recap-btn" class="btn btn-primary btn-sm">
+                                    Generate with AI
+                                </button>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr;">
+                                <div id="recap-ai-result" style="display: none; margin-bottom: 14px; padding: 12px 16px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; direction: ltr;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong style="font-size: 0.85rem; color: #555;">AI-generated recap — edit then copy into the editor below</strong>
+                                        <button type="button" id="copy-ai-recap-btn" class="btn btn-sm btn-outline-primary">Copy</button>
+                                    </div>
+                                    <pre id="recap-ai-text" style="white-space: pre-wrap; word-break: break-word; margin: 0; font-family: inherit; font-size: 14px; line-height: 1.7;"></pre>
+                                </div>
+                                <div id="recap-ai-error" style="display: none;" class="alert alert-danger"></div>
                                 <textarea id="newsletter-recap" name="recap" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the recap content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($recap); ?></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Preview Notes | Preview -->
                 <div class="row" style="direction: ltr;">
-                    <div class="col-sm-12">
-                        <div class="card">
+                    <div class="col-sm-12 col-md-6">
+                        <div class="card" style="height: 100%;">
+                            <div class="card-header" style="direction: ltr;">
+                                <h4>Preview Notes <small style="font-weight:normal;font-size:0.8rem;opacity:0.75;">(internal only)</small></h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr;">
+                                <textarea id="newsletter-notes" name="notes" class="form-control" rows="10" style="direction: ltr;" placeholder="Internal notes for the preview..."><?php echo htmlspecialchars($notes); ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <div class="card" style="height: 100%;">
                             <div class="card-header" style="direction: ltr; display: flex; align-items: center; justify-content: space-between;">
                                 <h4 style="margin: 0;">Week <?php echo $editWeek; ?> Preview</h4>
                                 <button type="button" id="generate-preview-btn" class="btn btn-primary btn-sm">

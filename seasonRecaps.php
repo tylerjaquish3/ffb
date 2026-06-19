@@ -370,30 +370,31 @@ foreach ($seasonNumbers as $standings) {
                                     <th>Manager 1</th>
                                     <th>Manager 2</th>
                                     <th>Score 1</th>
+                                    <th>Note</th>
                                     <th>Score 2</th>
+                                    <th>Note</th>
+                                    <th>Margin</th>
+                                    <th>Combined</th>
+                                    <th>Search 1</th>
+                                    <th>Search 2</th>
                                 </thead>
                                 <tbody>
                                     <?php
                                     foreach ($regSeasonMatchups as $matchup) {
-                                        if ($matchup['year'] == $season) {
-                                        ?>
+                                        if ($matchup['year'] == $season) { ?>
                                         <tr>
                                             <td><?php echo $matchup['week']; ?></td>
-
-                                            <?php if ($matchup['winner'] == 'm1') {
-                                                echo '<td><span class="badge badge-primary">' . $matchup['manager1'] . '</span></td>';
-                                            } else {
-                                                echo '<td><span class="badge badge-secondary">' . $matchup['manager1'] . '</span></td>';
-                                            }
-                                            if ($matchup['winner'] == 'm2') {
-                                                echo '<td><span class="badge badge-primary">' . $matchup['manager2'] . '</span></td>';
-                                            } else {
-                                                echo '<td><span class="badge badge-secondary">' . $matchup['manager2'] . '</span></td>';
-                                            } ?>
+                                            <td><?php echo '<span class="badge '.($matchup['winner']=='m1'?'badge-primary':'badge-secondary').'">'.$matchup['manager1'].'</span>'; ?></td>
+                                            <td><?php echo '<span class="badge '.($matchup['winner']=='m2'?'badge-primary':'badge-secondary').'">'.$matchup['manager2'].'</span>'; ?></td>
                                             <td><?php echo '<a href="/rosters.php?year='.$matchup['year'].'&week='.$matchup['week'].'&manager='.$matchup['manager1'].'">'.$matchup['score1'].'</a>'; ?></td>
+                                            <td><span style="font-size:11px;"><?php echo $matchup['score1note'] ?? ''; ?></span></td>
                                             <td><?php echo '<a href="/rosters.php?year='.$matchup['year'].'&week='.$matchup['week'].'&manager='.$matchup['manager2'].'">'.$matchup['score2'].'</a>'; ?></td>
+                                            <td><span style="font-size:11px;"><?php echo $matchup['score2note'] ?? ''; ?></span></td>
+                                            <td><?php echo $matchup['margin']; ?></td>
+                                            <td><?php echo $matchup['combined']; ?></td>
+                                            <td><?php echo $matchup['score1noteSearch'] ?? ''; ?></td>
+                                            <td><?php echo $matchup['score2noteSearch'] ?? ''; ?></td>
                                         </tr>
-
                                     <?php }
                                     } ?>
                                 </tbody>
@@ -572,6 +573,10 @@ foreach ($seasonNumbers as $standings) {
         text-transform: uppercase;
         border-top: 1px solid #e0e0e0 !important;
     }
+
+    #datatable-regSeason input[type=text] {
+        width: 100%;
+    }
 </style>
 
 <script type="text/javascript">
@@ -583,10 +588,53 @@ foreach ($seasonNumbers as $standings) {
     });
 
     // Initialize DataTables for each tab
+    $('#datatable-regSeason thead tr')
+        .clone(true)
+        .addClass('filters')
+        .appendTo('#datatable-regSeason thead');
+
     $('#datatable-regSeason').DataTable({
-        "order": [
-            [0, "asc"]
-        ]
+        pageLength: 25,
+        order: [[0, 'asc']],
+        columnDefs: [
+            { targets: [9, 10], visible: false },
+            { targets: [0], type: 'num' }
+        ],
+        orderCellsTop: true,
+        fixedHeader: true,
+        initComplete: function () {
+            var api = this.api();
+            var searchTimeouts = {};
+            api.columns().eq(0).each(function (colIdx) {
+                var cell = $('.filters th').eq($(api.column(colIdx).header()).index());
+                $(cell).html('<input type="text" placeholder="filter" />');
+                $('input', $('.filters th').eq($(api.column(colIdx).header()).index()))
+                    .off('keyup change input')
+                    .on('input', function (e) {
+                        e.stopPropagation();
+                        var inputElement = this;
+                        var searchValue = this.value;
+                        clearTimeout(searchTimeouts[colIdx]);
+                        searchTimeouts[colIdx] = setTimeout(function () {
+                            $(inputElement).attr('title', searchValue);
+                            if (colIdx === 0 && searchValue !== '') {
+                                api.column(colIdx).search('^' + searchValue + '$', true, false).draw(false);
+                            } else {
+                                var regexr = '({search})';
+                                api.column(colIdx).search(
+                                    searchValue != '' ? regexr.replace('{search}', '(((' + searchValue + ')))') : '',
+                                    searchValue != '',
+                                    searchValue == ''
+                                ).draw(false);
+                            }
+                        }, 300);
+                    })
+                    .on('keyup', function (e) {
+                        e.stopPropagation();
+                        $(this).trigger('input');
+                    });
+            });
+        }
     });
 
     $('#datatable-standings').DataTable({

@@ -690,7 +690,8 @@
 	</thead>
 	<tbody>
 		<?php
-		$result = query("SELECT managers.name, SUM(moves) as moves, SUM(trades) as trades, SUM(moves+trades) as total
+		$result = query("SELECT managers.name, SUM(moves) as moves, SUM(trades) as trades,
+				ROUND(CAST(SUM(moves+trades) AS FLOAT) / COUNT(DISTINCT year), 1) as per_year
 			FROM team_names
 			JOIN managers on manager_id = managers.id
 			GROUP BY managers.name");
@@ -699,7 +700,7 @@
 				<td><?php echo $row['name']; ?></td>
 				<td><?php echo $row['moves']; ?></td>
 				<td><?php echo $row['trades']; ?></td>
-				<td><span class="moves-total" data-total="<?php echo $row['total']; ?>">Loading...</span></td>
+				<td><?php echo $row['per_year']; ?></td>
 			</tr>
 
 		<?php } ?>

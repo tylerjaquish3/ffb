@@ -65,9 +65,6 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 
 - allow people add comments/smack talk to profile
 
-- Add league stats
-    - Lineup accuracy
-    - Playoff points/margin
 - move functions to lookup after page load to make more efficient
     - current season
     - profile
@@ -83,6 +80,9 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 - make newsletter show random additional data so its not the same every week
 - add lineup accuracy to profile head to head
 - add a table for top free agents
+- add preview notes for the whole season
+- add highest/lowest combined cards on profile, head to head
+- find a way to show who has the longest active streak against another manager
 
 Notes:
 Moved to 18 week schedule in 2021

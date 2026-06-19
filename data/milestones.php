@@ -15,14 +15,14 @@ function _milestonePositionPointsRegSql($rosterSpot)
         'totals' => "SELECT m.id AS mid, m.name AS mgr_name,
                         ROUND(COALESCE(SUM(r.points), 0), 2) AS value
                      FROM managers m
-                     LEFT JOIN rosters r ON r.manager = m.name AND r.roster_spot = '$rosterSpot'
+                     LEFT JOIN rosters r ON r.manager = m.name AND r.position = '$rosterSpot' AND r.roster_spot != 'BN'
                      GROUP BY m.id, m.name
                      ORDER BY value DESC",
         'events' => "SELECT r.year AS yr, r.week AS wk, 'Week ' || r.week AS wk_label,
                         m.id AS mid, SUM(r.points) AS inc
                      FROM rosters r
                      JOIN managers m ON m.name = r.manager
-                     WHERE r.roster_spot = '$rosterSpot' AND m.id IN (:ids)
+                     WHERE r.position = '$rosterSpot' AND r.roster_spot != 'BN' AND m.id IN (:ids)
                      GROUP BY m.id, r.year, r.week
                      ORDER BY r.year ASC, r.week ASC",
     ];

@@ -124,6 +124,16 @@ include 'sidebar.php';
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Draft Position vs. Finish</h4>
+                        </div>
+                        <div class="card-body chart-block" style="background: #fff; direction: ltr">
+                            <canvas id="draftPositionVsFinishChart" style="height: 500px"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="row card-section" id="best-drafts" style="display: none;">
@@ -530,6 +540,99 @@ include 'sidebar.php';
         }
 
         refreshPositionsDraftedChart();
+
+        var draftPosFinishData = <?php echo json_encode($draftPositionVsFinish); ?>;
+
+        var ctxPvF = $('#draftPositionVsFinishChart');
+        new Chart(ctxPvF, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'Season Result',
+                        data: draftPosFinishData.scatter,
+                        backgroundColor: 'rgba(76, 175, 80, 0.35)',
+                        borderColor: 'rgba(76, 175, 80, 0.35)',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        type: 'scatter'
+                    },
+                    {
+                        label: 'Avg Finish',
+                        data: draftPosFinishData.averages,
+                        borderColor: 'rgb(255, 179, 179)',
+                        backgroundColor: 'rgb(255, 179, 179)',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        showLine: true,
+                        borderWidth: 2,
+                        fill: false,
+                        type: 'scatter'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var pt = context.raw;
+                                if (pt.manager) {
+                                    return pt.manager + ' ' + pt.year + ' — pick #' + pt.x + ', finished #' + pt.y;
+                                }
+                                return 'Avg finish: ' + pt.y;
+                            }
+                        }
+                    },
+                    legend: { display: true }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Draft Position',
+                            font: { size: 16 }
+                        },
+                        min: 0.5,
+                        max: 10.5,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(val) {
+                                if (Number.isInteger(val) && val >= 1 && val <= 10) return '#' + val;
+                                return null;
+                            }
+                        },
+                        afterBuildTicks: function(axis) {
+                            axis.ticks = [1,2,3,4,5,6,7,8,9,10].map(function(v) { return {value: v}; });
+                        }
+                    },
+                    y: {
+                        display: true,
+                        reverse: true,
+                        title: {
+                            display: true,
+                            text: 'Finish Position',
+                            font: { size: 16 }
+                        },
+                        min: 0.5,
+                        max: 10.5,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(val) {
+                                if (Number.isInteger(val) && val >= 1 && val <= 10) return '#' + val;
+                                return null;
+                            }
+                        },
+                        afterBuildTicks: function(axis) {
+                            axis.ticks = [1,2,3,4,5,6,7,8,9,10].map(function(v) { return {value: v}; });
+                        }
+                    }
+                }
+            }
+        });
 
         if (managerFilter && yearFilter) {
             $('#datatable-draft > thead > tr.filters > th:nth-child(6) > input[type=text]').val(managerFilter);

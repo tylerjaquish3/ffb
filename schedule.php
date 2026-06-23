@@ -13,6 +13,19 @@ if (isset($_GET['id'])) {
     }
 }
 
+$managerColors = [
+    1  => "#9c68d9",
+    2  => "#a6c6fa",
+    3  => "#3cf06e",
+    4  => "#f33c47",
+    5  => "#c0f6e6",
+    6  => "#def89f",
+    7  => "#dca130",
+    8  => "#ff7f2c",
+    9  => "#2dd4bf",
+    10 => "#f87598",
+];
+
 ?>
 
 <div class="app-content content">
@@ -60,11 +73,27 @@ if (isset($_GET['id'])) {
                         <button class="tab-button" id="playoff-calculator-tab" onclick="showCard('playoff-calculator')">
                             Playoff Calculator
                         </button>
+                        <button class="tab-button" id="head-to-head-tab" onclick="showCard('head-to-head')">
+                            Head to Head Count
+                        </button>
                     </div>
                 </div>
             </div>
             
             <div class="row card-section" id="matchups">
+                <div class="col-sm-12" id="manager-filter-bar">
+                    <div class="manager-filter-legend">
+                        <?php
+                        $managerResult = query("SELECT id, name FROM managers ORDER BY id");
+                        while ($managerRow = fetch_array($managerResult)) {
+                            $mid   = $managerRow['id'];
+                            $mname = htmlspecialchars($managerRow['name']);
+                            $color = $managerColors[$mid] ?? '#9c68d9';
+                            echo '<span class="manager-chip" data-mid="' . $mid . '" data-manager="' . $mname . '" style="background:' . $color . ';">' . $mname . '</span>';
+                        }
+                        ?>
+                    </div>
+                </div>
                 <?php if(!empty($scheduleData)): ?>
                 <?php foreach($scheduleData as $weekData): ?>
                     <div class="col-sm-12 col-md-6 table-padding">
@@ -89,7 +118,7 @@ if (isset($_GET['id'])) {
                                             </thead>
                                             <tbody>
                                                 <?php foreach($weekData['matchups'] as $matchup): ?>
-                                                <tr>
+                                                <tr data-m1="<?php echo htmlspecialchars($matchup['manager1_name']); ?>" data-m2="<?php echo htmlspecialchars($matchup['manager2_name']); ?>">
                                                     <td>
                                                         <?php 
                                                         if ($matchup['is_completed'] && $matchup['manager1_score'] > $matchup['manager2_score']) {
@@ -203,18 +232,11 @@ if (isset($_GET['id'])) {
                             <div class="row mb-3">
                                 <div class="col-sm-12 col-md-6">
                                     <select id="schedule-manager-select" class="form-control">
+                                        <option value="">-- Select a Manager --</option>
                                         <?php
-                                        // Get managers from the managers table
-                                        $result = query("SELECT id, manager_name FROM managers ORDER BY id");
-                                        if (!$result) {
-                                            // Fallback if managers table doesn't exist or has a different structure
-                                            $result = query("SELECT DISTINCT manager1_id as id FROM regular_season_matchups WHERE year = $selectedSeason ORDER BY manager1_id");
-                                        }
-                                        
+                                        $result = query("SELECT id, name FROM managers ORDER BY name ASC");
                                         while ($row = fetch_array($result)) {
-                                            $managerId = isset($row['id']) ? $row['id'] : $row['manager1_id'];
-                                            $managerName = isset($row['manager_name']) ? $row['manager_name'] : getManagerName($managerId);
-                                            echo '<option value="'.$managerId.'">'.$managerName.'</option>';
+                                            echo '<option value="' . $row['id'] . '">' . htmlspecialchars($row['name']) . '</option>';
                                         }
                                         ?>
                                     </select>
@@ -233,6 +255,8 @@ if (isset($_GET['id'])) {
                                                 <th>Mock Record</th>
                                                 <th>Win %</th>
                                                 <th>Total Points</th>
+                                                <th>Actual Record</th>
+                                                <th>Win Diff</th>
                                             </tr>
                                         </thead>
                                         <tbody id="mock-schedule-tbody">
@@ -282,6 +306,45 @@ if (isset($_GET['id'])) {
                     </div>
                 </div>
             </div>
+            <!-- Head to Head Tab -->
+            <!-- Head to Head Tab -->
+            <div class="row card-section" id="head-to-head" style="display: none;">
+                <div class="col-sm-12 col-lg-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Head to Head Matchup Counts by Week</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <?php
+                            $h2hData = getHeadToHeadByWeek();
+                            $managers = $h2hData['managers'];
+                            $h2hFlat = [];
+                            foreach ($h2hData['weeklyGrid'] as $wk => $wGrid) {
+                                for ($i = 0; $i < count($managers); $i++) {
+                                    for ($j = $i + 1; $j < count($managers); $j++) {
+                                        $count = $wGrid[$managers[$i]][$managers[$j]];
+                                        $h2hFlat[] = [$wk, $managers[$i], $managers[$j], $count];
+                                    }
+                                }
+                            }
+                            ?>
+                            <div class="table-responsive">
+                                <table id="h2h-datatable" class="table table-striped table-bordered">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Week</th>
+                                            <th>Manager 1</th>
+                                            <th>Manager 2</th>
+                                            <th>Matchups</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -304,14 +367,7 @@ if (isset($_GET['id'])) {
             }
         }, 100);
         
-        // Auto-select the first manager when the Mock Schedule tab is clicked
-        $('#mock-schedule-tab').click(function() {
-            if ($('#mock-schedule-tbody').is(':empty')) {
-                setTimeout(function() {
-                    $('#schedule-manager-select').trigger('change');
-                }, 100);
-            }
-        });
+        // No auto-load on tab click — user must select a manager first
         
         // Initialize strength of schedule DataTable
         $('#strength-of-schedule-tab').click(function() {
@@ -416,15 +472,36 @@ if (isset($_GET['id'])) {
             });
         }
         
+        // Head to Head tab — initialize DataTable on first click
+        $('#head-to-head-tab').click(function() {
+            if (!$.fn.DataTable.isDataTable('#h2h-datatable')) {
+                $('#h2h-datatable').DataTable({
+                    data: <?php echo json_encode($h2hFlat); ?>,
+                    columns: [
+                        { title: 'Week' },
+                        { title: 'Manager 1' },
+                        { title: 'Manager 2' },
+                        { title: 'Matchups' }
+                    ],
+                    order: [[3, 'desc']],
+                    pageLength: 25
+                });
+            }
+        });
+
         // Handle mock schedule manager selection
         $('#schedule-manager-select').change(function() {
             const selectedManagerId = $(this).val();
-            const selectedManagerName = $(this).find("option:selected").text();
-            
+            if (!selectedManagerId) {
+                $('#mock-schedule-results .table-responsive').hide();
+                $('#mock-schedule-results .initial-message').html('<p>Select a manager\'s schedule to see how other managers would perform with that schedule.</p>').show();
+                return;
+            }
+
             // Show loading indicator
-            $('.initial-message').html('<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i><p>Loading results...</p></div>');
-            
-            // Fetch mock schedule data via AJAX
+            $('#mock-schedule-results .initial-message').html('<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i><p>Loading results...</p></div>').show();
+            $('#mock-schedule-results .table-responsive').hide();
+
             $.ajax({
                 url: baseUrl + 'dataLookup.php',
                 type: 'GET',
@@ -433,24 +510,93 @@ if (isset($_GET['id'])) {
                     dataType: 'mockSchedule',
                     year: selectedSeason,
                     scheduleManagerId: selectedManagerId,
-                    _t: new Date().getTime() // Cache busting timestamp
+                    _t: new Date().getTime()
                 },
                 success: function(response) {
-                    // Hide the initial message and show the table
-                    $('.initial-message').hide();
-                    $('.table-responsive').show();
-                    $('#mock-schedule-explanation').show();
-                    
-                    // Update the table body with the data
-                    $('#mock-schedule-tbody').html(response);
+                    const rows = typeof response === 'string' ? JSON.parse(response) : response;
+                    let html = '';
+                    rows.forEach(function(m) {
+                        const rowClass = m.is_schedule_owner ? ' class="table-primary"' : '';
+                        const badge = m.is_schedule_owner ? ' <span class="badge badge-primary">Original Schedule</span>' : '';
+                        const actualRecord = m.actual_wins + '-' + m.actual_losses;
+                        let diffText = m.win_diff > 0 ? '+' + m.win_diff : String(m.win_diff);
+                        let diffStyle = '';
+                        if (m.win_diff > 0) {
+                            diffStyle = ' style="color:#28a745;font-weight:700;"';
+                        } else if (m.win_diff < 0) {
+                            diffStyle = ' style="color:#dc3545;font-weight:700;"';
+                        }
+                        html += '<tr' + rowClass + '>';
+                        html += '<td>' + m.rank + '</td>';
+                        html += '<td>' + m.manager_name + badge + '</td>';
+                        html += '<td>' + m.mock_wins + '-' + m.mock_losses + '</td>';
+                        html += '<td>' + m.win_pct + '%</td>';
+                        html += '<td>' + Number(m.total_points).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>';
+                        html += '<td>' + actualRecord + '</td>';
+                        html += '<td' + diffStyle + '>' + diffText + '</td>';
+                        html += '</tr>';
+                    });
+                    $('#mock-schedule-tbody').html(html);
+                    $('#mock-schedule-results .initial-message').hide();
+                    $('#mock-schedule-results .table-responsive').show();
                 },
                 error: function() {
-                    $('.initial-message').html('<div class="alert alert-danger">Error loading mock schedule data.</div>');
-                    $('.initial-message').show();
-                    $('.table-responsive').hide();
-                    $('#mock-schedule-explanation').hide();
+                    $('#mock-schedule-results .initial-message').html('<div class="alert alert-danger">Error loading mock schedule data.</div>').show();
+                    $('#mock-schedule-results .table-responsive').hide();
                 }
             });
         });
+        // Manager chip filter — Matchups tab
+        const managerColors = <?php echo json_encode($managerColors); ?>;
+        let activeManagerFilter = null;
+
+        function hexToRgba(hex, alpha) {
+            const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+            if (!m) return 'rgba(255,220,80,' + alpha + ')';
+            const n = parseInt(m[1], 16);
+            return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
+        }
+
+        function clearMatchupHighlight() {
+            activeManagerFilter = null;
+            document.querySelectorAll('.manager-chip').forEach(c => c.classList.remove('selected', 'faded'));
+            document.querySelectorAll('tr[data-m1]').forEach(function(tr) {
+                tr.querySelectorAll('td').forEach(td => td.style.removeProperty('background-color'));
+                tr.style.removeProperty('opacity');
+            });
+        }
+
+        function applyMatchupHighlight(manager, mid) {
+            const hlColor = hexToRgba(managerColors[mid] || '#9c68d9', 0.3);
+            document.querySelectorAll('tr[data-m1]').forEach(function(tr) {
+                const m1 = tr.dataset.m1;
+                const m2 = tr.dataset.m2;
+                if (m1 === manager || m2 === manager) {
+                    tr.querySelectorAll('td').forEach(td => td.style.setProperty('background-color', hlColor, 'important'));
+                    tr.style.removeProperty('opacity');
+                } else {
+                    tr.querySelectorAll('td').forEach(td => td.style.removeProperty('background-color'));
+                    tr.style.setProperty('opacity', '0.25');
+                }
+            });
+        }
+
+        $(document).on('click', '.manager-chip', function() {
+            const manager = $(this).data('manager');
+            const mid     = parseInt($(this).data('mid'), 10);
+
+            if (activeManagerFilter === manager) {
+                clearMatchupHighlight();
+                return;
+            }
+            activeManagerFilter = manager;
+            document.querySelectorAll('.manager-chip').forEach(c => {
+                const isSelf = c.dataset.manager === manager;
+                c.classList.toggle('selected', isSelf);
+                c.classList.toggle('faded',    !isSelf);
+            });
+            applyMatchupHighlight(manager, mid);
+        });
     });
+
 </script>

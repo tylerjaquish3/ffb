@@ -207,22 +207,16 @@ include 'sidebar.php';
                             <h4 style="float: right">Top Weekly Performers</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
-                            <div id="manager-filter-btns" style="margin-bottom: 10px;">
+                            <div class="manager-filter-legend" id="manager-filter-btns">
                                 <?php
-                                $managerNames = [];
-                                foreach ($bestWeek as $week => $players) {
-                                    foreach ($players as $pos => $stuff) {
-                                        if (!empty($stuff['manager']) && !in_array($stuff['manager'], $managerNames)) {
-                                            $managerNames[] = $stuff['manager'];
-                                        }
-                                    }
-                                }
-                                sort($managerNames);
-                                foreach ($managerNames as $name) {
-                                    echo '<button class="btn btn-sm btn-outline-secondary manager-filter-btn" data-manager="' . htmlspecialchars($name) . '" style="margin: 2px;">' . htmlspecialchars($name) . '</button>';
+                                $managerResult = query("SELECT id, name FROM managers ORDER BY name");
+                                while ($managerRow = fetch_array($managerResult)) {
+                                    $mid   = $managerRow['id'];
+                                    $mname = htmlspecialchars($managerRow['name']);
+                                    $color = $managerColors[$mid] ?? '#9c68d9';
+                                    echo '<span class="manager-chip" data-mid="' . $mid . '" data-manager="' . $mname . '" style="background:' . $color . ';">' . $mname . '</span>';
                                 }
                                 ?>
-                                <button class="btn btn-sm btn-secondary" id="manager-filter-clear" style="margin: 2px; display: none;">Clear</button>
                             </div>
                             <table class="stripe nowrap row-border order-column full-width" id="datatable-bestWeek">
                                 <thead>
@@ -875,15 +869,26 @@ include 'sidebar.php';
 
         (function() {
             var activeManager = null;
+            var managerColors = <?php echo json_encode($managerColors); ?>;
 
-            function applyHighlight(manager) {
+            function hexToRgba(hex, alpha) {
+                var m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+                if (!m) return 'rgba(46,184,46,' + alpha + ')';
+                var n = parseInt(m[1], 16);
+                return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
+            }
+
+            function applyHighlight(manager, mid) {
+                var hlColor = hexToRgba(managerColors[mid] || '#9c68d9', 0.45);
                 $('#datatable-bestWeek tbody strong[data-manager]').each(function() {
                     var td = $(this).closest('td')[0];
                     if (!td) return;
                     if ($(this).attr('data-manager') === manager) {
-                        td.style.setProperty('background-color', 'rgba(255, 220, 80, 0.55)', 'important');
+                        td.style.setProperty('background-color', hlColor, 'important');
+                        td.style.removeProperty('opacity');
                     } else {
                         td.style.removeProperty('background-color');
+                        td.style.setProperty('opacity', '0.25');
                     }
                 });
             }
@@ -891,28 +896,31 @@ include 'sidebar.php';
             function clearHighlight() {
                 $('#datatable-bestWeek tbody strong[data-manager]').each(function() {
                     var td = $(this).closest('td')[0];
-                    if (td) td.style.removeProperty('background-color');
+                    if (td) {
+                        td.style.removeProperty('background-color');
+                        td.style.removeProperty('opacity');
+                    }
                 });
                 activeManager = null;
-                $('.manager-filter-btn').removeClass('active').css({'background-color': '', 'color': '', 'border-color': ''});
-                $('#manager-filter-clear').hide();
+                document.querySelectorAll('#manager-filter-btns .manager-chip').forEach(function(c) {
+                    c.classList.remove('selected', 'faded');
+                });
             }
 
-            $(document).on('click', '.manager-filter-btn', function() {
+            $(document).on('click', '#manager-filter-btns .manager-chip', function() {
                 var manager = $(this).data('manager');
+                var mid = parseInt($(this).data('mid'), 10);
                 if (activeManager === manager) {
                     clearHighlight();
                     return;
                 }
                 activeManager = manager;
-                $('.manager-filter-btn').removeClass('active').css({'background-color': '', 'color': '', 'border-color': ''});
-                $(this).addClass('active').css({'background-color': '#343a40', 'color': '#fff', 'border-color': '#343a40'});
-                $('#manager-filter-clear').show();
-                applyHighlight(manager);
-            });
-
-            $(document).on('click', '#manager-filter-clear', function() {
-                clearHighlight();
+                document.querySelectorAll('#manager-filter-btns .manager-chip').forEach(function(c) {
+                    var isSelf = c.dataset.manager === manager;
+                    c.classList.toggle('selected', isSelf);
+                    c.classList.toggle('faded', !isSelf);
+                });
+                applyHighlight(manager, mid);
             });
         })();
 

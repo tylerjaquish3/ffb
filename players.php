@@ -4,6 +4,27 @@ $pageName = "Players";
 include 'header.php';
 include 'sidebar.php';
 
+$allTimeBestWeek = getAllTimeBestWeek();
+
+// Collect ordered columns from data
+$allTimeCols = [];
+foreach ($allTimeBestWeek as $spots) {
+    foreach ($spots as $pos => $stuff) {
+        if (!in_array($pos, $allTimeCols)) $allTimeCols[] = $pos;
+    }
+}
+
+// Collect unique manager names for filter buttons
+$allTimeManagerNames = [];
+foreach ($allTimeBestWeek as $spots) {
+    foreach ($spots as $stuff) {
+        if (!empty($stuff['manager']) && !in_array($stuff['manager'], $allTimeManagerNames)) {
+            $allTimeManagerNames[] = $stuff['manager'];
+        }
+    }
+}
+sort($allTimeManagerNames);
+
 ?>
 
 <div class="app-content content">
@@ -18,6 +39,7 @@ include 'sidebar.php';
                         <button class="tab-button" id="top-seasons-tab" onclick="showCard('top-seasons', true)">Top Seasons</button>
                         <button class="tab-button" id="top-weeks-tab" onclick="showCard('top-weeks', true)">Top Weeks</button>
                         <button class="tab-button" id="players-by-manager-tab" onclick="showCard('players-by-manager', true)">Players by Manager</button>
+                        <button class="tab-button" id="top-performers-all-tab" onclick="showCard('top-performers-all', true)">Top Performers</button>
                         <button class="tab-button" id="nfl-teams-tab" onclick="showCard('nfl-teams', true)">NFL Teams</button>
                     </div>
                 </div>
@@ -301,6 +323,59 @@ include 'sidebar.php';
                                     </table>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All-Time Top Performers Tab -->
+            <div class="row card-section" id="top-performers-all" style="display: none;">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">All-Time Top Weekly Performers</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="manager-filter-legend" id="at-manager-filter-btns">
+                                <?php
+                                $managerResult2 = query("SELECT id, name FROM managers ORDER BY name");
+                                while ($managerRow2 = fetch_array($managerResult2)) {
+                                    $mid2   = $managerRow2['id'];
+                                    $mname2 = htmlspecialchars($managerRow2['name']);
+                                    $color2 = $managerColors[$mid2] ?? '#9c68d9';
+                                    echo '<span class="manager-chip" data-mid="' . $mid2 . '" data-manager="' . $mname2 . '" style="background:' . $color2 . ';">' . $mname2 . '</span>';
+                                }
+                                ?>
+                            </div>
+                            <table class="stripe nowrap row-border order-column full-width" id="datatable-allTimeBestWeek">
+                                <thead>
+                                    <tr>
+                                        <th>Week</th>
+                                        <?php foreach ($allTimeCols as $pos) {
+                                            echo '<th>Top ' . htmlspecialchars($pos) . '</th>';
+                                        } ?>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($allTimeBestWeek as $week => $spots) { ?>
+                                        <tr>
+                                            <td><?php echo $week; ?></td>
+                                            <?php foreach ($allTimeCols as $pos) {
+                                                $stuff = isset($spots[$pos]) ? $spots[$pos] : ['manager'=>'','player'=>'','points'=>'','year'=>''];
+                                                if (empty($stuff['manager'])) {
+                                                    echo '<td></td>';
+                                                } else { ?>
+                                                    <td data-order="<?php echo $stuff['points']; ?>">
+                                                        <strong data-manager="<?php echo htmlspecialchars($stuff['manager']); ?>"><?php echo htmlspecialchars($stuff['manager']); ?></strong><br />
+                                                        <?php echo htmlspecialchars($stuff['player']); ?><br />
+                                                        <i><?php echo $stuff['points'] . ' pts (' . $stuff['year'] . ')'; ?></i>
+                                                    </td>
+                                                <?php }
+                                            } ?>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -598,6 +673,75 @@ include 'sidebar.php';
         $('#seasons-show-all').click(function () {
             playerSeasons.columns('').search('').draw();
         });
+
+        $('#datatable-allTimeBestWeek').DataTable({
+            searching: false,
+            paging: false,
+            info: false,
+            scrollX: "100%",
+            scrollCollapse: true,
+            fixedColumns: {
+                left: 1
+            },
+            order: [[0, "asc"]]
+        });
+
+        (function() {
+            var activeManagerAT = null;
+            var managerColorsAT = <?php echo json_encode($managerColors); ?>;
+
+            function hexToRgbaAT(hex, alpha) {
+                var m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+                if (!m) return 'rgba(46,184,46,' + alpha + ')';
+                var n = parseInt(m[1], 16);
+                return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
+            }
+
+            function applyHighlightAT(manager, mid) {
+                var hlColor = hexToRgbaAT(managerColorsAT[mid] || '#9c68d9', 0.45);
+                $('#datatable-allTimeBestWeek tbody strong[data-manager]').each(function() {
+                    var td = $(this).closest('td')[0];
+                    if (!td) return;
+                    if ($(this).attr('data-manager') === manager) {
+                        td.style.setProperty('background-color', hlColor, 'important');
+                        td.style.removeProperty('opacity');
+                    } else {
+                        td.style.removeProperty('background-color');
+                        td.style.setProperty('opacity', '0.25');
+                    }
+                });
+            }
+
+            function clearHighlightAT() {
+                $('#datatable-allTimeBestWeek tbody strong[data-manager]').each(function() {
+                    var td = $(this).closest('td')[0];
+                    if (td) {
+                        td.style.removeProperty('background-color');
+                        td.style.removeProperty('opacity');
+                    }
+                });
+                activeManagerAT = null;
+                document.querySelectorAll('#at-manager-filter-btns .manager-chip').forEach(function(c) {
+                    c.classList.remove('selected', 'faded');
+                });
+            }
+
+            $(document).on('click', '#at-manager-filter-btns .manager-chip', function() {
+                var manager = $(this).data('manager');
+                var mid = parseInt($(this).data('mid'), 10);
+                if (activeManagerAT === manager) {
+                    clearHighlightAT();
+                    return;
+                }
+                activeManagerAT = manager;
+                document.querySelectorAll('#at-manager-filter-btns .manager-chip').forEach(function(c) {
+                    var isSelf = c.dataset.manager === manager;
+                    c.classList.toggle('selected', isSelf);
+                    c.classList.toggle('faded', !isSelf);
+                });
+                applyHighlightAT(manager, mid);
+            });
+        })();
 
         $('#datatable-nfl-teams').DataTable({
             pageLength: 10,

@@ -84,6 +84,7 @@ include 'sidebar.php';
                                 <option value="3" selected>Season Points</option>
                                 <option value="4">Average PF/PA</option>
                                 <option value="5">Start Streaks</option>
+                                <option value="18">Active Streaks</option>
                                 <option value="6">Win/Loss Margin</option>
                                 <option value="7">Weekly Points</option>
                                 <option value="8">Losses with Top 3 Pts</option>
@@ -165,33 +166,97 @@ include 'sidebar.php';
                         <div class="card-header">
                             <h4 style="float: right">Team Standings Lookup</h4>
                         </div>
-                        <div class="card-body" style="background: #fff; direction: ltr; text-align: center;">
-                            <h3>When was the last time ... </h3>
-                            <select id="manager1-select">
+                        <div class="card-body" style="background: #fff; direction: ltr; text-align: center; padding: 16px 20px;">
+                            <p class="lookup-connector" style="margin-top:4px">When was the last time...</p>
+                            <select id="manager1-select" class="lookup-select">
                                 <?php
                                 $result = query("SELECT * FROM managers ORDER BY name ASC");
                                 while ($row = fetch_array($result)) {
                                     echo '<option value="'.$row['id'].'">'.$row['name'].'</option>';
                                 }
                                 ?>
-                            </select><br>
-                            <h3>... was in ...</h3>
-                            <select id="place1">
-                                <option value="1">First</option>
-                                <option value="2">Second</option>
-                                <option value="3">Third</option>
-                                <option value="4">Fourth</option>
-                                <option value="5">Fifth</option>
-                                <option value="6">Sixth</option>
-                                <option value="7">Seventh</option>
-                                <option value="8">Eighth</option>
-                                <option value="9">Ninth</option>
-                                <option value="10">Tenth</option>
-                            </select><br>
-                            <h3>... place?</h3>
-                            <br />
-                            <button class="btn btn-secondary" id="lookup-btn">Search</button>
-                            <br /><br />
+                            </select>
+                            <p class="lookup-connector">...finished the week in...</p>
+                            <select id="place1" class="lookup-select">
+                                <optgroup label="Exact place">
+                                    <option value="exact_1">1st place</option>
+                                    <option value="exact_2">2nd place</option>
+                                    <option value="exact_3">3rd place</option>
+                                    <option value="exact_4">4th place</option>
+                                    <option value="exact_5">5th place</option>
+                                    <option value="exact_6">6th place</option>
+                                    <option value="exact_7">7th place</option>
+                                    <option value="exact_8">8th place</option>
+                                    <option value="exact_9">9th place</option>
+                                    <option value="exact_10">last place (10th)</option>
+                                </optgroup>
+                                <optgroup label="Top N">
+                                    <option value="lte_2">top 2</option>
+                                    <option value="lte_3">top 3</option>
+                                    <option value="lte_4">top 4</option>
+                                    <option value="lte_5">top half (1st–5th)</option>
+                                </optgroup>
+                                <optgroup label="Bottom N">
+                                    <option value="gte_6">bottom half (6th–10th)</option>
+                                    <option value="gte_7">bottom 4 (7th–10th)</option>
+                                    <option value="gte_8">bottom 3 (8th–10th)</option>
+                                    <option value="gte_9">bottom 2 (9th–10th)</option>
+                                </optgroup>
+                            </select>
+
+                            <div style="margin-top: 14px;">
+                                <label class="lookup-checkbox-label">
+                                    <input type="checkbox" id="final-week-only"> Final week of season only
+                                </label>
+                            </div>
+
+                            <hr style="margin: 14px 0 10px;">
+
+                            <label class="lookup-checkbox-label">
+                                <input type="checkbox" id="compare-enable"> Also, when was...
+                            </label>
+                            <div id="compare-section" style="display:none;">
+                                <select id="manager2-select" class="lookup-select" style="margin-top:8px">
+                                    <?php
+                                    $result = query("SELECT * FROM managers ORDER BY name ASC");
+                                    while ($row = fetch_array($result)) {
+                                        echo '<option value="'.$row['id'].'">'.$row['name'].'</option>';
+                                    }
+                                    ?>
+                                </select>
+                                <p class="lookup-connector">...also finished the week in...</p>
+                                <select id="place2" class="lookup-select">
+                                    <optgroup label="Exact place">
+                                        <option value="exact_1">1st place</option>
+                                        <option value="exact_2">2nd place</option>
+                                        <option value="exact_3">3rd place</option>
+                                        <option value="exact_4">4th place</option>
+                                        <option value="exact_5">5th place</option>
+                                        <option value="exact_6">6th place</option>
+                                        <option value="exact_7">7th place</option>
+                                        <option value="exact_8">8th place</option>
+                                        <option value="exact_9">9th place</option>
+                                        <option value="exact_10">last place (10th)</option>
+                                    </optgroup>
+                                    <optgroup label="Top N">
+                                        <option value="lte_2">top 2</option>
+                                        <option value="lte_3">top 3</option>
+                                        <option value="lte_4">top 4</option>
+                                        <option value="lte_5">top half (1st–5th)</option>
+                                    </optgroup>
+                                    <optgroup label="Bottom N">
+                                        <option value="gte_6">bottom half (6th–10th)</option>
+                                        <option value="gte_7">bottom 4 (7th–10th)</option>
+                                        <option value="gte_8">bottom 3 (8th–10th)</option>
+                                        <option value="gte_9">bottom 2 (9th–10th)</option>
+                                    </optgroup>
+                                </select>
+                                <p class="lookup-connector">...at the same time?</p>
+                            </div>
+
+                            <div style="margin-top: 16px;">
+                                <button class="btn btn-secondary" id="lookup-btn">Search</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -202,13 +267,9 @@ include 'sidebar.php';
                             <h4>Results</h4>
                         </div>
                         <div class="card-body" style="background: #fff; direction: ltr">
+                            <div id="lookup-summary" style="text-align:center; color:#555; margin-bottom:10px; font-size:14px;"></div>
                             <table class="table table-responsive table-striped nowrap" id="datatable-results">
-                                <thead>
-                                    <th>Year</th>
-                                    <th>Week</th>
-                                    <th>Record</th>
-                                    <th>Points</th>
-                                </thead>
+                                <thead><tr></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -598,6 +659,29 @@ include 'sidebar.php';
     .tab-buttons-container {
         padding: 10px 0 !important;
     }
+
+    .lookup-connector {
+        font-size: 15px;
+        color: #888;
+        margin: 8px 0 5px;
+        font-style: italic;
+    }
+    .lookup-select {
+        width: 100%;
+        max-width: 220px;
+    }
+    .lookup-checkbox-label {
+        font-size: 14px;
+        cursor: pointer;
+        color: #444;
+        user-select: none;
+    }
+    #compare-section {
+        background: #f8f8f8;
+        border-radius: 6px;
+        padding: 10px 12px 6px;
+        margin-top: 10px;
+    }
     
     /* Mobile-friendly button styles */
     .btn-mobile {
@@ -791,31 +875,94 @@ include 'sidebar.php';
 
         // PFPA chart will be populated by JS after fetch
 
-        $('#lookup-btn').click(function () {
-            lookupTable.ajax.reload();
-        });
+        function ordinal(n) {
+            var s = ['th','st','nd','rd'];
+            var v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        }
 
-        lookupTable = $('#datatable-results').DataTable({
-            searching: false,
-            ajax: {
-                url: 'dataLookup.php',
-                data: function (d) {
-                    d.dataType = 'standings';
-                    d.manager1 = $('#manager1-select').val();
-                    d.place1 = $('#place1').val();
-                }
-            },
-            columns: [
+        function initLookupTable() {
+            if ($.fn.DataTable.isDataTable('#datatable-results')) {
+                $('#datatable-results').DataTable().destroy();
+            }
+
+            var compareMode = $('#compare-enable').is(':checked');
+            var m2Name = $('#manager2-select option:selected').text();
+
+            var theadHtml = '<th>Year</th><th>Week</th><th>Place</th><th>Record</th><th>Points</th>';
+            if (compareMode) {
+                theadHtml += '<th>' + m2Name + ' Place</th><th>' + m2Name + ' Record</th>';
+            }
+            $('#datatable-results thead tr').html(theadHtml);
+
+            var columns = [
                 { data: "year" },
                 { data: "week" },
+                { data: "rank", render: function (data) { return ordinal(data); } },
                 { data: "record" },
                 { data: "points" },
-            ],
-            order: [
-                [0, "desc"],
-                [1, "desc"]
-            ]
+            ];
+            if (compareMode) {
+                columns.push({ data: "rank2", render: function (data) { return ordinal(data); } });
+                columns.push({ data: "record2" });
+            }
+
+            lookupTable = $('#datatable-results').DataTable({
+                searching: false,
+                ajax: {
+                    url: 'dataLookup.php',
+                    data: function (d) {
+                        d.dataType = 'standings';
+                        d.manager1 = $('#manager1-select').val();
+                        d.place1 = $('#place1').val();
+                        d.finalWeekOnly = $('#final-week-only').is(':checked') ? '1' : '0';
+                        d.manager2 = compareMode ? $('#manager2-select').val() : '';
+                        d.place2 = compareMode ? $('#place2').val() : '';
+                    }
+                },
+                columns: columns,
+                order: [[0, "desc"], [1, "desc"]],
+                drawCallback: function (settings) {
+                    if (!settings.json) { return; }
+                    var data = settings.json.data || [];
+                    var total = data.length;
+                    if (total === 0) {
+                        $('#lookup-summary').text('No results found.');
+                        return;
+                    }
+                    var managerName = $('#manager1-select option:selected').text();
+                    var placeText = $('#place1 option:selected').text();
+                    var years = {};
+                    data.forEach(function (row) { years[row.year] = 1; });
+                    var seasonCount = Object.keys(years).length;
+                    var summary = managerName + ' finished in <strong>' + placeText + '</strong> ';
+                    summary += '<strong>' + total + '</strong> time' + (total !== 1 ? 's' : '');
+                    summary += ' across ' + seasonCount + ' season' + (seasonCount !== 1 ? 's' : '');
+                    if ($('#final-week-only').is(':checked')) {
+                        summary += ' (final week only)';
+                    }
+                    if (compareMode) {
+                        var p2Text = $('#place2 option:selected').text();
+                        summary += ', while ' + m2Name + ' was in ' + p2Text;
+                    }
+                    $('#lookup-summary').html(summary);
+                }
+            });
+        }
+
+        $('#lookup-btn').click(function () {
+            initLookupTable();
         });
+
+        $('#compare-enable').change(function () {
+            if ($(this).is(':checked')) {
+                $('#compare-section').show();
+            } else {
+                $('#compare-section').hide();
+            }
+        });
+
+        initLookupTable();
 
         standingsTable = $('#datatable-league-standings').DataTable({
             searching: false,
@@ -1521,6 +1668,33 @@ include 'sidebar.php';
                     }
                 });
 
+                // Helpers for regression and correlation
+                function leastSquares(pts) {
+                    const n = pts.length;
+                    if (n < 2) return null;
+                    let sx = 0, sy = 0, sxy = 0, sxx = 0;
+                    pts.forEach(p => { sx += p.x; sy += p.y; sxy += p.x * p.y; sxx += p.x * p.x; });
+                    const d = n * sxx - sx * sx;
+                    if (d === 0) return null;
+                    const m = (n * sxy - sx * sy) / d;
+                    const b = (sy - m * sx) / n;
+                    return { m, b };
+                }
+                function pearsonR(pts) {
+                    const n = pts.length;
+                    if (n < 2) return 0;
+                    let sx = 0, sy = 0;
+                    pts.forEach(p => { sx += p.x; sy += p.y; });
+                    const mx = sx / n, my = sy / n;
+                    let num = 0, dx2 = 0, dy2 = 0;
+                    pts.forEach(p => {
+                        const dx = p.x - mx, dy = p.y - my;
+                        num += dx * dy; dx2 += dx * dx; dy2 += dy * dy;
+                    });
+                    const denom = Math.sqrt(dx2 * dy2);
+                    return denom === 0 ? 0 : num / denom;
+                }
+
                 // Populate Scatter Chart
                 const scatterChart = document.getElementById('scatterChart').getContext('2d');
                 let points = data.scatterChart;
@@ -1540,6 +1714,24 @@ include 'sidebar.php';
                     obj.borderColor = pointColor;
                     dataset2.push(obj);
                 }
+                // Add dashed reference lines at x=0 (manager avg) and y=0 (opponent avg)
+                const allScatterPts = dataset2.flatMap(d => d.data);
+                const sxVals = allScatterPts.map(p => p.x);
+                const syVals = allScatterPts.map(p => p.y);
+                const sxMin = Math.min(...sxVals) - 15, sxMax = Math.max(...sxVals) + 15;
+                const syMin = Math.min(...syVals) - 15, syMax = Math.max(...syVals) + 15;
+                dataset2.push({
+                    label: 'League Avg (X)',
+                    data: [{ x: sxMin, y: 0 }, { x: sxMax, y: 0 }],
+                    showLine: true, pointRadius: 0,
+                    borderColor: 'rgba(80,120,220,0.55)', borderDash: [6, 4], borderWidth: 1.5, fill: false,
+                });
+                dataset2.push({
+                    label: 'League Avg (Y)',
+                    data: [{ x: 0, y: syMin }, { x: 0, y: syMax }],
+                    showLine: true, pointRadius: 0,
+                    borderColor: 'rgba(220,120,80,0.55)', borderDash: [6, 4], borderWidth: 1.5, fill: false,
+                });
                 new Chart(scatterChart, {
                     type: 'scatter',
                     data: { datasets: dataset2 },
@@ -1577,13 +1769,26 @@ include 'sidebar.php';
                     } else {
                         pointColor = '#ffbdc3';
                     }
+                    const r = pearsonR(value);
+                    const reg = leastSquares(value);
                     let obj = {};
-                    obj.label = key;
+                    obj.label = `${key}  (r = ${r.toFixed(2)})`;
                     obj.data = value;
                     obj.showLine = false;
                     obj.pointBackgroundColor = pointColor;
                     obj.borderColor = pointColor;
                     dataset3.push(obj);
+                    if (reg) {
+                        const xs = value.map(p => p.x);
+                        const xMin = Math.min(...xs), xMax = Math.max(...xs);
+                        const trendColor = key.includes('For') ? 'rgba(60,160,60,0.8)' : 'rgba(200,60,60,0.8)';
+                        dataset3.push({
+                            label: `${key} trend`,
+                            data: [{ x: xMin, y: reg.m * xMin + reg.b }, { x: xMax, y: reg.m * xMax + reg.b }],
+                            showLine: true, pointRadius: 0,
+                            borderColor: trendColor, borderDash: [6, 4], borderWidth: 2, fill: false,
+                        });
+                    }
                 }
                 new Chart(pfwinsChart, {
                     type: 'scatter',

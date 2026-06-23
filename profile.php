@@ -798,6 +798,8 @@ if (isset($_GET['id'])) {
                                     ['Avg PA', $overallTotal > 0 ? round($pa / $overallTotal, 1) : 'N/A'],
                                     ['Avg Margin', count($marginsArr) > 0 ? round(array_sum(array_map('abs', $marginsArr)) / count($marginsArr), 2) : 'N/A'],
                                     ['Avg Combined', count($combinedArr) > 0 ? round(array_sum($combinedArr) / count($combinedArr), 2) : 'N/A'],
+                                    ['Highest Combined', count($combinedArr) > 0 ? round(max($combinedArr), 2) : 'N/A'],
+                                    ['Lowest Combined', count($combinedArr) > 0 ? round(min($combinedArr), 2) : 'N/A'],
                                     ['Biggest Win', $wins + $postWins > 0 ? round($bigWin, 2) : 'N/A'],
                                     ['Biggest Loss', $losses + $postLosses > 0 ? round(abs($bigLoss), 2) : 'N/A'],
                                     ['Closest Win', $wins + $postWins > 0 ? round($closeWin, 2) : 'N/A'],

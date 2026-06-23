@@ -51,6 +51,19 @@ while ($row = fetch_array($result)) {
     $season = $row['year'];
 }
 
+$managerColors = [
+    1  => "#9c68d9",
+    2  => "#a6c6fa",
+    3  => "#3cf06e",
+    4  => "#f33c47",
+    5  => "#c0f6e6",
+    6  => "#def89f",
+    7  => "#dca130",
+    8  => "#ff7f2c",
+    9  => "#2dd4bf",
+    10 => "#f87598",
+];
+
 $result = query("SELECT MAX(WEEK) AS maxweek FROM rosters WHERE YEAR = $season");
 while ($row = fetch_array($result)) {
     $week = $row['maxweek'];
@@ -84,6 +97,7 @@ if ($pageName == 'Schedule') {
 if ($pageName == 'Draft') {
     $draftResults = getDraftResults();
     $draftSpotChart = getDraftChartNumbers();
+    $draftPositionVsFinish = getDraftPositionVsFinish();
 }
 if ((strpos($pageName, 'Recap') !== false)) {
     $regSeasonMatchups = getRegularSeasonMatchups();
@@ -1264,6 +1278,40 @@ function getDraftChartNumbers()
     return $response;
 }
 
+function getDraftPositionVsFinish()
+{
+    $points = [];
+    $avgByPosition = [];
+
+    $result = query("SELECT d.round_pick as draft_position, f.finish, d.year, m.name as manager
+        FROM draft d
+        JOIN finishes f ON f.manager_id = d.manager_id AND f.year = d.year
+        JOIN managers m ON m.id = d.manager_id
+        WHERE d.round = 1
+        ORDER BY d.round_pick, d.year");
+
+    while ($row = fetch_array($result)) {
+        $pos = (int) $row['draft_position'];
+        $finish = (int) $row['finish'];
+        $points[] = [
+            'x'       => $pos,
+            'y'       => $finish,
+            'year'    => (int) $row['year'],
+            'manager' => $row['manager'],
+        ];
+        $avgByPosition[$pos]['sum'] = ($avgByPosition[$pos]['sum'] ?? 0) + $finish;
+        $avgByPosition[$pos]['count'] = ($avgByPosition[$pos]['count'] ?? 0) + 1;
+    }
+
+    $avgPoints = [];
+    ksort($avgByPosition);
+    foreach ($avgByPosition as $pos => $data) {
+        $avgPoints[] = ['x' => $pos, 'y' => round($data['sum'] / $data['count'], 2)];
+    }
+
+    return ['scatter' => $points, 'averages' => $avgPoints];
+}
+
 /**
  * Undocumented function
  */
@@ -1608,6 +1656,70 @@ function queryBestWeekPlayer($week, $pts, $pos)
     }
 
     return $response;
+}
+
+function getAllTimeBestWeek()
+{
+    $bestWeek = [];
+    $result = query("SELECT week,
+        MAX(CASE WHEN roster_spot='QB' THEN points ELSE NULL END) AS top_qb,
+        MAX(CASE WHEN roster_spot='RB' THEN points ELSE NULL END) AS top_rb,
+        MAX(CASE WHEN roster_spot='WR' THEN points ELSE NULL END) AS top_wr,
+        MAX(CASE WHEN roster_spot='TE' THEN points ELSE NULL END) AS top_te,
+        MAX(CASE WHEN roster_spot='W/R' THEN points ELSE NULL END) AS top_wrflex,
+        MAX(CASE WHEN roster_spot='W/T' THEN points ELSE NULL END) AS top_wtflex,
+        MAX(CASE WHEN roster_spot='W/R/T' THEN points ELSE NULL END) AS top_wrt,
+        MAX(CASE WHEN roster_spot='Q/W/R/T' THEN points ELSE NULL END) AS top_qwrt,
+        MAX(CASE WHEN roster_spot='K' THEN points ELSE NULL END) AS top_k,
+        MAX(CASE WHEN roster_spot='DEF' THEN points ELSE NULL END) AS top_def,
+        MAX(CASE WHEN roster_spot='DB' THEN points ELSE NULL END) AS top_db,
+        MAX(CASE WHEN roster_spot='D' THEN points ELSE NULL END) AS top_d
+        FROM rosters
+        WHERE week <= 14
+        GROUP BY week
+        ORDER BY CAST(week AS INTEGER)");
+    while ($row = fetch_array($result)) {
+        $week = $row['week'];
+        $bestWeek[$week]['QB']  = queryAllTimeBestWeekPlayer($week, $row['top_qb'],   'QB');
+        $bestWeek[$week]['RB']  = queryAllTimeBestWeekPlayer($week, $row['top_rb'],   'RB');
+        $bestWeek[$week]['WR']  = queryAllTimeBestWeekPlayer($week, $row['top_wr'],   'WR');
+        $bestWeek[$week]['TE']  = queryAllTimeBestWeekPlayer($week, $row['top_te'],   'TE');
+        if ($row['top_wrt'])
+            $bestWeek[$week]['W/R/T']   = queryAllTimeBestWeekPlayer($week, $row['top_wrt'],    'W/R/T');
+        if ($row['top_wrflex'])
+            $bestWeek[$week]['W/R']     = queryAllTimeBestWeekPlayer($week, $row['top_wrflex'], 'W/R');
+        if ($row['top_wtflex'])
+            $bestWeek[$week]['W/T']     = queryAllTimeBestWeekPlayer($week, $row['top_wtflex'], 'W/T');
+        if ($row['top_qwrt'])
+            $bestWeek[$week]['Q/W/R/T'] = queryAllTimeBestWeekPlayer($week, $row['top_qwrt'],   'Q/W/R/T');
+        if ($row['top_db'])
+            $bestWeek[$week]['DB']      = queryAllTimeBestWeekPlayer($week, $row['top_db'],     'DB');
+        if ($row['top_d'])
+            $bestWeek[$week]['D']       = queryAllTimeBestWeekPlayer($week, $row['top_d'],      'D');
+        $bestWeek[$week]['K']   = queryAllTimeBestWeekPlayer($week, $row['top_k'],   'K');
+        $bestWeek[$week]['DEF'] = queryAllTimeBestWeekPlayer($week, $row['top_def'], 'DEF');
+    }
+    return $bestWeek;
+}
+
+function queryAllTimeBestWeekPlayer($week, $pts, $pos)
+{
+    if (!$pts || $pts == 'Bye') {
+        return ['manager' => '', 'player' => '', 'points' => '', 'year' => ''];
+    }
+    $result = query("SELECT * FROM rosters
+        WHERE week = $week AND points = $pts AND roster_spot = '$pos'
+        LIMIT 1");
+    $row = fetch_array($result);
+    if ($row) {
+        return [
+            'manager' => $row['manager'],
+            'player'  => $row['player'],
+            'points'  => round($pts, 1),
+            'year'    => $row['year']
+        ];
+    }
+    return ['manager' => '', 'player' => '', 'points' => '', 'year' => ''];
 }
 
 /**
@@ -3569,6 +3681,46 @@ function getWeeklyScoresData()
         'minScores' => $minScores,
         'avgScores' => $avgScores
     ];
+}
+
+/**
+ * Get per-week head-to-head matchup counts across all seasons
+ */
+function getHeadToHeadByWeek() {
+    $managers = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett', 'Justin', 'Cole', 'Ben'];
+
+    $weeklyGrid = [];
+    for ($week = 1; $week <= 14; $week++) {
+        $weeklyGrid[$week] = [];
+        foreach ($managers as $m1) {
+            $weeklyGrid[$week][$m1] = [];
+            foreach ($managers as $m2) {
+                $weeklyGrid[$week][$m1][$m2] = 0;
+            }
+        }
+    }
+
+    $result = query("
+        SELECT rsm.week_number, m1.name AS manager1, m2.name AS manager2, COUNT(*) AS times_played
+        FROM regular_season_matchups rsm
+        JOIN managers m1 ON m1.id = rsm.manager1_id
+        JOIN managers m2 ON m2.id = rsm.manager2_id
+        WHERE rsm.manager1_id < rsm.manager2_id
+        GROUP BY rsm.week_number, m1.name, m2.name
+    ");
+
+    while ($row = fetch_array($result)) {
+        $week  = (int)$row['week_number'];
+        $m1    = $row['manager1'];
+        $m2    = $row['manager2'];
+        $count = (int)$row['times_played'];
+        if ($week >= 1 && $week <= 14 && isset($weeklyGrid[$week][$m1][$m2])) {
+            $weeklyGrid[$week][$m1][$m2] = $count;
+            $weeklyGrid[$week][$m2][$m1] = $count;
+        }
+    }
+
+    return ['managers' => $managers, 'weeklyGrid' => $weeklyGrid];
 }
 
 /**

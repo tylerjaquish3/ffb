@@ -74,15 +74,10 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 - page just for charts
     - pie chart for points by position with filters for manager or all
     - lineup accuracy
-- page for random league facts
-    - all Marvin's since 2009 have been Jrs
-    - Baltimore has been owned the most but only by 7 managers
 - make newsletter show random additional data so its not the same every week
 - add lineup accuracy to profile head to head
 - add a table for top free agents
-- add preview notes for the whole season
-- add highest/lowest combined cards on profile, head to head
-- find a way to show who has the longest active streak against another manager
+- add preview notes for each week of the new season
 
 Notes:
 Moved to 18 week schedule in 2021
@@ -136,7 +131,8 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 
 
 2026 pre draft order notes
-- Justin has only had 2 picks in the top 3, and hasn't had a top 3 pick in 14 years
-- Cam, Ev, and Justin have never had #1
 - the last 5 champions have picked in the top 5, but none of them were #1
+- Cole and AJ were 11-3 last year and they picked #1 and #2
+- Cam, Ev, and Justin have never had #1
+- Justin has only had 2 picks in the top 3, and hasn't had a top 3 pick in 14 years
 - the only time #1 pick won was Ben in 2011

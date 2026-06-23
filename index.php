@@ -185,6 +185,7 @@ include 'sidebar.php';
                                         <option value="2">Total Points</option>
                                         <option value="4">Average PF/PA</option>
                                         <option value="5">Start Streaks</option>
+                                        <option value="18">Active Streaks</option>
                                         <option value="6">Win/Loss Margin</option>
                                         <option value="7">Weekly Points</option>
                                         <option value="8">Losses with Top 3 Pts</option>
@@ -344,6 +345,11 @@ include 'sidebar.php';
     }
 
     function showRegTableById(statId) {
+        if (statId === 18) {
+            const el = document.getElementById('datatable-misc18');
+            if (el) el.style.display = '';
+            return;
+        }
         const wrapper = document.getElementById('datatable-misc' + statId + '_wrapper');
         if (wrapper) wrapper.style.display = '';
     }
@@ -376,11 +382,16 @@ include 'sidebar.php';
 
                 loadedRegTables.add(statId);
 
-                const config = Object.assign(
-                    { searching: false, paging: false, info: false },
-                    regTableConfigs[statId] || {}
-                );
-                $('#datatable-misc' + statId).DataTable(config);
+                if (statId === 18) {
+                    $('#datatable-misc18a').DataTable({ searching: false, paging: false, info: false, order: [[1, 'desc']] });
+                    $('#datatable-misc18c').DataTable({ searching: false, paging: false, info: false, order: [[2, 'desc']] });
+                } else {
+                    const config = Object.assign(
+                        { searching: false, paging: false, info: false },
+                        regTableConfigs[statId] || {}
+                    );
+                    $('#datatable-misc' + statId).DataTable(config);
+                }
             })
             .catch(() => {
                 document.getElementById('reg-misc-loader')?.remove();

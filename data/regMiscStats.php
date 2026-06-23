@@ -942,6 +942,95 @@ case 17: ?>
 </table>
 <?php break;
 
+case 18:
+$_activeManagers = [];
+$_res = query("SELECT id, name FROM managers ORDER BY id");
+while ($_row = fetch_array($_res)) {
+    $_activeManagers[] = ['id' => (int)$_row['id'], 'name' => $_row['name']];
+}
+
+$_regStreaks = [];
+foreach ($_activeManagers as $_mgr) {
+    $_mid = $_mgr['id'];
+    $_res2 = query("
+        SELECT CASE WHEN winning_manager_id = $_mid THEN 1 ELSE 0 END as won
+        FROM regular_season_matchups
+        WHERE manager1_id = $_mid AND winning_manager_id IS NOT NULL
+        ORDER BY year ASC, week_number ASC
+    ");
+    $_games = [];
+    while ($_g = fetch_array($_res2)) $_games[] = (int)$_g['won'];
+    $_streak = 0;
+    for ($_i = count($_games) - 1; $_i >= 0; $_i--) {
+        if ($_games[$_i] === 1) $_streak++;
+        else break;
+    }
+    $_regStreaks[] = ['manager' => $_mgr['name'], 'streak' => $_streak];
+}
+usort($_regStreaks, fn($a, $b) => $b['streak'] - $a['streak']);
+
+$_h2hStreaks = [];
+$_n = count($_activeManagers);
+for ($_i = 0; $_i < $_n; $_i++) {
+    for ($_j = $_i + 1; $_j < $_n; $_j++) {
+        $_id1   = $_activeManagers[$_i]['id'];
+        $_id2   = $_activeManagers[$_j]['id'];
+        $_name1 = $_activeManagers[$_i]['name'];
+        $_name2 = $_activeManagers[$_j]['name'];
+        $_res2 = query("
+            SELECT winning_manager_id
+            FROM regular_season_matchups
+            WHERE manager1_id = $_id1 AND manager2_id = $_id2
+              AND winning_manager_id IS NOT NULL
+            ORDER BY year DESC, week_number DESC
+        ");
+        $_activeWin = null; $_streak = 0; $_first = true;
+        while ($_g = fetch_array($_res2)) {
+            $_wid = (int)$_g['winning_manager_id'];
+            if ($_first) { $_activeWin = $_wid; $_streak = 1; $_first = false; }
+            elseif ($_wid === $_activeWin) { $_streak++; }
+            else break;
+        }
+        if ($_streak >= 2 && $_activeWin !== null) {
+            $_winName = ($_activeWin === $_id1) ? $_name1 : $_name2;
+            $_losName = ($_activeWin === $_id1) ? $_name2 : $_name1;
+            $_h2hStreaks[] = ['winner' => $_winName, 'loser' => $_losName, 'streak' => $_streak];
+        }
+    }
+}
+usort($_h2hStreaks, fn($a, $b) => $b['streak'] - $a['streak']);
+$_top3H2H = array_slice($_h2hStreaks, 0, 3);
+?>
+<div id="datatable-misc18">
+    <p class="mb-1"><strong>Active Winning Streak (Regular Season)</strong></p>
+    <table class="table table-responsive table-striped nowrap mb-3" id="datatable-misc18a">
+        <thead><tr><th>Manager</th><th>Active Streak</th></tr></thead>
+        <tbody>
+            <?php foreach ($_regStreaks as $_row): ?>
+            <tr><td><?php echo $_row['manager']; ?></td><td><?php echo $_row['streak']; ?></td></tr>
+            <?php endforeach; ?>
+        </tbody>
+        <tfoot><tr><td colspan="2">Consecutive regular season wins through the most recent game played</td></tr></tfoot>
+    </table>
+    <p class="mb-1"><strong>Active Win Streak vs. Opponent (Regular Season) — Top 3</strong></p>
+    <table class="table table-responsive table-striped nowrap" id="datatable-misc18c">
+        <thead><tr><th>Manager</th><th>Opponent</th><th>Active Streak</th></tr></thead>
+        <tbody>
+            <?php if (empty($_top3H2H)): ?>
+            <tr><td colspan="3" class="text-muted">No active streaks of 2+ games found</td></tr>
+            <?php else: foreach ($_top3H2H as $_row): ?>
+            <tr>
+                <td><?php echo $_row['winner']; ?></td>
+                <td><?php echo $_row['loser']; ?></td>
+                <td><?php echo $_row['streak']; ?></td>
+            </tr>
+            <?php endforeach; endif; ?>
+        </tbody>
+        <tfoot><tr><td colspan="3">Consecutive regular season wins against the same opponent</td></tr></tfoot>
+    </table>
+</div>
+<?php break;
+
 default:
     http_response_code(400);
     echo 'Invalid stat';

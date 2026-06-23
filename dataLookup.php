@@ -8,28 +8,84 @@ include_once 'functions.php';
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'standings') {
 
     $return = [];
-    $manager = $_GET['manager1'];
-    $place = $_GET['place1'];
+    $manager = intval($_GET['manager1']);
+    $placeVal = $_GET['place1']; // e.g. "exact_1", "lte_3", "gte_7"
+    $finalWeekOnly = isset($_GET['finalWeekOnly']) && $_GET['finalWeekOnly'] === '1';
+    $manager2 = isset($_GET['manager2']) && $_GET['manager2'] !== '' ? intval($_GET['manager2']) : null;
+    $placeVal2 = isset($_GET['place2']) && $_GET['place2'] !== '' ? $_GET['place2'] : null;
 
-    // Use the standings table to get all instances where this manager was in this place
-    $result = query("SELECT s.year, s.week, s.points, s.wins, s.losses
-        FROM standings s
-        JOIN managers m ON s.manager_id = m.id
-        WHERE s.rank = $place AND m.id = $manager AND s.points > 0
-        ORDER BY s.year DESC, s.week DESC");
-    
-    while ($row = fetch_array($result)) {
-        $record = $row['wins'].' - '.$row['losses'];
-        $return[] = [
-            'year'      => $row['year'],
-            'week'      => $row['week'],
-            'record'    => $record,
-            'points'    => round($row['points'], 1)
-        ];
+    // Parse "qualifier_rank" value into a SQL condition
+    $parts = explode('_', $placeVal, 2);
+    $qualifier = $parts[0];
+    $rankNum = intval($parts[1]);
+    if ($qualifier === 'lte') {
+        $rankCondition1 = "s.rank <= $rankNum";
+    } elseif ($qualifier === 'gte') {
+        $rankCondition1 = "s.rank >= $rankNum";
+    } else {
+        $rankCondition1 = "s.rank = $rankNum";
+    }
+
+    $finalWeekClause = $finalWeekOnly
+        ? "AND s.week = (SELECT MAX(s3.week) FROM standings s3 WHERE s3.year = s.year AND s3.points > 0)"
+        : "";
+
+    if ($manager2 && $placeVal2) {
+        $parts2 = explode('_', $placeVal2, 2);
+        $qualifier2 = $parts2[0];
+        $rankNum2 = intval($parts2[1]);
+        if ($qualifier2 === 'lte') {
+            $rankCondition2 = "s2.rank <= $rankNum2";
+        } elseif ($qualifier2 === 'gte') {
+            $rankCondition2 = "s2.rank >= $rankNum2";
+        } else {
+            $rankCondition2 = "s2.rank = $rankNum2";
+        }
+
+        $result = query("SELECT s.year, s.week, s.points, s.wins, s.losses, s.rank as rank1,
+                s2.rank as rank2, s2.wins as wins2, s2.losses as losses2
+            FROM standings s
+            JOIN managers m ON s.manager_id = m.id
+            JOIN standings s2 ON s.year = s2.year AND s.week = s2.week
+            JOIN managers m2 ON s2.manager_id = m2.id
+            WHERE $rankCondition1 AND m.id = $manager AND s.points > 0
+            AND $rankCondition2 AND m2.id = $manager2 AND s2.points > 0
+            $finalWeekClause
+            ORDER BY s.year DESC, s.week DESC");
+
+        while ($row = fetch_array($result)) {
+            $return[] = [
+                'year'    => $row['year'],
+                'week'    => $row['week'],
+                'rank'    => $row['rank1'],
+                'record'  => $row['wins'].' - '.$row['losses'],
+                'points'  => round($row['points'], 1),
+                'rank2'   => $row['rank2'],
+                'record2' => $row['wins2'].' - '.$row['losses2'],
+            ];
+        }
+    } else {
+        $result = query("SELECT s.year, s.week, s.points, s.wins, s.losses, s.rank
+            FROM standings s
+            JOIN managers m ON s.manager_id = m.id
+            WHERE $rankCondition1 AND m.id = $manager AND s.points > 0
+            $finalWeekClause
+            ORDER BY s.year DESC, s.week DESC");
+
+        while ($row = fetch_array($result)) {
+            $return[] = [
+                'year'   => $row['year'],
+                'week'   => $row['week'],
+                'rank'   => $row['rank'],
+                'record' => $row['wins'].' - '.$row['losses'],
+                'points' => round($row['points'], 1),
+            ];
+        }
     }
 
     $content = new \stdClass();
     $content->data = $return;
+    $content->total = count($return);
 
     echo json_encode($content);
     die;
@@ -954,30 +1010,49 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'mockSchedule') {
         return $b['total_points'] - $a['total_points']; // If wins are tied, sort by points desc
     });
     
-    // Output only the table rows for AJAX response
+    // Fetch actual records for each manager this season
+    $actualRecordsQuery = "SELECT manager1_id,
+        SUM(CASE WHEN manager1_score > manager2_score THEN 1 ELSE 0 END) as actual_wins,
+        SUM(CASE WHEN manager1_score < manager2_score THEN 1 ELSE 0 END) as actual_losses
+        FROM regular_season_matchups
+        WHERE year = $year
+        GROUP BY manager1_id";
+    $actualRecordsResult = query($actualRecordsQuery);
+    $actualRecords = [];
+    while ($row = fetch_array($actualRecordsResult)) {
+        $actualRecords[$row['manager1_id']] = [
+            'wins'   => (int)$row['actual_wins'],
+            'losses' => (int)$row['actual_losses'],
+        ];
+    }
+
+    // Build JSON response
+    $rows = [];
     $rank = 1;
     foreach ($managerScores as $managerData) {
         $managerId = $managerData['manager_id'];
-        $isScheduleManager = ($managerId == $scheduleManagerId);
-        
-        echo '<tr' . ($isScheduleManager ? ' class="table-primary"' : '') . '>';
-        echo '<td>' . $rank . '</td>';
-        echo '<td>' . $managerData['manager_name'];
-        
-        if ($isScheduleManager) {
-            echo ' <span class="badge badge-primary">Original Schedule</span>';
-        }
-        
-        echo '</td>';
-        echo '<td>' . $managerData['mock_wins'] . '-' . $managerData['mock_losses'] . '</td>';
         $totalGames = $managerData['mock_wins'] + $managerData['mock_losses'];
         $winPct = ($totalGames > 0) ? round(($managerData['mock_wins'] / $totalGames) * 100, 1) : 0;
-        echo '<td>' . $winPct . '%</td>';
-        echo '<td>' . number_format($managerData['total_points'], 2) . '</td>';
-        echo '</tr>';
-        
+        $actualWins   = isset($actualRecords[$managerId]) ? $actualRecords[$managerId]['wins']   : 0;
+        $actualLosses = isset($actualRecords[$managerId]) ? $actualRecords[$managerId]['losses'] : 0;
+        $rows[] = [
+            'rank'             => $rank,
+            'manager_id'       => $managerId,
+            'manager_name'     => $managerData['manager_name'],
+            'is_schedule_owner'=> ($managerId == $scheduleManagerId),
+            'mock_wins'        => $managerData['mock_wins'],
+            'mock_losses'      => $managerData['mock_losses'],
+            'win_pct'          => $winPct,
+            'total_points'     => round($managerData['total_points'], 2),
+            'actual_wins'      => $actualWins,
+            'actual_losses'    => $actualLosses,
+            'win_diff'         => $managerData['mock_wins'] - $actualWins,
+        ];
         $rank++;
-    }    die;
+    }
+    header('Content-Type: application/json');
+    echo json_encode($rows);
+    die;
 }
 
 // Points by Season for a manager (for profile page)

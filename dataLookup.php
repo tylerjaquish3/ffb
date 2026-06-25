@@ -292,6 +292,115 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'all-players') {
     die;
 }
 
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'top-player-seasons') {
+    $allowed = ['QB', 'RB', 'WR', 'TE', 'DEF', 'K'];
+    $position = isset($_GET['position']) && in_array($_GET['position'], $allowed) ? $_GET['position'] : null;
+    $posClause = $position ? "AND position = '$position'" : '';
+
+    $result = query(
+        "SELECT player, year, team, position, sum(points) as points, max(manager) as man
+        FROM rosters
+        WHERE 1=1 $posClause
+        GROUP BY player, year, team
+        ORDER BY points DESC
+        LIMIT 200"
+    );
+
+    $rows = [];
+    while ($array = fetch_array($result)) {
+        $rows[] = [
+            'player'   => $array['player'],
+            'year'     => $array['year'],
+            'team'     => $array['team'],
+            'position' => $array['position'],
+            'points'   => round($array['points'], 1),
+            'man'      => $array['man']
+        ];
+    }
+
+    $content = new \stdClass();
+    $content->data = $rows;
+    echo json_encode($content);
+    die;
+}
+
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'top-player-weeks') {
+    $allowed = ['QB', 'RB', 'WR', 'TE', 'DEF', 'K'];
+    $position = isset($_GET['position']) && in_array($_GET['position'], $allowed) ? $_GET['position'] : null;
+    $posClause = $position ? "AND position = '$position'" : '';
+
+    $result = query(
+        "SELECT player, team, position, week, year, sum(points) as points, max(manager) as man
+        FROM rosters
+        WHERE 1=1 $posClause
+        GROUP BY player, team, year, week
+        ORDER BY points DESC
+        LIMIT 200"
+    );
+
+    $rows = [];
+    while ($row = fetch_array($result)) {
+        $rows[] = [
+            'player'   => $row['player'],
+            'year'     => $row['year'],
+            'week'     => $row['week'],
+            'team'     => $row['team'],
+            'position' => $row['position'],
+            'points'   => round($row['points'], 1),
+            'man'      => $row['man']
+        ];
+    }
+
+    $content = new \stdClass();
+    $content->data = $rows;
+    echo json_encode($content);
+    die;
+}
+
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'free-agents') {
+    $result = query(
+        "WITH canonical AS (
+            SELECT player AS name, player AS canonical FROM player_aliases
+            UNION SELECT alias_1, player FROM player_aliases WHERE alias_1 IS NOT NULL
+            UNION SELECT alias_2, player FROM player_aliases WHERE alias_2 IS NOT NULL
+            UNION SELECT alias_3, player FROM player_aliases WHERE alias_3 IS NOT NULL
+        ),
+        drafted_canonical AS (
+            SELECT DISTINCT d.year, COALESCE(c.canonical, d.player) AS canonical
+            FROM draft d
+            LEFT JOIN canonical c ON c.name = d.player
+        )
+        SELECT r.player, r.year, r.position, r.team, ROUND(SUM(r.points), 1) AS points, max(r.manager) AS manager
+        FROM rosters r
+        LEFT JOIN canonical c ON c.name = r.player
+        WHERE r.player != '' AND r.player != '(Empty)'
+          AND NOT EXISTS (
+            SELECT 1 FROM drafted_canonical dc
+            WHERE dc.year = r.year AND dc.canonical = COALESCE(c.canonical, r.player)
+          )
+        GROUP BY r.player, r.year
+        ORDER BY points DESC
+        LIMIT 200"
+    );
+
+    $rows = [];
+    while ($row = fetch_array($result)) {
+        $rows[] = [
+            'player'   => $row['player'],
+            'year'     => (int)$row['year'],
+            'position' => $row['position'],
+            'team'     => $row['team'],
+            'points'   => (float)$row['points'],
+            'manager'  => $row['manager'],
+        ];
+    }
+
+    $content = new \stdClass();
+    $content->data = $rows;
+    echo json_encode($content);
+    die;
+}
+
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
 
     $selectedSeason = $_GET['season'];

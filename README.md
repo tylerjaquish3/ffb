@@ -71,12 +71,8 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 - analyze text messages by manager in group text
 - milestones about to happen
     - league on pace to break record
-- page just for charts
-    - pie chart for points by position with filters for manager or all
-    - lineup accuracy
 - make newsletter show random additional data so its not the same every week
 - add lineup accuracy to profile head to head
-- add a table for top free agents
 - add preview notes for each week of the new season
 
 Notes:
@@ -85,7 +81,7 @@ Rams moved to LA between 2015 & 2016
 Chargers moved to LA between 2016 & 2017
 Raiders moved to LV between 2019 & 2020
 
-Draft ideas:
+Draft order ideas:
 - movie like the Mean Girls one i saw, but still random
 
 

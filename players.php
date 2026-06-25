@@ -40,6 +40,7 @@ sort($allTimeManagerNames);
                         <button class="tab-button" id="top-weeks-tab" onclick="showCard('top-weeks', true)">Top Weeks</button>
                         <button class="tab-button" id="players-by-manager-tab" onclick="showCard('players-by-manager', true)">Players by Manager</button>
                         <button class="tab-button" id="top-performers-all-tab" onclick="showCard('top-performers-all', true)">Top Performers</button>
+                        <button class="tab-button" id="free-agents-tab" onclick="showCard('free-agents', true)">Free Agents</button>
                         <button class="tab-button" id="nfl-teams-tab" onclick="showCard('nfl-teams', true)">NFL Teams</button>
                     </div>
                 </div>
@@ -105,31 +106,7 @@ sort($allTimeManagerNames);
                                             <th>Position</th>
                                             <th>Points</th>
                                         </thead>
-                                        <tbody>
-                                        <?php
-                                        $result = query(
-                                            "SELECT player, year, team, position, sum(points) as points, max(manager) as man
-                                            FROM rosters
-                                            GROUP BY player, year, team
-                                            ORDER BY points DESC
-                                            LIMIT 200");
-                                        while ($array = fetch_array($result)) { ?>
-                                            <tr>
-                                                <td><?php echo $array['year']; ?></td>
-                                                <td><?php echo '<a href="/profile.php?id='.$array['man'].'">'.$array['man'].'</a>'; ?></td>
-                                                <td>
-                                                    <?php echo '<a href="/rosters.php?year='.$array['year'].'&week=1&manager='.$array['man'].'">
-                                                    <i class="icon-clipboard"></i></a>&nbsp;&nbsp;&nbsp;';
-                                                    echo '<a href="/draft.php?year='.$array['year'].'&manager='.$array['man'].'">
-                                                    <i class="icon-table"></i></a>'; ?>
-                                                </td>
-                                                <td><?php echo '<a href="/players.php?player='.$array['player'].'">'.$array['player'].'</a>'; ?></td>
-                                                <td><?php echo $array['team']; ?></td>
-                                                <td><?php echo $array['position']; ?></td>
-                                                <td><?php echo round($array['points'], 1); ?></td>
-                                            </tr>
-                                        <?php } ?>
-                                        </tbody>
+                                        <tbody></tbody>
                                     </table>
                                 </div>
                             </div>
@@ -173,30 +150,7 @@ sort($allTimeManagerNames);
                                             <th>Position</th>
                                             <th>Points</th>
                                         </thead>
-                                        <tbody>
-                                        <?php
-                                        $result = query(
-                                            "SELECT player, team, position, week, year, sum(points) as points, max(manager) as man
-                                            FROM rosters
-                                            GROUP BY player, team, year, week
-                                            ORDER BY points DESC
-                                            LIMIT 200");
-                                        while ($row = fetch_array($result)) { ?>
-                                            <tr>
-                                                <td><?php echo $row['year']; ?></td>
-                                                <td><?php echo $row['week']; ?></td>
-                                                <td><?php echo '<a href="/profile.php?id='.$row['man'].'">'.$row['man'].'</a>'; ?></td>
-                                                <td>
-                                                    <?php echo '<a href="/rosters.php?year='.$row['year'].'&week='.$row['week'].'&manager='.$row['man'].'">
-                                                    <i class="icon-clipboard"></i></a>'; ?>
-                                                </td>
-                                                <td><?php echo '<a href="/players.php?player='.$row['player'].'">'.$row['player'].'</a>'; ?></td>
-                                                <td><?php echo $row['team']; ?></td>
-                                                <td><?php echo $row['position']; ?></td>
-                                                <td><?php echo round($row['points'], 1); ?></td>
-                                            </tr>
-                                        <?php } ?>
-                                        </tbody>
+                                        <tbody></tbody>
                                     </table>
                                 </div>
                             </div>
@@ -376,6 +330,34 @@ sort($allTimeManagerNames);
                                     <?php } ?>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Free Agents Tab -->
+            <div class="row card-section" id="free-agents" style="display: none;">
+                <div class="col-sm-12 col-md-6 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Top Free Agents</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-striped nowrap table-responsive" id="datatable-freeAgents">
+                                        <thead>
+                                            <th>Year</th>
+                                            <th>Player</th>
+                                            <th>Position</th>
+                                            <th>Team</th>
+                                            <th>Manager</th>
+                                            <th>Points</th>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -642,36 +624,81 @@ sort($allTimeManagerNames);
             }
         });
 
+        var currentSeasonsPosition = '';
+        var currentWeeksPosition = '';
+
         var playerSeasons = $('#datatable-playerSeasons').DataTable({
             pageLength: 10,
-            order: [
-                [6, "desc"]
+            order: [[6, "desc"]],
+            ajax: {
+                url: 'dataLookup.php',
+                data: function() {
+                    return { dataType: 'top-player-seasons', position: currentSeasonsPosition };
+                }
+            },
+            columns: [
+                { data: 'year' },
+                { data: 'man', render: function(data) {
+                    return '<a href="/profile.php?id=' + data + '">' + data + '</a>';
+                }},
+                { data: 'year', orderable: false, searchable: false, render: function(data, type, row) {
+                    return '<a href="/rosters.php?year=' + row.year + '&week=1&manager=' + row.man + '"><i class="icon-clipboard"></i></a>' +
+                           '&nbsp;&nbsp;&nbsp;<a href="/draft.php?year=' + row.year + '&manager=' + row.man + '"><i class="icon-table"></i></a>';
+                }},
+                { data: 'player', render: function(data) {
+                    return '<a href="/players.php?player=' + data + '">' + data + '</a>';
+                }},
+                { data: 'team' },
+                { data: 'position' },
+                { data: 'points' }
             ]
         });
-        
+
         var playerWeeks = $('#datatable-playerWeeks').DataTable({
             pageLength: 10,
-            order: [
-                [7, "desc"]
+            order: [[7, "desc"]],
+            ajax: {
+                url: 'dataLookup.php',
+                data: function() {
+                    return { dataType: 'top-player-weeks', position: currentWeeksPosition };
+                }
+            },
+            columns: [
+                { data: 'year' },
+                { data: 'week' },
+                { data: 'man', render: function(data) {
+                    return '<a href="/profile.php?id=' + data + '">' + data + '</a>';
+                }},
+                { data: 'week', orderable: false, searchable: false, render: function(data, type, row) {
+                    return '<a href="/rosters.php?year=' + row.year + '&week=' + row.week + '&manager=' + row.man + '"><i class="icon-clipboard"></i></a>';
+                }},
+                { data: 'player', render: function(data) {
+                    return '<a href="/players.php?player=' + data + '">' + data + '</a>';
+                }},
+                { data: 'team' },
+                { data: 'position' },
+                { data: 'points' }
             ]
         });
 
         $('#weeks-filter-btns a').click(function () {
-            let criteria = $(this)[0].outerText;
-            playerWeeks.columns([6]).search(criteria, true, true).draw();
+            currentWeeksPosition = $(this).text().trim();
+            playerWeeks.ajax.reload();
         });
 
         $('#weeks-show-all').click(function () {
-            playerWeeks.columns('').search('').draw();
+            currentWeeksPosition = '';
+            playerWeeks.ajax.reload();
         });
 
         $('#seasons-filter-btns a').click(function () {
-            let criteria = $(this)[0].outerText;
-            playerSeasons.columns([5]).search(criteria, true, true).draw();
+            currentSeasonsPosition = $(this).text().trim();
+            playerSeasons.ajax.reload();
         });
 
         $('#seasons-show-all').click(function () {
-            playerSeasons.columns('').search('').draw();
+            currentSeasonsPosition = '';
+            playerSeasons.ajax.reload();
         });
 
         $('#datatable-allTimeBestWeek').DataTable({
@@ -742,6 +769,27 @@ sort($allTimeManagerNames);
                 applyHighlightAT(manager, mid);
             });
         })();
+
+        $('#datatable-freeAgents').DataTable({
+            pageLength: 25,
+            order: [[5, "desc"]],
+            ajax: {
+                url: 'dataLookup.php',
+                data: { dataType: 'free-agents' }
+            },
+            columns: [
+                { data: 'year' },
+                { data: 'player', render: function(data) {
+                    return '<a href="/players.php?player=' + data + '">' + data + '</a>';
+                }},
+                { data: 'position' },
+                { data: 'team' },
+                { data: 'manager', render: function(data) {
+                    return '<a href="/profile.php?id=' + data + '">' + data + '</a>';
+                }},
+                { data: 'points' }
+            ]
+        });
 
         $('#datatable-nfl-teams').DataTable({
             pageLength: 10,

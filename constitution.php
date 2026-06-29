@@ -212,90 +212,6 @@ while ($row = fetch_array($result)) {
                                             <li>Con: Could impact pocket passers more likely than running QBs, which already have an edge.</li>
                                         </ul>
                                     </li>
-                                    <li>Proposal: Increase points for DEF turnovers as follows:
-                                        <div class="table-responsive mt-2 mb-2">
-                                            <table class="table table-sm table-bordered text-center small" style="max-width: 320px; line-height: 1.2;">
-                                                <thead class="thead-light">
-                                                    <tr><th>Category</th><th>2025</th><th>2026 (proposed)</th><th>Top 20 DEF Range</th></tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr><td>Sack</td><td>0.5</td><td>0.5 (unchanged)</td><td>35-50 sacks per season</td></tr>
-                                                    <tr><td>3 and Out</td><td>0.5</td><td>0.5 (unchanged)</td><td>30-50 per season</td></tr>
-                                                    <tr class="table-warning"><td>Interception</td><td>1</td><td><strong>2</strong></td><td>10-20 ints per season</td></tr>
-                                                    <tr class="table-warning"><td>Fumble Recovery</td><td>1</td><td><strong>2</strong></td><td>7-12 per season</td></tr>
-                                                    <tr class="table-warning"><td>Safety</td><td>2</td><td><strong>4</strong></td><td>0-1 per season</td></tr>
-                                                    <tr class="table-warning"><td>Block Kick</td><td>1</td><td><strong>4</strong></td><td>1-4 per season</td></tr>
-                                                    <tr class="table-warning"><td>4th Down Stop</td><td>1</td><td><strong>2</strong></td><td>10-20 per season</td></tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        <ul>
-                                            <li>We all know that DEF scoring is not ideal, based on Yahoo's ranges for points and yards allowed. But we've tweaked it into maybe the best situation it can be in a broken system. Points and yards allowed are not a perfect indication of defensive performance, but hopefully the combination of those and turnovers are.</li>
-                                            <li>Pro: Would reward defenses for creating turnovers, rather than just limiting points and yards.</li>
-                                            <li>Con: Good defenses would be much more valuable, potentially creating a larger gap between top and bottom teams.</li>
-                                        </ul>
-                                        <br />
-                                        <h4>How DEF compares to other positions (2025)</h4>
-
-                                        <div class="table-responsive mt-2 mb-2">
-                                            <table class="table table-sm table-bordered text-center small" style="max-width: 460px; line-height: 1.2;">
-                                                <thead class="thead-light">
-                                                    <tr><th>Pos</th><th>#1</th><th>Last Starter</th><th>Last Starter Pts</th><th>Avg (top starters)</th></tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr><td>QB</td><td>361</td><td>#25</td><td>159</td><td>257</td></tr>
-                                                    <tr><td>RB</td><td>365</td><td>#30</td><td>137</td><td>220</td></tr>
-                                                    <tr><td>WR</td><td>309</td><td>#40</td><td>137</td><td>180</td></tr>
-                                                    <tr><td>TE</td><td>253</td><td>#15</td><td>107</td><td>149</td></tr>
-                                                    <tr><td>K</td><td>211</td><td>#15</td><td>143</td><td>166</td></tr>
-                                                    <tr class="table-danger"><td>DEF (current)</td><td>243</td><td>#15</td><td>137</td><td>181</td></tr>
-                                                    <tr class="table-success"><td>DEF (proposed)</td><td>299</td><td>#15</td><td>176</td><td>222</td></tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <h4>2025 DEF Weekly Stats</h4>
-                                        Min: -7 pts | Max: 38 pts | Avg: 10.6 pts
-                                        <div class="table-responsive mt-2 mb-2">
-                                            <table class="table table-sm table-bordered text-center small" style="max-width: 320px; line-height: 1.2;">
-                                                <tbody>
-                                                    <tr><td>Above 20 pts</td><td>15 times</td><td></td><td></td></tr>
-                                                    <tr><td>10 – 20 pts</td><td>53 times</td><td></td><td></td></tr>
-                                                    <tr><td>0 – 10 pts</td><td>62 times</td><td></td><td></td></tr>
-                                                    <tr><td>Negative pts</td><td>10 times</td><td></td><td></td></tr>
-                                                    <tr class="font-weight-bold"><td>Total</td><td>140</td><td></td><td></td></tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        2025 Week 16 actual examples are shown below. Take a minute and try to rank these defensive performances to determine how they should ideally score fantasy points.
-                                        <div class="table-responsive mt-2 mb-2">
-                                            <table class="table table-sm table-bordered text-center small" style="line-height: 1.2;">
-                                                <thead class="thead-light">
-                                                    <tr>
-                                                        <th>Team</th>
-                                                        <th>Pts vs.</th>
-                                                        <th>Yards Allowed</th>
-                                                        <th>Sack</th>
-                                                        <th>Safe</th>
-                                                        <th>Int</th>
-                                                        <th>Fum Rec</th>
-                                                        <th>TD</th>
-                                                        <th>Blk Kick</th>
-                                                        <th>4 Dwn Stop</th>
-                                                        <th>3 And Outs</th>
-                                                        <th class="def-hidden-col" style="display:none;">Fantasy Pts</th>
-                                                        <th class="def-hidden-col" style="display:none;">Fantasy Pts (proposed)</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr><td>Texans</td><td>21</td><td>315</td><td>3</td><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>4</td><td class="def-hidden-col" style="display:none;">10.5</td><td class="def-hidden-col" style="display:none;">11.5</td></tr>
-                                                    <tr><td>Titans</td><td>9</td><td>133</td><td>4</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>4</td><td class="def-hidden-col" style="display:none;">20</td><td class="def-hidden-col" style="display:none;">22</td></tr>
-                                                    <tr><td>Bengals</td><td>21</td><td>389</td><td>0</td><td>0</td><td>2</td><td>1</td><td>0</td><td>0</td><td>1</td><td>2</td><td class="def-hidden-col" style="display:none;">5</td><td class="def-hidden-col" style="display:none;">8</td></tr>
-                                                    <tr><td>Ravens</td><td>28</td><td>453</td><td>4</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td class="def-hidden-col" style="display:none;">2.5</td><td class="def-hidden-col" style="display:none;">4.5</td></tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </li>
                                 </ol>
                                 <strong>Determine 2026 draft order</strong><br />
                                 <br />
@@ -394,7 +310,7 @@ while ($row = fetch_array($result)) {
 
                                 <a href="https://www.cameo.com/recipient/62dac9a54baeecb8a4f7d7ce?from_share_sheet=1&utm_campaign=video_share_to_copy">Watch Dean Blandino Video Here</a>
                                 <br /><br />
-                                <strong>Draft date: 9.5.22 | Time: 3pm | Location: <a href="#" id="reveal-def-cols" onclick="document.querySelectorAll('.def-hidden-col').forEach(el => el.style.display=''); this.style.pointerEvents='none'; return false;" style="color: inherit; text-decoration: none;">Everett's</a></strong>
+                                <strong>Draft date: 9.5.22 | Time: 3pm | Location: Everett's</strong>
                                 <br /><br />
                                 FAB info:<br />
                                 <ul>

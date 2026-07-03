@@ -254,115 +254,23 @@ case 5: ?>
     <thead>
         <th>Manager</th>
         <th>Best Start</th>
-        <th>Year</th>
-        <th>Finish</th>
+        <th>Years (Finish)</th>
         <th>Worst Start</th>
-        <th>Year</th>
-        <th>Finish</th>
+        <th>Years (Finish)</th>
     </thead>
     <tbody>
-        <?php
-        $startStreaks = [];
-        for ($x = 1; $x < 11; $x++) {
-
-            $years = [];
-            $result = query("SELECT * FROM regular_season_matchups
-                WHERE manager1_id = $x and winning_manager_id = $x
-                order by year asc, week_number asc");
-            while ($row = fetch_array($result)) {
-                $years[$row['year']][] = $row;
-            };
-
-            $myStreakWin = $myLongestWin = 0;
-            foreach ($years as $y => $weeks) {
-                $lastWeek = 0;
-                foreach ($weeks as $w) {
-                    if ($w['week_number'] == 1) {
-                        $myStreakWin = 0;
-                    }
-                    if ($w['week_number'] == ($lastWeek + 1)) {
-                        $myStreakWin++;
-                        if ($myStreakWin > $myLongestWin) {
-                            $myLongestWin = $myStreakWin;
-                            $winYear = $y;
-                        }
-                        $lastWeek = $w['week_number'];
-                    } else {
-                        break;
-                    }
-                }
-            }
-
-            $years = [];
-            $result = query("SELECT * FROM regular_season_matchups
-                WHERE manager1_id = $x and losing_manager_id = $x
-                order by year asc, week_number asc");
-            while ($row = fetch_array($result)) {
-                $years[$row['year']][] = $row;
-            };
-
-            $myStreakLose = $myLongestLose = 0;
-            foreach ($years as $y => $weeks) {
-                $lastWeek = 0;
-                foreach ($weeks as $w) {
-                    if ($w['week_number'] == 1) {
-                        $myStreakLose = 0;
-                    }
-                    if ($w['week_number'] == ($lastWeek + 1)) {
-                        $myStreakLose++;
-                        if ($myStreakLose > $myLongestLose) {
-                            $myLongestLose = $myStreakLose;
-                            $loseYear = $y;
-                        }
-                        $lastWeek = $w['week_number'];
-                    } else {
-                        break;
-                    }
-                }
-            }
-
-            $result2 = query("SELECT * FROM managers WHERE id = $x");
-            while ($row2 = fetch_array($result2)) {
-                $manager = $row2['name'];
-            }
-
-            $winYearFinish = '-';
-            $result3 = query("SELECT * FROM finishes WHERE manager_id = $x AND year = $winYear");
-            while ($row3 = fetch_array($result3)) {
-                $winYearFinish = $row3['finish'];
-            }
-
-            $loseYearFinish = '-';
-            $result4 = query("SELECT * FROM finishes WHERE manager_id = $x AND year = $loseYear");
-            while ($row4 = fetch_array($result4)) {
-                $loseYearFinish = $row4['finish'];
-            }
-
-            $startStreaks[] = [
-                'manager' => $manager,
-                'winStreak' => $myLongestWin . ' - 0',
-                'winYear' => $winYear,
-                'winYearFinish' => $winYearFinish,
-                'loseStreak' => '0 - ' . $myLongestLose,
-                'loseYear' => $loseYear,
-                'loseYearFinish' => $loseYearFinish
-            ];
-        }
-
-        foreach ($startStreaks as $row) { ?>
+        <?php foreach (getStartStreaks() as $row) { ?>
             <tr>
                 <td><?php echo $row['manager']; ?></td>
                 <td><?php echo $row['winStreak']; ?></td>
-                <td><?php echo $row['winYear']; ?></td>
-                <td><?php echo $row['winYearFinish']; ?></td>
+                <td><?php echo $row['winYears']; ?></td>
                 <td><?php echo $row['loseStreak']; ?></td>
-                <td><?php echo $row['loseYear']; ?></td>
-                <td><?php echo $row['loseYearFinish']; ?></td>
+                <td><?php echo $row['loseYears']; ?></td>
             </tr>
         <?php } ?>
     </tbody>
     <tfoot>
-        <tr><td colspan=7>Longest winning or losing streak to start a season and how it ended</td></tr>
+        <tr><td colspan=5>Longest winning or losing streak to start a season and how it ended</td></tr>
     </tfoot>
 </table>
 <?php break;

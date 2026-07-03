@@ -14,8 +14,53 @@ if (isset($_GET['id'])) {
     <div class="content-wrapper">
 
         <div class="content-body">
+            <?php
+            $type_labels = [
+                'current' => 'Current Season',
+                'draft'   => 'Draft',
+                'post'    => 'Postseason',
+                'regular' => 'Regular Season',
+                'roster'  => 'Roster',
+            ];
+            $active_categories = $type != 'all' ? [$type => $type_labels[$type]] : $type_labels;
+
+            $summary_query = "SELECT managers.name, ff.type, is_positive, COUNT(*) as count
+                FROM manager_fun_facts mff
+                JOIN fun_facts ff ON mff.fun_fact_id = ff.id
+                JOIN managers ON managers.id = mff.manager_id
+                WHERE managers.id BETWEEN 1 AND 10";
+            if ($type != 'all') {
+                $summary_query .= " AND ff.type = '$type'";
+            }
+            $summary_query .= " GROUP BY managers.name, ff.type, is_positive ORDER BY managers.name, ff.type";
+            $summary_result = query($summary_query);
+
+            $summary_data = [];
+            while ($summary_row = fetch_array($summary_result)) {
+                $name = $summary_row['name'];
+                $t    = $summary_row['type'];
+                if (!isset($summary_data[$name])) {
+                    $summary_data[$name] = [];
+                }
+                if (!isset($summary_data[$name][$t])) {
+                    $summary_data[$name][$t] = ['positive' => 0, 'negative' => 0];
+                }
+                $key = $summary_row['is_positive'] ? 'positive' : 'negative';
+                $summary_data[$name][$t][$key] = (int)$summary_row['count'];
+            }
+
+            // Column totals
+            $col_totals = [];
+            foreach ($active_categories as $cat_key => $cat_label) {
+                $col_totals[$cat_key] = ['positive' => 0, 'negative' => 0];
+                foreach ($summary_data as $name => $cats) {
+                    $col_totals[$cat_key]['positive'] += $cats[$cat_key]['positive'] ?? 0;
+                    $col_totals[$cat_key]['negative'] += $cats[$cat_key]['negative'] ?? 0;
+                }
+            }
+            ?>
             <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-4">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">Filters</h4>
@@ -52,6 +97,69 @@ if (isset($_GET['id'])) {
                                     </div>
                                 </div>
                                 <a href="/records.php">Go To Record Log</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Awards Summary</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <div class="card-block">
+                                <div style="overflow-x: auto;">
+                                <table class="table table-sm table-bordered" style="margin-bottom: 0; white-space: nowrap;">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2" class="align-middle">Manager</th>
+                                            <?php foreach ($active_categories as $cat_key => $cat_label): ?>
+                                                <th colspan="2" class="text-center"><?php echo $cat_label; ?></th>
+                                            <?php endforeach; ?>
+                                            <th rowspan="2" class="text-center align-middle">Total</th>
+                                        </tr>
+                                        <tr>
+                                            <?php foreach ($active_categories as $cat_key => $cat_label): ?>
+                                                <th class="text-center text-success" style="font-size: 0.8em;">+</th>
+                                                <th class="text-center text-danger"  style="font-size: 0.8em;">-</th>
+                                            <?php endforeach; ?>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($summary_data as $name => $cats):
+                                            $row_total = 0;
+                                            foreach ($active_categories as $cat_key => $cat_label) {
+                                                $row_total += ($cats[$cat_key]['positive'] ?? 0) + ($cats[$cat_key]['negative'] ?? 0);
+                                            }
+                                        ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($name); ?></td>
+                                                <?php foreach ($active_categories as $cat_key => $cat_label): ?>
+                                                    <td class="text-center text-success"><?php echo $cats[$cat_key]['positive'] ?? 0; ?></td>
+                                                    <td class="text-center text-danger"><?php echo $cats[$cat_key]['negative'] ?? 0; ?></td>
+                                                <?php endforeach; ?>
+                                                <td class="text-center"><strong><?php echo $row_total; ?></strong></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Total</th>
+                                            <?php
+                                            $grand_total = 0;
+                                            foreach ($active_categories as $cat_key => $cat_label):
+                                                $pos = $col_totals[$cat_key]['positive'];
+                                                $neg = $col_totals[$cat_key]['negative'];
+                                                $grand_total += $pos + $neg;
+                                            ?>
+                                                <th class="text-center text-success"><?php echo $pos; ?></th>
+                                                <th class="text-center text-danger"><?php echo $neg; ?></th>
+                                            <?php endforeach; ?>
+                                            <th class="text-center"><?php echo $grand_total; ?></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                </div>
                             </div>
                         </div>
                     </div>

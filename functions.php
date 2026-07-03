@@ -4473,10 +4473,110 @@ function getManagerH2HInfo($manager1_id, $manager2_id)
     }
     
     $streakText = $streak > 0 ? $streakWinner . ' ' . $streak : 'Even';
-    
+
     return [
         'regular_record' => $regular_record,
         'postseason_record' => $postseason_record,
         'streak' => $streakText
     ];
+}
+
+function getStartStreaks() {
+    $startStreaks = [];
+    for ($x = 1; $x < 11; $x++) {
+
+        $years = [];
+        $result = query("SELECT * FROM regular_season_matchups
+            WHERE manager1_id = $x AND winning_manager_id = $x
+            ORDER BY year ASC, week_number ASC");
+        while ($row = fetch_array($result)) {
+            $years[$row['year']][] = $row;
+        }
+
+        $myStreakWin = $myLongestWin = 0;
+        $winYears = [];
+        foreach ($years as $y => $weeks) {
+            $lastWeek = 0;
+            foreach ($weeks as $w) {
+                if ($w['week_number'] == 1) {
+                    $myStreakWin = 0;
+                }
+                if ($w['week_number'] == ($lastWeek + 1)) {
+                    $myStreakWin++;
+                    if ($myStreakWin > $myLongestWin) {
+                        $myLongestWin = $myStreakWin;
+                        $winYears = [$y];
+                    } elseif ($myStreakWin === $myLongestWin && !in_array($y, $winYears)) {
+                        $winYears[] = $y;
+                    }
+                    $lastWeek = $w['week_number'];
+                } else {
+                    break;
+                }
+            }
+        }
+
+        $years = [];
+        $result = query("SELECT * FROM regular_season_matchups
+            WHERE manager1_id = $x AND losing_manager_id = $x
+            ORDER BY year ASC, week_number ASC");
+        while ($row = fetch_array($result)) {
+            $years[$row['year']][] = $row;
+        }
+
+        $myStreakLose = $myLongestLose = 0;
+        $loseYears = [];
+        foreach ($years as $y => $weeks) {
+            $lastWeek = 0;
+            foreach ($weeks as $w) {
+                if ($w['week_number'] == 1) {
+                    $myStreakLose = 0;
+                }
+                if ($w['week_number'] == ($lastWeek + 1)) {
+                    $myStreakLose++;
+                    if ($myStreakLose > $myLongestLose) {
+                        $myLongestLose = $myStreakLose;
+                        $loseYears = [$y];
+                    } elseif ($myStreakLose === $myLongestLose && !in_array($y, $loseYears)) {
+                        $loseYears[] = $y;
+                    }
+                    $lastWeek = $w['week_number'];
+                } else {
+                    break;
+                }
+            }
+        }
+
+        $result2 = query("SELECT name FROM managers WHERE id = $x");
+        $manager = fetch_array($result2)['name'];
+
+        $winYearParts = [];
+        foreach ($winYears as $wy) {
+            $finish = '-';
+            $r = query("SELECT finish FROM finishes WHERE manager_id = $x AND year = $wy");
+            if ($row3 = fetch_array($r)) {
+                $finish = $row3['finish'];
+            }
+            $winYearParts[] = $wy . ' (' . $finish . ')';
+        }
+
+        $loseYearParts = [];
+        foreach ($loseYears as $ly) {
+            $finish = '-';
+            $r = query("SELECT finish FROM finishes WHERE manager_id = $x AND year = $ly");
+            if ($row4 = fetch_array($r)) {
+                $finish = $row4['finish'];
+            }
+            $loseYearParts[] = $ly . ' (' . $finish . ')';
+        }
+
+        $startStreaks[] = [
+            'manager'    => $manager,
+            'winStreak'  => $myLongestWin . ' - 0',
+            'winYears'   => implode(', ', $winYearParts),
+            'loseStreak' => '0 - ' . $myLongestLose,
+            'loseYears'  => implode(', ', $loseYearParts),
+        ];
+    }
+    return $startStreaks;
 }

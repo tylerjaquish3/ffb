@@ -48,7 +48,6 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 
 # Bugs
 
-- start streaks on dashboard... maybe they started 4-0 3 times? put all years
 - If yahoo api request has an error, try it again. seems to continue after but skips errored rows
     - make sure it doesnt add duplicate rows, this happens for names with an apostrophe in the name
 
@@ -74,6 +73,9 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 - make newsletter show random additional data so its not the same every week
 - add lineup accuracy to profile head to head
 - add preview notes for each week of the new season
+- have a page for luck
+    - wins with bottom points
+    - wins under 5 pt margin
 
 Notes:
 Moved to 18 week schedule in 2021

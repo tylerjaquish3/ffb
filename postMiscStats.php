@@ -82,6 +82,7 @@
     <thead>
         <th>Manager</th>
         <th>Appearances</th>
+        <th>Playoff Rate</th>
         <th>Best Streak</th>
         <th>Current Streak</th>
     </thead>
@@ -99,13 +100,14 @@
         
         foreach ($managers as $name => $array) {
 
-            $currentStreak = $thisStreak = $longestStreak = $appearances = 0;
+            $currentStreak = $thisStreak = $longestStreak = $appearances = $totalSeasons = 0;
             $currentStreakOver = false;
-            $result = query("SELECT * FROM finishes 
+            $result = query("SELECT * FROM finishes
                 JOIN managers ON managers.id = finishes.manager_id
                 WHERE managers.name = '$name'
                 ORDER BY year DESC");
             while ($row = fetch_array($result)) {
+                $totalSeasons++;
                 // increment appearances if finish is less than 7
                 if ($row['finish'] < 7) {
                     $appearances++;
@@ -120,6 +122,7 @@
                 }
             }
             $managers[$name]['app'] = $appearances;
+            $managers[$name]['rate'] = $totalSeasons > 0 ? round(100 * $appearances / $totalSeasons) : 0;
             $managers[$name]['streak'] = $longestStreak;
             $managers[$name]['current'] = $currentStreak;
         }
@@ -128,6 +131,7 @@
             <tr>
                 <td><?php echo $manager; ?></td>
                 <td><?php echo $array['app']; ?></td>
+                <td><?php echo $array['rate']; ?>%</td>
                 <td><?php echo $array['streak']; ?></td>
                 <td><?php echo $array['current']; ?></td>
             </tr>
@@ -136,7 +140,7 @@
     </tbody>
     <tfoot>
         <tr>
-            <td colspan=3>Postseason appearances and best streak of consecutive appearances</td>
+            <td colspan=5>Postseason appearances and best streak of consecutive appearances</td>
         </tr>
     </tfoot>
 </table>

@@ -390,25 +390,25 @@ const QUESTION_TEMPLATES = [
     'Would {p1} survive longer than {p2} on a deserted island with only a fantasy football magazine?',
     'Would {p1} beat {p2} in a Costco free-sample eating contest?',
     'Is {p1} too much for {p2} to handle?',
-    'Is {p1} better than {p2} at blaming the refs?',
-    'Would {p1} beat {p2} in a race through an airport terminal?',
-    'Is {p1} better than {p2} at negotiating fake trades no one wants?',
+    'Is {p1} better than {p2} at blaming the refs after a loss?',
+    'Can {p1} pee farther than {p2}?',
+    'Is {p1} better than {p2} at negotiating trades for players no one wants?',
     'Is {p1} more likely than {p2} to lose because they forgot to set their lineup?',
-    'Would {p1} beat {p2} in a karaoke battle singing 2000s emo songs?',
+    'Does {p1} send more unnecessary messages in our group chat than {p2}?',
     'Would {p1} beat {p2} in a spelling bee after three beers?',
     'Is {p1} more likely than {p2} to draft a player from their favorite team way too early?',
     'Would {p1} defeat {p2} in a dad-joke competition?',
     'Would {p1} be more likely than {p2} to score a touchdown in PeeWee football?',
     'Is {p1} more likely than {p2} to yell at the TV during a preseason game?',
-    'Would {p1} beat {p2} in a race to assemble IKEA furniture?',
-    'Is {p1} more likely than {p2} to get kicked out of a Vegas sportsbook?',
+    'Is {p1} more likely than {p2} to accidentally draft a retired player?',
+    'If {p1} has (or hypothetically has) a sister, would {p2} have a chance with her?',
     'Would {p1} make a better optometrist than {p2}?',
     'Can {p1} deliver more UPS packages in one day than {p2}?',
     "Is {p1}'s mom better looking than {p2}'s?",
     'Does {p1} deserve a higher pick than {p2}?',
     'Should {p1} diet and exercise more than {p2}?',
     'Does {p1} need a shower more than {p2}?',
-    "Will {p1} finish ahead of {p2} this year?"
+    "Will {p1} finish ahead of {p2} this season?"
 ];
 
 let questionQueue = [];

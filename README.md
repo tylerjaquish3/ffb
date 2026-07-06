@@ -56,14 +56,15 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 - add more fun facts
     - record against everyone
     - best trade
-    - fewest points by position (all time, season)
-    - most QB/RB/WR/etc points current season
-    - optimal points missed
     - matchup combined score high/low
     - highest/lowest avg margin
+- add these awards as records
+    - most postseason losses
+    - best record against everyone
+    - most weeks with bottom 3 points
+    - most weeks with top 3 points
 
 - allow people add comments/smack talk to profile
-
 - move functions to lookup after page load to make more efficient
     - current season
     - profile

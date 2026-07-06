@@ -521,7 +521,9 @@ function getFoesArray()
         'biggest_win' => ['manager' => '', 'value' => ''],
         'biggest_loss' => ['manager' => '', 'value' => ''],
         'closest_win' => ['manager' => '', 'value' => ''],
-        'closest_loss' => ['manager' => '', 'value' => '']
+        'closest_loss' => ['manager' => '', 'value' => ''],
+        'worst_lineup_accuracy' => ['manager' => '', 'value' => ''],
+        'best_lineup_accuracy' => ['manager' => '', 'value' => '']
     ];
 
     $categories = array_keys($results);
@@ -544,18 +546,18 @@ function getFoesArray()
             $data = [];
             $result = query("SELECT * FROM (
                 SELECT year, week_number, manager1_id AS man1, manager2_id AS man2,
-                manager1_score AS man1score, manager2_score AS man2score, winning_manager_id
+                manager1_score AS man1score, manager2_score AS man2score, winning_manager_id, manager1_optimal AS man1optimal
                 FROM regular_season_matchups
                 WHERE manager1_id = $managerId
                 AND manager2_id = $versus
             UNION
                 SELECT year, round, manager1_id AS man1, manager2_id AS man2,
-                manager1_score AS man1score, manager2_score AS man2score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END
+                manager1_score AS man1score, manager2_score AS man2score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END, manager1_optimal AS man1optimal
                 FROM playoff_matchups
                 WHERE (manager1_id = $managerId AND manager2_id = $versus)
             UNION
                 SELECT year, round, manager2_id AS man2, manager1_id AS man1,
-                manager2_score AS man1score, manager1_score AS man2score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END
+                manager2_score AS man1score, manager1_score AS man2score, CASE WHEN manager1_score > manager2_score THEN manager1_id ELSE manager2_id END, manager2_optimal AS man1optimal
                 FROM playoff_matchups
                 WHERE (manager1_id = $versus AND manager2_id = $managerId)
             ) AS T");
@@ -569,6 +571,7 @@ function getFoesArray()
                     'manager2_id' => $row['man2'],
                     'manager1_score' => $row['man1score'],
                     'manager2_score' => $row['man2score'],
+                    'manager1_optimal' => $row['man1optimal'],
                     'margin' => $row['man1score'] - $row['man2score'],
                     'winning_manager_id' => $row['winning_manager_id']
                 ];
@@ -582,7 +585,8 @@ function getFoesArray()
                 'total_pf' => 0,'total_pa' => 0,
                 'average_pf' => 0,'average_pa' => 0,
                 'biggest_win' => 0,'biggest_loss' => 0,
-                'closest_win' => 417417,'closest_loss' => -417417
+                'closest_win' => 417417,'closest_loss' => -417417,
+                'total_points_missed' => 0
             ];
             foreach ($data as $match) {
                 
@@ -615,7 +619,12 @@ function getFoesArray()
                 if ($match['margin'] > $totals['closest_loss'] && $match['margin'] < 0) {
                     $totals['closest_loss'] = round($match['margin'], 2);
                 }
+                if ($match['manager1_optimal']) {
+                    $totals['total_points_missed'] += ($match['manager1_optimal'] - $match['manager1_score']);
+                }
             }
+            $totals['worst_lineup_accuracy'] = round($totals['total_points_missed'], 2);
+            $totals['best_lineup_accuracy'] = round($totals['total_points_missed'], 2);
             $allOpponents[] = $totals;
         }
 
@@ -637,7 +646,7 @@ function sortAndAssign(array $array, string $category, array $result)
     });
 
     // Sort asc for these categories
-    if ($category == "biggest_loss" || $category == "closest_win") {
+    if ($category == "biggest_loss" || $category == "closest_win" || $category == "best_lineup_accuracy") {
         usort($array, function ($item1, $item2) use ($category) {
             return $item1[$category] <=> $item2[$category];
         });

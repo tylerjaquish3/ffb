@@ -97,6 +97,14 @@ if (isset($_GET['id'])) {
                                     </div>
                                 </div>
                                 <a href="/records.php">Go To Record Log</a>
+                                <div style="margin-top: 12px;">
+                                    <button type="button" class="btn btn-primary btn-sm" id="btn-grid">
+                                        <i class="fa fa-th-large"></i> Grid
+                                    </button>
+                                    <button type="button" class="btn btn-default btn-sm" id="btn-table" style="margin-left: 6px;">
+                                        <i class="fa fa-table"></i> Table
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -166,6 +174,7 @@ if (isset($_GET['id'])) {
                 </div>
             </div>
 
+            <div id="view-grid">
             <div class="row">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
@@ -275,6 +284,66 @@ if (isset($_GET['id'])) {
                     </div>
                 </div>
             </div>
+            </div><!-- #view-grid -->
+
+            <div id="view-table" style="display:none;">
+            <div class="row">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Fun Facts</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <div style="overflow-x: auto;">
+                            <table id="awards-table" class="table table-sm table-bordered table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Award</th>
+                                        <th>Manager</th>
+                                        <th>Value</th>
+                                        <th>Note</th>
+                                        <th>Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                <?php
+                                $table_query = "SELECT ff.fact, managers.name as manager, mff.value, mff.note, ff.type, ff.is_positive
+                                    FROM manager_fun_facts mff
+                                    JOIN fun_facts ff ON mff.fun_fact_id = ff.id
+                                    JOIN managers ON managers.id = mff.manager_id
+                                    WHERE managers.id BETWEEN 1 AND 10";
+                                if ($type != 'all') {
+                                    $table_query .= " AND ff.type = '$type'";
+                                }
+                                $table_query .= " ORDER BY ff.sort_order, managers.name";
+                                $table_result = query($table_query);
+                                while ($trow = fetch_array($table_result)) {
+                                    $tval = $trow['value'];
+                                    if (is_numeric($trow['value'])) {
+                                        $tval = isDecimal($trow['value'])
+                                            ? number_format($trow['value'], 2, '.', ',')
+                                            : number_format($trow['value'], 0, '.', ',');
+                                    }
+                                    $fact_class = $trow['is_positive'] ? 'text-success' : 'text-danger';
+                                    $type_label = $type_labels[$trow['type']] ?? ucfirst($trow['type']);
+                                    echo '<tr>';
+                                    echo '<td class="' . $fact_class . '">' . htmlspecialchars($trow['fact']) . '</td>';
+                                    echo '<td>' . htmlspecialchars($trow['manager']) . '</td>';
+                                    echo '<td>' . htmlspecialchars($tval) . '</td>';
+                                    echo '<td>' . htmlspecialchars($trow['note'] ?? '') . '</td>';
+                                    echo '<td>' . htmlspecialchars($type_label) . '</td>';
+                                    echo '</tr>';
+                                }
+                                ?>
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div><!-- #view-table -->
+
         </div>
     </div>
 </div>
@@ -322,5 +391,42 @@ if (isset($_GET['id'])) {
 
     $('#positive-only').change(applyClientFilters);
     $('#manager-select').change(applyClientFilters);
+
+    // View toggle
+    let tableInitialized = false;
+
+    $('#btn-grid').click(function() {
+        $(this).addClass('active btn-primary').removeClass('btn-default');
+        $('#btn-table').addClass('btn-default').removeClass('active btn-primary');
+        $('#view-table').hide();
+        $('#view-grid').show();
+    });
+
+    $('#btn-table').click(function() {
+        $(this).addClass('active btn-primary').removeClass('btn-default');
+        $('#btn-grid').addClass('btn-default').removeClass('active btn-primary');
+        $('#view-grid').hide();
+        $('#view-table').show();
+        if (!tableInitialized) {
+            $('#awards-table').DataTable({
+                pageLength: 25,
+                order: []
+            });
+            tableInitialized = true;
+        }
+        // Sync manager filter to DataTable search
+        const mgr = $('#manager-select').val();
+        if (mgr !== 'all') {
+            $('#awards-table').DataTable().column(1).search(mgr).draw();
+        }
+    });
+
+    // Keep DataTable manager filter in sync when manager dropdown changes
+    $('#manager-select').change(function() {
+        if (tableInitialized) {
+            const mgr = $(this).val();
+            $('#awards-table').DataTable().column(1).search(mgr === 'all' ? '' : mgr).draw();
+        }
+    });
 
 </script>

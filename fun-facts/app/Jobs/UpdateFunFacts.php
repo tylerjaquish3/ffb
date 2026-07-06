@@ -137,6 +137,12 @@ class UpdateFunFacts implements ShouldQueue
             $this->seahawksDrafted();
             // 171,172
             $this->weeklyScoring();
+            // 173-184
+            $this->currentSeasonPositionPoints();
+            // 185,186,187,188
+            $this->optimalPointsMissed();
+            // 189,190,191,192,193,194,195,196
+            $this->optimalPointsMissedAllSeasons();
 
         } catch (\Exception $e) {
             $success = false;
@@ -1930,68 +1936,85 @@ class UpdateFunFacts implements ShouldQueue
         $optimalRoster = [
             'qb' => 0,'rb1' => 0,'rb2' => 0,'wr1' => 0,'wr2' => 0,'wr3' => 0,'te' => 0,'wrt' => 0,'qwrt' => 0,'k' => 0,'def' => 0
         ];
+        $filled = array_fill_keys(array_keys($optimalRoster), false);
 
         $fullRoster = 0;
         foreach ($roster as $player) {
             if ($fullRoster < 11) {
                 if ($player['pos'] == 'QB') {
-                    if ($optimalRoster['qb'] == 0) {
+                    if (!$filled['qb']) {
                         $optimalRoster['qb'] = $player['points'];
+                        $filled['qb'] = true;
                         $fullRoster++;
-                    } elseif ($optimalRoster['qwrt'] == 0) {
+                    } elseif (!$filled['qwrt']) {
                         $optimalRoster['qwrt'] = $player['points'];
+                        $filled['qwrt'] = true;
                         $fullRoster++;
                     }
                 } elseif ($player['pos'] == 'RB') {
-                    if ($optimalRoster['rb1'] == 0) {
+                    if (!$filled['rb1']) {
                         $optimalRoster['rb1'] = $player['points'];
+                        $filled['rb1'] = true;
                         $fullRoster++;
-                    } elseif ($optimalRoster['rb2'] == 0) {
+                    } elseif (!$filled['rb2']) {
                         $optimalRoster['rb2'] = $player['points'];
+                        $filled['rb2'] = true;
                         $fullRoster++;
-                    } elseif ($optimalRoster['wrt'] == 0) {
+                    } elseif (!$filled['wrt']) {
                         $optimalRoster['wrt'] = $player['points'];
+                        $filled['wrt'] = true;
                         $fullRoster++;
-                    } elseif ($optimalRoster['qwrt'] == 0) {
+                    } elseif (!$filled['qwrt']) {
                         $optimalRoster['qwrt'] = $player['points'];
+                        $filled['qwrt'] = true;
                         $fullRoster++;
                     }
                 } elseif ($player['pos'] == 'WR') {
-                    if ($optimalRoster['wr1'] == 0) {
+                    if (!$filled['wr1']) {
                         $optimalRoster['wr1'] = $player['points'];
+                        $filled['wr1'] = true;
                         $fullRoster++;
-                    } elseif ($optimalRoster['wr2'] == 0) {
+                    } elseif (!$filled['wr2']) {
                         $optimalRoster['wr2'] = $player['points'];
+                        $filled['wr2'] = true;
                         $fullRoster++;
-                    } elseif ($optimalRoster['wr3'] == 0) {
+                    } elseif (!$filled['wr3']) {
                         $optimalRoster['wr3'] = $player['points'];
+                        $filled['wr3'] = true;
                         $fullRoster++;
-                    } elseif ($optimalRoster['wrt'] == 0) {
+                    } elseif (!$filled['wrt']) {
                         $optimalRoster['wrt'] = $player['points'];
+                        $filled['wrt'] = true;
                         $fullRoster++;
-                    } elseif ($optimalRoster['qwrt'] == 0) {
+                    } elseif (!$filled['qwrt']) {
                         $optimalRoster['qwrt'] = $player['points'];
+                        $filled['qwrt'] = true;
                         $fullRoster++;
                     }
                 } elseif ($player['pos'] == 'TE') {
-                    if ($optimalRoster['te'] == 0) {
+                    if (!$filled['te']) {
                         $optimalRoster['te'] = $player['points'];
+                        $filled['te'] = true;
                         $fullRoster++;
-                    } elseif ($optimalRoster['wrt'] == 0) {
+                    } elseif (!$filled['wrt']) {
                         $optimalRoster['wrt'] = $player['points'];
+                        $filled['wrt'] = true;
                         $fullRoster++;
-                    } elseif ($optimalRoster['qwrt'] == 0) {
+                    } elseif (!$filled['qwrt']) {
                         $optimalRoster['qwrt'] = $player['points'];
+                        $filled['qwrt'] = true;
                         $fullRoster++;
                     }
                 } elseif ($player['pos'] == 'K') {
-                    if ($optimalRoster['k'] == 0) {
+                    if (!$filled['k']) {
                         $optimalRoster['k'] = $player['points'];
+                        $filled['k'] = true;
                         $fullRoster++;
                     }
                 } elseif ($player['pos'] == 'DEF') {
-                    if ($optimalRoster['def'] == 0) {
+                    if (!$filled['def']) {
                         $optimalRoster['def'] = $player['points'];
+                        $filled['def'] = true;
                         $fullRoster++;
                     }
                 }
@@ -2000,6 +2023,60 @@ class UpdateFunFacts implements ShouldQueue
         $optimal = 0;
         foreach ($optimalRoster as $pos => $score) {
             $optimal += $score;
+        }
+
+        return $optimal;
+    }
+
+    /**
+     * Calculate optimal lineup points using the actual roster slot structure from the data.
+     * Works for both modern rosters (QB/RB/WR/TE/K/DEF/flex) and historical IDP rosters.
+     * Processes players highest-to-lowest, assigning each to the most restrictive available slot.
+     */
+    private function calculateOptimalForRoster(Collection $rows): float
+    {
+        $eligibility = [
+            'QB'      => ['QB'],
+            'RB'      => ['RB', 'WR'],
+            'WR'      => ['WR', 'RB'],
+            'TE'      => ['TE', 'QB'],
+            'K'       => ['K'],
+            'DEF'     => ['DEF'],
+            'D'       => ['D'],
+            'DB'      => ['DB'],
+            'DL'      => ['DL'],
+            'LB'      => ['LB'],
+            'W/R'     => ['WR', 'RB', 'W/R'],
+            'W/T'     => ['WR', 'TE'],
+            'W/R/T'   => ['WR', 'RB', 'TE'],
+            'Q/W/R/T' => ['QB', 'WR', 'RB', 'TE'],
+        ];
+
+        // Count active (non-BN) slots from the actual lineup
+        $slotCounts = [];
+        foreach ($rows->where('roster_spot', '!=', 'BN') as $row) {
+            $slot = $row->roster_spot;
+            $slotCounts[$slot] = ($slotCounts[$slot] ?? 0) + 1;
+        }
+
+        // Process all players highest-to-lowest, assign each to most restrictive available slot
+        $optimal = 0.0;
+        foreach ($rows->sortByDesc('points') as $player) {
+            $pos = $player->position;
+            $bestSlot = null;
+            $bestSize = PHP_INT_MAX;
+            foreach ($slotCounts as $slot => $count) {
+                if ($count <= 0) continue;
+                $eligible = $eligibility[$slot] ?? [$slot];
+                if (in_array($pos, $eligible) && count($eligible) < $bestSize) {
+                    $bestSlot = $slot;
+                    $bestSize = count($eligible);
+                }
+            }
+            if ($bestSlot !== null) {
+                $optimal += (float)$player->points;
+                $slotCounts[$bestSlot]--;
+            }
         }
 
         return $optimal;
@@ -3501,5 +3578,219 @@ class UpdateFunFacts implements ShouldQueue
         $this->insertFunFact(172, 'manager_id', 'count', [], $tops);
         
         $this->updateProgress("Weekly Scoring");
+    }
+
+    private function currentSeasonPositionPoints()
+    {
+        echo 'Current Season Position Points'.PHP_EOL;
+
+        $seasonToUse = $this->isHistoricalCalculation
+            ? ($this->asOfYear ?? $this->currentSeason)
+            : (Roster::max('year') ?? $this->currentSeason);
+
+        $all = [
+            173 => 'QB',
+            174 => 'RB',
+            175 => 'WR',
+            176 => 'TE',
+            177 => 'K',
+            178 => 'DEF',
+        ];
+
+        $fewest = [
+            179 => 'QB',
+            180 => 'RB',
+            181 => 'WR',
+            182 => 'TE',
+            183 => 'K',
+            184 => 'DEF',
+        ];
+
+        foreach ([[$all, 'desc'], [$fewest, 'asc']] as [$map, $direction]) {
+            foreach ($map as $ffId => $pos) {
+                $query = Roster::selectRaw('manager, managers.id as manager_id, sum(points) as pts')
+                    ->join('managers', 'managers.name', '=', 'rosters.manager')
+                    ->where('position', $pos)
+                    ->whereNotIn('roster_spot', ['BN', 'IR'])
+                    ->where('year', $seasonToUse)
+                    ->groupBy('managers.id')
+                    ->orderBy('pts', $direction)
+                    ->limit(3);
+
+                if ($this->isHistoricalCalculation && $this->asOfWeek !== null) {
+                    $query->where('week', '<=', $this->asOfWeek);
+                }
+
+                $top = $query->get();
+                $tops = $this->checkMultiple($top, 'pts');
+                $this->insertFunFact($ffId, 'manager_id', 'pts', [], $tops);
+            }
+        }
+    }
+
+    private function optimalPointsMissed()
+    {
+        echo 'Optimal Points Missed'.PHP_EOL;
+
+        $seasonToUse = $this->isHistoricalCalculation
+            ? ($this->asOfYear ?? $this->currentSeason)
+            : (Roster::max('year') ?? $this->currentSeason);
+
+        $weeks = Roster::selectRaw('distinct week')
+            ->where('year', $seasonToUse)
+            ->when($this->isHistoricalCalculation && $this->asOfWeek !== null, fn($q) => $q->where('week', '<=', $this->asOfWeek))
+            ->pluck('week');
+
+        // Accumulate per manager: total optimal, total actual
+        $totals = [];
+
+        foreach ($weeks as $week) {
+            $managers = Roster::selectRaw('distinct manager')
+                ->where('week', $week)
+                ->where('year', $seasonToUse)
+                ->pluck('manager');
+
+            foreach ($managers as $managerName) {
+                $rows = Roster::where('manager', $managerName)
+                    ->where('week', $week)
+                    ->where('year', $seasonToUse)
+                    ->where('roster_spot', '!=', 'IR')
+                    ->get();
+
+                $optimal = $this->calculateOptimalForRoster($rows);
+                $actual = (float)$rows->where('roster_spot', '!=', 'BN')->sum('points');
+
+                if (!isset($totals[$managerName])) {
+                    $totals[$managerName] = ['optimal' => 0.0, 'actual' => 0.0];
+                }
+                $totals[$managerName]['optimal'] += $optimal;
+                $totals[$managerName]['actual'] += (float)$actual;
+            }
+        }
+
+        $missed = [];
+        $accuracy = [];
+
+        foreach ($totals as $managerName => $data) {
+            $managerId = Manager::where('name', $managerName)->value('id');
+            $totalMissed = round(abs($data['optimal'] - $data['actual']), 2);
+            $totalAccuracy = $data['optimal'] > 0 ? min(100, round(($data['actual'] / $data['optimal']) * 100, 2)) : 0;
+
+            $missed[] = (object)['manager_id' => $managerId, 'val' => $totalMissed];
+            $accuracy[] = (object)['manager_id' => $managerId, 'val' => $totalAccuracy];
+        }
+
+        // Most missed (worst) — sort desc
+        usort($missed, fn($a, $b) => $b->val <=> $a->val);
+        $missedCollection = collect($missed);
+        $this->insertFunFact(185, 'manager_id', 'val', [], $this->checkMultiple($missedCollection, 'val'));
+
+        // Fewest missed (best) — sort asc
+        usort($missed, fn($a, $b) => $a->val <=> $b->val);
+        $missedCollection = collect($missed);
+        $this->insertFunFact(186, 'manager_id', 'val', [], $this->checkMultiple($missedCollection, 'val'));
+
+        // Best accuracy — sort desc
+        usort($accuracy, fn($a, $b) => $b->val <=> $a->val);
+        $accuracyCollection = collect($accuracy);
+        $this->insertFunFact(187, 'manager_id', 'val', [], $this->checkMultiple($accuracyCollection, 'val'));
+
+        // Worst accuracy — sort asc
+        usort($accuracy, fn($a, $b) => $a->val <=> $b->val);
+        $accuracyCollection = collect($accuracy);
+        $this->insertFunFact(188, 'manager_id', 'val', [], $this->checkMultiple($accuracyCollection, 'val'));
+    }
+
+    private function optimalPointsMissedAllSeasons()
+    {
+        echo 'Optimal Points Missed (All Seasons)'.PHP_EOL;
+
+        // Get all year/week combos, applying historical filter when relevant
+        $query = Roster::selectRaw('distinct year, week')->orderBy('year')->orderBy('week');
+        if ($this->isHistoricalCalculation) {
+            $this->applyHistoricalFilter($query, 'year', 'week');
+        }
+        $yearWeeks = $query->get();
+
+        // byManagerYear: ['ManagerName']['2019'] => ['optimal' => x, 'actual' => y]
+        // byManager:     ['ManagerName']         => ['optimal' => x, 'actual' => y]
+        $byManagerYear = [];
+        $byManager = [];
+
+        foreach ($yearWeeks as $yw) {
+            $year = $yw->year;
+            $week = $yw->week;
+
+            $managers = Roster::selectRaw('distinct manager')
+                ->where('year', $year)
+                ->where('week', $week)
+                ->pluck('manager');
+
+            foreach ($managers as $managerName) {
+                $rows = Roster::where('manager', $managerName)
+                    ->where('year', $year)
+                    ->where('week', $week)
+                    ->where('roster_spot', '!=', 'IR')
+                    ->get();
+
+                $optimal = $this->calculateOptimalForRoster($rows);
+                $actual = (float)$rows->where('roster_spot', '!=', 'BN')->sum('points');
+
+                $byManagerYear[$managerName][$year] = $byManagerYear[$managerName][$year] ?? ['optimal' => 0.0, 'actual' => 0.0];
+                $byManagerYear[$managerName][$year]['optimal'] += $optimal;
+                $byManagerYear[$managerName][$year]['actual'] += $actual;
+
+                $byManager[$managerName] = $byManager[$managerName] ?? ['optimal' => 0.0, 'actual' => 0.0];
+                $byManager[$managerName]['optimal'] += $optimal;
+                $byManager[$managerName]['actual'] += $actual;
+            }
+        }
+
+        // Season-level: flatten manager+year into records, find best/worst single season
+        $seasonMissed = [];
+        $seasonAccuracy = [];
+        foreach ($byManagerYear as $managerName => $years) {
+            $managerId = Manager::where('name', $managerName)->value('id');
+            foreach ($years as $year => $data) {
+                $missed = round(abs($data['optimal'] - $data['actual']), 2);
+                $accuracy = $data['optimal'] > 0 ? min(100, round(($data['actual'] / $data['optimal']) * 100, 2)) : 0;
+                $seasonMissed[] = (object)['manager_id' => $managerId, 'val' => $missed, 'year' => $year];
+                $seasonAccuracy[] = (object)['manager_id' => $managerId, 'val' => $accuracy, 'year' => $year];
+            }
+        }
+
+        usort($seasonMissed, fn($a, $b) => $b->val <=> $a->val);
+        $this->insertFunFact(189, 'manager_id', 'val', ['year'], $this->checkMultiple(collect($seasonMissed), 'val'));
+
+        usort($seasonMissed, fn($a, $b) => $a->val <=> $b->val);
+        $this->insertFunFact(190, 'manager_id', 'val', ['year'], $this->checkMultiple(collect($seasonMissed), 'val'));
+
+        usort($seasonAccuracy, fn($a, $b) => $b->val <=> $a->val);
+        $this->insertFunFact(193, 'manager_id', 'val', ['year'], $this->checkMultiple(collect($seasonAccuracy), 'val'));
+
+        usort($seasonAccuracy, fn($a, $b) => $a->val <=> $b->val);
+        $this->insertFunFact(194, 'manager_id', 'val', ['year'], $this->checkMultiple(collect($seasonAccuracy), 'val'));
+
+        // All-time: one record per manager
+        $allTimeMissed = [];
+        $allTimeAccuracy = [];
+        foreach ($byManager as $managerName => $data) {
+            $managerId = Manager::where('name', $managerName)->value('id');
+            $allTimeMissed[] = (object)['manager_id' => $managerId, 'val' => round(abs($data['optimal'] - $data['actual']), 2)];
+            $accuracy = $data['optimal'] > 0 ? min(100, round(($data['actual'] / $data['optimal']) * 100, 2)) : 0;
+            $allTimeAccuracy[] = (object)['manager_id' => $managerId, 'val' => $accuracy];
+        }
+
+        usort($allTimeMissed, fn($a, $b) => $b->val <=> $a->val);
+        $this->insertFunFact(191, 'manager_id', 'val', [], $this->checkMultiple(collect($allTimeMissed), 'val'));
+
+        usort($allTimeMissed, fn($a, $b) => $a->val <=> $b->val);
+        $this->insertFunFact(192, 'manager_id', 'val', [], $this->checkMultiple(collect($allTimeMissed), 'val'));
+
+        usort($allTimeAccuracy, fn($a, $b) => $b->val <=> $a->val);
+        $this->insertFunFact(195, 'manager_id', 'val', [], $this->checkMultiple(collect($allTimeAccuracy), 'val'));
+
+        usort($allTimeAccuracy, fn($a, $b) => $a->val <=> $b->val);
+        $this->insertFunFact(196, 'manager_id', 'val', [], $this->checkMultiple(collect($allTimeAccuracy), 'val'));
     }
 }

@@ -941,11 +941,21 @@ if (isset($_GET['id'])) {
                                                 return $bRoundValue - $aRoundValue;
                                             });
 
+                                            $h2hChartData = [];
                                             foreach ($allMatchups as $array) {
                                                 // Determine which manager is which in the display
                                                 $isManagerFirst = ($array['man1'] == $managerId);
                                                 $managerScore = $isManagerFirst ? $array['man1score'] : $array['man2score'];
                                                 $opponentScore = $isManagerFirst ? $array['man2score'] : $array['man1score'];
+                                                $weekLabel = is_numeric($array['week_number']) ? 'W'.(int)$array['week_number'] : $array['week_number'];
+                                                $h2hChartData[] = [
+                                                    'label' => $array['year'].' '.$weekLabel,
+                                                    'pf' => round((float)$managerScore, 2),
+                                                    'pa' => round((float)$opponentScore, 2),
+                                                    'margin' => round((float)$managerScore - (float)$opponentScore, 2),
+                                                    'combined' => round((float)$managerScore + (float)$opponentScore, 2),
+                                                    'win' => $array['winning_manager_id'] == $managerId,
+                                                ];
 
                                                 // Calculate correct week for playoff matchups
                                                 $linkWeek = $array["week_number"];
@@ -1094,9 +1104,32 @@ if (isset($_GET['id'])) {
                                             <td><?php echo $foes['closest_loss']['manager']; ?></td>
                                             <td><?php echo abs($foes['closest_loss']['value']); ?></td>
                                         </tr>
+                                        <tr>
+                                            <td>Most Points Missed</td>
+                                            <td><?php echo $foes['worst_lineup_accuracy']['manager']; ?></td>
+                                            <td><?php echo $foes['worst_lineup_accuracy']['value']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Fewest Points Missed</td>
+                                            <td><?php echo $foes['best_lineup_accuracy']['manager']; ?></td>
+                                            <td><?php echo $foes['best_lineup_accuracy']['value']; ?></td>
+                                        </tr>
 
                                     </table>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Matchup History</h4>
+                        </div>
+                        <div class="card-body" style="direction: ltr; background: #fff;">
+                            <div style="height: 400px; position: relative;">
+                                <canvas id="h2hMatchupChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -1887,5 +1920,81 @@ if (isset($_GET['id'])) {
         },
         plugins: [ChartDataLabels]
     });
+
+    // H2H Matchup History Chart
+    (function() {
+        var h2hData = <?php echo json_encode(array_reverse($h2hChartData)); ?>;
+        if (!h2hData || h2hData.length === 0) return;
+        var managerName = <?php echo json_encode($managerName); ?>;
+        var versusName = <?php echo json_encode($versusName); ?>;
+        var h2hCtx = document.getElementById('h2hMatchupChart');
+        if (!h2hCtx) return;
+        new Chart(h2hCtx, {
+            type: 'line',
+            data: {
+                labels: h2hData.map(function(d) { return d.label; }),
+                datasets: [
+                    {
+                        label: managerName + ' PF',
+                        data: h2hData.map(function(d) { return d.pf; }),
+                        borderColor: '#297eff',
+                        backgroundColor: 'rgba(41,126,255,0.08)',
+                        fill: false,
+                        tension: 0.2,
+                        pointRadius: 5,
+                        pointBackgroundColor: h2hData.map(function(d) { return d.win ? '#297eff' : '#aaa'; }),
+                    },
+                    {
+                        label: versusName + ' PA',
+                        data: h2hData.map(function(d) { return d.pa; }),
+                        borderColor: '#f33c47',
+                        backgroundColor: 'rgba(243,60,71,0.08)',
+                        fill: false,
+                        tension: 0.2,
+                        pointRadius: 5,
+                    },
+                    {
+                        label: 'Margin',
+                        data: h2hData.map(function(d) { return d.margin; }),
+                        borderColor: '#2eb82e',
+                        backgroundColor: 'rgba(46,184,46,0.08)',
+                        fill: false,
+                        tension: 0.2,
+                        pointRadius: 4,
+                        hidden: true,
+                    },
+                    {
+                        label: 'Combined',
+                        data: h2hData.map(function(d) { return d.combined; }),
+                        borderColor: '#dca130',
+                        backgroundColor: 'rgba(220,161,48,0.08)',
+                        fill: false,
+                        tension: 0.2,
+                        pointRadius: 4,
+                        hidden: true,
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: true, position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { maxRotation: 60, minRotation: 30 } },
+                    y: { title: { display: false } }
+                }
+            }
+        });
+    })();
 
 </script>

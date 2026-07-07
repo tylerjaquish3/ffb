@@ -143,6 +143,10 @@ class UpdateFunFacts implements ShouldQueue
             $this->optimalPointsMissed();
             // 189,190,191,192,193,194,195,196
             $this->optimalPointsMissedAllSeasons();
+            // 197,198,199,200
+            $this->allPlayRecord();
+            // 201,202,203,204
+            $this->averageMargin();
 
         } catch (\Exception $e) {
             $success = false;
@@ -3792,5 +3796,111 @@ class UpdateFunFacts implements ShouldQueue
 
         usort($allTimeAccuracy, fn($a, $b) => $a->val <=> $b->val);
         $this->insertFunFact(196, 'manager_id', 'val', [], $this->checkMultiple(collect($allTimeAccuracy), 'val'));
+    }
+
+    private function allPlayRecord()
+    {
+        echo 'All-Play Record'.PHP_EOL;
+
+        $historicalSql = $this->isHistoricalCalculation
+            ? "AND a.year <= {$this->asOfYear}" . ($this->asOfWeek !== null ? " AND (a.year < {$this->asOfYear} OR a.week_number <= {$this->asOfWeek})" : '')
+            : '';
+
+        // All-time
+        $rows = DB::select("
+            SELECT a.manager1_id as manager_id,
+                   SUM(CASE WHEN a.manager1_score > b.manager1_score THEN 1 ELSE 0 END) as wins,
+                   SUM(CASE WHEN a.manager1_score < b.manager1_score THEN 1 ELSE 0 END) as losses,
+                   ROUND(CAST(SUM(CASE WHEN a.manager1_score > b.manager1_score THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*) * 100, 4) as win_pct
+            FROM regular_season_matchups a
+            JOIN regular_season_matchups b
+              ON a.year = b.year AND a.week_number = b.week_number AND a.manager1_id != b.manager1_id
+            WHERE 1=1 {$historicalSql}
+            GROUP BY a.manager1_id
+            ORDER BY win_pct DESC
+        ");
+
+        $this->insertAllPlayFunFact(197, $rows, note: false);
+        $this->insertAllPlayFunFact(198, array_reverse($rows), note: false);
+
+        // By season
+        $seasonRows = DB::select("
+            SELECT a.manager1_id as manager_id, a.year,
+                   SUM(CASE WHEN a.manager1_score > b.manager1_score THEN 1 ELSE 0 END) as wins,
+                   SUM(CASE WHEN a.manager1_score < b.manager1_score THEN 1 ELSE 0 END) as losses,
+                   ROUND(CAST(SUM(CASE WHEN a.manager1_score > b.manager1_score THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*) * 100, 4) as win_pct
+            FROM regular_season_matchups a
+            JOIN regular_season_matchups b
+              ON a.year = b.year AND a.week_number = b.week_number AND a.manager1_id != b.manager1_id
+            WHERE 1=1 {$historicalSql}
+            GROUP BY a.manager1_id, a.year
+            ORDER BY win_pct DESC
+        ");
+
+        $this->insertAllPlayFunFact(199, $seasonRows, note: true);
+        $this->insertAllPlayFunFact(200, array_reverse($seasonRows), note: true);
+
+        $this->updateProgress("All-Play Record");
+    }
+
+    private function averageMargin()
+    {
+        echo 'Average Margin'.PHP_EOL;
+
+        // All-time: highest
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, ROUND(AVG(manager1_score - manager2_score), 2) as avg_margin')
+            ->groupBy('manager1_id')
+            ->orderBy('avg_margin', 'desc');
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $tops = $this->checkMultiple($query->get(), 'avg_margin');
+        $this->insertFunFact(201, 'manager1_id', 'avg_margin', [], $tops);
+
+        // All-time: lowest
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, ROUND(AVG(manager1_score - manager2_score), 2) as avg_margin')
+            ->groupBy('manager1_id')
+            ->orderBy('avg_margin', 'asc');
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $tops = $this->checkMultiple($query->get(), 'avg_margin');
+        $this->insertFunFact(202, 'manager1_id', 'avg_margin', [], $tops);
+
+        // By season: highest
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, year, ROUND(AVG(manager1_score - manager2_score), 2) as avg_margin')
+            ->groupBy('manager1_id', 'year')
+            ->orderBy('avg_margin', 'desc');
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $tops = $this->checkMultiple($query->get(), 'avg_margin');
+        $this->insertFunFact(203, 'manager1_id', 'avg_margin', ['year'], $tops);
+
+        // By season: lowest
+        $query = RegularSeasonMatchup::selectRaw('manager1_id, year, ROUND(AVG(manager1_score - manager2_score), 2) as avg_margin')
+            ->groupBy('manager1_id', 'year')
+            ->orderBy('avg_margin', 'asc');
+        $this->applyHistoricalFilter($query, 'year', 'week_number');
+        $tops = $this->checkMultiple($query->get(), 'avg_margin');
+        $this->insertFunFact(204, 'manager1_id', 'avg_margin', ['year'], $tops);
+
+        $this->updateProgress("Average Margin");
+    }
+
+    private function insertAllPlayFunFact(int $ffId, array $rows, bool $note)
+    {
+        if (empty($rows)) {
+            return;
+        }
+
+        $topPct = $rows[0]->win_pct;
+        $tops = array_filter($rows, fn($r) => $r->win_pct == $topPct);
+
+        ManagerFunFact::where('fun_fact_id', $ffId)->delete();
+        foreach ($tops as $row) {
+            ManagerFunFact::create([
+                'fun_fact_id' => $ffId,
+                'manager_id'  => $row->manager_id,
+                'rank'        => 1,
+                'value'       => $row->wins . '-' . $row->losses,
+                'note'        => $note ? $row->year : '',
+                'new_leader'  => 0,
+            ]);
+        }
     }
 }

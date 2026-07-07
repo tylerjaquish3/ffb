@@ -54,10 +54,7 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 # Ideas
 
 - add more fun facts
-    - record against everyone
     - best trade
-    - matchup combined score high/low
-    - highest/lowest avg margin
 - add these awards as records
     - most postseason losses
     - best record against everyone
@@ -72,7 +69,7 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 - milestones about to happen
     - league on pace to break record
 - make newsletter show random additional data so its not the same every week
-- add lineup accuracy to profile head to head
+
 - add preview notes for each week of the new season
 - have a page for luck
     - wins with bottom points
@@ -135,3 +132,48 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 - Cam, Ev, and Justin have never had #1
 - Justin has only had 2 picks in the top 3, and hasn't had a top 3 pick in 14 years
 - the only time #1 pick won was Ben in 2011
+
+
+# Feature Ideas
+
+## Interactive / Social Features
+
+- **Smack Talk / Comments Board** — each week's matchups get a comment thread for trash talk before and after games. Store manager_id, week, year, body, timestamp. Give it a "Letters to the Editor" newspaper vibe.
+- **Weekly Pick'em** — before each week locks, managers predict who wins each of the 5 matchups (or just their own). Running leaderboard of prediction accuracy. Keeps eliminated managers engaged every week.
+- **Confidence Poll** — every manager ranks all 10 managers 1–10 in power ranking order. Average the votes, show composite ranking vs. actual standings, flag disagreements. Huge discussion driver.
+- **Playoff Bracket Predictions** — at the start of the postseason, everyone locks in their bracket prediction and it scores in real time as games complete.
+
+## Trivia / Guessing Games
+
+- **"Guess That Score" Game** — show a week/year/matchup and ask: what was the final score? Closest guess wins bragging rights. Rotate a new puzzle weekly. Uses existing data with zero new fetching.
+- **Manager Trivia Quiz** — 10-question quiz about league history ("Who scored the most points in a single game?", "Who beat Tyler in 2017 week 6?"). All answers in the DB. Shareable score at the end.
+- **Historical Reenactment** — "It's Week 3, 2019. You're Matt, sitting at 1-2. What do you do?" Present a historical roster/waiver situation, let managers vote on the decision, then reveal what actually happened.
+
+## Charts Page Additions
+
+- **Point Distribution Violin/Box Plot** — show the spread of scores, not just averages. Who is consistently mediocre vs. who has wild swings?
+- **Head-to-Head Win% Heatmap** — 10×10 grid, each cell colored by how often manager A beats manager B all-time. Visually striking and immediately creates conversation.
+- **"Lucky vs. Good" Scatter Plot** — X-axis: points scored, Y-axis: actual wins. Managers above the line won more than their points deserved (lucky); below the line are unlucky. Per season or all-time.
+- **Week-by-Week Points Bump Chart** — animated bump chart showing each manager's rank by total points scored, week by week through a season.
+- **Optimal Lineup % Over Time** — line chart showing if managers got smarter about setting lineups over the years. Do some managers chronically leave points on the bench?
+- **Score Distribution Bell Curve Overlay** — all scores in league history as a histogram with a normal curve overlay. Mark where each manager's average falls.
+
+## Animations / Dashboard Intro
+
+- **Season Opener Intro Sequence** — when a new season starts, a brief full-screen animation plays once (cookie-gated): stadium crowd roar, Suntown logo slams in, then transitions to the page. CSS + JS only.
+- **Animated Trophy Case** — on the awards/trophy page, trophies "fall" into their shelf position on first load one by one with a clink effect.
+- **Live Ticker Bar** — scrolling ESPN-style ticker below the nav during the season: "Tyler leads the league in points scored · AJ is on a 3-game win streak · Cole's optimal lineup % is league-worst." Pulls from existing fun facts.
+- **"On This Day in Suntown"** — dashboard widget: "On this date in 2019, Cameron scored 187 points, the 4th-highest single-game score in history." Rotates daily. Zero new data, pure DB queries.
+
+## Newsletter "Turning the Page" Sections
+
+- **The Classifieds** — auto-generated fake classified ads based on roster data: "FOR SALE: 3 backup quarterbacks, gently used. Contact: Everett." Managers with depth at a position get a funny ad.
+- **The Police Blotter** — absurdist "crimes" triggered by real events: "Justin cited for fielding an injured player. Bail set at 6 waiver points."
+- **The Box Scores in Print** — style the weekly matchup results like a literal newspaper box score layout — tiny font, columns, totals. Different skin on existing data.
+- **The Weather Report** — metaphor-based matchup preview: "Forecast: Stormy for Cole (faces #1 scoring offense). Sunny skies for Tyler (faces last-place Matt)."
+
+## Quick Wins
+
+- **Odds of Making Playoffs** — run 1000 random outcomes for remaining weeks (weighted by points avg), show each manager's playoff probability. Managers would refresh this constantly.
+- **"Milestones Watch" Widget** — surface milestone proximity on the dashboard: "Tyler needs 47 more points to hit 10,000 career points."
+- **Group Text Analyzer** — export the group chat and visualize: who texts most during the season, most common trash talk targets, busiest week, word clouds per manager.

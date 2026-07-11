@@ -51,6 +51,31 @@ while ($row = $seedsResult->fetchArray(SQLITE3_ASSOC)) {
     <div class="content-wrapper">
         <div class="content-body">
 
+            <div class="row mb-1">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0" style="direction:ltr;">Seed Randomizer</h4>
+                        </div>
+                        <div class="card-body" style="direction:ltr; padding:1.25rem;">
+                            <div class="seed-grid" id="seed-grid">
+                                <div class="seed-slot" data-idx="0"><span class="seed-num">1</span><span class="seed-name">—</span></div>
+                                <div class="seed-slot" data-idx="1"><span class="seed-num">2</span><span class="seed-name">—</span></div>
+                                <div class="seed-slot" data-idx="2"><span class="seed-num">3</span><span class="seed-name">—</span></div>
+                                <div class="seed-slot" data-idx="3"><span class="seed-num">4</span><span class="seed-name">—</span></div>
+                                <div class="seed-slot" data-idx="4"><span class="seed-num">5</span><span class="seed-name">—</span></div>
+                                <div class="seed-slot" data-idx="5"><span class="seed-num">6</span><span class="seed-name">—</span></div>
+                                <div class="seed-slot" data-idx="6"><span class="seed-num">7</span><span class="seed-name">—</span></div>
+                                <div class="seed-slot" data-idx="7"><span class="seed-num">8</span><span class="seed-name">—</span></div>
+                                <div class="seed-slot" data-idx="8"><span class="seed-num">9</span><span class="seed-name">—</span></div>
+                                <div class="seed-slot" data-idx="9"><span class="seed-num">10</span><span class="seed-name">—</span></div>
+                            </div>
+                            <button id="randomize-btn" class="seed-randomize-btn">&#127922;&nbsp; Randomize Seeds</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-sm-12">
                     <div class="card">
@@ -143,6 +168,109 @@ while ($row = $seedsResult->fetchArray(SQLITE3_ASSOC)) {
 </div>
 
 <style>
+/* ── Seed Randomizer ─────────────────────────────────────────────── */
+.seed-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+@media (max-width: 700px) {
+    .seed-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.seed-slot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #222;
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-height: 50px;
+    transition: border-color 0.25s, box-shadow 0.25s;
+}
+.seed-slot .seed-num {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #7367f0;
+    min-width: 28px;
+    text-align: center;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+.seed-slot .seed-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.15s, filter 0.1s;
+}
+.seed-slot.rolling {
+    border-color: #f0963b;
+    box-shadow: 0 0 14px rgba(240, 150, 59, 0.35);
+}
+.seed-slot.rolling .seed-name {
+    color: #f0963b;
+    filter: blur(0.7px);
+}
+.seed-slot.locked {
+    border-color: #28a745;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.32);
+}
+.seed-slot.locked .seed-name {
+    color: #28a745;
+    font-weight: 700;
+    filter: none;
+}
+@keyframes seedLockBurst {
+    0%   { box-shadow: 0 0 30px rgba(40,167,69,0.9); transform: scale(1.04); }
+    55%  { transform: scale(0.97); }
+    100% { box-shadow: 0 0 12px rgba(40,167,69,0.32); transform: scale(1); }
+}
+.seed-slot.lock-anim {
+    animation: seedLockBurst 0.45s ease-out forwards;
+}
+.seed-randomize-btn {
+    width: 100%;
+    padding: 13px 20px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #7367f0 0%, #4a42b8 100%);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(115,103,240,0.45);
+    transition: box-shadow 0.2s, transform 0.1s, opacity 0.2s;
+}
+.seed-randomize-btn:hover:not(:disabled) {
+    box-shadow: 0 6px 26px rgba(115,103,240,0.65);
+    transform: translateY(-1px);
+}
+.seed-randomize-btn:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(115,103,240,0.3);
+}
+.seed-randomize-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+.seed-randomize-btn.is-rolling {
+    background: linear-gradient(135deg, #f0963b 0%, #c97420 100%);
+    box-shadow: 0 4px 18px rgba(240,150,59,0.45);
+    animation: btnRollPulse 0.65s ease infinite;
+}
+@keyframes btnRollPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
 /* ── Bracket layout ──────────────────────────────────────────────── */
 .bracket-section-label {
     font-size: 0.7rem;
@@ -327,11 +455,117 @@ while ($row = $seedsResult->fetchArray(SQLITE3_ASSOC)) {
 </style>
 
 <script>
-// ── Seeds from PHP ───────────────────────────────────────────────────────────
-const SEEDS = <?php echo json_encode($seeds); ?>;
-// SEEDS[0]=seed1(AJ), SEEDS[9]=seed10(Gavin)
+// ── Seeds ────────────────────────────────────────────────────────────────────
+// ALL_MANAGERS = every manager name (from DB, order irrelevant here)
+// SEEDS = current seeding order, populated by the randomizer
+const ALL_MANAGERS = <?php echo json_encode($seeds); ?>;
+const SEEDS = [];  // starts empty; filled by randomizer
 const SEED_MAP = {};
-SEEDS.forEach((name, i) => { SEED_MAP[name] = i + 1; });
+
+// ── Seed Randomizer ──────────────────────────────────────────────────────────
+let isRandomizing = false;
+
+function fisherYates(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function syncSeedSlots() {
+    document.querySelectorAll('#seed-grid .seed-slot').forEach((slot, i) => {
+        const nameEl = slot.querySelector('.seed-name');
+        nameEl.textContent = SEEDS[i] || '—';
+        slot.classList.remove('rolling', 'lock-anim');
+        if (SEEDS[i]) {
+            slot.classList.add('locked');
+        } else {
+            slot.classList.remove('locked');
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    syncSeedSlots();
+
+    document.getElementById('randomize-btn').addEventListener('click', function () {
+        if (isRandomizing) return;
+
+        const hasResults = Object.keys(results).length > 0;
+        if (hasResults && !confirm('Randomizing will reset the current bracket results. Continue?')) return;
+
+        isRandomizing = true;
+        const btn = this;
+        btn.disabled = true;
+        btn.classList.add('is-rolling');
+        btn.textContent = '⏳  Randomizing…';
+
+        const newOrder = fisherYates(ALL_MANAGERS);
+        const slots = Array.from(document.querySelectorAll('#seed-grid .seed-slot'));
+        const intervals = [];
+
+        // All slots roll simultaneously with different starting offsets
+        slots.forEach(function (slot, i) {
+            slot.classList.remove('locked', 'lock-anim');
+            slot.classList.add('rolling');
+            const nameEl = slot.querySelector('.seed-name');
+            let idx = Math.floor(Math.random() * ALL_MANAGERS.length);
+            const iv = setInterval(function () {
+                nameEl.textContent = ALL_MANAGERS[idx % ALL_MANAGERS.length];
+                idx++;
+            }, 60);
+            intervals.push(iv);
+        });
+
+        // Lock slots one at a time
+        const ROLL_DUR = 1500;
+        const LOCK_GAP = 180;
+
+        newOrder.forEach(function (name, i) {
+            setTimeout(function () {
+                clearInterval(intervals[i]);
+                const slot = slots[i];
+                slot.classList.remove('rolling');
+                slot.querySelector('.seed-name').textContent = name;
+                slot.classList.add('locked');
+                slot.classList.remove('lock-anim');
+                void slot.offsetWidth; // force reflow for animation restart
+                slot.classList.add('lock-anim');
+                setTimeout(function () { slot.classList.remove('lock-anim'); }, 460);
+
+                if (i === newOrder.length - 1) {
+                    setTimeout(function () {
+                        // Update SEEDS and SEED_MAP in-place
+                        SEEDS.length = 0;
+                        newOrder.forEach(function (n) { SEEDS.push(n); });
+                        Object.keys(SEED_MAP).forEach(function (k) { delete SEED_MAP[k]; });
+                        SEEDS.forEach(function (n, idx) { SEED_MAP[n] = idx + 1; });
+
+                        // Reset bracket (seeds changed = fresh start)
+                        results = {};
+                        lastResultsHash = null;
+                        fetch('/data/draftOrderBracket.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ reset: true })
+                        }).catch(function () {});
+
+                        renderBracket();
+                        renderMatchupsList();
+                        renderDraftTable();
+
+                        isRandomizing = false;
+                        btn.disabled = false;
+                        btn.classList.remove('is-rolling');
+                        btn.textContent = '🎲  Randomize Again';
+                    }, 500);
+                }
+            }, ROLL_DUR + i * LOCK_GAP);
+        });
+    });
+});
 
 // ── Bracket definition ───────────────────────────────────────────────────────
 // Each match: { id, label, type, p1src, p2src }

@@ -30,6 +30,73 @@ while ($row = $seedsResult->fetchArray(SQLITE3_ASSOC)) {
 </head>
 <body class="fixed-navbar" style="background:#1f1f1f;">
 
+<!-- Intro overlay -->
+<div id="intro-overlay">
+    <div id="intro-card">
+
+        <div id="intro-step-dots">
+            <span class="intro-dot active" data-step="1"></span>
+            <span class="intro-dot" data-step="2"></span>
+        </div>
+
+        <!-- Step 1: Instructions -->
+        <div id="intro-step-1">
+            <div id="intro-pickle">🥒</div>
+            <h1 id="intro-title">The Mystic Pickle Decides</h1>
+            <h2 id="intro-subtitle">2026 Draft Order Tournament</h2>
+            <div id="intro-body">
+                <p>Draft order is earned, not given. This year, all 10 managers compete in a <strong>double-elimination tournament</strong> — and the outcomes are in the hands of a higher power: <strong>the Mystic Pickle</strong>.</p>
+
+                <div class="intro-rule-block">
+                    <div class="intro-rule-label">How It Works</div>
+                    <ol class="intro-rules">
+                        <li><strong>Seeds are randomized.</strong> No one gets a free ride based on last year's finish — the randomizer scrambles the bracket seeds.</li>
+                        <li><strong>The Pickle presides over every match.</strong> For each matchup, the Pickle is asked a random yes/no question. Yes means the first manager wins. No means the second.</li>
+                        <li><strong>Only clear answers count.</strong> The Pickle speaks in riddles sometimes. If the answer is a "maybe," incoherent, or otherwise non-committal, the Pickle is consulted again.</li>
+                        <li><strong>Draft order fills from the bottom up.</strong> The first manager eliminated gets pick #10. The last manager standing gets pick #1.</li>
+                    </ol>
+                </div>
+
+                <p class="intro-footer-note">The Pickle has spoken before. The Pickle will speak again. Trust the Pickle.</p>
+            </div>
+            <button id="intro-next-btn">The Stakes &rarr;</button>
+        </div>
+
+        <!-- Step 2: Pre-draft notes -->
+        <div id="intro-step-2" style="display:none;">
+            <div id="intro-pickle">📊</div>
+            <h1 id="intro-title">Why It Matters</h1>
+            <h2 id="intro-subtitle">2026 Pre-Draft Notes</h2>
+            <div id="intro-body">
+                <ul class="intro-stats-list">
+                    <li>
+                        <span class="stat-highlight">0 for 5</span>
+                        <span class="stat-desc">The last 5 champions all picked in the top 5 — but <strong>not one of them had the #1 pick</strong>.</span>
+                    </li>
+                    <li>
+                        <span class="stat-highlight">#1 &amp; #2</span>
+                        <span class="stat-desc">Cole and AJ both went <strong>11-3</strong> last year and landed the first two picks.</span>
+                    </li>
+                    <li>
+                        <span class="stat-highlight">Never</span>
+                        <span class="stat-desc"><strong>Cam, Ev, and Justin</strong> have never held the #1 overall pick.</span>
+                    </li>
+                    <li>
+                        <span class="stat-highlight">14 years</span>
+                        <span class="stat-desc">Justin has had just <strong>2 top-3 picks in league history</strong> — and hasn't seen one since 2012.</span>
+                    </li>
+                    <li>
+                        <span class="stat-highlight">2011</span>
+                        <span class="stat-desc">The <strong>only time the #1 pick won</strong> the league was Ben, back in 2011.</span>
+                    </li>
+                </ul>
+            </div>
+            <button id="intro-start-btn">Get Started</button>
+        </div>
+
+    </div>
+</div>
+
     <nav class="header-navbar navbar navbar-with-menu navbar-fixed-top navbar-semi-dark navbar-shadow">
         <div class="navbar-wrapper">
             <div class="navbar-header">
@@ -168,6 +235,200 @@ while ($row = $seedsResult->fetchArray(SQLITE3_ASSOC)) {
 </div>
 
 <style>
+/* ── Intro Overlay ───────────────────────────────────────────────── */
+#intro-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.97);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    direction: ltr;
+}
+#intro-card {
+    background: #1e1e2e;
+    border: 1px solid #3a3a5a;
+    border-radius: 16px;
+    max-width: 560px;
+    width: 100%;
+    padding: 40px 36px;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(115,103,240,0.15);
+}
+#intro-pickle {
+    font-size: 4rem;
+    line-height: 1;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 18px rgba(115,103,240,0.6));
+    animation: pickleFloat 3s ease-in-out infinite;
+}
+@keyframes pickleFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-8px); }
+}
+#intro-title {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #fff;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+}
+#intro-subtitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #7367f0;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 28px;
+}
+#intro-body {
+    text-align: left;
+    color: #bbb;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    margin-bottom: 28px;
+}
+#intro-body p {
+    margin: 0 0 16px;
+}
+#intro-body strong {
+    color: #e0e0e0;
+}
+.intro-rule-block {
+    background: #16161f;
+    border: 1px solid #2e2e44;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+}
+.intro-rule-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #7367f0;
+    margin-bottom: 12px;
+}
+ol.intro-rules {
+    margin: 0;
+    padding-left: 20px;
+}
+ol.intro-rules li {
+    margin-bottom: 10px;
+    color: #bbb;
+}
+ol.intro-rules li:last-child {
+    margin-bottom: 0;
+}
+.intro-footer-note {
+    font-size: 0.82rem;
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    margin: 0 !important;
+}
+#intro-start-btn {
+    display: block;
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #7367f0 0%, #4a42b8 100%);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(115,103,240,0.5);
+    transition: box-shadow 0.2s, transform 0.1s;
+}
+#intro-start-btn:hover {
+    box-shadow: 0 6px 32px rgba(115,103,240,0.7);
+    transform: translateY(-1px);
+}
+#intro-start-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 12px rgba(115,103,240,0.35);
+}
+/* Step dots */
+#intro-step-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+.intro-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3a3a5a;
+    transition: background 0.3s;
+}
+.intro-dot.active {
+    background: #7367f0;
+}
+/* Next button */
+#intro-next-btn {
+    display: block;
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #7367f0 0%, #4a42b8 100%);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(115,103,240,0.5);
+    transition: box-shadow 0.2s, transform 0.1s;
+}
+#intro-next-btn:hover {
+    box-shadow: 0 6px 32px rgba(115,103,240,0.7);
+    transform: translateY(-1px);
+}
+#intro-next-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 12px rgba(115,103,240,0.35);
+}
+/* Stats list */
+ul.intro-stats-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+ul.intro-stats-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #16161f;
+    border: 1px solid #2e2e44;
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+.stat-highlight {
+    font-size: 1rem;
+    font-weight: 900;
+    color: #7367f0;
+    min-width: 52px;
+    text-align: right;
+    white-space: nowrap;
+    flex-shrink: 0;
+    line-height: 1.5;
+}
+.stat-desc {
+    font-size: 0.88rem;
+    color: #bbb;
+    line-height: 1.55;
+}
+
 /* ── Seed Randomizer ─────────────────────────────────────────────── */
 .seed-grid {
     display: grid;
@@ -338,6 +599,10 @@ while ($row = $seedsResult->fetchArray(SQLITE3_ASSOC)) {
     padding: 1px 7px;
     white-space: nowrap;
     z-index: 2;
+}
+.match-badge-label {
+    font-weight: 400;
+    opacity: 0.85;
 }
 .match-card.consolation .match-badge {
     background: #f0963b;
@@ -543,13 +808,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         Object.keys(SEED_MAP).forEach(function (k) { delete SEED_MAP[k]; });
                         SEEDS.forEach(function (n, idx) { SEED_MAP[n] = idx + 1; });
 
-                        // Reset bracket (seeds changed = fresh start)
+                        // Reset bracket (seeds changed = fresh start), persist seeds
                         results = {};
                         lastResultsHash = null;
+                        Object.keys(matchQuestions).forEach(function (k) { delete matchQuestions[k]; });
                         fetch('/data/draftOrderBracket.php', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ reset: true })
+                            body: JSON.stringify({ reset: true, seeds: SEEDS.slice() })
                         }).catch(function () {});
 
                         renderBracket();
@@ -572,34 +838,37 @@ document.addEventListener('DOMContentLoaded', function () {
 // src format: "seed:N" | "winner:M" | "loser:M" | "bye:M" (auto-advance)
 // type: "wb" | "lb" | "consolation" | "grand-final"
 const MATCH_DEFS = {
-    // ── Play-in (bottom 4 seeds) ──────────────────────────────────────────────
-     1: { label:'Play-in',   type:'wb',           p1src:'seed:8',    p2src:'seed:9'   },
-     2: { label:'Play-in',   type:'wb',           p1src:'seed:7',    p2src:'seed:10'  },
+    // ── Play-in ───────────────────────────────────────────────────────────────
+     1: { label:'Play-in',              type:'wb',          p1src:'seed:8',    p2src:'seed:9'    },
+     2: { label:'Play-in',              type:'wb',          p1src:'seed:7',    p2src:'seed:10'   },
     // ── Winners Bracket R1 ────────────────────────────────────────────────────
-     3: { label:'WB R1',     type:'wb',           p1src:'seed:1',    p2src:'winner:1' },
-     4: { label:'WB R1',     type:'wb',           p1src:'seed:2',    p2src:'winner:2' },
-     5: { label:'WB R1',     type:'wb',           p1src:'seed:3',    p2src:'seed:6'   },
-     6: { label:'WB R1',     type:'wb',           p1src:'seed:4',    p2src:'seed:5'   },
-    // ── Losers Bracket R1 (before WB R2) ─────────────────────────────────────
-     7: { label:'LB R1',     type:'lb',           p1src:'loser:1',   p2src:'loser:3'  },
-     8: { label:'LB R1',     type:'lb',           p1src:'loser:2',   p2src:'loser:4'  },
-     9: { label:'LB R1',     type:'lb',           p1src:'loser:5',   p2src:'loser:6'  },
-    10: { label:'10th place',type:'consolation',  p1src:'loser:7',   p2src:'loser:8'  },
-    // ── Winners Bracket R2 & SF ───────────────────────────────────────────────
-    11: { label:'WB R2',     type:'wb',           p1src:'winner:3',  p2src:'winner:4' },
-    12: { label:'WB R2',     type:'wb',           p1src:'winner:5',  p2src:'winner:6' },
-    // ── Losers Bracket continued (before WB SF) ──────────────────────────────
-    13: { label:'8th/9th',   type:'consolation',  p1src:'winner:10', p2src:'loser:9'  },
-    14: { label:'LB R2',     type:'lb',           p1src:'loser:11',  p2src:'winner:7' },
-    15: { label:'LB R2',     type:'lb',           p1src:'loser:12',  p2src:'winner:8' },
-    // ── Winners Bracket SF ────────────────────────────────────────────────────
-    16: { label:'WB SF',     type:'wb',           p1src:'winner:11', p2src:'winner:12' },
-    17: { label:'6th/7th',   type:'consolation',  p1src:'loser:14',  p2src:'loser:15' },
-    18: { label:'LB R3',     type:'lb',           p1src:'loser:16',  p2src:'winner:9' },
-    19: { label:'LB R3',     type:'lb',           p1src:'winner:14', p2src:'winner:15' },
-    20: { label:'4th/5th',   type:'consolation',  p1src:'loser:18',  p2src:'loser:19' },
-    21: { label:'LB Final',  type:'lb',           p1src:'winner:18', p2src:'winner:19' },
-    22: { label:'Grand Final',type:'grand-final', p1src:'winner:16', p2src:'winner:21' },
+     3: { label:'WB R1',                type:'wb',          p1src:'seed:1',    p2src:'winner:1'  },
+     4: { label:'WB R1',                type:'wb',          p1src:'seed:2',    p2src:'winner:2'  },
+     5: { label:'WB R1',                type:'wb',          p1src:'seed:3',    p2src:'seed:6'    },
+     6: { label:'WB R1',                type:'wb',          p1src:'seed:4',    p2src:'seed:5'    },
+    // ── Losers Bracket R1 ─────────────────────────────────────────────────────
+     7: { label:'LB R1',                type:'lb',          p1src:'loser:1',   p2src:'loser:3'   },
+     8: { label:'LB R1',                type:'lb',          p1src:'loser:2',   p2src:'loser:4'   },
+     9: { label:'LB R1',                type:'lb',          p1src:'loser:5',   p2src:'loser:6'   },
+    10: { label:'10th pick',            type:'consolation', p1src:'loser:7',   p2src:'loser:8'   },
+    // ── 8th/9th — before WB R2 ────────────────────────────────────────────────
+    11: { label:'8th/9th pick',         type:'consolation', p1src:'winner:10', p2src:'loser:9'   },
+    // ── Winners Bracket R2 ────────────────────────────────────────────────────
+    12: { label:'WB R2',                type:'wb',          p1src:'winner:3',  p2src:'winner:4'  },
+    13: { label:'WB R2',                type:'wb',          p1src:'winner:5',  p2src:'winner:6'  },
+    // ── Losers Bracket R2 ─────────────────────────────────────────────────────
+    14: { label:'LB R2',                type:'lb',          p1src:'loser:12',  p2src:'winner:7'  },
+    15: { label:'LB R2',                type:'lb',          p1src:'loser:13',  p2src:'winner:8'  },
+    // ── 6th/7th & WB SF ───────────────────────────────────────────────────────
+    16: { label:'6th/7th pick',         type:'consolation', p1src:'loser:14',  p2src:'loser:15'  },
+    17: { label:'WB SF',                type:'wb',          p1src:'winner:12', p2src:'winner:13' },
+    // ── LB R3 (needs WB SF loser + LB R2 winners) ─────────────────────────────
+    18: { label:'LB R3',                type:'lb',          p1src:'loser:17',  p2src:'winner:9'  },
+    19: { label:'LB R3',                type:'lb',          p1src:'winner:14', p2src:'winner:15' },
+    // ── 4th/5th, LB Final, Grand Final ───────────────────────────────────────
+    20: { label:'4th/5th pick',         type:'consolation', p1src:'loser:18',  p2src:'loser:19'  },
+    21: { label:'3rd Pick',             type:'lb',          p1src:'winner:18', p2src:'winner:19' },
+    22: { label:'Grand Final · 1st/2nd Pick', type:'grand-final', p1src:'winner:17', p2src:'winner:21' },
 };
 
 // Which match result determines each draft position
@@ -610,10 +879,10 @@ const POSITION_SOURCES = {
     3:  { match:21, slot:'loser'  },
     4:  { match:20, slot:'winner' },
     5:  { match:20, slot:'loser'  },
-    6:  { match:17, slot:'winner' },
-    7:  { match:17, slot:'loser'  },
-    8:  { match:13, slot:'winner' },
-    9:  { match:13, slot:'loser'  },
+    6:  { match:16, slot:'winner' },
+    7:  { match:16, slot:'loser'  },
+    8:  { match:11, slot:'winner' },
+    9:  { match:11, slot:'loser'  },
     10: { match:10, slot:'loser'  },
 };
 
@@ -657,6 +926,7 @@ function nextQuestion() {
 // results[matchId] = winner name
 let results = {};
 let lastResultsHash = null;
+const matchQuestions = {}; // matchId -> question template string
 
 function getPlayer(src) {
     if (!src) return null;
@@ -682,21 +952,21 @@ function resolveMatch(id) {
 
 // WB columns (top band)
 const WB_COLS = [
-    { label:'Play-in',     matches:[1,2],            spacer:1 },
-    { label:'WB Round 1',  matches:[3,4,5,6],        spacer:0 },
-    { label:'WB Round 2',  matches:[11,12],           spacer:1 },
-    { label:'WB Semifinal',matches:[16],             spacer:3 },
+    { label:'Play-in',     matches:[1,2],    spacer:1 },
+    { label:'WB Round 1',  matches:[3,4,5,6], spacer:0 },
+    { label:'WB Round 2',  matches:[12,13],  spacer:1 },
+    { label:'WB Semifinal',matches:[17],     spacer:3 },
 ];
 // LB columns (bottom band)
 const LB_COLS = [
-    { label:'LB Round 1',  matches:[7,8,9],          spacer:0 },
-    { label:'10th place',  matches:[10],             spacer:1 },
-    { label:'8th/9th',     matches:[13],             spacer:1 },
-    { label:'LB Round 2',  matches:[14,15],          spacer:0 },
-    { label:'6th/7th',     matches:[17],             spacer:1 },
-    { label:'LB Round 3',  matches:[18,19],          spacer:0 },
-    { label:'4th/5th',     matches:[20],             spacer:1 },
-    { label:'LB Final',    matches:[21],             spacer:3 },
+    { label:'LB Round 1',  matches:[7,8,9],  spacer:0 },
+    { label:'10th place',  matches:[10],     spacer:1 },
+    { label:'8th/9th',     matches:[11],     spacer:1 },
+    { label:'LB Round 2',  matches:[14,15],  spacer:0 },
+    { label:'6th/7th',     matches:[16],     spacer:1 },
+    { label:'LB Round 3',  matches:[18,19],  spacer:0 },
+    { label:'4th/5th',     matches:[20],     spacer:1 },
+    { label:'LB Final',    matches:[21],     spacer:3 },
 ];
 const GF_COL = { label:'Grand Final', matches:[22] };
 
@@ -729,7 +999,7 @@ function matchCardHtml(id) {
 
     return `
 <div class="match-card ${clickable} ${completedCls} ${typeCls}" data-match="${id}">
-    <div class="match-badge">M${id}</div>
+    <div class="match-badge">M${id}<span class="match-badge-label"> &bull; ${def.label}</span></div>
     ${slotHtml(p1, p1role)}
     ${slotHtml(p2, p2role)}
 </div>`;
@@ -832,7 +1102,8 @@ function openModal(id) {
     selectedWinner = winner || null;
 
     document.getElementById('modal-match-num').textContent = id;
-    const template = nextQuestion();
+    if (!matchQuestions[id]) matchQuestions[id] = nextQuestion();
+    const template = matchQuestions[id];
     document.getElementById('modal-question').innerHTML = template
         .replace('{p1}', `<strong>${p1}</strong>`)
         .replace('{p2}', `<strong>${p2}</strong>`);
@@ -892,7 +1163,7 @@ function saveResult(matchId, winner) {
     fetch('/data/draftOrderBracket.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ matchId, winner })
+        body: JSON.stringify({ matchId, winner, question: matchQuestions[matchId] || null })
     })
     .then(r => r.json())
     .then(data => {
@@ -935,43 +1206,74 @@ document.getElementById('reset-btn').addEventListener('click', () => {
     fetch('/data/draftOrderBracket.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reset: true })
+        body: JSON.stringify({ reset: true, clearSeeds: true })
     })
     .then(r => r.json())
     .then(data => {
         lastResultsHash = JSON.stringify(data.results || {});
+        Object.keys(matchQuestions).forEach(function (k) { delete matchQuestions[k]; });
+        SEEDS.length = 0;
+        Object.keys(SEED_MAP).forEach(function (k) { delete SEED_MAP[k]; });
+        syncSeedSlots();
         applyServerState(data.results || {});
     });
 });
 
-// ── Polling for live updates ─────────────────────────────────────────────────
-function pollForUpdates() {
-    // Skip poll while modal is open to avoid disrupting an active selection
-    if ($('#matchModal').hasClass('show')) return;
-
-    fetch('/data/draftOrderBracket.json?t=' + Date.now())
-        .then(r => r.json())
-        .then(data => {
-            const hash = JSON.stringify(data.results || {});
-            if (hash !== lastResultsHash) {
-                lastResultsHash = hash;
-                applyServerState(data.results || {});
-            }
-        })
-        .catch(() => {}); // silently ignore network errors during poll
+// ── Seed restore helper ──────────────────────────────────────────────────────
+function restoreSeedsFromData(data) {
+    if (!data.seeds || !data.seeds.length) return;
+    SEEDS.length = 0;
+    data.seeds.forEach(function (n) { SEEDS.push(n); });
+    Object.keys(SEED_MAP).forEach(function (k) { delete SEED_MAP[k]; });
+    SEEDS.forEach(function (n, i) { SEED_MAP[n] = i + 1; });
+    syncSeedSlots();
 }
+
+function restoreQuestionsFromData(data) {
+    if (!data.questions) return;
+    Object.entries(data.questions).forEach(function ([id, q]) {
+        matchQuestions[parseInt(id)] = q;
+    });
+}
+
+// ── Intro overlay ────────────────────────────────────────────────────────────
+document.getElementById('intro-next-btn').addEventListener('click', function () {
+    const s1 = document.getElementById('intro-step-1');
+    const s2 = document.getElementById('intro-step-2');
+    s1.style.transition = 'opacity 0.25s ease';
+    s1.style.opacity = '0';
+    setTimeout(function () {
+        s1.style.display = 'none';
+        s2.style.display = '';
+        s2.style.opacity = '0';
+        s2.style.transition = 'opacity 0.3s ease';
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () { s2.style.opacity = '1'; });
+        });
+    }, 250);
+    document.querySelectorAll('.intro-dot').forEach(function (d, i) {
+        d.classList.toggle('active', i === 1);
+    });
+});
+
+document.getElementById('intro-start-btn').addEventListener('click', function () {
+    const overlay = document.getElementById('intro-overlay');
+    overlay.style.transition = 'opacity 0.4s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function () { overlay.style.display = 'none'; }, 400);
+});
 
 // Initial load
 fetch('/data/draftOrderBracket.json?t=' + Date.now())
     .then(r => r.ok ? r.json() : { results: {} })
     .then(data => {
         lastResultsHash = JSON.stringify(data.results || {});
+        restoreSeedsFromData(data);
+        restoreQuestionsFromData(data);
         applyServerState(data.results || {});
-        setInterval(pollForUpdates, 10000);
     })
     .catch(() => {
         applyServerState({});
-        setInterval(pollForUpdates, 10000);
     });
 </script>
 

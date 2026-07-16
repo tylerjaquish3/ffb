@@ -14,8 +14,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $body = json_decode(file_get_contents('php://input'), true);
     if (!empty($body['reset'])) {
-        file_put_contents($stateFile, json_encode(['results' => (object)[]], JSON_PRETTY_PRINT));
-        echo json_encode(['results' => (object)[]]);
+        $state = ['results' => (object)[]];
+        if (!empty($body['seeds']) && is_array($body['seeds'])) {
+            // New seeds provided (randomizer ran) — save them
+            $state['seeds'] = $body['seeds'];
+        } elseif (empty($body['clearSeeds']) && file_exists($stateFile)) {
+            // Plain bracket reset — keep existing seeds
+            $existing = json_decode(file_get_contents($stateFile), true);
+            if (!empty($existing['seeds'])) {
+                $state['seeds'] = $existing['seeds'];
+            }
+        }
+        file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT));
+        echo json_encode($state);
         exit;
     }
     if (!isset($body['matchId']) || !isset($body['winner'])) {
@@ -29,6 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $matchId = (string)$body['matchId'];
     $state['results'][$matchId] = $body['winner'];
+    if (!empty($body['question'])) {
+        if (!isset($state['questions'])) $state['questions'] = [];
+        $state['questions'][$matchId] = $body['question'];
+    }
 
     file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT));
     echo json_encode($state);

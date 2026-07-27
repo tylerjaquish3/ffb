@@ -53,8 +53,6 @@ php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + 
 
 # Ideas
 
-- add more fun facts
-    - best trade
 - add these awards as records
     - most postseason losses
     - best record against everyone
@@ -124,15 +122,6 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 - Baseball, golf, olympics
 - Mexican, italian, canadian
 - Pirates, animals, space, casino, school (report card), race car
-
-
-2026 pre draft order notes
-- the last 5 champions have picked in the top 5, but none of them were #1
-- Cole and AJ were 11-3 last year and they picked #1 and #2
-- Cam, Ev, and Justin have never had #1
-- Justin has only had 2 picks in the top 3, and hasn't had a top 3 pick in 14 years
-- the only time #1 pick won was Ben in 2011
-
 
 # Feature Ideas
 

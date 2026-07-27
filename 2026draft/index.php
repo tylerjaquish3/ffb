@@ -148,7 +148,6 @@ while ($row = $seedsResult->fetchArray(SQLITE3_ASSOC)) {
                     <div class="card">
                         <div class="card-header d-flex align-items-center justify-content-between">
                             <h4 class="card-title mb-0">Double Elimination Bracket</h4>
-                            <button id="reset-btn" class="btn btn-sm btn-outline-danger" style="direction:ltr;">Reset Bracket</button>
                         </div>
                         <div class="card-body p-0">
                             <div class="bracket-scroll-wrapper" style="overflow-x:auto; padding: 1.5rem; direction: ltr;">
@@ -1200,24 +1199,6 @@ function applyServerState(rawResults) {
     renderMatchupsList();
     renderDraftTable();
 }
-
-document.getElementById('reset-btn').addEventListener('click', () => {
-    if (!confirm('Reset the entire bracket? This cannot be undone.')) return;
-    fetch('/data/draftOrderBracket.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reset: true, clearSeeds: true })
-    })
-    .then(r => r.json())
-    .then(data => {
-        lastResultsHash = JSON.stringify(data.results || {});
-        Object.keys(matchQuestions).forEach(function (k) { delete matchQuestions[k]; });
-        SEEDS.length = 0;
-        Object.keys(SEED_MAP).forEach(function (k) { delete SEED_MAP[k]; });
-        syncSeedSlots();
-        applyServerState(data.results || {});
-    });
-});
 
 // ── Seed restore helper ──────────────────────────────────────────────────────
 function restoreSeedsFromData(data) {

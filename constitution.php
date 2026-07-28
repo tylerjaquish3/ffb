@@ -192,30 +192,33 @@ while ($row = fetch_array($result)) {
             <div class="row card-section" id="meeting-notes" style="display: none;">
                 <div class="col-sm-12">
 
-                    <!-- Meeting Agenda TBD 2026 -->
+                    <!-- Meeting Agenda 2026 -->
                     <div class="card">
                         <div class="card-header">
-                            <h4>Meeting Agenda | TBD 2026</h4>
+                            <h4>Meeting Agenda | 7.27.2026</h4>
                         </div>
                         <div class="card-body">
                             <div class="card-block" style="direction: ltr">
                                 <br />
-                                <strong>Vote on the following: </strong>
+                                <strong>Voted on the following: </strong>
                                 <ol style="padding-left: 0; list-style-position: inside;">
-                                    <li>Proposal: Add stat category for "Pick 6s Thrown" worth -4 points.
-                                        <ul>
-                                            <li>2025: Burrow had 3, Flacco & Stafford had 2, and 20 QBs had 1.</li>
-                                            <li>2024: Levis had 4, Lock had 3, 4 QBs had 2, and 13 QBs had 1.</li>
-                                            <li>This would be in addition to an Interception worth -2 pts. So a Pick 6 would really be -6 pts for the QB.</li>
-                                            <li>Set to -4 points because anything less wouldn't be meaningful. </li>
-                                            <li>Pro: Won't make a big impact on the season, but could be a fun wrinkle in a weekly matchup.</li>
-                                            <li>Con: Could impact pocket passers more likely than running QBs, which already have an edge.</li>
-                                        </ul>
-                                    </li>
+                                    <li>Add stat category for "Pick 6s Thrown" worth -4 points | <strong>Voted to keep as-is (vote was 7-2).</strong></li>
                                 </ol>
-                                <strong>Determine 2026 draft order</strong><br />
+                                <strong>Mystic Pickle determined 2026 draft order</strong><br />
+                                <ol>
+                                    <li>Andy</li>
+                                    <li>Cameron</li>
+                                    <li>Justin</li>
+                                    <li>Matt</li>
+                                    <li>Cole</li>
+                                    <li>Gavin</li>
+                                    <li>Everett</li>
+                                    <li>AJ</li>
+                                    <li>Tyler</li>
+                                    <li>Ben</li>
+                                </ol>
                                 <br />
-                                <strong>Draft date: 8.29.26 | Time: TBD | Location: Cole's</strong>
+                                <strong>Draft date: 8.29.26 | Time: 6pm | Location: Cole's</strong>
                                 <br /><br />
                             </div>
                         </div>

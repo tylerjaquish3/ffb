@@ -25,13 +25,13 @@ Each manager must appear in exactly 5 rematch pairs (since they play 5 rematches
 
 1. Go to `https://www.pro-football-reference.com/years/YYYY/games.htm` (replace YYYY with the season year)
 2. Select all content in the games table and copy it
-3. Paste into `fun-facts/storage/app/games/raw.txt`
-4. Run from `fun-facts/`:
+3. Paste into `suntown/storage/app/private/games/raw.txt`
+4. Run from `suntown/`:
 ```bash
 php artisan importGames
 ```
 
-This converts the tab-separated paste into `storage/app/games/YYYY.csv` (matching the format of the existing CSVs) and deletes `raw.txt`. Run once per year, at the start of the season after Week 1 kickoff so all game times are published.
+This converts the tab-separated paste into `storage/app/private/games/YYYY.csv` (matching the format of the existing CSVs) and deletes `raw.txt`. Run once per year, at the start of the season after Week 1 kickoff so all game times are published.
 
 ## 3. Pull Data from Yahoo API
 Use the admin page to fetch the current season's data from the Yahoo Fantasy Sports API. Do this each week during the season to keep scores, rosters, and standings current.
@@ -41,9 +41,9 @@ Use the admin page to fetch the current season's data from the Yahoo Fantasy Spo
 
 All environments now use sqlite for the database.
 To get new data, use the admin page that will interact with the Yahoo API. 
-There is a laravel project inside the fun-facts folder so that jobs can be run. Here are the jobs:
+The jobs that used to run from a `fun-facts` Laravel project in this repo now live in `../suntown` (see its CLAUDE.md), reading/writing this repo's `database/ffb.sqlite` over a dedicated `ffb` connection. Run them from `suntown/`:
 php artisan funFacts : update all of the manager fun facts. 
-php artisan gameTimes : parse storage/app/games/YYYY.csv and update game_time + game_slot on rosters table
+php artisan gameTimes : parse storage/app/private/games/YYYY.csv and update game_time + game_slot on rosters table
 
 
 # Bugs

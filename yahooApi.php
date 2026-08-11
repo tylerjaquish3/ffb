@@ -130,7 +130,7 @@ $request_token_url = get_request_token_url($consumer_key);
 
                             <h3>Weeks</h3>
                             <div style="display: flex; flex-wrap: wrap;">
-                                <?php for ($week = 1; $week <= 17; $week++): $checked = ($week == $defaultWeek) ? 'checked' : ''; ?>
+                                <?php for ($week = 1; $week <= 18; $week++): $checked = ($week == $defaultWeek) ? 'checked' : ''; ?>
                                 <div style="width: 33%; min-width: 50px; margin-bottom: 4px;">
                                     <input type="checkbox" name="weeks[]" value="<?php echo $week; ?>" <?php echo $checked; ?>> <?php echo $week; ?>
                                 </div>
@@ -164,12 +164,12 @@ $request_token_url = get_request_token_url($consumer_key);
                             <p style="margin-top: 10px;">
                                 Note: after running these updates, update the awards by running:
                                 <br />
-                                <button class="btn btn-sm btn-outline-primary copy-btn" data-clipboard-text="cd fun-facts && php artisan funFacts" style="margin: 5px 0;">
+                                <button class="btn btn-sm btn-outline-primary copy-btn" data-clipboard-text="cd suntown && php artisan funFacts" style="margin: 5px 0;">
                                     📋 Copy: php artisan funFacts
                                 </button>
                                 <br />Then update the record log with:
                                 <br />
-                                <button class="btn btn-sm btn-outline-primary copy-btn" data-clipboard-text="php artisan weekly:records <?php echo $currentYear; ?> <?php echo $defaultWeek; ?>" style="margin: 5px 0;">
+                                <button class="btn btn-sm btn-outline-primary copy-btn" data-clipboard-text="cd suntown && php artisan weekly:records <?php echo $currentYear; ?> <?php echo $defaultWeek; ?>" style="margin: 5px 0;">
                                     📋 Copy: php artisan weekly:records <?php echo $currentYear; ?> <?php echo $defaultWeek; ?>
                                 </button>
                             </p>

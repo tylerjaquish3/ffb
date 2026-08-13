@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        background-color: theme('colors.chalk.DEFAULT');
+    }
+
+    ::selection {
+        background-color: theme('colors.gold.DEFAULT');
+        color: theme('colors.ink.DEFAULT');
+    }
+
+    :focus-visible {
+        outline: 2px solid theme('colors.gold.DEFAULT');
+        outline-offset: 2px;
+    }
+}
+
+@layer components {
+    /* Amber "LED" readout used for scores, records, and week numbers */
+    .led-digits {
+        font-family: theme('fontFamily.mono');
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.05em;
+        color: theme('colors.gold.DEFAULT');
+        text-shadow: 0 0 4px rgba(242, 177, 52, 0.7), 0 0 12px rgba(242, 177, 52, 0.25);
+    }
+
+    /* The dark identity band used at the top of every page */
+    .stadium-header {
+        background-image: linear-gradient(135deg, theme('colors.ink.DEFAULT') 0%, theme('colors.ink.2') 100%);
+        border-bottom: 3px dashed rgba(246, 242, 231, 0.18);
+    }
+
+    /* Chalk-white content card with a turf sideline stripe and bolted corners */
+    .card-panel {
+        background-color: theme('colors.chalk.white');
+        border-top: 4px solid theme('colors.turf.DEFAULT');
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 2px rgba(18, 32, 58, 0.06), 0 8px 20px -12px rgba(18, 32, 58, 0.25);
+        position: relative;
+    }
+
+    .card-panel::before,
+    .card-panel::after {
+        content: '';
+        position: absolute;
+        top: 0.45rem;
+        width: 5px;
+        height: 5px;
+        border-radius: 9999px;
+        background-color: rgba(18, 32, 58, 0.15);
+    }
+
+    .card-panel::before {
+        left: 0.6rem;
+    }
+
+    .card-panel::after {
+        right: 0.6rem;
+    }
+
+    /* Jersey-number style rank badge */
+    .rank-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 9999px;
+        background-color: theme('colors.turf.DEFAULT');
+        color: theme('colors.chalk.white');
+        font-family: theme('fontFamily.display');
+        font-size: 0.95rem;
+        line-height: 1;
+        padding-top: 2px;
+    }
+
+    /* Compact W-L(-T) record chip, scoreboard style */
+    .record-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        background-color: theme('colors.ink.DEFAULT');
+        border-radius: 0.25rem;
+        padding: 0.15rem 0.5rem;
+        font-family: theme('fontFamily.mono');
+        font-size: 0.75rem;
+        font-variant-numeric: tabular-nums;
+        color: theme('colors.gold.DEFAULT');
+    }
+
+    /* Small NFL team color swatch, driven by real team colors */
+    .team-dot {
+        display: inline-block;
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 9999px;
+        box-shadow: 0 0 0 2px rgba(18, 32, 58, 0.08);
+    }
+
+    /* Eyebrow label: small tracked uppercase caption above a display headline */
+    .eyebrow {
+        font-family: theme('fontFamily.sans');
+        font-weight: 700;
+        font-size: 0.7rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: theme('colors.gold.DEFAULT');
+    }
+}

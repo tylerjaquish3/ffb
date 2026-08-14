@@ -21,6 +21,28 @@
 
     $milestoneTotals = getMilestoneTotals(); // [spec_id => ['spec' => …, 'top5' => …]]
     $alerts          = getCareerPointsAlerts();
+    $scorigami       = getScorigamiData();
+
+    // Scorigami grid: dense list of every integer score in range, and a
+    // count-bucket (0-4) per cell for CSS shading.
+    $sgValues  = range($scorigami['min'], $scorigami['max']);
+    $sgCellMap = [];
+    foreach ($scorigami['cells'] as $c) {
+        $sgCellMap[$c['win_score'] . '-' . $c['lose_score']] = $c;
+    }
+    function _scorigamiBucket($count)
+    {
+        if ($count <= 0) return 0;
+        if ($count >= 4) return 4;
+        return $count;
+    }
+
+    // rosters.php resolves a matchup from any one of its two managers'
+    // names, so either side of the pairing works here.
+    function _scorigamiRosterLink($year, $week, $managerName)
+    {
+        return '/rosters.php?year=' . $year . '&week=' . $week . '&manager=' . rawurlencode($managerName);
+    }
 
     // Group charts by tab, preserving spec order.
     $tabs = [
@@ -182,6 +204,88 @@
     @media (max-width: 600px) {
         .manager-chip { font-size: 0.72rem; padding: 0.25rem 0.6rem; }
     }
+    .sg-intro {
+        color: rgba(0,0,0,0.7);
+        font-size: 0.9rem;
+        margin: 0 0 0.75rem;
+    }
+    .sg-detail {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.08);
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        margin: 0 0 0.75rem;
+        color: rgba(0,0,0,0.6);
+        font-size: 0.85rem;
+    }
+    .sg-detail-title { color: #000; font-weight: 700; margin-bottom: 0.35rem; }
+    .sg-detail-list { margin: 0; padding-left: 1.1rem; color: #000; }
+    .sg-detail-list li { margin: 0.15rem 0; }
+    .sg-wrapper {
+        overflow: auto;
+        max-height: 65vh;
+        border: 1px solid rgba(0,0,0,0.1);
+        border-radius: 6px;
+        background: #fff;
+    }
+    .sg-table { border-collapse: collapse; font-size: 0.62rem; }
+    .sg-table th, .sg-table td {
+        width: 20px; min-width: 20px; height: 20px;
+        text-align: center; padding: 0;
+        border: 1px solid rgba(0,0,0,0.06);
+        white-space: nowrap;
+    }
+    .sg-corner, .sg-col-head, .sg-row-head {
+        position: sticky;
+        background: #fff;
+        color: #000;
+        font-weight: 700;
+    }
+    .sg-col-head { top: 0; z-index: 2; }
+    .sg-row-head { left: 0; z-index: 2; padding: 0 4px; }
+    .sg-corner { top: 0; left: 0; z-index: 3; font-size: 0.55rem; color: rgba(0,0,0,0.5); }
+    .sg-cell { cursor: default; }
+    .sg-cell[data-key] { cursor: pointer; }
+    .sg-cell[data-key]:hover { outline: 2px solid #000; outline-offset: -2px; }
+    .sg-cell.sg-c0 { background: #fff; }
+    .sg-cell.sg-c1 { background: #b7d3f6; }
+    .sg-cell.sg-c2 { background: #6da7ec; }
+    .sg-cell.sg-c3 { background: #2a78d6; }
+    .sg-cell.sg-c4 { background: #184f95; }
+    .sg-invalid {
+        background: repeating-linear-gradient(
+            45deg, rgba(0,0,0,0.03), rgba(0,0,0,0.03) 4px,
+            rgba(0,0,0,0.06) 4px, rgba(0,0,0,0.06) 8px
+        );
+    }
+    .sg-swatch {
+        width: 12px; height: 12px; border-radius: 3px;
+        border: 1px solid rgba(0,0,0,0.15);
+    }
+    .sg-swatch.sg-c0 { background: #fff; }
+    .sg-swatch.sg-c1 { background: #b7d3f6; }
+    .sg-swatch.sg-c2 { background: #6da7ec; }
+    .sg-swatch.sg-c3 { background: #2a78d6; }
+    .sg-swatch.sg-c4 { background: #184f95; }
+    .sg-outliers {
+        margin-top: 0.85rem;
+        padding: 0.75rem 1rem;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.08);
+        border-radius: 6px;
+        color: #000;
+    }
+    .sg-outliers-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .sg-recent {
+        margin-top: 0.85rem;
+        padding: 0.75rem 1rem;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.08);
+        border-radius: 6px;
+        color: #000;
+    }
+    .sg-recent-title { font-weight: 700; }
+    .sg-recent-sub { margin: 0.15rem 0 0.6rem; font-size: 0.82rem; color: rgba(0,0,0,0.6); }
 </style>
 <div class="app-content content">
     <div class="content-wrapper">
@@ -201,6 +305,10 @@
                                 <?php echo htmlspecialchars($tab['label']); ?>
                             </button>
                         <?php endforeach; ?>
+                        <button class="tab-button" id="scorigami-tab"
+                                onclick="showMilestoneTab('scorigami')">
+                            Scorigami
+                        </button>
                     </div>
 
                     <div>
@@ -279,6 +387,147 @@
                             </div>
                         </div>
                         <?php endforeach; ?>
+
+                        <!-- ── Scorigami ── -->
+                        <div class="row card-section" id="scorigami" style="display: none;">
+                            <div class="col-sm-12">
+                                <div class="card milestone-card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Scorigami</h4>
+                                    </div>
+                                    <div class="card-body" style="direction: ltr;">
+                                        <p class="sg-intro">
+                                            Every regular-season matchup, plotted by winning score (rows) vs.
+                                            losing score (columns), rounded to the nearest point. Click a cell
+                                            to see when it happened.
+                                        </p>
+                                        <div class="tier-legend">
+                                            <span class="tier-chip"><span class="tier-dot sg-swatch sg-c0"></span><span class="tier-label">Never</span></span>
+                                            <span class="tier-chip"><span class="tier-dot sg-swatch sg-c1"></span><span class="tier-label">1x</span></span>
+                                            <span class="tier-chip"><span class="tier-dot sg-swatch sg-c2"></span><span class="tier-label">2x</span></span>
+                                            <span class="tier-chip"><span class="tier-dot sg-swatch sg-c3"></span><span class="tier-label">3x</span></span>
+                                            <span class="tier-chip"><span class="tier-dot sg-swatch sg-c4"></span><span class="tier-label">4+x</span></span>
+                                        </div>
+                                        <div id="sg-detail" class="sg-detail">Click a cell in the grid to see the matchups behind it.</div>
+                                        <div class="sg-wrapper">
+                                            <table class="sg-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="sg-corner">W \ L</th>
+                                                        <?php foreach ($sgValues as $l): ?>
+                                                            <th class="sg-col-head"><?php echo $l; ?></th>
+                                                        <?php endforeach; ?>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php $sgN = count($sgValues); ?>
+                                                    <?php for ($i = 0; $i < $sgN; $i++):
+                                                        $w = $sgValues[$i];
+                                                    ?>
+                                                    <tr>
+                                                        <th class="sg-row-head"><?php echo $w; ?></th>
+                                                        <?php for ($j = 0; $j <= $i; $j++):
+                                                            $l     = $sgValues[$j];
+                                                            $key   = $w . '-' . $l;
+                                                            $cell  = $sgCellMap[$key] ?? null;
+                                                            $count = $cell['count'] ?? 0;
+                                                            $bucket = _scorigamiBucket($count);
+                                                            $title  = $w . '–' . $l . ' — ' . ($count > 0
+                                                                ? $count . ($count === 1 ? ' time' : ' times')
+                                                                : 'never happened');
+                                                        ?>
+                                                            <td class="sg-cell sg-c<?php echo $bucket; ?>"
+                                                                <?php if ($count > 0): ?>data-key="<?php echo $key; ?>"<?php endif; ?>
+                                                                title="<?php echo htmlspecialchars($title); ?>"></td>
+                                                        <?php endfor; ?>
+                                                        <?php $remaining = $sgN - 1 - $i; ?>
+                                                        <?php if ($remaining > 0): ?>
+                                                            <td class="sg-invalid" colspan="<?php echo $remaining; ?>"></td>
+                                                        <?php endif; ?>
+                                                    </tr>
+                                                    <?php endfor; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <?php if (!empty($scorigami['outliers'])): ?>
+                                        <div class="sg-outliers">
+                                            <div class="sg-outliers-title">
+                                                Outliers (excluded from grid above — the most extreme 1% of scores on each end)
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table table-striped" id="scorigami-outliers-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Year</th>
+                                                            <th>Week</th>
+                                                            <th>Score</th>
+                                                            <th>Matchup</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($scorigami['outliers'] as $o): ?>
+                                                            <tr>
+                                                                <td><?php echo $o['year']; ?></td>
+                                                                <td><?php echo $o['week']; ?></td>
+                                                                <td><?php echo $o['win_score'] . '–' . $o['lose_score']; ?></td>
+                                                                <td>
+                                                                    <a href="<?php echo _scorigamiRosterLink($o['year'], $o['week'], $o['win_name']); ?>">
+                                                                        <?php if ($o['tie']): ?>
+                                                                            <?php echo htmlspecialchars($o['win_name'] . ' tied ' . $o['lose_name']); ?>
+                                                                        <?php else: ?>
+                                                                            <?php echo htmlspecialchars($o['win_name'] . ' over ' . $o['lose_name']); ?>
+                                                                        <?php endif; ?>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endforeach; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($scorigami['recent'])): ?>
+                                        <div class="sg-recent">
+                                            <div class="sg-recent-title">Scorigamis</div>
+                                            <p class="sg-recent-sub">The first time each score pair happened, most recent first.</p>
+                                            <div class="table-responsive">
+                                                <table class="table table-striped" id="scorigami-recent-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Year</th>
+                                                            <th>Week</th>
+                                                            <th>Score</th>
+                                                            <th>Matchup</th>
+                                                            <th>Times Since</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($scorigami['recent'] as $g): ?>
+                                                            <tr>
+                                                                <td><?php echo $g['year']; ?></td>
+                                                                <td><?php echo $g['week']; ?></td>
+                                                                <td><?php echo $g['win_score'] . '–' . $g['lose_score']; ?></td>
+                                                                <td>
+                                                                    <a href="<?php echo _scorigamiRosterLink($g['year'], $g['week'], $g['winner']); ?>">
+                                                                        <?php if ($g['tie']): ?>
+                                                                            <?php echo htmlspecialchars($g['winner'] . ' tied ' . $g['loser']); ?>
+                                                                        <?php else: ?>
+                                                                            <?php echo htmlspecialchars($g['winner'] . ' over ' . $g['loser']); ?>
+                                                                        <?php endif; ?>
+                                                                    </a>
+                                                                </td>
+                                                                <td><?php echo $g['count']; ?></td>
+                                                            </tr>
+                                                        <?php endforeach; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -463,10 +712,44 @@
     });
 
     // Hidden-tab canvases render at 0 width; resize charts after activation.
+    // DataTables has the same problem, so its tables init lazily on first view.
+    let sgTablesInitialized = false;
     window.showMilestoneTab = function (tabId) {
         showCard(tabId);
         const charts = chartsByTab[tabId];
         if (charts && charts.length) setTimeout(() => charts.forEach(c => c.resize()), 50);
+
+        if (tabId === 'scorigami' && !sgTablesInitialized && window.jQuery && jQuery.fn.DataTable) {
+            sgTablesInitialized = true;
+            jQuery('#scorigami-outliers-table').DataTable({ pageLength: 10, order: [[0, 'desc'], [1, 'desc']] });
+            jQuery('#scorigami-recent-table').DataTable({ pageLength: 10, order: [[0, 'desc'], [1, 'desc']] });
+        }
     };
+
+    // ── Scorigami cell detail ──────────────────────────────────────────────
+    const sgCellDetails = <?php echo json_encode($sgCellMap); ?>;
+    const sgDetailEl    = document.getElementById('sg-detail');
+    const sgTable       = document.querySelector('.sg-table');
+
+    if (sgTable) {
+        sgTable.addEventListener('click', function (e) {
+            const td = e.target.closest('td[data-key]');
+            if (!td) return;
+            const cell = sgCellDetails[td.dataset.key];
+            if (!cell || !cell.games.length) return;
+
+            const items = cell.games.map(g => {
+                const when = g.year + ' Wk ' + g.week;
+                return g.tie
+                    ? '<li>' + when + ': ' + g.winner + ' tied ' + g.loser + '</li>'
+                    : '<li>' + when + ': ' + g.winner + ' over ' + g.loser + '</li>';
+            }).join('');
+
+            sgDetailEl.innerHTML =
+                '<div class="sg-detail-title">' + cell.win_score + '–' + cell.lose_score +
+                ' (' + cell.count + (cell.count === 1 ? ' time)' : ' times)') + '</div>' +
+                '<ul class="sg-detail-list">' + items + '</ul>';
+        });
+    }
 })();
 </script>

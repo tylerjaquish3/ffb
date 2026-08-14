@@ -284,6 +284,112 @@ function _milestoneBuildAlerts($crossings, $categoryLabel, $latestSeason)
     return $alerts;
 }
 
+// ── SCORIGAMI ────────────────────────────────────────────────────────────
+// Grid of (winner score, loser score) -> how many times that exact rounded
+// score pair has occurred in a regular-season matchup. The most extreme 1%
+// of individual scores at each end (by frequency, not by distinct value) are
+// excluded from the grid's range and reported separately as outliers, along
+// with any matchup touching one of those scores.
+
+// Returns [lo, hi]: the score range remaining after trimming $pct% of
+// individual score instances off each end of a sorted list.
+function _scorigamiPercentileRange($sortedScores, $pct = 1)
+{
+    $n = count($sortedScores);
+    if ($n === 0) return [0, 0];
+    $loIdx = (int) floor($n * $pct / 100);
+    $hiIdx = (int) ceil($n * (100 - $pct) / 100) - 1;
+    $hiIdx = max($hiIdx, $loIdx);
+    return [$sortedScores[$loIdx], $sortedScores[$hiIdx]];
+}
+
+function getScorigamiData()
+{
+    $r = query("SELECT manager1_id AS m1, manager2_id AS m2,
+                    manager1_score AS s1, manager2_score AS s2,
+                    year AS yr, week_number AS wk
+                FROM regular_season_matchups
+                WHERE manager1_id < manager2_id
+                ORDER BY year ASC, week_number ASC, id ASC");
+
+    $matchups     = [];
+    $scoreInstances = [];
+    while ($row = fetch_array($r)) {
+        $s1 = (int) round((float) $row['s1']);
+        $s2 = (int) round((float) $row['s2']);
+        $tie = $s1 === $s2;
+        if ($s1 >= $s2) {
+            $winScore = $s1; $winName = getManagerName((int) $row['m1']);
+            $loseScore = $s2; $loseName = getManagerName((int) $row['m2']);
+        } else {
+            $winScore = $s2; $winName = getManagerName((int) $row['m2']);
+            $loseScore = $s1; $loseName = getManagerName((int) $row['m1']);
+        }
+        $matchups[] = [
+            'win_score' => $winScore, 'win_name' => $winName,
+            'lose_score' => $loseScore, 'lose_name' => $loseName,
+            'tie' => $tie, 'year' => (int) $row['yr'], 'week' => (int) $row['wk'],
+        ];
+        $scoreInstances[] = $winScore;
+        $scoreInstances[] = $loseScore;
+    }
+
+    if (empty($scoreInstances)) {
+        return ['min' => 0, 'max' => 0, 'cells' => [], 'outliers' => [], 'recent' => []];
+    }
+
+    sort($scoreInstances, SORT_NUMERIC);
+    [$min, $max] = _scorigamiPercentileRange($scoreInstances, 1);
+
+    $cellsByKey  = [];
+    $outliers    = [];
+    foreach ($matchups as $m) {
+        if ($m['win_score'] < $min || $m['win_score'] > $max ||
+            $m['lose_score'] < $min || $m['lose_score'] > $max) {
+            $outliers[] = $m;
+            continue;
+        }
+        $key = $m['win_score'] . '-' . $m['lose_score'];
+        if (!isset($cellsByKey[$key])) {
+            $cellsByKey[$key] = [
+                'win_score' => $m['win_score'], 'lose_score' => $m['lose_score'],
+                'count' => 0, 'games' => [],
+            ];
+        }
+        $cellsByKey[$key]['count']++;
+        $cellsByKey[$key]['games'][] = [
+            'year' => $m['year'], 'week' => $m['week'], 'tie' => $m['tie'],
+            'winner' => $m['win_name'], 'loser' => $m['lose_name'],
+        ];
+    }
+
+    // Outliers sorted highest score first; ties in scores broken by year/week.
+    usort($outliers, fn($a, $b) => $b['win_score'] <=> $a['win_score']
+        ?: $b['year'] <=> $a['year'] ?: $b['week'] <=> $a['week']);
+
+    // Scorigamis: the first time each score pair happened, within the
+    // grid's range — games within a cell are already in chronological order,
+    // so games[0] is that pair's debut, even if it has since repeated.
+    $recent = [];
+    foreach ($cellsByKey as $cell) {
+        $g = $cell['games'][0];
+        $recent[] = [
+            'win_score' => $cell['win_score'], 'lose_score' => $cell['lose_score'],
+            'winner' => $g['winner'], 'loser' => $g['loser'], 'tie' => $g['tie'],
+            'year' => $g['year'], 'week' => $g['week'], 'count' => $cell['count'],
+        ];
+    }
+    usort($recent, fn($a, $b) => $b['year'] <=> $a['year'] ?: $b['week'] <=> $a['week']);
+
+    return [
+        'min'      => $min,
+        'max'      => $max,
+        'cells'    => array_values($cellsByKey),
+        'outliers' => $outliers,
+        'recent'   => $recent,
+    ];
+}
+
 // Top-5 totals for every spec, keyed by spec id.
 function getMilestoneTotals()
 {

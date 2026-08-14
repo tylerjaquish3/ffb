@@ -72,6 +72,7 @@ php artisan gameTimes : parse storage/app/private/games/YYYY.csv and update game
 - have a page for luck
     - wins with bottom points
     - wins under 5 pt margin
+    - late round picks that scored a lot
 
 Notes:
 Moved to 18 week schedule in 2021

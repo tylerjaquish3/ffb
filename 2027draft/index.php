@@ -49,6 +49,8 @@ $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
                             <p>Before the <?php echo $year; ?> season, every manager picks one player from the top 100 picks of the real <?php echo $year; ?> draft — no two managers can have the same player. The goal is to finish the season <strong>closest to <?php echo (int)DRAFT_ORDER_GAME_TARGET; ?> fantasy points</strong> (over or under) — that's an average of <?php echo number_format(DRAFT_ORDER_GAME_TARGET / DRAFT_ORDER_GAME_WEEKS, 2); ?> points per week to land right on target. Whoever finishes closest gets to choose their draft position for the <?php echo $year + 1; ?> draft at our annual meeting, next-closest chooses second, and so on.</p>
                             <p>This runs the <strong>full <?php echo DRAFT_ORDER_GAME_WEEKS; ?>-week NFL regular season</strong> — not just the FFB league's own <?php echo $year; ?> schedule. Your player keeps racking up real stats through Week <?php echo DRAFT_ORDER_GAME_WEEKS; ?> no matter what, so even if your fantasy team doesn't make the FFB playoffs, you've still got something to play for all the way to the finish line.</p>
                             <p>Want to switch your player? Text the admin — only they can make the change. Switching doesn't rewrite history: points already scored by your old player stay locked in, and your new player only counts from the week the switch takes effect. You can be as involved or checked out as you want to be — pick a player and forget about it, or track his pace all season and switch if he's not trending toward <?php echo (int)DRAFT_ORDER_GAME_TARGET; ?>.</p>
+                            <p><strong>Moves are limited:</strong> each manager gets <strong>3 voluntary switches</strong> for the season. A switch forced by your player getting hurt (see below) is <strong>mandatory and does not count</strong> against your 3.</p>
+                            <p><strong>Injuries:</strong> if your player gets hurt — whether he's out just for a week or done for the season — and becomes ineligible, he's removed from the pool and you must switch to a new player. This mandatory injury switch doesn't use up one of your 3 voluntary moves.</p>
                             <p><strong>Tiebreakers</strong> (in order): 1) fewest pick changes during the season, 2) later overall draft pick of your current player.</p>
                             <p class="mb-0"><em>Example:</em> you draft a running back projected for around <?php echo (int)DRAFT_ORDER_GAME_TARGET; ?> points. He gets off to a slow start, so at midseason you switch to a receiver who looks more likely to hit the target — that's a pick change, which only matters later as a tiebreaker. By Week <?php echo DRAFT_ORDER_GAME_WEEKS; ?>, your combined total (old player's points before the switch + new player's points after) lands at <?php echo (int)DRAFT_ORDER_GAME_TARGET + 5; ?>, just 5 points over. If that ends up closest to <?php echo (int)DRAFT_ORDER_GAME_TARGET; ?> among all ten managers, you get to choose your draft position for the <?php echo $year + 1; ?> draft at the annual meeting.</p>
                         </div>
@@ -82,6 +84,7 @@ $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
                                         <th>Pos</th>
                                         <th>Points</th>
                                         <th>Diff from <?php echo (int)DRAFT_ORDER_GAME_TARGET; ?></th>
+                                        <th>Moves</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -104,8 +107,9 @@ $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
                                             <td><?php echo htmlspecialchars($row['position']); ?></td>
                                             <td><?php echo number_format($row['points'], 1); ?></td>
                                             <td><?php echo number_format($row['diff'], 1); ?></td>
+                                            <td class="<?php echo $row['moves'] >= DRAFT_ORDER_GAME_MAX_MOVES ? 'text-danger' : ''; ?>"><?php echo $row['moves']; ?> / <?php echo DRAFT_ORDER_GAME_MAX_MOVES; ?></td>
                                         <?php else: ?>
-                                            <td colspan="4" class="text-muted font-italic">No pick yet</td>
+                                            <td colspan="5" class="text-muted font-italic">No pick yet</td>
                                         <?php endif; ?>
                                     </tr>
                                 <?php endforeach; ?>

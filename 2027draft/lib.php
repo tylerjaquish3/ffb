@@ -18,6 +18,7 @@ const DRAFT_ORDER_GAME_PASSWORD = 'suntown';
 // as of this writing; weeks 15-18 need an admin Yahoo sync (yahooApi.php) run for ALL
 // managers, not just playoff qualifiers, once those weeks are played.
 const DRAFT_ORDER_GAME_WEEKS = 18;
+const DRAFT_ORDER_GAME_MAX_MOVES = 3;
 
 function getManagers(SQLite3 $conn) {
     $managers = [];
@@ -203,6 +204,7 @@ function getSummaryRows(SQLite3 $conn, $year) {
             'points' => null,
             'diff' => null,
             'history' => $assignments,
+            'moves' => $assignments ? count($assignments) - 1 : 0,
         ];
         if ($assignments) {
             $points = getManagerSeasonPoints($conn, $year, $assignments);

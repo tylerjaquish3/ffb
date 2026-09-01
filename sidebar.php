@@ -123,6 +123,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <span class="menu-title">Suggestions</span>
                 </a>
             </li> -->
+            <li class="nav-item<?php if (strpos($_SERVER['REQUEST_URI'], '/2027draft/') !== false) echo ' active'; ?>">
+                <a href="/2027draft/index.php">
+                    <i class="icon-arrow-up-right"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">2027 Draft</span>
+                </a>
+            </li>
         </ul>
     </div>
 </div>

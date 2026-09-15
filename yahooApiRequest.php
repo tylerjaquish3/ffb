@@ -435,6 +435,22 @@ function handle_team_rosters(int $yahooId, int $week, object $data)
             'points' => $points
         ]);
 
+        // Defensive cleanup (same exposure as handle_scraped_rosters() in
+        // yahooScrapeRequest.php): `rosters` uses a plain
+        // `INTEGER PRIMARY KEY` (no AUTOINCREMENT), so a brand-new roster
+        // row's id is whatever id is next free, and can coincidentally
+        // reuse an old, deleted roster's id, "inheriting" any orphaned
+        // `stats` row still under that roster_id. Not harmless for
+        // non-IR players either: updateOrCreate() only SETs columns
+        // present in $cleanStats, so any category absent from THIS
+        // player's real stats (e.g. a kicker has no passing columns at
+        // all) would otherwise keep the STALE orphan's value for that
+        // column instead of being cleared. Unconditionally deleting
+        // whatever sits under this roster_id BEFORE writing (or not
+        // writing, for IR) guarantees no stale column ever survives, for
+        // every roster_spot — not just IR.
+        query("DELETE FROM stats WHERE roster_id = " . (int)$rosterId);
+
         if ($spot != 'IR' && isset($stats['stats']) && is_array($stats['stats'])) {
 
             // Insert stats - make sure we have valid stats array

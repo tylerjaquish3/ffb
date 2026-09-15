@@ -130,7 +130,7 @@ non-zero exit code as failure.
 |---|---|---|---|
 | `yahoo_ids` | `handle_managers` | `season_managers.yahoo_id` | **Not implemented — confirmed permanently unscrapeable.** Investigated 2026-09-15: the manager's Yahoo nickname (the only signal `handle_managers` can bootstrap a manager mapping from) renders as a literal `--hidden--` placeholder everywhere on the website — the standings page, and all 10 individual team pages, including the scraping account's own team. That last point rules out a per-account privacy setting: Yahoo's website no longer sends this value to the browser at all, for anyone. Stays API-only; see "Open risks" below for possible future workarounds. |
 | `team_names` | `handle_teams` | `team_names` (name, **moves only** — see note) | `handle_scraped_team_names` (done) — the standings page has no trades count anywhere (confirmed by full-page search of live-captured HTML); the write path omits `trades` from `updateOrCreate()` entirely so it never overwrites an existing value, rather than writing 0. |
-| `matchups` | `handle_team_matchups` | `regular_season_matchups` (scores, projected, winner/loser) + triggers `updateStandingsForWeek` | `handle_scraped_matchups` |
+| `matchups` | `handle_team_matchups` | `regular_season_matchups` (scores, projected, winner/loser) + triggers `updateStandingsForWeek` | `handle_scraped_matchups` (done) — the assumed `/scoreboard?week=` URL 404s for real; the actual page is the league home page's "Matchups" module (`?matchup_week=<N>&module=matchups&lhst=matchups`), which returns all 5 matchups for a week in one load. Projected points ARE available even for a completed week (confirmed against the individual matchup page's "Orig Proj" label) — contrary to this doc's earlier speculation, so `projected` is never nulled out here the way `team_names`' `trades` is. |
 | `rosters` | `handle_team_rosters` + `get_player_stats` | `rosters` (player/position/team/points) + `stats` (full per-category breakdown — pass_yds, pass_tds, ints, rush_yds, rush_tds, receptions, rec_yds, rec_tds, fumbles, pat_made, fg_yards, fg_made, def_int, def_fum, def_sacks) + optimal lineup back onto `regular_season_matchups` | `handle_scraped_rosters` |
 | `trades` | `handle_trades` | `trades` (player, from/to manager, week, trade id) | `handle_scraped_trades` |
 
@@ -229,6 +229,17 @@ scraper against new, unverified data.
 
 ## Open risks
 
+- The scrape path may only work against the **current** season's league.
+  Investigated 2026-09-15 while building `matchups`: navigating to a past
+  season's league (year 2025, league id 23237) with the saved session
+  redirects straight to `login.yahoo.com`, while the exact same session
+  navigates to the current league (18261) fine — confirmed against both the
+  base league URL and the matchups URL, so it isn't a URL-pattern bug. This
+  looks like Yahoo requiring fresh re-authentication for a non-current
+  season that the saved cookie state alone can't satisfy. Not investigated
+  further (out of scope for the `matchups` task) — if a past season ever
+  needs re-scraping, this will need its own look, possibly via the
+  non-headless manual-login escape hatch already noted below.
 - Yahoo may detect and block scripted logins over time (rate limiting,
   anomaly detection, forced 2FA). The manual-login fallback described
   under "Credentials & session" is the mitigation, not yet built.

@@ -7,6 +7,11 @@ test('builds the default team_names URL from league-id', () => {
     assert.equal(url, 'https://football.fantasysports.yahoo.com/f1/18261');
 });
 
+test('builds the default matchups URL from league-id and week', () => {
+    const url = resolveUrl({ section: 'matchups', 'league-id': '18261', week: '1' });
+    assert.equal(url, 'https://football.fantasysports.yahoo.com/f1/18261?matchup_week=1&module=matchups&lhst=matchups');
+});
+
 test('builds the default rosters URL from league-id, manager, and week', () => {
     const url = resolveUrl({ section: 'rosters', 'league-id': '18261', manager: '4', week: '3' });
     assert.equal(url, 'https://football.fantasysports.yahoo.com/f1/18261/4?week=3');

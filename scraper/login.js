@@ -98,7 +98,7 @@ async function loginWithCredentials(browser) {
         await submitCredentials(page, username, password);
 
         if (PUSH_CHALLENGE_PATTERN.test(page.url())) {
-            console.log(
+            console.error(
                 `Approve the push notification on your phone now (Yahoo Fantasy ` +
                 `Football app) — waiting up to ${PUSH_APPROVAL_TIMEOUT_MS / 1000}s...`
             );

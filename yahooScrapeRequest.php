@@ -3,6 +3,14 @@ set_time_limit(300);
 
 include 'yahooSharedFunctions.php';
 
+session_start();
+
+if (isset($APP_ENV) && $APP_ENV === 'production' && empty($_SESSION['admin_auth'])) {
+    http_response_code(403);
+    echo '<div class="alert alert-danger">Unauthorized.</div>';
+    exit;
+}
+
 $year = (int)($_POST['year'] ?? 0);
 $section = $_POST['section'] ?? '';
 $weeks = $_POST['weeks'] ?? [];
@@ -42,9 +50,10 @@ if ($exitCode !== 0) {
 }
 
 $data = json_decode($stdout, true);
-if ($data === null) {
+if (json_last_error() !== JSON_ERROR_NONE) {
     echo '<div class="alert alert-danger">Scraper returned invalid JSON for ' . htmlspecialchars($section) . '.</div>';
     exit;
 }
 
-echo '<div class="alert alert-success">Scraped ' . htmlspecialchars($section) . ' successfully (' . count($data) . ' item(s)). Writing this section to the database is added in a follow-up task.</div>';
+$itemCount = is_array($data) ? count($data) : 1;
+echo '<div class="alert alert-success">Scraped ' . htmlspecialchars($section) . ' successfully (' . $itemCount . ' item(s)). Writing this section to the database is added in a follow-up task.</div>';

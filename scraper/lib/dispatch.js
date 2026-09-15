@@ -1,9 +1,8 @@
 function getExtractor(extractors, section) {
-    const extractor = extractors[section];
-    if (!extractor) {
+    if (!Object.prototype.hasOwnProperty.call(extractors, section)) {
         throw new Error(`No scrape extractor implemented yet for section "${section}".`);
     }
-    return extractor;
+    return extractors[section];
 }
 
 module.exports = { getExtractor };

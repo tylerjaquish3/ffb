@@ -138,6 +138,59 @@ function do_dump(&$var, $var_name = NULL, $indent = NULL, $reference = NULL)
     echo "</div>";
 }
 
+/**
+ * Look up the local manager_id for a given Yahoo team id/year. Used by both
+ * the OAuth/API path (yahooApiRequest.php) and the web-scrape fallback path
+ * (yahooScrapeRequest.php) — moved here so both files can share it instead
+ * of duplicating it.
+ */
+function lookupManager(int $yahooTeamId, int $year)
+{
+    $result = query("SELECT managers.id FROM season_managers
+        JOIN managers on managers.id = season_managers.manager_id
+        WHERE yahoo_id = $yahooTeamId and year = $year");
+    while ($manager = fetch_array($result)) {
+        return $manager['id'];
+    }
+}
+
+/**
+ * Look up the Yahoo league_id for a given year. Same year -> league_id
+ * mapping already hardcoded in yahooApi.php/yahooApiRequest.php (only the
+ * league_id half is needed here — the OAuth path's game_code isn't used by
+ * the scrape path, which drives real web pages instead of the Yahoo API).
+ * Returns null if the year isn't a known season, so callers can surface a
+ * clear error instead of passing a bad league id downstream.
+ */
+function getSeasonLeagueId(int $year): ?int
+{
+    $seasons = [
+        2026 => 18261,
+        2025 => 23237,
+        2024 => 98957,
+        2023 => 74490,
+        2022 => 84027,
+        2021 => 16064,
+        2020 => 43673,
+        2019 => 201651,
+        2018 => 224863,
+        2017 => 262191,
+        2016 => 477642,
+        2015 => 217861,
+        2014 => 53077,
+        2013 => 27577,
+        2012 => 26725,
+        2011 => 163601,
+        2010 => 35443,
+        2009 => 42150,
+        2008 => 8224,
+        2007 => 73988,
+        2006 => 48909,
+    ];
+
+    return $seasons[$year] ?? null;
+}
+
 function query($sql)
 {
     global $conn, $DB_TYPE;

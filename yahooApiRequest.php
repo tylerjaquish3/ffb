@@ -290,16 +290,6 @@ function handle_teams(object $data)
     }
 }
 
-function lookupManager(int $yahooTeamId, int $year)
-{
-    $result = query("SELECT managers.id FROM season_managers 
-        JOIN managers on managers.id = season_managers.manager_id
-        WHERE yahoo_id = $yahooTeamId and year = $year");
-    while ($manager = fetch_array($result)) {
-        return $manager['id'];
-    }
-}
-
 function handle_team_matchups(int $yahooTeamId, object $data, array $selectedWeeks = [])
 {
     global $year;

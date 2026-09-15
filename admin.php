@@ -211,8 +211,21 @@ $( document ).ready( () => {
         }
     });
 
+    // Fetch mode toggle (Yahoo API vs Web Scrape)
+    function applyFetchModeVisibility() {
+        var mode = $('input[name="fetch_mode"]:checked').val();
+        if (mode === 'scrape') {
+            $('.api-mode-field').hide();
+        } else {
+            $('.api-mode-field').show();
+        }
+    }
+    $('input[name="fetch_mode"]').change(applyFetchModeVisibility);
+    applyFetchModeVisibility();
+
     // Yahoo API Submit
     $('#make_request').click(function () {
+        var mode = $('input[name="fetch_mode"]:checked').val();
         var year = $('input[name="year"]').val();
         var weeks = [];
         $('input[name="weeks[]"]:checked').each(function () {
@@ -229,13 +242,18 @@ $( document ).ready( () => {
             return week > 14;
         });
 
-        if (matchupsSelected && playoffWeeksSelected) {
+        if (mode === 'api' && matchupsSelected && playoffWeeksSelected) {
             $('#output').html('<div class="alert alert-danger"><strong>Error:</strong> Playoff matchups (weeks 15+) are not available from the Yahoo API. Please deselect weeks 15-17 when updating matchups, or deselect the Matchups option.</div>');
             return false;
         }
 
         $('#loading').show();
         $('#output').html('');
+
+        if (mode === 'scrape') {
+            makeRequest(year, weeks, managers, mode);
+            return;
+        }
 
         if (!access_token) {
             $.ajax({
@@ -247,7 +265,7 @@ $( document ).ready( () => {
                 },
                 success: function(response) {
                     access_token = response;
-                    makeRequest(year, weeks, managers);
+                    makeRequest(year, weeks, managers, mode);
                 },
                 error: function() {
                     $('#loading').hide();
@@ -255,7 +273,7 @@ $( document ).ready( () => {
                 }
             });
         } else {
-            makeRequest(year, weeks, managers);
+            makeRequest(year, weeks, managers, mode);
         }
     });
 
@@ -414,9 +432,10 @@ $( document ).ready( () => {
 </script>
 
 <script>
-function makeRequest(year, weeks, managers) {
+function makeRequest(year, weeks, managers, mode) {
     var pendingRequests = $('input[name="sections[]"]:checked').length;
     var hasRosters = $('input[name="sections[]"][value="rosters"]:checked').length > 0;
+    var endpoint = mode === 'scrape' ? 'yahooScrapeRequest.php' : 'yahooApiRequest.php';
 
     if (pendingRequests === 0) {
         $('#loading').hide();
@@ -431,21 +450,24 @@ function makeRequest(year, weeks, managers) {
     $('input[name="sections[]"]:checked').each(function () {
         let section = $(this).val();
         if (section == 'rosters') {
-            makeRosterRequest(year, weeks, managers, 0, function() {
+            makeRosterRequest(year, weeks, managers, mode, 0, function() {
                 if (pendingRequests === 0) {
                     $('#loading').hide();
                 }
             });
         } else {
+            var requestData = {
+                year: year,
+                section: section,
+                weeks: weeks
+            };
+            if (mode !== 'scrape') {
+                requestData.token = access_token;
+            }
             $.ajax({
-                url: 'yahooApiRequest.php',
+                url: endpoint,
                 type: 'POST',
-                data: {
-                    token: access_token,
-                    year: year,
-                    section: section,
-                    weeks: weeks
-                },
+                data: requestData,
                 success: function(response) {
                     $('#output').append(response);
                     pendingRequests--;
@@ -465,7 +487,7 @@ function makeRequest(year, weeks, managers) {
     });
 }
 
-function makeRosterRequest(year, weeks, managers, managerIndex, callback)
+function makeRosterRequest(year, weeks, managers, mode, managerIndex, callback)
 {
     var managersToProcess = [];
 
@@ -485,27 +507,31 @@ function makeRosterRequest(year, weeks, managers, managerIndex, callback)
     }
 
     var currentManager = managersToProcess[managerIndex];
+    var endpoint = mode === 'scrape' ? 'yahooScrapeRequest.php' : 'yahooApiRequest.php';
+    var requestData = {
+        year: year,
+        section: 'rosters',
+        weeks: weeks,
+        manager: currentManager
+    };
+    if (mode !== 'scrape') {
+        requestData.token = access_token;
+    }
 
     $.ajax({
-        url: 'yahooApiRequest.php',
+        url: endpoint,
         type: 'POST',
-        data: {
-            token: access_token,
-            year: year,
-            section: 'rosters',
-            weeks: weeks,
-            manager: currentManager
-        },
+        data: requestData,
         success: function(response) {
             $('#output').append(response);
             setTimeout(function () {
-                makeRosterRequest(year, weeks, managers, managerIndex + 1, callback);
+                makeRosterRequest(year, weeks, managers, mode, managerIndex + 1, callback);
             }, 2000);
         },
         error: function() {
             $('#output').append('<div class="alert alert-danger">Error processing rosters for manager ' + currentManager + '. Continuing with next manager.</div>');
             setTimeout(function () {
-                makeRosterRequest(year, weeks, managers, managerIndex + 1, callback);
+                makeRosterRequest(year, weeks, managers, mode, managerIndex + 1, callback);
             }, 2000);
         }
     });

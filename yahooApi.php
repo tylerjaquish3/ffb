@@ -94,7 +94,19 @@ $request_token_url = get_request_token_url($consumer_key);
             </div>
             <?php endif; ?>
 
-            <div class="row">
+            <div class="row mb-1">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-body info-card">
+                            <h3>Fetch Mode</h3>
+                            <label><input type="radio" name="fetch_mode" value="api" checked> Yahoo API</label><br>
+                            <label><input type="radio" name="fetch_mode" value="scrape"> Web Scrape (bypass Yahoo login)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row api-mode-field">
                 <div class="col-sm-12 table-padding">
                     <div class="card">
                         <div class="card-header"></div>
@@ -114,8 +126,10 @@ $request_token_url = get_request_token_url($consumer_key);
                             <h4 class="card-title">Settings</h4>
                         </div>
                         <div class="card-body info-card">
-                            <h3>Code</h3>
-                            <input type="text" name="code">
+                            <div class="api-mode-field">
+                                <h3>Code</h3>
+                                <input type="text" name="code">
+                            </div>
 
                             <h3>Season</h3>
                             <input type="text" name="year" value="<?php echo date('Y'); ?>">

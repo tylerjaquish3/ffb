@@ -1,0 +1,14 @@
+{
+  "name": "ffb-yahoo-scraper",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local Playwright fallback for pulling Yahoo Fantasy Football data when the OAuth API path is unavailable.",
+  "scripts": {
+    "postinstall": "playwright install chromium",
+    "test": "node --test lib/*.test.js"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0",
+    "dotenv": "^16.4.5"
+  }
+}

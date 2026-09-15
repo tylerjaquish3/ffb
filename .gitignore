@@ -4,3 +4,6 @@ visit_log.txt
 .env.local
 sync-db.sh
 data/draftOrderBracket.json
+scraper/node_modules
+scraper/.auth
+scraper/inspection-output

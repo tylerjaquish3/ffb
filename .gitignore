@@ -1,5 +1,6 @@
 connections.php
 .DS_Store
-visit_log.txt.env.local
+visit_log.txt
+.env.local
 sync-db.sh
 data/draftOrderBracket.json

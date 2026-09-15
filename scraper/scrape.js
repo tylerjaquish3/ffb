@@ -500,8 +500,12 @@ const POINTS_TITLE = 'Fantasy Points';
 // "Eagles"), but the OAuth API — and therefore every existing `rosters` row
 // with position='DEF' — stores just the CITY name ("Philadelphia"), or for
 // the two-team LA/NY markets, the full disambiguated name ("Los Angeles
-// Rams", "New York Giants"). Confirmed against every existing DEF row in
-// `rosters` across all years in the DB. Without this translation, the same
+// Rams", "New York Giants") — though the API path itself is inconsistent
+// in the LA market (2025 has 4 rows stored under the bare, ambiguous
+// "Los Angeles" alongside the fuller "Los Angeles Rams"/"Los Angeles
+// Chargers" rows), so this mapping picks the better convention rather
+// than guaranteeing it matches every historical row. Without this
+// translation, the same
 // defense would get a SECOND, different `rosters` row every time the
 // scrape path ran (the row's uniqueness key includes `player`) instead of
 // updating the one the API path already wrote. Built from only the

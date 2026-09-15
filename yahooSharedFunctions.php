@@ -191,6 +191,30 @@ function getSeasonLeagueId(int $year): ?int
     return $seasons[$year] ?? null;
 }
 
+/**
+ * Map a Y-m-d date to a fantasy week number for the given season year (week
+ * 1 ends the first Monday after Labor Day). Moved here from
+ * yahooApiRequest.php's handle_trades() (which took $year from a global
+ * rather than a param) so the web-scrape fallback path
+ * (yahooScrapeRequest.php's handle_scraped_trades()) can reuse the exact
+ * same week math instead of duplicating it — both paths need to turn a
+ * trade's real-world date into the same week numbering the rest of this
+ * app uses. Behavior is unchanged from the original.
+ */
+function lookup_week(string $date, int $year)
+{
+    // week 1 ends the first monday after labor day
+    $week1 = date('Y-m-d', strtotime('second monday of september '.$year));
+    // add one week until getting to $date
+    $week = 1;
+    while ($week1 < $date) {
+        $week1 = date('Y-m-d', strtotime('+1 week '.$week1));
+        $week++;
+    }
+
+    return $week;
+}
+
 function query($sql)
 {
     global $conn, $DB_TYPE;

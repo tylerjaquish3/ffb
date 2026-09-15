@@ -536,7 +536,7 @@ function handle_trades(object $data)
             $timestamp = $trans->transaction[0]->timestamp;
             // make date from timestamp
             $date = date('Y-m-d', $timestamp);
-            $currentWeek = lookup_week($date);
+            $currentWeek = lookup_week($date, $year);
             
             foreach ($trans->transaction[1]->players as $player) {
                 // do_dump($player);die;
@@ -576,21 +576,10 @@ function find_manager_id(string $teamKey)
     return $id;
 }
 
-function lookup_week(string $date)
-{
-    global $year;
-
-    // week 1 ends the first monday after labor day
-    $week1 = date('Y-m-d', strtotime('second monday of september '.$year));
-    // add one week until getting to $date
-    $week = 1;
-    while ($week1 < $date) {
-        $week1 = date('Y-m-d', strtotime('+1 week '.$week1));
-        $week++;
-    }
-
-    return $week;
-}
+// lookup_week() moved to yahooSharedFunctions.php so the
+// web-scrape fallback path (yahooScrapeRequest.php) can reuse it too,
+// without duplicating it — this file still gets it via the
+// `include 'yahooSharedFunctions.php'` at the top.
 
 // updateStandingsForWeek() moved to yahooSharedFunctions.php so the
 // web-scrape fallback path (yahooScrapeRequest.php) can reuse it too,

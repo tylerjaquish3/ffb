@@ -170,6 +170,78 @@ function handle_scraped_matchups(array $matchups, int $year): int
     return $written;
 }
 
+/**
+ * Write scraped trades data to the database. Mirrors yahooApiRequest.php's
+ * handle_trades(), but works from scrape.js's already-normalized flat
+ * array (one object per player moved: { player, fromTeamYahooId,
+ * toTeamYahooId, date, tradeIdentifier }) rather than the API's nested
+ * transaction/player JSON. Writes via firstOrCreate() — NOT
+ * updateOrCreate() — exactly like handle_trades(): this table is
+ * insert-if-not-exists (keyed on player+year+manager_from_id), never an
+ * upsert, so a trade already recorded (e.g. previously fetched via the
+ * API) is left untouched rather than overwritten.
+ *
+ * The scraped `date` (a plain Y-m-d string, since Yahoo's rendered
+ * timestamp has no explicit year) is turned into a week number via the
+ * same lookup_week() the API path uses, now shared via
+ * yahooSharedFunctions.php rather than reimplemented here.
+ *
+ * IMPORTANT CAVEAT: unlike handle_scraped_team_names()/
+ * handle_scraped_matchups(), the extractor this reads from
+ * (extractTrades() in scrape.js) has never been exercised against a real
+ * trade row — investigated 2026-09-15: the current 2026 league has had
+ * zero trades all season (confirmed both by the live Yahoo page and by
+ * this exact `trades` table already having zero 2026 rows), and this
+ * scraping account isn't in any other reachable league/season with a
+ * trade to check against either. Its non-empty-row parsing is therefore a
+ * best-effort structural inference, not a verified pattern (see
+ * scrape.js's extractTrades() for the full reasoning). The caller below
+ * surfaces an extra caution banner whenever this actually writes 1+ rows,
+ * so a real trade is never silently trusted the first time this runs
+ * against one.
+ */
+function handle_scraped_trades(array $trades, int $year): int
+{
+    $written = 0;
+    foreach ($trades as $trade) {
+        $player = $trade['player'] ?? null;
+        $fromTeamYahooId = isset($trade['fromTeamYahooId']) ? (int)$trade['fromTeamYahooId'] : 0;
+        $toTeamYahooId = isset($trade['toTeamYahooId']) ? (int)$trade['toTeamYahooId'] : 0;
+        $date = $trade['date'] ?? null;
+        $tradeIdentifier = isset($trade['tradeIdentifier']) ? (int)$trade['tradeIdentifier'] : 0;
+
+        if (!$player || !$fromTeamYahooId || !$toTeamYahooId || !$date || !$tradeIdentifier) {
+            echo 'Skipping malformed scraped trade entry.<br>';
+            continue;
+        }
+
+        $managerFromId = lookupManager($fromTeamYahooId, $year);
+        $managerToId = lookupManager($toTeamYahooId, $year);
+
+        if (!$managerFromId || !$managerToId) {
+            echo 'No manager found for Yahoo team ID ' . $fromTeamYahooId . ' or ' . $toTeamYahooId . ', skipping trade for ' . htmlspecialchars($player) . '.<br>';
+            continue;
+        }
+
+        $week = lookup_week($date, $year);
+
+        firstOrCreate('trades', [
+            'player' => $player,
+            'year' => $year,
+            'manager_from_id' => $managerFromId,
+        ], [
+            'week' => $week,
+            'manager_to_id' => $managerToId,
+            'trade_identifier' => $tradeIdentifier,
+        ]);
+
+        echo 'Week ' . $week . ': manager ' . $managerFromId . ' traded ' . htmlspecialchars($player) . ' to manager ' . $managerToId . '.<br>';
+        $written++;
+    }
+
+    return $written;
+}
+
 session_start();
 
 if (isset($APP_ENV) && $APP_ENV === 'production' && empty($_SESSION['admin_auth'])) {
@@ -236,6 +308,13 @@ if ($section === 'team_names') {
 } elseif ($section === 'matchups') {
     $writtenCount = handle_scraped_matchups($data, $year);
     echo '<div class="alert alert-success">Scraped and saved ' . htmlspecialchars($section) . ' (' . $writtenCount . ' of ' . $itemCount . ' matchup(s) written).</div>';
+} elseif ($section === 'trades') {
+    $writtenCount = handle_scraped_trades($data, $year);
+    if ($writtenCount > 0) {
+        echo '<div class="alert alert-warning">Scraped and saved ' . htmlspecialchars($section) . ' (' . $writtenCount . ' of ' . $itemCount . ' trade(s) written). <strong>Caution:</strong> this extractor has never been verified against a real trade — manually check these rows against the Yahoo transactions page before trusting them.</div>';
+    } else {
+        echo '<div class="alert alert-success">Scraped ' . htmlspecialchars($section) . ' (0 of ' . $itemCount . ' trade(s) written — no trades found).</div>';
+    }
 } else {
     echo '<div class="alert alert-success">Scraped ' . htmlspecialchars($section) . ' successfully (' . $itemCount . ' item(s)). Writing this section to the database is added in a follow-up task.</div>';
 }

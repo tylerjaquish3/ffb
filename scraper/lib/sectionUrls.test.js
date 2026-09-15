@@ -17,6 +17,11 @@ test('builds the default rosters URL from league-id, manager, and week', () => {
     assert.equal(url, 'https://football.fantasysports.yahoo.com/f1/18261/4?week=3');
 });
 
+test('builds the default trades URL from league-id', () => {
+    const url = resolveUrl({ section: 'trades', 'league-id': '18261' });
+    assert.equal(url, 'https://football.fantasysports.yahoo.com/f1/18261/transactions?transactionsfilter=trade');
+});
+
 test('an explicit --url always wins over the default', () => {
     const url = resolveUrl({ section: 'rosters', url: 'https://example.com/override' });
     assert.equal(url, 'https://example.com/override');

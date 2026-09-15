@@ -210,9 +210,238 @@ async function extractMatchupsForWeek(args, context, week) {
     }
 }
 
+// The originally-assumed `?scope=all&type=trade` query params don't 404
+// (unlike matchups' original guess) but they're simply not real params
+// Yahoo's transactions page understands — confirmed live: that URL loads
+// fine, yet the page's own nav shows "All Transactions" as Selected, not
+// "Trades", and all 16 rows returned were plain adds/drops. The real
+// filter param, read directly off the page's own "Trades" tab link
+// (`<a class="Navtarget" href="?transactionsfilter=trade">Trades</a>`),
+// is `transactionsfilter=trade` — see the corrected default URL in
+// lib/sectionUrls.js.
+//
+// CONFIRMED (against a real inspect.js capture of the corrected URL,
+// league 18261, Sep 2026): with that filter applied, the nav's "Trades"
+// tab correctly shows "Selected" and the table body renders Yahoo's own
+// empty-state markup (`.F-faded` div containing "No recent transactions")
+// — this league genuinely has zero trades so far in 2026 (matches the
+// `trades` DB table, which also has zero 2026 rows). No JSON network
+// response on this page is Yahoo's own fantasy data either (same finding
+// as team_names: all 19-20 captured responses are ad-tech/analytics), so
+// this is DOM-scraped like team_names, not JSON-intercepted.
+//
+// UNVERIFIED CAVEAT: this account is only in the one league (no other
+// Yahoo fantasy football league reachable from its nav to peek at for a
+// real trade example), and past seasons of this same league aren't
+// reachable with the saved session (see the design doc's "Open risks").
+// So there is no real trade row anywhere reachable to build or verify the
+// non-empty-table parsing logic against — everything below the empty-
+// state check is a best-effort structural inference from the CONFIRMED
+// add/drop row layout in this exact table (same one-icon-per-action
+// pattern, same per-player sub-label under each player's name, same
+// right-hand Tst-team-name attribution + timestamp), not a verified
+// pattern. Per-row/per-player parsing failures are skipped and logged
+// rather than guessed. The returned shape is the same flat array every
+// other extractor returns (so the PHP dispatch layer doesn't need a
+// per-section special case) — instead, handle_scraped_trades() in
+// yahooScrapeRequest.php adds an extra caution banner whenever this
+// section actually writes 1+ rows, since a non-empty result exercises
+// entirely unverified parsing. The first time this ever returns real
+// rows, manually diff them against the Yahoo page by eye before trusting
+// a DB write.
+//
+// Team identity for both sides of a trade is resolved via the page's own
+// team-picker flyout (`#playermatchupsteam select option`), NOT via
+// scraping a link out of the trade row itself — confirmed present in
+// every capture of this page (trades or not), it maps each team's real
+// Yahoo team id straight from `value="...&mid=<id>"` to that team's
+// display name (e.g. `<option value="?transactionsfilter=trade&mid=3">
+// Love in the Time of Jeanty</option>`). This sidesteps needing to know
+// whether an unseen trade row's "traded to <team>" text is ever a real
+// link — a plain-text team name is enough to resolve a Yahoo team id via
+// this map.
+//
+// `tradeIdentifier` cannot be Yahoo's real internal transaction id: unlike
+// the OAuth API's JSON (`transaction_id`), nothing on the rendered page
+// exposes it (confirmed: no `data-*`/id attribute anywhere on a
+// transaction `<tr>` carries one). Since `handle_scraped_trades()`'s
+// `firstOrCreate()` key is `(player, year, manager_from_id)` — NOT
+// `trade_identifier` — the real Yahoo id was never load-bearing for
+// write correctness; it's informational metadata used to group both
+// sides of the same swap together. A synthetic id (`<leagueId><row
+// index>`) is used instead, unique per row within one extraction run,
+// which is all that's needed for that grouping.
+async function extractTrades(args, context) {
+    if (!args['league-id']) {
+        throw new Error('Missing required --league-id=<id> argument.');
+    }
+    if (!args.year) {
+        throw new Error('Missing required --year=<season year> argument.');
+    }
+
+    const url = resolveUrl(args);
+    const page = await context.newPage();
+    try {
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+        if (page.url().includes('login.yahoo.com')) {
+            throw new Error(
+                'Redirected to Yahoo login while loading the trades transactions page — ' +
+                'the saved session has expired. Re-run to trigger a fresh login.'
+            );
+        }
+
+        await page.waitForSelector('#transactions table.Tst-transaction-table', { timeout: 15000 });
+
+        const teamIdByName = await page.$$eval('#playermatchupsteam option', (opts) => {
+            const map = {};
+            for (const opt of opts) {
+                const match = (opt.getAttribute('value') || '').match(/mid=(\d+)/);
+                if (match) {
+                    map[opt.textContent.trim()] = Number(match[1]);
+                }
+            }
+            return map;
+        });
+        if (Object.keys(teamIdByName).length === 0) {
+            throw new Error(
+                'Could not find the team-picker flyout (#playermatchupsteam) used to map team ' +
+                'names to Yahoo team ids — the transactions page structure may have changed.'
+            );
+        }
+
+        const rawRows = await page.$$eval('#transactions table.Tst-transaction-table tbody > tr', (trs) =>
+            trs.map((tr) => {
+                if (tr.querySelector('.F-faded')) {
+                    return { empty: true };
+                }
+
+                const iconTitles = Array.from(tr.querySelectorAll('td.Grid-u-1-12 span.F-icon'))
+                    .map((el) => el.getAttribute('title') || '');
+
+                const playerBlocks = Array.from(tr.querySelectorAll('td.Fill-x > div')).map((div) => {
+                    const nameLink = Array.from(div.querySelectorAll('a')).find(
+                        (a) => !a.classList.contains('playernote')
+                    );
+                    const subLabel = div.querySelector('h6.F-shade');
+                    return {
+                        player: nameLink ? nameLink.textContent.trim() : null,
+                        subLabel: subLabel ? subLabel.textContent.trim() : null,
+                    };
+                });
+
+                const teamLink = tr.querySelector('a.Tst-team-name');
+                const timestampEl = tr.querySelector('.F-timestamp');
+
+                return {
+                    empty: false,
+                    iconTitles,
+                    playerBlocks,
+                    rowTeamName: teamLink ? teamLink.textContent.trim() : null,
+                    timestampText: timestampEl ? timestampEl.textContent.trim() : null,
+                };
+            })
+        );
+
+        if (rawRows.length === 0 || rawRows.every((row) => row.empty)) {
+            return [];
+        }
+
+        const trades = [];
+        let rowIndex = 0;
+        for (const row of rawRows) {
+            if (row.empty) {
+                continue;
+            }
+            rowIndex++;
+
+            const isTrade = row.iconTitles.some((title) => /trade/i.test(title));
+            if (!isTrade) {
+                console.error(`Skipping non-trade row despite the trades filter (icon titles: ${JSON.stringify(row.iconTitles)}).`);
+                continue;
+            }
+            if (!row.rowTeamName || !row.timestampText) {
+                console.error(`Skipping trade row missing an attributed team or timestamp: ${JSON.stringify(row)}`);
+                continue;
+            }
+
+            const fromTeamId = teamIdByName[row.rowTeamName];
+            if (!fromTeamId) {
+                console.error(`Skipping trade row — could not resolve team "${row.rowTeamName}" to a Yahoo team id.`);
+                continue;
+            }
+
+            const date = parseTradeDate(row.timestampText, Number(args.year));
+            if (!date) {
+                console.error(`Skipping trade row — could not parse timestamp "${row.timestampText}".`);
+                continue;
+            }
+
+            const tradeIdentifier = Number(`${args['league-id']}${rowIndex}`);
+
+            for (const block of row.playerBlocks) {
+                if (!block.player || !block.subLabel) {
+                    console.error(`Skipping unparseable trade player block: ${JSON.stringify(block)}`);
+                    continue;
+                }
+                const destMatch = block.subLabel.match(/traded\s+to\s+(.+)/i);
+                if (!destMatch) {
+                    console.error(`Skipping trade player block with unrecognized sub-label "${block.subLabel}" for player ${block.player} — expected wording like "Traded to <team>".`);
+                    continue;
+                }
+                const toTeamName = destMatch[1].trim();
+                const toTeamId = teamIdByName[toTeamName];
+                if (!toTeamId) {
+                    console.error(`Skipping trade player block for ${block.player} — could not resolve destination team "${toTeamName}" to a Yahoo team id.`);
+                    continue;
+                }
+
+                trades.push({
+                    player: block.player,
+                    fromTeamYahooId: fromTeamId,
+                    fromTeamName: row.rowTeamName,
+                    toTeamYahooId: toTeamId,
+                    toTeamName,
+                    date,
+                    tradeIdentifier,
+                });
+            }
+        }
+
+        return trades;
+    } finally {
+        await page.close();
+    }
+}
+
+// Yahoo's transaction timestamp text has no year ("Sep 13, 12:39 pm") —
+// the season year comes from --year instead, matching how the OAuth API
+// path derives the trade date from a Unix timestamp that's implicitly
+// within the season year. Only the date (not the time) is used downstream
+// (handle_scraped_trades() -> lookup_week()), mirroring handle_trades()'s
+// own `date('Y-m-d', $timestamp)` truncation.
+const TRADE_MONTHS = {
+    jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+    jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12',
+};
+
+function parseTradeDate(timestampText, year) {
+    const match = /^([A-Za-z]{3})[a-z]*\s+(\d{1,2})/.exec(timestampText.trim());
+    if (!match) {
+        return null;
+    }
+    const month = TRADE_MONTHS[match[1].toLowerCase()];
+    if (!month) {
+        return null;
+    }
+    const day = String(match[2]).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 const extractors = {
     team_names: extractTeamNames,
     matchups: extractMatchups,
+    trades: extractTrades,
 };
 
 async function main() {

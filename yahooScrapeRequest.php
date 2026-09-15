@@ -17,7 +17,8 @@ if ($manager !== '') {
     $args[] = '--manager=' . $manager;
 }
 
-$cmd = 'node ' . escapeshellarg($scraperDir . '/scrape.js') . ' ' . implode(' ', array_map('escapeshellarg', $args));
+$nodeBin = getenv('HOME') . '/.nvm/versions/node/v22.23.0/bin/node';
+$cmd = escapeshellarg($nodeBin) . ' ' . escapeshellarg($scraperDir . '/scrape.js') . ' ' . implode(' ', array_map('escapeshellarg', $args));
 
 $descriptorSpec = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
 $process = proc_open($cmd, $descriptorSpec, $pipes, $scraperDir);

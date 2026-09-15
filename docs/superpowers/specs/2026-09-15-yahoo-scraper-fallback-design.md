@@ -162,10 +162,10 @@ years, so it was left for the user to decide on rather than done here.
 unrelated pre-existing gap — this table is also read by several
 non-scraper features, e.g. `constitution.php`), which would make
 `calculateOptimalForManager()` unconditionally return 0.0 regardless of
-input, for either the scrape or the API path. Seeded by copying 2025's 17
+input, for either the scrape or the API path. Seeded by copying 2025's 19
 rows forward to 2026 — justified not just by "assume unchanged from last
 year" but by the real scraped roster structure itself confirming the same
-9 starting slots (QB, 3×WR, 2×RB, TE, FLEX, SUPERFLEX, K, DEF) and 6 bench
+11 starting slots (QB, 3×WR, 2×RB, TE, FLEX, SUPERFLEX, K, DEF) and 6 bench
 slots; the IR slot count (copied as 2) is the one part not independently
 confirmed (a manager was observed using 2, which is consistent, but a
 single observation can't rule out the league having configured only 1).

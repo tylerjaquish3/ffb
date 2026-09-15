@@ -325,11 +325,35 @@ function handle_scraped_rosters(array $players, int $year): int
         echo htmlspecialchars($manager) . ' - ' . htmlspecialchars($playerName) . ' (' . htmlspecialchars($team) . ' - ' . htmlspecialchars($position) . ' - ' . htmlspecialchars($rosterSpot) . ') Points: ' . $points . '<br>';
         $written++;
 
+        // Defensive cleanup discovered during real verification: `rosters`
+        // uses a plain `INTEGER PRIMARY KEY` (no AUTOINCREMENT), so a
+        // brand-new roster row's id is whatever id is next free — and this
+        // DB already has ~113 pre-existing `stats` rows across all years
+        // whose `roster_id` points at a `rosters` row that no longer
+        // exists (confirmed: same orphaned rows exist in the untouched
+        // production DB, unrelated to this scraper — a pre-existing
+        // app-level data-integrity gap, present in handle_team_rosters()'s
+        // identical code path too). A brand-new roster row can land on one
+        // of those stale ids purely by coincidence — confirmed happening
+        // for real 2026 week 1 data during this task's own verification,
+        // and NOT harmless for non-IR players either: updateOrCreate()
+        // only SETs columns present in $cleanStats, so any category absent
+        // from THIS player's real stats (e.g. a kicker has no passing
+        // columns at all) would otherwise keep the STALE orphan's value
+        // for that column instead of being cleared. Unconditionally
+        // deleting whatever sits under this roster_id BEFORE writing (or
+        // not writing, for IR) guarantees no stale column ever survives,
+        // for every roster_spot — not just IR.
+        query("DELETE FROM stats WHERE roster_id = " . (int)$rosterId);
+
         if ($rosterSpot !== 'IR' && !empty($stats)) {
             // Convert any nulls to 0 (same as handle_team_rosters()) —
             // categories genuinely not applicable to this player are
             // simply absent from $stats entirely, not included as null,
-            // so they never reach this array and the DB column stays NULL.
+            // so they never reach this array and the DB column stays NULL
+            // after the fresh insert below (the delete above guarantees
+            // there's no pre-existing row for updateOrCreate() to find, so
+            // this is always a clean INSERT, never a partial UPDATE).
             $cleanStats = array_map(function ($value) {
                 return $value === null ? 0 : $value;
             }, $stats);
@@ -337,23 +361,6 @@ function handle_scraped_rosters(array $players, int $year): int
             updateOrCreate('stats', [
                 'roster_id' => $rosterId,
             ], $cleanStats);
-        } elseif ($rosterSpot === 'IR') {
-            // Defensive cleanup discovered during real verification: `rosters`
-            // uses a plain `INTEGER PRIMARY KEY` (no AUTOINCREMENT), so a
-            // brand-new roster row's id is whatever id is next free — and
-            // this DB already has ~113 pre-existing `stats` rows across all
-            // years whose `roster_id` points at a `rosters` row that no
-            // longer exists (confirmed: same orphaned rows exist in the
-            // untouched production DB, unrelated to this scraper — a
-            // pre-existing app-level data-integrity gap, present in
-            // handle_team_rosters()'s identical code path too). A brand-new
-            // roster row can land on one of those stale ids purely by
-            // coincidence (confirmed happening for a real 2026 week 1 IR
-            // player during this task's own verification). Since IR players
-            // are never supposed to have a `stats` row at all, explicitly
-            // clear out anything sitting under this roster_id rather than
-            // silently leaving a stale, unrelated stat line attached to it.
-            query("DELETE FROM stats WHERE roster_id = " . (int)$rosterId);
         }
 
         $weeksByManager[$manager][$week] = true;

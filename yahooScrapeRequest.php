@@ -17,7 +17,7 @@ if ($manager !== '') {
     $args[] = '--manager=' . $manager;
 }
 
-$nodeBin = getenv('HOME') . '/.nvm/versions/node/v22.23.0/bin/node';
+$nodeBin = '/Users/tyler.jaquish/.nvm/versions/node/v22.23.0/bin/node';
 $cmd = escapeshellarg($nodeBin) . ' ' . escapeshellarg($scraperDir . '/scrape.js') . ' ' . implode(' ', array_map('escapeshellarg', $args));
 
 $descriptorSpec = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];

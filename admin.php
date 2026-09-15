@@ -309,7 +309,7 @@ $( document ).ready( () => {
         $.ajax({
             url: 'generateWeeklyPreview.php',
             type: 'POST',
-            data: { notes: notes },
+            data: { notes: notes, week: btn.data('week') },
             success: function(response) {
                 btn.text(originalText).prop('disabled', false);
                 if (response.error) {
@@ -358,7 +358,7 @@ $( document ).ready( () => {
         $.ajax({
             url: 'generateWeeklyRecap.php',
             type: 'POST',
-            data: { notes: notes },
+            data: { notes: notes, week: btn.data('week') },
             success: function(response) {
                 btn.text(originalText).prop('disabled', false);
                 if (response.error) {

@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $notes = trim($_POST['notes'] ?? '');
+$week  = isset($_POST['week']) ? (int)$_POST['week'] : null;
 
 if (empty($notes)) {
     echo json_encode(['error' => 'No notes provided.']);
@@ -17,8 +18,14 @@ if (empty($notes)) {
 }
 
 $notesPlain = strip_tags($notes);
+$weekLabel  = $week ? "Week $week" : "this week";
 
-$prompt = "write a funny fantasy football recap for the week that roasts the managers and uses the following data: " . $notesPlain;
+$prompt = "You are a veteran sports newspaper columnist covering the Suntown Fantasy Football League, "
+    . "a 10-manager league between longtime friends. Write the $weekLabel recap. "
+    . "Style: sharp, witty newspaper sports-column prose — think a beat writer with a mean streak, not a group chat text. "
+    . "Use clever turns of phrase and pointed jabs/roasts at managers based on how they performed. "
+    . "No emojis, no exclamation-point-heavy hype, and nothing that reads like a high schooler's writing. "
+    . "Base it on the following data: " . $notesPlain;
 
 $result = callGeminiApi($prompt, $GEMINI_API_KEY);
 

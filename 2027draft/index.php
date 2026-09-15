@@ -99,7 +99,8 @@ $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
                                                     <div class="text-muted small">
                                                         <?php echo htmlspecialchars(implode(' → ', array_map(function ($a, $i) use ($row) {
                                                             $endWeek = ($i + 1 < count($row['history'])) ? $row['history'][$i + 1]['effective_week'] - 1 : DRAFT_ORDER_GAME_WEEKS;
-                                                            return $a['player'] . ' (wk ' . $a['effective_week'] . '–' . $endWeek . ')';
+                                                            $label = $a['player'] . ' (wk ' . $a['effective_week'] . '–' . $endWeek . ')';
+                                                            return $a['forced'] ? $label . ' [injury]' : $label;
                                                         }, $row['history'], array_keys($row['history'])))); ?>
                                                     </div>
                                                 <?php endif; ?>

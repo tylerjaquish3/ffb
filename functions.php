@@ -1953,12 +1953,13 @@ function getDraftedPoints($dir, $round)
             OR d.player = pa.alias_1 
             OR d.player = pa.alias_2 
             OR d.player = pa.alias_3
-        WHERE r.year = $selectedSeason 
-            AND r.roster_spot NOT IN ('BN', 'IR') 
+        WHERE r.year = $selectedSeason
+            AND r.roster_spot NOT IN ('BN', 'IR')
             AND d.round $dir $round
-            AND (r.player = pa.player OR 
-                 r.player = pa.alias_1 OR 
-                 r.player = pa.alias_2 OR 
+            AND r.player <> d.player
+            AND (r.player = pa.player OR
+                 r.player = pa.alias_1 OR
+                 r.player = pa.alias_2 OR
                  r.player = pa.alias_3)
         GROUP BY r.manager
     ) combined

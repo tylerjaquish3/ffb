@@ -2941,8 +2941,8 @@ class UpdateFunFacts implements ShouldQueue
         $histFilter = '';
         if ($this->isHistoricalCalculation && $this->asOfYear !== null) {
             $histFilter = $this->asOfWeek !== null
-                ? " AND (year < {$this->asOfYear} OR (year = {$this->asOfYear} AND week <= {$this->asOfWeek}))"
-                : " AND year <= {$this->asOfYear}";
+                ? " AND (r.year < {$this->asOfYear} OR (r.year = {$this->asOfYear} AND r.week <= {$this->asOfWeek}))"
+                : " AND r.year <= {$this->asOfYear}";
         }
 
         // Single query for name→id map, reused for all three facts
@@ -2951,10 +2951,10 @@ class UpdateFunFacts implements ShouldQueue
         // --- Fact 144: All-time ---
         $rows = DB::connection('ffb')->select("
             WITH MaxPoints AS (
-                SELECT year, position, week, MAX(points) AS max_points
-                FROM rosters
-                WHERE $baseWhere $histFilter
-                GROUP BY year, position, week
+                SELECT r.year, r.position, r.week, MAX(r.points) AS max_points
+                FROM rosters r
+                WHERE r.$baseWhere $histFilter
+                GROUP BY r.year, r.position, r.week
             )
             SELECT r.manager, COUNT(*) AS count
             FROM rosters r
@@ -2971,16 +2971,16 @@ class UpdateFunFacts implements ShouldQueue
         $season = $this->isHistoricalCalculation
             ? ($this->asOfYear ?? $this->currentSeason)
             : (Roster::max('year') ?? $this->currentSeason);
-        $seasonFilter = "AND year = $season";
+        $seasonFilter = "AND r.year = $season";
         $weekCap = ($this->currentWeek !== null && $this->currentWeek < PHP_INT_MAX)
-            ? "AND week <= {$this->currentWeek}" : '';
+            ? "AND r.week <= {$this->currentWeek}" : '';
 
         $rows = DB::connection('ffb')->select("
             WITH MaxPoints AS (
-                SELECT position, week, MAX(points) AS max_points
-                FROM rosters
-                WHERE $baseWhere $seasonFilter $weekCap
-                GROUP BY position, week
+                SELECT r.position, r.week, MAX(r.points) AS max_points
+                FROM rosters r
+                WHERE r.$baseWhere $seasonFilter $weekCap
+                GROUP BY r.position, r.week
             )
             SELECT r.manager, COUNT(*) AS count
             FROM rosters r
@@ -2997,10 +2997,10 @@ class UpdateFunFacts implements ShouldQueue
         // BestSeasons picks each manager's peak season so we can surface the year.
         $rows = DB::connection('ffb')->select("
             WITH MaxPoints AS (
-                SELECT year, position, week, MAX(points) AS max_points
-                FROM rosters
-                WHERE $baseWhere $histFilter
-                GROUP BY year, position, week
+                SELECT r.year, r.position, r.week, MAX(r.points) AS max_points
+                FROM rosters r
+                WHERE r.$baseWhere $histFilter
+                GROUP BY r.year, r.position, r.week
             ),
             SeasonCounts AS (
                 SELECT r.year, r.manager, COUNT(*) AS season_count

@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $notes = trim($_POST['notes'] ?? '');
+$week  = isset($_POST['week']) ? (int)$_POST['week'] : null;
 
 if (empty($notes)) {
     echo json_encode(['error' => 'No notes provided.']);
@@ -18,8 +19,14 @@ if (empty($notes)) {
 
 // Strip HTML tags from CKEditor output to get plain text for the prompt
 $notesPlain = strip_tags($notes);
+$weekLabel  = $week ? "Week $week" : "this week's";
 
-$prompt = "write a funny weekly preview text for our fantasy football league that roasts the managers and includes the following notes: " . $notesPlain;
+$prompt = "You are a veteran sports newspaper columnist covering the Suntown Fantasy Football League, "
+    . "a 10-manager league between longtime friends. Write the $weekLabel preview. "
+    . "Style: sharp, witty newspaper sports-column prose — think a beat writer with a mean streak, not a group chat text. "
+    . "Use clever turns of phrase and pointed jabs/roasts at managers based on their upcoming matchups. "
+    . "No emojis, no exclamation-point-heavy hype, and nothing that reads like a high schooler's writing. "
+    . "Base it on the following notes: " . $notesPlain;
 
 $result = callGeminiApi($prompt, $GEMINI_API_KEY);
 

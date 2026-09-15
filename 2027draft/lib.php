@@ -57,7 +57,7 @@ function getIneligiblePlayers(SQLite3 $conn, $year) {
 // sorted so the last element of each manager's list is always their current pick.
 function getPickHistory(SQLite3 $conn, $year) {
     $stmt = $conn->prepare("
-        SELECT id, manager_id, player, effective_week
+        SELECT id, manager_id, player, effective_week, forced
         FROM draft_order_pick_history
         WHERE year = :year
         ORDER BY manager_id ASC, effective_week ASC, id ASC
@@ -70,6 +70,7 @@ function getPickHistory(SQLite3 $conn, $year) {
             'id' => (int)$row['id'],
             'player' => $row['player'],
             'effective_week' => (int)$row['effective_week'],
+            'forced' => (bool)$row['forced'],
         ];
     }
     return $history;
@@ -204,7 +205,12 @@ function getSummaryRows(SQLite3 $conn, $year) {
             'points' => null,
             'diff' => null,
             'history' => $assignments,
-            'moves' => $assignments ? count($assignments) - 1 : 0,
+            // Voluntary switches only — a transition flagged 'forced' (the manager's
+            // prior player was ineligible/injured at the time) doesn't count against
+            // the 3-move limit, per the game's rules.
+            'moves' => count(array_filter(array_slice($assignments, 1), function ($a) {
+                return !$a['forced'];
+            })),
         ];
         if ($assignments) {
             $points = getManagerSeasonPoints($conn, $year, $assignments);
@@ -222,9 +228,7 @@ function getSummaryRows(SQLite3 $conn, $year) {
         if ($b['diff'] === null) return -1;
         if ($a['diff'] !== $b['diff']) return $a['diff'] <=> $b['diff'];
 
-        $aChanges = count($a['history']);
-        $bChanges = count($b['history']);
-        if ($aChanges !== $bChanges) return $aChanges <=> $bChanges;
+        if ($a['moves'] !== $b['moves']) return $a['moves'] <=> $b['moves'];
 
         return $b['overall_pick'] <=> $a['overall_pick'];
     });

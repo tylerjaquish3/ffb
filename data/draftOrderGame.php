@@ -87,14 +87,20 @@ if ($action === 'assign_pick') {
         }
     }
 
+    // A switch away from a currently-ineligible (injured) player is mandatory, not a
+    // voluntary move — flagged permanently at insert time so it stays excluded from the
+    // move count even if the old player is later reactivated.
+    $forced = ($currentPickForManager !== null && isset($ineligible[$currentPickForManager])) ? 1 : 0;
+
     $stmt = $conn->prepare("
-        INSERT INTO draft_order_pick_history (year, manager_id, player, effective_week)
-        VALUES (:year, :manager_id, :player, :effective_week)
+        INSERT INTO draft_order_pick_history (year, manager_id, player, effective_week, forced)
+        VALUES (:year, :manager_id, :player, :effective_week, :forced)
     ");
     $stmt->bindValue(':year', $year, SQLITE3_INTEGER);
     $stmt->bindValue(':manager_id', $managerId, SQLITE3_INTEGER);
     $stmt->bindValue(':player', $player, SQLITE3_TEXT);
     $stmt->bindValue(':effective_week', $effectiveWeek, SQLITE3_INTEGER);
+    $stmt->bindValue(':forced', $forced, SQLITE3_INTEGER);
     $stmt->execute();
 
     echo json_encode(['success' => true, 'manager_id' => $managerId, 'player' => $player, 'effective_week' => $effectiveWeek]);

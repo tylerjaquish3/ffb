@@ -330,7 +330,7 @@ if ($contentRow) {
                         <div class="card" style="height: 100%;">
                             <div class="card-header" style="direction: ltr; display: flex; align-items: center; justify-content: space-between;">
                                 <h4 style="margin: 0;">Week <?php echo $editWeek - 1; ?> Recap</h4>
-                                <button type="button" id="generate-recap-btn" class="btn btn-primary btn-sm">
+                                <button type="button" id="generate-recap-btn" class="btn btn-primary btn-sm" data-week="<?php echo $editWeek - 1; ?>">
                                     Generate with AI
                                 </button>
                             </div>
@@ -365,7 +365,7 @@ if ($contentRow) {
                         <div class="card" style="height: 100%;">
                             <div class="card-header" style="direction: ltr; display: flex; align-items: center; justify-content: space-between;">
                                 <h4 style="margin: 0;">Week <?php echo $editWeek; ?> Preview</h4>
-                                <button type="button" id="generate-preview-btn" class="btn btn-primary btn-sm">
+                                <button type="button" id="generate-preview-btn" class="btn btn-primary btn-sm" data-week="<?php echo $editWeek; ?>">
                                     Generate with AI
                                 </button>
                             </div>

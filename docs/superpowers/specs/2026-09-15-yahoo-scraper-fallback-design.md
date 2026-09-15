@@ -128,8 +128,8 @@ non-zero exit code as failure.
 
 | Section | Existing API handler | DB writes | Scraped JSON → PHP handler |
 |---|---|---|---|
-| `yahoo_ids` | `handle_managers` | `season_managers.yahoo_id` | `handle_scraped_managers` |
-| `team_names` | `handle_teams` | `team_names` (name, moves, trades) | `handle_scraped_teams` |
+| `yahoo_ids` | `handle_managers` | `season_managers.yahoo_id` | **Not implemented — confirmed permanently unscrapeable.** Investigated 2026-09-15: the manager's Yahoo nickname (the only signal `handle_managers` can bootstrap a manager mapping from) renders as a literal `--hidden--` placeholder everywhere on the website — the standings page, and all 10 individual team pages, including the scraping account's own team. That last point rules out a per-account privacy setting: Yahoo's website no longer sends this value to the browser at all, for anyone. Stays API-only; see "Open risks" below for possible future workarounds. |
+| `team_names` | `handle_teams` | `team_names` (name, **moves only** — see note) | `handle_scraped_team_names` (done) — the standings page has no trades count anywhere (confirmed by full-page search of live-captured HTML); the write path omits `trades` from `updateOrCreate()` entirely so it never overwrites an existing value, rather than writing 0. |
 | `matchups` | `handle_team_matchups` | `regular_season_matchups` (scores, projected, winner/loser) + triggers `updateStandingsForWeek` | `handle_scraped_matchups` |
 | `rosters` | `handle_team_rosters` + `get_player_stats` | `rosters` (player/position/team/points) + `stats` (full per-category breakdown — pass_yds, pass_tds, ints, rush_yds, rush_tds, receptions, rec_yds, rec_tds, fumbles, pat_made, fg_yards, fg_made, def_int, def_fum, def_sacks) + optimal lineup back onto `regular_season_matchups` | `handle_scraped_rosters` |
 | `trades` | `handle_trades` | `trades` (player, from/to manager, week, trade id) | `handle_scraped_trades` |
@@ -238,3 +238,15 @@ scraper against new, unverified data.
 - `rosters`' per-stat-category requirement is the least certain to be
   scrapeable at the same fidelity as the API — confirmed or refuted only
   once `inspect.js` output for that section is reviewed.
+- `yahoo_ids` cannot be scraped at all (see "Data mapping" above) — the
+  manager-nickname field the whole section depends on is masked
+  everywhere on the website now. If this is ever needed without the API,
+  the two realistic paths are: (1) have the user manually click through
+  Yahoo's real invite/manage-members UI to check whether nicknames appear
+  there for the commissioner, then `inspect.js` that real navigation
+  flow (a guessed direct URL to it redirected to a login/crumb check,
+  inconclusive); or (2) skip scraping entirely and add a small one-time
+  manual-mapping step — the user (who knows all 10 people) confirms
+  which real manager a given `yahooTeamId`/team name belongs to, once
+  per season, writing straight to `season_managers.yahoo_id` the same
+  way `handle_managers`/`handle_scraped_team_names` already do.

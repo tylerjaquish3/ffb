@@ -68,9 +68,7 @@ function handle_scraped_team_names(array $teams, int $year): int
  * matchup's original projected points ("Orig Proj") even after the week is
  * final — confirmed against a real logged-in capture of both the
  * all-matchups module and an individual matchup/recap page agreeing on the
- * same figures. See matchups-extractor-report.md for the real verification
- * run before this was trusted against the standings-rewriting side effect
- * below.
+ * same figures.
  *
  * IMPORTANT: exactly like handle_team_matchups(), calls
  * updateStandingsForWeek() for every week that had at least one genuinely

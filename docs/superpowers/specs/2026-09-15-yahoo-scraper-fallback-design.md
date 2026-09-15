@@ -131,14 +131,44 @@ non-zero exit code as failure.
 | `yahoo_ids` | `handle_managers` | `season_managers.yahoo_id` | **Not implemented — confirmed permanently unscrapeable.** Investigated 2026-09-15: the manager's Yahoo nickname (the only signal `handle_managers` can bootstrap a manager mapping from) renders as a literal `--hidden--` placeholder everywhere on the website — the standings page, and all 10 individual team pages, including the scraping account's own team. That last point rules out a per-account privacy setting: Yahoo's website no longer sends this value to the browser at all, for anyone. Stays API-only; see "Open risks" below for possible future workarounds. |
 | `team_names` | `handle_teams` | `team_names` (name, **moves only** — see note) | `handle_scraped_team_names` (done) — the standings page has no trades count anywhere (confirmed by full-page search of live-captured HTML); the write path omits `trades` from `updateOrCreate()` entirely so it never overwrites an existing value, rather than writing 0. |
 | `matchups` | `handle_team_matchups` | `regular_season_matchups` (scores, projected, winner/loser) + triggers `updateStandingsForWeek` | `handle_scraped_matchups` (done) — the assumed `/scoreboard?week=` URL 404s for real; the actual page is the league home page's "Matchups" module (`?matchup_week=<N>&module=matchups&lhst=matchups`), which returns all 5 matchups for a week in one load. Projected points ARE available even for a completed week (confirmed against the individual matchup page's "Orig Proj" label) — contrary to this doc's earlier speculation, so `projected` is never nulled out here the way `team_names`' `trades` is. |
-| `rosters` | `handle_team_rosters` + `get_player_stats` | `rosters` (player/position/team/points) + `stats` (full per-category breakdown — pass_yds, pass_tds, ints, rush_yds, rush_tds, receptions, rec_yds, rec_tds, fumbles, pat_made, fg_yards, fg_made, def_int, def_fum, def_sacks) + optimal lineup back onto `regular_season_matchups` | `handle_scraped_rosters` |
+| `rosters` | `handle_team_rosters` + `get_player_stats` | `rosters` (player/position/team/points) + `stats` (full per-category breakdown — pass_yds, pass_tds, ints, rush_yds, rush_tds, receptions, rec_yds, rec_tds, fumbles, pat_made, fg_yards, fg_made, def_int, def_fum, def_sacks) + optimal lineup back onto `regular_season_matchups` | `handle_scraped_rosters` (done) — the originally-assumed `/f1/<leagueId>/<manager>?week=<week>` URL turned out to be correct (unlike matchups/trades' first guesses): it's the manager's own team page, rendered as a full box score. The full per-stat-category breakdown — the single biggest open risk in this whole project — IS present in the rendered DOM: up to three per-position-group tables (offense/kickers/defense) inside `#team-roster`, each row (starters, bench, AND IR all mixed together, distinguished by the "Pos" column's `data-pos`) carrying every `<th title="...">`-labeled stat column needed. Confirmed 2026-09-15 against a real capture (league 18261, all 10 managers, week 1) and sanity-checked by reverse-engineering the league's 0.5-PPR scoring formula from 3 players' numbers and getting an exact match to Yahoo's own displayed "Fan Pts" total. Two real parsing gaps found and fixed: (1) a player with an injury designation (Doubtful/IR-Return/etc.) gets an extra `.Fz-xxs`-classed span for the injury badge itself, which a naive selector picks up instead of the real "TEAM - POS" text — fixed by scoping to `.D-b .Fz-xxs`; (2) Yahoo renders a team defense under its nickname ("Eagles"), not the city name ("Philadelphia") the OAuth API and every existing `rosters` DEF row use — translated via a hardcoded current-season abbreviation→city-name map so the scrape path writes to the same row the API path would. |
 | `trades` | `handle_trades` | `trades` (player, from/to manager, week, trade id) | `handle_scraped_trades` (done) — the assumed `?scope=all&type=trade` URL loads fine (no 404) but those params aren't real; Yahoo silently ignores them and renders the default "All Transactions" tab instead. The real filter param, read off the page's own "Trades" tab link, is `transactionsfilter=trade`. With that applied, the current 2026 league (18261) genuinely has zero trades so far this season — confirmed both by the live page's own "No recent transactions" empty state and by the `trades` DB table already having zero 2026 rows — so `[]` is a correct, verified result, not a gap. **Caveat**: no real trade row exists anywhere reachable (this account is in only the one league, and past seasons of it aren't reachable with the saved session — see "Open risks"), so the non-empty-row parsing logic (which player/team/date a real trade row would contain) is a best-effort structural inference from the confirmed add/drop row layout on the same page, not a verified pattern. Team identity is resolved via the page's own team-picker flyout (name → Yahoo team id map, confirmed present regardless of trade count) rather than assuming a trade row itself links to both teams. `trade_identifier` is necessarily synthetic (`<leagueId><row index>`) since nothing on the rendered page exposes Yahoo's real transaction id — harmless for `firstOrCreate()` correctness since that id isn't part of its uniqueness key. The admin UI shows an extra caution banner the first time this section ever writes 1+ rows, given the unverified parsing. |
 
-`rosters` is the highest-risk section: it requires the same per-stat-category
-breakdown as the API provides, not just a fantasy-points total, so
-whichever Yahoo page/endpoint is used for it must expose that same
-granularity (Yahoo's own box-score view renders this same table, so it's
-expected to be available — to be confirmed via `inspect.js`).
+All 5 sections are now implemented (or, for `yahoo_ids`, confirmed
+unscrapeable and documented above). `rosters` was the highest-risk section —
+it required the same per-stat-category breakdown as the API provides, not
+just a fantasy-points total — and it resolved favorably: Yahoo's own
+box-score view renders that same granularity directly in the DOM.
+
+**Pre-existing data-integrity gap found while verifying `rosters` (not
+caused by this work, not fixed beyond the one table it touches):** the
+`stats` table already had ~113 rows (across all years, in the untouched
+DB) whose `roster_id` points at a `rosters` row that no longer exists —
+`rosters.id` is a plain `INTEGER PRIMARY KEY` (no `AUTOINCREMENT`), so a
+brand-new roster row's id is just the next free id, and it can land on one
+of those stale orphaned ids purely by coincidence. This bit a real 2026
+week 1 IR player during verification (a long-dead row's leftover defensive
+stats showed up attached to a new WR on IR). `handle_scraped_rosters()`
+defensively deletes anything already sitting under a roster_id it's about
+to skip (IR players never get a `stats` row), so its own writes are
+internally clean — but `handle_team_rosters()` in the OAuth API path has
+the identical exposure and was NOT touched (out of scope here). A full
+`DELETE FROM stats WHERE roster_id NOT IN (SELECT id FROM rosters)` cleanup
+would remove the risk permanently but touches historical data across all
+years, so it was left for the user to decide on rather than done here.
+
+**Also required to make `rosters`' optimal-lineup step meaningful:** the
+`season_positions` table had zero rows for year 2026 (a separate,
+unrelated pre-existing gap — this table is also read by several
+non-scraper features, e.g. `constitution.php`), which would make
+`calculateOptimalForManager()` unconditionally return 0.0 regardless of
+input, for either the scrape or the API path. Seeded by copying 2025's 17
+rows forward to 2026 — justified not just by "assume unchanged from last
+year" but by the real scraped roster structure itself confirming the same
+9 starting slots (QB, 3×WR, 2×RB, TE, FLEX, SUPERFLEX, K, DEF) and 6 bench
+slots; the IR slot count (copied as 2) is the one part not independently
+confirmed (a manager was observed using 2, which is consistent, but a
+single observation can't rule out the league having configured only 1).
 
 New file `yahooScrapeRequest.php` (sibling to `yahooApiRequest.php`)
 holds the `handle_scraped_*` functions. These are simpler than their API
@@ -246,9 +276,12 @@ scraper against new, unverified data.
 - Yahoo's website structure/internal endpoints can change without
   notice, same risk profile as any scraper. No versioning/monitoring
   strategy beyond manual re-inspection when a section starts failing.
-- `rosters`' per-stat-category requirement is the least certain to be
-  scrapeable at the same fidelity as the API — confirmed or refuted only
-  once `inspect.js` output for that section is reviewed.
+- `rosters`' per-stat-category requirement — the least certain part of
+  this whole project at the design stage — is now resolved: the same
+  fidelity as the API IS scrapeable (see "Data mapping" above). The
+  pre-existing orphaned-`stats`-rows and missing-2026-`season_positions`
+  gaps found while verifying it are noted there instead, since they're app
+  data-layer issues, not scraper risks.
 - `yahoo_ids` cannot be scraped at all (see "Data mapping" above) — the
   manager-nickname field the whole section depends on is masked
   everywhere on the website now. If this is ever needed without the API,

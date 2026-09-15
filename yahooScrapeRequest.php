@@ -242,6 +242,149 @@ function handle_scraped_trades(array $trades, int $year): int
     return $written;
 }
 
+/**
+ * Write scraped rosters/stats data to the database. Mirrors
+ * yahooApiRequest.php's handle_team_rosters() + get_player_stats(), but
+ * works from scrape.js's already-normalized flat array (one object per
+ * rostered player-week: { week, yahooTeamId, player, position, team,
+ * rosterSpot, points, stats }) instead of the API's nested Yahoo JSON.
+ * Unlike the API path (which is always called once per manager/week),
+ * this can receive multiple weeks for the same manager in one call (since
+ * extractRosters() loops --weeks internally the same way extractMatchups()
+ * does) — grouped below by (manager, week) so calculateOptimalForManager()
+ * and the regular_season_matchups optimal-column writes happen exactly
+ * once per week actually written, at the end, exactly like
+ * handle_team_rosters() does at the end of its own per-manager/week call.
+ *
+ * `stats` is only written (to the `stats` table) when roster_spot isn't
+ * 'IR' — same rule as handle_team_rosters(). Any stat category genuinely
+ * not shown for a given player (e.g. a kicker has no passing stats) comes
+ * through from scrape.js as a MISSING key, not a null one, so it's simply
+ * never part of $cleanStats and that column stays NULL in `stats` — same
+ * as the OAuth API's own behavior (confirmed against existing rows). A
+ * category that IS shown but reads as a dash on the page comes through as
+ * a real `null` value and gets converted to 0 here, also matching the API
+ * path's null-to-0 conversion.
+ */
+function handle_scraped_rosters(array $players, int $year): int
+{
+    $written = 0;
+    $weeksByManager = [];
+    $managerIdByYahooId = [];
+    $managerNameById = [];
+
+    foreach ($players as $p) {
+        $yahooTeamId = isset($p['yahooTeamId']) ? (int)$p['yahooTeamId'] : 0;
+        $week = isset($p['week']) ? (int)$p['week'] : 0;
+        $playerName = $p['player'] ?? null;
+        $position = $p['position'] ?? null;
+        $team = $p['team'] ?? null;
+        $rosterSpot = $p['rosterSpot'] ?? null;
+        $points = isset($p['points']) ? (float)$p['points'] : 0.0;
+        $stats = isset($p['stats']) && is_array($p['stats']) ? $p['stats'] : [];
+
+        if ($yahooTeamId <= 0 || $week <= 0 || !$playerName || !$position || !$team || !$rosterSpot) {
+            echo 'Skipping malformed scraped roster entry.<br>';
+            continue;
+        }
+
+        if (!isset($managerIdByYahooId[$yahooTeamId])) {
+            $managerIdByYahooId[$yahooTeamId] = lookupManager($yahooTeamId, $year);
+        }
+        $managerId = $managerIdByYahooId[$yahooTeamId];
+        if (!$managerId) {
+            echo 'No manager found for Yahoo team ID ' . $yahooTeamId . ', skipping.<br>';
+            continue;
+        }
+
+        if (!isset($managerNameById[$managerId])) {
+            $managerResult = query("SELECT name FROM managers WHERE id = $managerId");
+            $managerRow = fetch_array($managerResult);
+            $managerNameById[$managerId] = $managerRow ? $managerRow['name'] : null;
+        }
+        $manager = $managerNameById[$managerId];
+        if (!$manager) {
+            echo 'Manager id ' . $managerId . ' has no matching name, skipping.<br>';
+            continue;
+        }
+
+        // Insert player into rosters (same params/values shape as
+        // handle_team_rosters()'s updateOrCreate() call).
+        $rosterId = updateOrCreate('rosters', [
+            'manager' => $manager,
+            'year' => $year,
+            'week' => $week,
+            'player' => $playerName,
+            'position' => $position,
+        ], [
+            'team' => $team,
+            'roster_spot' => $rosterSpot,
+            'points' => $points,
+        ]);
+
+        echo htmlspecialchars($manager) . ' - ' . htmlspecialchars($playerName) . ' (' . htmlspecialchars($team) . ' - ' . htmlspecialchars($position) . ' - ' . htmlspecialchars($rosterSpot) . ') Points: ' . $points . '<br>';
+        $written++;
+
+        if ($rosterSpot !== 'IR' && !empty($stats)) {
+            // Convert any nulls to 0 (same as handle_team_rosters()) —
+            // categories genuinely not applicable to this player are
+            // simply absent from $stats entirely, not included as null,
+            // so they never reach this array and the DB column stays NULL.
+            $cleanStats = array_map(function ($value) {
+                return $value === null ? 0 : $value;
+            }, $stats);
+
+            updateOrCreate('stats', [
+                'roster_id' => $rosterId,
+            ], $cleanStats);
+        } elseif ($rosterSpot === 'IR') {
+            // Defensive cleanup discovered during real verification: `rosters`
+            // uses a plain `INTEGER PRIMARY KEY` (no AUTOINCREMENT), so a
+            // brand-new roster row's id is whatever id is next free — and
+            // this DB already has ~113 pre-existing `stats` rows across all
+            // years whose `roster_id` points at a `rosters` row that no
+            // longer exists (confirmed: same orphaned rows exist in the
+            // untouched production DB, unrelated to this scraper — a
+            // pre-existing app-level data-integrity gap, present in
+            // handle_team_rosters()'s identical code path too). A brand-new
+            // roster row can land on one of those stale ids purely by
+            // coincidence (confirmed happening for a real 2026 week 1 IR
+            // player during this task's own verification). Since IR players
+            // are never supposed to have a `stats` row at all, explicitly
+            // clear out anything sitting under this roster_id rather than
+            // silently leaving a stale, unrelated stat line attached to it.
+            query("DELETE FROM stats WHERE roster_id = " . (int)$rosterId);
+        }
+
+        $weeksByManager[$manager][$week] = true;
+    }
+
+    // Calculate optimal lineup once per (manager, week) actually written
+    // above, and persist to both sides of regular_season_matchups — same
+    // UPDATE queries handle_team_rosters() runs at the end of its own call.
+    foreach ($weeksByManager as $manager => $weeks) {
+        foreach (array_keys($weeks) as $week) {
+            $optimal = calculateOptimalForManager($manager, $year, $week);
+            $safeManager = str_replace("'", "''", $manager);
+            $optimalVal = round($optimal, 2);
+
+            query("UPDATE regular_season_matchups
+                SET manager1_optimal = $optimalVal
+                WHERE manager1_id = (SELECT id FROM managers WHERE name = '$safeManager')
+                AND year = $year AND week_number = $week");
+
+            query("UPDATE regular_season_matchups
+                SET manager2_optimal = $optimalVal
+                WHERE manager2_id = (SELECT id FROM managers WHERE name = '$safeManager')
+                AND year = $year AND week_number = $week");
+
+            echo 'Optimal for ' . htmlspecialchars($manager) . ' week ' . $week . ': ' . $optimalVal . '<br>';
+        }
+    }
+
+    return $written;
+}
+
 session_start();
 
 if (isset($APP_ENV) && $APP_ENV === 'production' && empty($_SESSION['admin_auth'])) {
@@ -308,6 +451,9 @@ if ($section === 'team_names') {
 } elseif ($section === 'matchups') {
     $writtenCount = handle_scraped_matchups($data, $year);
     echo '<div class="alert alert-success">Scraped and saved ' . htmlspecialchars($section) . ' (' . $writtenCount . ' of ' . $itemCount . ' matchup(s) written).</div>';
+} elseif ($section === 'rosters') {
+    $writtenCount = handle_scraped_rosters($data, $year);
+    echo '<div class="alert alert-success">Scraped and saved ' . htmlspecialchars($section) . ' (' . $writtenCount . ' of ' . $itemCount . ' player-week row(s) written).</div>';
 } elseif ($section === 'trades') {
     $writtenCount = handle_scraped_trades($data, $year);
     if ($writtenCount > 0) {

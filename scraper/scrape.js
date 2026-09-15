@@ -438,10 +438,271 @@ function parseTradeDate(timestampText, year) {
     return `${year}-${month}-${day}`;
 }
 
+// The default rosters URL (`/f1/<leagueId>/<manager>?week=<week>`, already
+// in lib/sectionUrls.js) loads the manager's own team page for that week —
+// unlike matchups/trades, this was NOT a wrong first guess: confirmed via a
+// real inspect.js capture (league 18261, manager 1, week 1 — see
+// scraper/inspection-output/rosters-1789495713698/page.html) that Yahoo
+// renders this exact URL as a full box score, complete with the page's own
+// "Week 1" nav confirming the requested week and a caption reading "...
+// roster for week 1."
+//
+// The page contains up to three per-position-group tables inside
+// `#team-roster` (`#statTable0`/`data-pos-type="O"` offense,
+// `#statTable1`/`"K"` kickers, `#statTable2`/`"DT"` defense/special teams —
+// discovered by selector rather than assumed ids/order, since which ones
+// exist depends on what's actually rostered), each with one row per
+// ROSTERED player — starters AND bench AND IR all appear in the same three
+// tables, distinguished only by the "Pos" column's `data-pos` attribute
+// (e.g. "QB"/"RB"/"W/R/T"/"Q/W/R/T"/"BN"/"IR"/"K"/"DEF" — this is the
+// roster_spot, matching `selected_position` from the OAuth API).
+//
+// Critically, each table's real per-stat-category breakdown IS present —
+// this was the single biggest open risk in the whole project, and it
+// resolved favorably. Every <th> in a table's second header row carries a
+// `title` attribute naming the exact stat (title="Passing Yards",
+// title="Sack", title="Field Goals Made", etc.) that lines up 1:1, after
+// expanding any `colspan` (the header's "Action" <th> spans 2 <td>s), with
+// each row's <td>s. STAT_TITLE_TO_KEY below maps every one of those titles
+// that's relevant to the same statIds map get_player_stats() uses in
+// yahooApiRequest.php. None of this section's captured network JSON
+// responses were Yahoo's own fantasy endpoints (same ad-tech-only finding
+// as team_names/trades), so this is DOM-scraped, not JSON-intercepted.
+//
+// This mapping is NOT just plausible-looking — it was sanity-checked by
+// reverse-engineering the league's own (0.5-PPR) scoring formula from the
+// numbers themselves: pass_yds*0.04 + pass_td*4 + int*-2 + rush_yds*0.1 +
+// rush_td*6 + rec*0.5 + rec_yds*0.1 reproduces the exact "Fan Pts" total
+// Yahoo displays for 3 different offensive players in the real capture
+// (Justin Herbert 13.26, Chase Brown 16.30, Rhamondre Stevenson 12.00),
+// using nothing but the per-category numbers this extractor reads. That
+// would not happen by coincidence if the column-to-stat mapping were wrong.
+const STAT_TITLE_TO_KEY = {
+    'Passing Yards': 'pass_yds',
+    'Passing Touchdowns': 'pass_tds',
+    'Interceptions': 'ints',
+    'Rushing Yards': 'rush_yds',
+    'Rushing Touchdowns': 'rush_tds',
+    'Receptions': 'receptions',
+    'Receiving Yards': 'rec_yds',
+    'Receiving Touchdowns': 'rec_tds',
+    'Fumbles Lost': 'fumbles',
+    'Point After Attempt Made': 'pat_made',
+    'Field Goals Total Yards': 'fg_yards',
+    'Field Goals Made': 'fg_made',
+    'Interception': 'def_int',
+    'Fumble Recovery': 'def_fum',
+    'Sack': 'def_sacks',
+};
+const POINTS_TITLE = 'Fantasy Points';
+
+// Yahoo's roster page shows a team defense under its NICKNAME (e.g.
+// "Eagles"), but the OAuth API — and therefore every existing `rosters` row
+// with position='DEF' — stores just the CITY name ("Philadelphia"), or for
+// the two-team LA/NY markets, the full disambiguated name ("Los Angeles
+// Rams", "New York Giants"). Confirmed against every existing DEF row in
+// `rosters` across all years in the DB. Without this translation, the same
+// defense would get a SECOND, different `rosters` row every time the
+// scrape path ran (the row's uniqueness key includes `player`) instead of
+// updating the one the API path already wrote. Built from only the
+// CURRENT (2026) 32 team abbreviations — this scraper only ever targets
+// the current season (see the design doc's "Open risks"), so no
+// legacy-relocation codes (OAK/SD/STL) are needed.
+const TEAM_DEFENSE_NAMES = {
+    ARI: 'Arizona', ATL: 'Atlanta', BAL: 'Baltimore', BUF: 'Buffalo',
+    CAR: 'Carolina', CHI: 'Chicago', CIN: 'Cincinnati', CLE: 'Cleveland',
+    DAL: 'Dallas', DEN: 'Denver', DET: 'Detroit', GB: 'Green Bay',
+    HOU: 'Houston', IND: 'Indianapolis', JAX: 'Jacksonville', KC: 'Kansas City',
+    LAC: 'Los Angeles Chargers', LAR: 'Los Angeles Rams', LV: 'Las Vegas',
+    MIA: 'Miami', MIN: 'Minnesota', NE: 'New England', NO: 'New Orleans',
+    NYG: 'New York Giants', NYJ: 'New York Jets', PHI: 'Philadelphia',
+    PIT: 'Pittsburgh', SEA: 'Seattle', SF: 'San Francisco', TB: 'Tampa Bay',
+    TEN: 'Tennessee', WAS: 'Washington',
+};
+
+async function extractRosters(args, context) {
+    if (!args['league-id']) {
+        throw new Error('Missing required --league-id=<id> argument.');
+    }
+    if (!args.manager) {
+        throw new Error('Missing required --manager=<yahoo team id> argument.');
+    }
+
+    const weekList = String(args.weeks || args.week || '')
+        .split(',')
+        .map((w) => w.trim())
+        .filter(Boolean);
+    if (weekList.length === 0) {
+        throw new Error('Missing required --weeks=<comma-separated weeks> (or --week=<N>) argument.');
+    }
+
+    const players = [];
+    for (const week of weekList) {
+        const weekPlayers = await extractRosterForWeek(args, context, week);
+        players.push(...weekPlayers);
+    }
+    return players;
+}
+
+async function extractRosterForWeek(args, context, week) {
+    const url = resolveUrl({ ...args, week });
+    const page = await context.newPage();
+    try {
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+        if (page.url().includes('login.yahoo.com')) {
+            throw new Error(
+                `Redirected to Yahoo login while loading manager ${args.manager}'s week ${week} roster page — ` +
+                'the saved session has expired. Re-run to trigger a fresh login.'
+            );
+        }
+
+        await page.waitForSelector('#team-roster', { timeout: 15000 });
+
+        const rawRows = await page.$$eval(
+            '#team-roster table[id^="statTable"]',
+            (tables, { statTitleMap, pointsTitle }) => {
+                const rows = [];
+                for (const table of tables) {
+                    const headerRows = table.querySelectorAll('thead tr');
+                    if (headerRows.length === 0) {
+                        continue;
+                    }
+                    // The last header row is the one with per-column `title`
+                    // attributes (the first is just group labels like
+                    // "Passing"/"Rushing" spanning multiple columns).
+                    const headerRow = headerRows[headerRows.length - 1];
+                    const titles = [];
+                    headerRow.querySelectorAll('th').forEach((th) => {
+                        const title = th.getAttribute('title') || '';
+                        const span = parseInt(th.getAttribute('colspan') || '1', 10);
+                        for (let i = 0; i < span; i++) {
+                            titles.push(title);
+                        }
+                    });
+
+                    table.querySelectorAll('tbody tr').forEach((tr) => {
+                        const posLabel = tr.querySelector('.pos-label');
+                        const rosterSpot = posLabel ? posLabel.getAttribute('data-pos') : null;
+                        const nameEl = tr.querySelector('td.player a.name');
+                        const playerName = nameEl ? nameEl.textContent.trim() : null;
+                        // Scoped to `.D-b .Fz-xxs` specifically, NOT just any
+                        // `.Fz-xxs` in the cell — a player with an injury
+                        // designation (Doubtful/Questionable/IR-Return/etc.)
+                        // gets an EARLIER sibling span also classed
+                        // `Fz-xxs` (`<span class="... F-injury Fz-xxs">D</span>`)
+                        // holding just the injury abbreviation ("D", "IR-R"),
+                        // which a bare `.Fz-xxs` selector would match first
+                        // instead of the real "TEAM - POS" span. Confirmed via
+                        // a real capture: Sam Darnold (Doubtful) and Jordyn
+                        // Tyson (IR-Return) both hit this — their injury span
+                        // is a sibling of `.D-b`, not nested inside it.
+                        const teamPosEl = tr.querySelector('td.player .D-b .Fz-xxs');
+                        const teamPosText = teamPosEl ? teamPosEl.textContent.trim() : null;
+
+                        const values = [];
+                        tr.querySelectorAll('td').forEach((td) => {
+                            const span = parseInt(td.getAttribute('colspan') || '1', 10);
+                            const text = td.textContent.trim();
+                            for (let i = 0; i < span; i++) {
+                                values.push(text);
+                            }
+                        });
+
+                        const stats = {};
+                        let points = null;
+                        const len = Math.min(titles.length, values.length);
+                        for (let i = 0; i < len; i++) {
+                            const title = titles[i];
+                            if (!title) {
+                                continue;
+                            }
+                            const raw = values[i];
+                            const isBlank = raw === '' || raw === '-' || raw === '—';
+                            if (title === pointsTitle) {
+                                points = isBlank ? null : Number(raw);
+                            } else if (statTitleMap[title]) {
+                                stats[statTitleMap[title]] = isBlank ? null : Number(raw.replace(/,/g, ''));
+                            }
+                        }
+
+                        rows.push({
+                            rosterSpot,
+                            playerName,
+                            teamPosText,
+                            points,
+                            stats,
+                            titleCount: titles.length,
+                            valueCount: values.length,
+                        });
+                    });
+                }
+                return rows;
+            },
+            { statTitleMap: STAT_TITLE_TO_KEY, pointsTitle: POINTS_TITLE }
+        );
+
+        const players = [];
+        for (const row of rawRows) {
+            if (row.titleCount !== row.valueCount) {
+                console.error(
+                    `Warning: header/column count mismatch (${row.titleCount} vs ${row.valueCount}) for a roster row ` +
+                    `(manager ${args.manager}, week ${week}) — zipping on the shorter length, some trailing columns may be dropped.`
+                );
+            }
+            if (!row.rosterSpot || !row.playerName || !row.teamPosText) {
+                console.error(`Skipping unparseable roster row for manager ${args.manager} week ${week}: ${JSON.stringify(row)}`);
+                continue;
+            }
+            const match = /^(.+?)\s-\s(.+)$/.exec(row.teamPosText);
+            if (!match) {
+                console.error(`Skipping roster row for ${row.playerName} — could not parse team/position text "${row.teamPosText}".`);
+                continue;
+            }
+            const team = match[1].trim().toUpperCase();
+            const pos = match[2].trim();
+
+            let playerName = row.playerName;
+            if (pos === 'DEF') {
+                if (!TEAM_DEFENSE_NAMES[team]) {
+                    console.error(`Skipping DEF row for team "${team}" — no known city-name mapping (unexpected team abbreviation).`);
+                    continue;
+                }
+                playerName = TEAM_DEFENSE_NAMES[team];
+            }
+
+            const cleanStats = {};
+            for (const [key, value] of Object.entries(row.stats)) {
+                if (value !== null && !Number.isFinite(value)) {
+                    console.error(`Unexpected non-numeric value for stat "${key}" on ${playerName} (manager ${args.manager}, week ${week}) — treating as null.`);
+                    cleanStats[key] = null;
+                } else {
+                    cleanStats[key] = value;
+                }
+            }
+
+            players.push({
+                week: Number(week),
+                yahooTeamId: Number(args.manager),
+                player: playerName,
+                position: pos,
+                team,
+                rosterSpot: row.rosterSpot,
+                points: row.points !== null && Number.isFinite(row.points) ? row.points : 0,
+                stats: cleanStats,
+            });
+        }
+        return players;
+    } finally {
+        await page.close();
+    }
+}
+
 const extractors = {
     team_names: extractTeamNames,
     matchups: extractMatchups,
     trades: extractTrades,
+    rosters: extractRosters,
 };
 
 async function main() {

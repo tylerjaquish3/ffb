@@ -1214,7 +1214,22 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'points-by-season') {
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'playoff-calculator') {
     $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
     $playoffSpots = 6; // Assuming top 6 teams make playoffs
-    
+
+    // The calculator brute-forces every combination of remaining games, so it only
+    // finishes in a reasonable time once few enough weeks remain. Gate it until week 8.
+    $weekResult = query("SELECT MAX(week_number) as maxWeek FROM regular_season_matchups WHERE year = $year AND winning_manager_id IS NOT NULL");
+    $weekRow = fetch_array($weekResult);
+    $currentWeek = ($weekRow && $weekRow['maxWeek'] !== null) ? intval($weekRow['maxWeek']) + 1 : 1;
+
+    if ($currentWeek < 8) {
+        $content = new \stdClass();
+        $content->data = [];
+        $content->available = false;
+        $content->message = 'The Playoff Calculator will be available starting Week 8, once there are few enough remaining scenarios to calculate in a reasonable time.';
+        echo json_encode($content);
+        die;
+    }
+
     // Get current standings (wins/losses from regular_season_matchups)
     $standings = [];
     $managerStats = [];

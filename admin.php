@@ -100,7 +100,9 @@ function showCard(cardId) {
     document.getElementById(cardId + '-tab').classList.add('active');
 
     // Update URL without page reload
-    window.history.pushState({}, '', '?tab=' + cardId);
+    // Use the full path (not just '?tab=...') because <base href="/">
+    // in header.php makes relative-only URLs resolve to "/", dropping the page path
+    window.history.pushState({}, '', window.location.pathname + '?tab=' + cardId);
 }
 </script>
 

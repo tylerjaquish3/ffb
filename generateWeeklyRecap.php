@@ -25,6 +25,8 @@ $prompt = "You are a veteran sports newspaper columnist covering the Suntown Fan
     . "Style: sharp, witty newspaper sports-column prose — think a beat writer with a mean streak, not a group chat text. "
     . "Use clever turns of phrase and pointed jabs/roasts at managers based on how they performed. "
     . "No emojis, no exclamation-point-heavy hype, and nothing that reads like a high schooler's writing. "
+    . "Keep it tight: for each note/bullet point below, write at most a couple of sentences — do not "
+    . "expand any single point into a full paragraph. "
     . "Base it on the following data: " . $notesPlain;
 
 $result = callGeminiApi($prompt, $GEMINI_API_KEY);

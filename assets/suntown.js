@@ -13,7 +13,9 @@ function showCard(cardId, updateUrl = true) {
         
         // Update URL hash by default (changed default to true)
         if (updateUrl) {
-            window.history.replaceState(null, null, '#' + cardId);
+            // Use the full path (not just '#' + cardId) because <base href="/">
+            // in header.php makes relative-only URLs resolve to "/", dropping the page path
+            window.history.replaceState(null, null, window.location.pathname + window.location.search + '#' + cardId);
         }
     }
 
@@ -359,7 +361,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Update URL hash without calling showCard again (it's already called by the original onclick)
             setTimeout(() => {
-                window.history.replaceState(null, null, '#' + tabId);
+                window.history.replaceState(null, null, window.location.pathname + window.location.search + '#' + tabId);
             }, 0);
         });
     });

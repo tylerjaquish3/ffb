@@ -32,10 +32,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
         $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
         $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         if (in_array($fileExt, $allowedExts)) {
-            $newFileName = "newsletter_{$editYear}_wk{$editWeek}_hero.{$fileExt}";
+            $newFileName = "newsletter_{$editYear}_wk{$editWeek}_hero_" . time() . ".{$fileExt}";
             $destPath = "images/newsletter_metadata/" . $newFileName;
             if (move_uploaded_file($fileTmpPath, $destPath)) {
                 $heroImagePath = '/' . $destPath;
+                // Old hero images for this week are now orphaned - remove them so the
+                // deterministic-URL cache (proxy/browser) can't keep serving stale content.
+                foreach (glob("images/newsletter_metadata/newsletter_{$editYear}_wk{$editWeek}_hero_*") as $oldFile) {
+                    if (realpath($oldFile) !== realpath($destPath)) {
+                        unlink($oldFile);
+                    }
+                }
+                foreach ($allowedExts as $legacyExt) {
+                    $legacyPath = "images/newsletter_metadata/newsletter_{$editYear}_wk{$editWeek}_hero.{$legacyExt}";
+                    if (is_file($legacyPath)) {
+                        unlink($legacyPath);
+                    }
+                }
             }
         }
     }
@@ -177,9 +190,20 @@ if ($contentRow) {
                 <input type="hidden" name="year" value="<?php echo $editYear; ?>">
                 <input type="hidden" name="week" value="<?php echo $editWeek; ?>">
 
-                <!-- Headline & Hero Image | Schedule -->
-                <div class="row" style="direction: ltr;">
-                    <div class="col-sm-12 col-md-6">
+                <div class="newsletter-editor-layout">
+                    <nav class="newsletter-sidebar">
+                        <button type="button" class="newsletter-nav-item active" data-target="newsletter-section-headline"><i class="icon-image"></i> Headline &amp; Hero</button>
+                        <button type="button" class="newsletter-nav-item" data-target="newsletter-section-schedule"><i class="icon-calendar"></i> Schedule</button>
+                        <button type="button" class="newsletter-nav-item" data-target="newsletter-section-recap"><i class="icon-document-text"></i> Recap</button>
+                        <button type="button" class="newsletter-nav-item" data-target="newsletter-section-preview"><i class="icon-eye"></i> Preview</button>
+                    </nav>
+
+                    <div class="newsletter-sections">
+
+                        <!-- Headline & Hero Image -->
+                        <div class="newsletter-section active" id="newsletter-section-headline">
+                        <div class="row" style="direction: ltr;">
+                    <div class="col-sm-12">
                         <div class="card" style="height: 100%;">
                             <div class="card-header" style="direction: ltr;">
                                 <h4>Headline &amp; Hero Image</h4>
@@ -211,7 +235,13 @@ if ($contentRow) {
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6">
+                        </div>
+                        </div>
+
+                        <!-- Schedule -->
+                        <div class="newsletter-section" id="newsletter-section-schedule">
+                        <div class="row" style="direction: ltr;">
+                    <div class="col-sm-12">
                         <div class="card" style="height: 100%;">
                             <div class="card-header" style="direction: ltr;">
                                 <h4>Week <?php echo $editWeek; ?> Schedule<?php if (isset($isPlayoffWeek) && $isPlayoffWeek): ?> (<?php echo $playoffRound; ?>)<?php endif; ?></h4>
@@ -313,8 +343,10 @@ if ($contentRow) {
                         </div>
                     </div>
                 </div>
+                        </div>
 
-                <!-- Recap Notes | Recap -->
+                        <!-- Recap Notes | Recap -->
+                        <div class="newsletter-section" id="newsletter-section-recap">
                 <div class="row" style="direction: ltr;">
                     <div class="col-sm-12 col-md-6">
                         <div class="card" style="height: 100%;">
@@ -348,8 +380,10 @@ if ($contentRow) {
                         </div>
                     </div>
                 </div>
+                        </div>
 
-                <!-- Preview Notes | Preview -->
+                        <!-- Preview Notes | Preview -->
+                        <div class="newsletter-section" id="newsletter-section-preview">
                 <div class="row" style="direction: ltr;">
                     <div class="col-sm-12 col-md-6">
                         <div class="card" style="height: 100%;">
@@ -381,6 +415,10 @@ if ($contentRow) {
                                 <textarea id="preview" name="preview" class="form-control" rows="20" style="direction: ltr;" placeholder="Enter the preview content for Week <?php echo $editWeek; ?>..."><?php echo htmlspecialchars($preview); ?></textarea>
                             </div>
                         </div>
+                    </div>
+                </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -423,6 +461,22 @@ function updateURL() {
     const week = document.getElementById('week-select').value;
     window.location.href = 'admin.php?tab=newsletter&year=' + year + '&week=' + week;
 }
+
+(function() {
+    var navItems = document.querySelectorAll('.newsletter-nav-item');
+    navItems.forEach(function(item) {
+        item.addEventListener('click', function() {
+            var target = item.getAttribute('data-target');
+
+            document.querySelectorAll('.newsletter-section').forEach(function(section) {
+                section.classList.toggle('active', section.id === target);
+            });
+            navItems.forEach(function(navItem) {
+                navItem.classList.toggle('active', navItem === item);
+            });
+        });
+    });
+})();
 
 <?php if (!empty($saved)): ?>
 (function() {

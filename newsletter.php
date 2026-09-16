@@ -295,7 +295,7 @@ $vDate = "(05/19/26)";
     <?php else: ?>
         <div class="section-label accent-label"><span>Week <?php echo ($selectedWeek - 1); ?> Recap</span></div>
         <div class="article-full">
-            <div class="article-headline">Week <?php echo ($selectedWeek - 1); ?> &mdash; Recap</div>
+            <div class="article-headline">Week <?php echo ($selectedWeek - 1); ?> Recap</div>
             <div class="article-byline">By the Editorial Staff &middot; <?php echo $selectedSeason; ?></div>
             <div class="article-body has-dropcap"><?php echo nl2br($recapContent); ?></div>
         </div>

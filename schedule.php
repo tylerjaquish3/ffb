@@ -413,7 +413,14 @@ $managerColors = [
                         
                         // Clear the table body
                         $('#playoff-calculator-tbody').empty();
-                        
+
+                        if (data.available === false) {
+                            $('#playoff-calculator-title').text('Playoff Calculator');
+                            $('#playoff-calculator-results .initial-message').html('<div class="alert alert-info">' + data.message + '</div>');
+                            $('#playoff-calculator-results .table-responsive').hide();
+                            return;
+                        }
+
                         // Populate the table with data
                         if (data.data && data.data.length > 0) {
                             

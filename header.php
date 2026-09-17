@@ -7,9 +7,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2B6X5W9X3W"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-2B6X5W9X3W');
+    </script>
+
     <title><?php echo isset($pageName) ? $pageName. ' | Suntown FFB' : 'Suntown FFB'; ?></title>
-    <?php $version = "v5.8.5";
-    $vDate = "(09/17/26)"; ?>
+    <?php $version = "v5.8.6";
+    $vDate = "(09/18/26)"; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">
 

@@ -13,8 +13,10 @@ if (!$visitorId) {
     setcookie('visitor_id', $visitorId, time() + 60*60*24*365, '/'); // 1 year
 }
 
-$logEntry = "$timestamp\t$ip\t$visitorId\t$userAgent\n";
-file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+if (!in_array($ip, ['127.0.0.1', '127.0.0.2'], true)) {
+    $logEntry = "$timestamp\t$ip\t$visitorId\t$userAgent\n";
+    file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+}
 
 $pageName = "Newsletter";
 
@@ -657,12 +659,13 @@ $(document).ready(function() {
                         var api = this.api();
                         api.columns(':not(:first)').every(function() {
                             var col = this.index();
+                            var invert = (col === 5);
                             var data = this.data().unique().map(function(v){ return parseInt(v); }).toArray().sort(function(a,b){return b-a});
                             last = data.length-1;
                             api.cells(null, col).every(function() {
                                 var cell = parseInt(this.data());
-                                if (cell === data[0]) { $(this.node()).css('background-color', 'rgb(172, 240, 172)'); }
-                                else if (cell === data[last]) { $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)'); }
+                                if (cell === data[0]) { $(this.node()).css('background-color', invert ? 'rgba(255, 85, 85, 0.32)' : 'rgb(172, 240, 172)'); }
+                                else if (cell === data[last]) { $(this.node()).css('background-color', invert ? 'rgb(172, 240, 172)' : 'rgba(255, 85, 85, 0.32)'); }
                             });
                         });
                     }
@@ -683,12 +686,13 @@ $(document).ready(function() {
                     var api = this.api();
                     api.columns(':not(:first)').every(function() {
                         var col = this.index();
+                        var invert = (col === 5);
                         var data = this.data().unique().map(function(v){ return parseInt(v); }).toArray().sort(function(a,b){return b-a});
                         last = data.length-1;
                         api.cells(null, col).every(function() {
                             var cell = parseInt(this.data());
-                            if (cell === data[0]) { $(this.node()).css('background-color', 'rgb(172, 240, 172)'); }
-                            else if (cell === data[last]) { $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)'); }
+                            if (cell === data[0]) { $(this.node()).css('background-color', invert ? 'rgba(255, 85, 85, 0.32)' : 'rgb(172, 240, 172)'); }
+                            else if (cell === data[last]) { $(this.node()).css('background-color', invert ? 'rgb(172, 240, 172)' : 'rgba(255, 85, 85, 0.32)'); }
                         });
                     });
                 }

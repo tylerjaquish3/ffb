@@ -13,8 +13,10 @@ if (!$visitorId) {
     setcookie('visitor_id', $visitorId, time() + 60*60*24*365, '/'); // 1 year
 }
 
-$logEntry = "$timestamp\t$ip\t$visitorId\t$userAgent\n";
-file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+if (!in_array($ip, ['127.0.0.1', '127.0.0.2'], true)) {
+    $logEntry = "$timestamp\t$ip\t$visitorId\t$userAgent\n";
+    file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+}
 
 $pageName = "Playoff Newsletter";
 

@@ -760,6 +760,101 @@ $(document).ready(function() {
             }
         });
     }
+
+    // Measures the natural (shrink-to-fit) width of a line of text at a given
+    // font-size, using a detached element so a block-level line's own
+    // stretched width never gets measured in its place.
+    function measureLineWidth(text, refEl, fontSizePx) {
+        var style = getComputedStyle(refEl);
+        var measurer = document.createElement('span');
+        measurer.style.position = 'absolute';
+        measurer.style.visibility = 'hidden';
+        measurer.style.whiteSpace = 'nowrap';
+        measurer.style.left = '-9999px';
+        measurer.style.top = '0';
+        measurer.style.fontFamily = style.fontFamily;
+        measurer.style.fontWeight = style.fontWeight;
+        measurer.style.fontStyle = style.fontStyle;
+        measurer.style.letterSpacing = style.letterSpacing;
+        measurer.style.textTransform = style.textTransform;
+        measurer.style.fontSize = fontSizePx + 'px';
+        measurer.textContent = text;
+        document.body.appendChild(measurer);
+        var width = measurer.getBoundingClientRect().width;
+        document.body.removeChild(measurer);
+        return width;
+    }
+
+    // Stretch each headline line to fill the full width, newspaper-style
+    function fitNewspaperHeadline() {
+        var el = document.querySelector('.newsletter-headline');
+        if (!el) return;
+
+        if (!el.dataset.originalText) {
+            el.dataset.originalText = el.textContent.trim();
+        }
+        var words = el.dataset.originalText.split(/\s+/).filter(Boolean);
+        if (!words.length) return;
+
+        // Measurement pass: lay words out normally to see where they wrap
+        el.style.fontSize = '';
+        el.innerHTML = '';
+        words.forEach(function(word, i) {
+            var span = document.createElement('span');
+            span.className = 'hl-word';
+            span.textContent = word;
+            el.appendChild(span);
+            if (i < words.length - 1) {
+                el.appendChild(document.createTextNode(' '));
+            }
+        });
+
+        var wordEls = el.querySelectorAll('.hl-word');
+        var lines = [];
+        var currentTop = null;
+        var currentLine = [];
+        wordEls.forEach(function(w) {
+            var top = w.offsetTop;
+            if (currentTop === null || Math.abs(top - currentTop) > 1) {
+                if (currentLine.length) lines.push(currentLine);
+                currentLine = [w];
+                currentTop = top;
+            } else {
+                currentLine.push(w);
+            }
+        });
+        if (currentLine.length) lines.push(currentLine);
+
+        var containerWidth = el.clientWidth;
+        var baseFontSize = parseFloat(getComputedStyle(el).fontSize);
+        if (!containerWidth || !baseFontSize) return;
+
+        // Rebuild as one block per line, scaling each line's font-size to span the full width
+        el.innerHTML = '';
+        lines.forEach(function(lineWords) {
+            var lineText = lineWords.map(function(w) { return w.textContent; }).join(' ');
+            var lineSpan = document.createElement('span');
+            lineSpan.className = 'hl-line';
+            lineSpan.textContent = lineText;
+            el.appendChild(lineSpan);
+
+            var naturalWidth = measureLineWidth(lineText, el, baseFontSize);
+            if (naturalWidth > 0) {
+                var scale = Math.min(containerWidth / naturalWidth, 2.2);
+                lineSpan.style.fontSize = (baseFontSize * scale) + 'px';
+            }
+        });
+    }
+
+    if (document.querySelector('.newsletter-headline')) {
+        fitNewspaperHeadline();
+        $(window).on('load', fitNewspaperHeadline);
+        var headlineResizeTimer;
+        $(window).on('resize', function() {
+            clearTimeout(headlineResizeTimer);
+            headlineResizeTimer = setTimeout(fitNewspaperHeadline, 150);
+        });
+    }
 });
 </script>
 

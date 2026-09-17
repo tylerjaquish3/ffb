@@ -68,7 +68,8 @@ $activeTab = $_GET['tab'] ?? 'yahoo-api';
                     <div class="tab-buttons-container">
                         <button class="tab-button<?php echo $activeTab === 'yahoo-api' ? ' active' : ''; ?>" id="yahoo-api-tab" onclick="showCard('yahoo-api')">Yahoo API</button>
                         <button class="tab-button<?php echo $activeTab === 'newsletter' ? ' active' : ''; ?>" id="newsletter-tab" onclick="showCard('newsletter')">Newsletter</button>
-                        <button class="tab-button<?php echo $activeTab === 'recap' ? ' active' : ''; ?>" id="recap-tab" onclick="showCard('recap')">Recap</button>
+                        <button class="tab-button<?php echo $activeTab === 'recap' ? ' active' : ''; ?>" id="recap-tab" onclick="showCard('recap')">Season Recap</button>
+                        <button class="tab-button<?php echo $activeTab === 'player-aliases' ? ' active' : ''; ?>" id="player-aliases-tab" onclick="showCard('player-aliases')">Player Aliases</button>
                     </div>
                 </div>
             </div>
@@ -86,6 +87,11 @@ $activeTab = $_GET['tab'] ?? 'yahoo-api';
             <!-- Recap Tab -->
             <div class="card-section" id="recap"<?php echo $activeTab !== 'recap' ? ' style="display: none;"' : ''; ?>>
                 <?php include 'generateSeasonRecap.php'; ?>
+            </div>
+
+            <!-- Player Aliases Tab -->
+            <div class="card-section" id="player-aliases"<?php echo $activeTab !== 'player-aliases' ? ' style="display: none;"' : ''; ?>>
+                <?php include 'playerAliases.php'; ?>
             </div>
 
         </div>

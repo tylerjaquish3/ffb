@@ -736,6 +736,28 @@ include 'sidebar.php';
                         </div>
                     </div>
                 </div>
+
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Avg Weekly Roster Rank</h4>
+                        </div>
+                        <div class="card-body chart-block" style="background: #fff; direction: ltr">
+                            <canvas id="overallRankChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float: right">Avg Position Rank by Manager</h4>
+                        </div>
+                        <div class="card-body" style="background: #fff; direction: ltr">
+                            <div class="row" id="positionRankPanels"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -1416,6 +1438,135 @@ include 'sidebar.php';
         
         // Make chart globally accessible
         window.weeklyScoresChart = weeklyScoresChart;
+
+        // Avg Weekly Roster Rank Chart
+        var overallRankData = <?php echo json_encode($overallRankChart); ?>;
+
+        var overallRankCtx = $('#overallRankChart');
+        let overallRankChart = new Chart(overallRankCtx, {
+            type: 'line',
+            data: {
+                labels: overallRankData.weeks,
+                datasets: overallRankData.datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        display: true,
+                        reverse: true,
+                        title: {
+                            display: true,
+                            text: 'Avg Rank (lower is better)',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Week',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                return label + context.parsed.y + ' avg rank';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Make chart globally accessible
+        window.overallRankChart = overallRankChart;
+
+        // Avg Position Rank by Manager - one small horizontal bar panel per position
+        var positionRankPanels = <?php echo json_encode($positionRankChart); ?>;
+        var $positionRankContainer = $('#positionRankPanels');
+        window.positionRankCharts = {};
+
+        positionRankPanels.forEach(function(panel) {
+            var canvasId = 'positionRankChart-' + panel.position;
+            var $col = $('<div>', { class: 'col-sm-12 col-md-6 col-lg-4 position-rank-col' });
+            $('<h6>', { class: 'text-center', text: panel.position }).appendTo($col);
+            var $panelBlock = $('<div>', { class: 'position-rank-panel' });
+            var $canvas = $('<canvas>', { id: canvasId });
+            $panelBlock.append($canvas);
+            $col.append($panelBlock);
+            $positionRankContainer.append($col);
+
+            var labels = panel.rows.map(r => r.manager);
+            var data = panel.rows.map(r => r.avgRank);
+            var colors = panel.rows.map(r => r.color);
+
+            window.positionRankCharts[panel.position] = new Chart($canvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderRadius: 4,
+                        maxBarThickness: 22
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Avg Position Rank'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Avg rank: ' + context.parsed.x;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
     });
 
     // Initialize the page with Performance Stats tab active
@@ -1456,6 +1607,16 @@ include 'sidebar.php';
 
     /* Ensure charts fit properly within their containers */
     .chart-block canvas {
+        max-width: 100% !important;
+        max-height: 100% !important;
+    }
+
+    /* Small-multiples panels for the Avg Position Rank chart */
+    .position-rank-panel {
+        height: 320px;
+        margin-bottom: 20px;
+    }
+    .position-rank-panel canvas {
         max-width: 100% !important;
         max-height: 100% !important;
     }

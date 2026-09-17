@@ -553,7 +553,7 @@ table.dataTable.stripe tbody tr.odd { background: var(--paper-dark); }
     font-family: 'Playfair Display', serif;
     font-size: clamp(1.5rem, 11vw, 7rem);
     font-weight: 900;
-    line-height: 1;
+    line-height: 1.05;
     color: var(--ink);
     text-align: center;
     margin: 1rem 0 0.8rem;
@@ -561,6 +561,10 @@ table.dataTable.stripe tbody tr.odd { background: var(--paper-dark); }
     padding: 0.4rem 0;
     width: 100%;
     text-transform: uppercase;
+}
+.newsletter-headline .hl-line {
+    display: block;
+    white-space: nowrap;
 }
 
 .hero-image-wrapper {

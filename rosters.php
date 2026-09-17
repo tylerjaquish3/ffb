@@ -317,12 +317,22 @@ function lookupGameTime(?int $id) {
                                             if ($playoffRoster) {
                                                 $result = query("SELECT r.player, r.*, d.round FROM playoff_rosters r
                                                     JOIN managers m on m.name = r.manager
-                                                    LEFT JOIN draft d on d.player = r.player AND d.year = r.year and d.manager_id = m.id
+                                                    LEFT JOIN draft d on d.year = r.year and d.manager_id = m.id
+                                                        AND (d.player = r.player OR EXISTS (
+                                                            SELECT 1 FROM player_aliases pa
+                                                            WHERE (pa.player = d.player OR pa.alias_1 = d.player OR pa.alias_2 = d.player OR pa.alias_3 = d.player)
+                                                              AND (pa.player = r.player OR pa.alias_1 = r.player OR pa.alias_2 = r.player OR pa.alias_3 = r.player)
+                                                        ))
                                                     WHERE r.year = $year AND week = $week AND manager = '$managerName'");
                                             } else {
                                                 $result = query("SELECT r.player, r.*, round FROM rosters r
                                                     JOIN managers m on m.name = r.manager
-                                                    LEFT JOIN draft d on d.player = r.player AND d.year = r.year and d.manager_id = m.id
+                                                    LEFT JOIN draft d on d.year = r.year and d.manager_id = m.id
+                                                        AND (d.player = r.player OR EXISTS (
+                                                            SELECT 1 FROM player_aliases pa
+                                                            WHERE (pa.player = d.player OR pa.alias_1 = d.player OR pa.alias_2 = d.player OR pa.alias_3 = d.player)
+                                                              AND (pa.player = r.player OR pa.alias_1 = r.player OR pa.alias_2 = r.player OR pa.alias_3 = r.player)
+                                                        ))
                                                     WHERE r.year = $year AND week = $week AND manager = '$managerName'");
                                             }
                                             while ($row = fetch_array($result)) {
@@ -369,11 +379,21 @@ function lookupGameTime(?int $id) {
                                             <?php
                                             if ($playoffRoster) {
                                                 $result = query("SELECT r.player, r.*, draft.round FROM playoff_rosters r
-                                                    LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
+                                                    LEFT JOIN draft on draft.year = r.year
+                                                        AND (draft.player = r.player OR EXISTS (
+                                                            SELECT 1 FROM player_aliases pa
+                                                            WHERE (pa.player = draft.player OR pa.alias_1 = draft.player OR pa.alias_2 = draft.player OR pa.alias_3 = draft.player)
+                                                              AND (pa.player = r.player OR pa.alias_1 = r.player OR pa.alias_2 = r.player OR pa.alias_3 = r.player)
+                                                        ))
                                                     WHERE r.year = $year AND week = $week AND manager = '$versus'");
                                             } else {
                                                 $result = query("SELECT r.player, r.*, round FROM rosters r
-                                                    LEFT JOIN draft on draft.player = r.player AND draft.year = r.year
+                                                    LEFT JOIN draft on draft.year = r.year
+                                                        AND (draft.player = r.player OR EXISTS (
+                                                            SELECT 1 FROM player_aliases pa
+                                                            WHERE (pa.player = draft.player OR pa.alias_1 = draft.player OR pa.alias_2 = draft.player OR pa.alias_3 = draft.player)
+                                                              AND (pa.player = r.player OR pa.alias_1 = r.player OR pa.alias_2 = r.player OR pa.alias_3 = r.player)
+                                                        ))
                                                     WHERE r.year = $year AND week = $week AND manager = '$versus'");
                                             }
                                             while ($row = fetch_array($result)) {

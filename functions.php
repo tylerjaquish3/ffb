@@ -1,6 +1,7 @@
 <?php
 
 include 'connections.php';
+include 'data/currentSeason.php';
 
 // phpinfo(); exit;
 
@@ -127,6 +128,8 @@ if ($pageName == 'Current Season') {
     $scatterChart = getPointsForScatter();
     $weekStandings = getSeasonStandings($selectedSeason);
     $weeklyScores = getWeeklyScoresData();
+    $overallRankChart = getOverallWeeklyRankChartData($selectedSeason);
+    $positionRankChart = getPositionRankChartData($selectedSeason);
 }
 if ($pageName == 'Rosters') {
     $recap = getMatchupRecapNumbers();

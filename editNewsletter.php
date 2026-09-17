@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
             $newFileName = "newsletter_{$editYear}_wk{$editWeek}_hero_" . time() . ".{$fileExt}";
             $destPath = "images/newsletter_metadata/" . $newFileName;
             if (move_uploaded_file($fileTmpPath, $destPath)) {
+                compressUploadedImage($destPath);
                 $heroImagePath = '/' . $destPath;
                 // Old hero images for this week are now orphaned - remove them so the
                 // deterministic-URL cache (proxy/browser) can't keep serving stale content.

@@ -2421,7 +2421,7 @@ function getAllDraftedPlayerDetails()
     $response = [];
 
     $result = query("SELECT managers.name as manager, draft.overall_pick, draft.position, draft.round, draft.player,
-        SUM(COALESCE(rosters.points, 0)) AS points, SUM(IF(rosters.roster_spot NOT IN ('BN','IR'), 1, 0)) AS GP
+        SUM(COALESCE(rosters.points, 0)) AS points, SUM(CASE WHEN rosters.roster_spot NOT IN ('BN','IR') THEN 1 ELSE 0 END) AS GP
         FROM draft
         JOIN managers ON draft.manager_id = managers.id 
         LEFT JOIN player_aliases pa ON draft.player = pa.player 
@@ -4592,4 +4592,61 @@ function getStartStreaks() {
         ];
     }
     return $startStreaks;
+}
+
+// Resizes (if wider than $maxWidth) and re-encodes an uploaded image in place to shrink
+// its file size for faster page loads. No-op if GD can't decode the file.
+function compressUploadedImage($path, $maxWidth = 1600, $jpegQuality = 82) {
+    $info = @getimagesize($path);
+    if (!$info) {
+        return;
+    }
+    [$width, $height, $type] = $info;
+
+    switch ($type) {
+        case IMAGETYPE_JPEG:
+            $image = @imagecreatefromjpeg($path);
+            break;
+        case IMAGETYPE_PNG:
+            $image = @imagecreatefrompng($path);
+            break;
+        case IMAGETYPE_GIF:
+            $image = @imagecreatefromgif($path);
+            break;
+        case IMAGETYPE_WEBP:
+            $image = @imagecreatefromwebp($path);
+            break;
+        default:
+            return;
+    }
+    if (!$image) {
+        return;
+    }
+
+    if ($width > $maxWidth) {
+        $newWidth = $maxWidth;
+        $newHeight = (int) round($height * ($maxWidth / $width));
+        $resized = imagecreatetruecolor($newWidth, $newHeight);
+        if ($type === IMAGETYPE_PNG || $type === IMAGETYPE_WEBP) {
+            imagealphablending($resized, false);
+            imagesavealpha($resized, true);
+        }
+        imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        $image = $resized;
+    }
+
+    switch ($type) {
+        case IMAGETYPE_JPEG:
+            imagejpeg($image, $path, $jpegQuality);
+            break;
+        case IMAGETYPE_PNG:
+            imagepng($image, $path, 6);
+            break;
+        case IMAGETYPE_GIF:
+            imagegif($image, $path);
+            break;
+        case IMAGETYPE_WEBP:
+            imagewebp($image, $path, $jpegQuality);
+            break;
+    }
 }

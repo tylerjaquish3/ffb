@@ -19,7 +19,7 @@
     <script src="/assets/app.min.js" type="text/javascript"></script>
     <script src="/assets/chart.min.js" type="text/javascript"></script>
     <script src="/assets/chartjs-plugin-datalabels.min.js"></script>
-    <script src="/assets/suntown.js" type="text/javascript"></script>
+    <script src="/assets/suntown.js?v=<?php echo $version; ?>" type="text/javascript"></script>
 
 </body>
 

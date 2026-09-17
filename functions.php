@@ -152,14 +152,15 @@ if ($pageName == 'Newsletter') {
 
     // Only load data if we're not in week 1 and have roster data
     if ($rosterAvailable) {
+        $throughWeek = $selectedWeek - 1;
         $bestWeek = getCurrentSeasonBestWeek();
-        $topPerformers = getCurrentSeasonTopPerformers();
-        $stats = getCurrentSeasonStats();
+        $topPerformers = getCurrentSeasonTopPerformers($throughWeek);
+        $stats = getCurrentSeasonStats($throughWeek);
         $weekStats = getCurrentSeasonWeekStats();
-        $everyoneRecord = getRecordAgainstEveryone();
+        $everyoneRecord = getRecordAgainstEveryone($throughWeek);
         $teamWeek = getCurrentSeasonBestTeamWeek();
         $weekStandings = getSeasonStandings($selectedSeason);
-    } 
+    }
     
     // Load schedule info for all weeks
     $scheduleInfo = getScheduleInfo($selectedSeason, $selectedWeek);
@@ -1563,15 +1564,17 @@ function getCurrentSeasonPoints()
 /**
  * Get total season stats by manager for Current Season page
  */
-function getCurrentSeasonStats()
+function getCurrentSeasonStats($throughWeek = null)
 {
     global $selectedSeason;
+
+    $weekFilter = $throughWeek !== null ? "AND r.week <= $throughWeek" : "";
 
     $result = query("SELECT manager, SUM(pass_yds) AS pass_yds, SUM(pass_tds) AS pass_tds, SUM(ints) AS ints, SUM(rush_yds) AS rush_yds, SUM(rush_tds) AS rush_tds,
         SUM(receptions) AS rec, SUM(rec_yds) AS rec_yds, SUM(rec_tds) AS rec_tds, SUM(fumbles) AS fum, SUM(fg_made) AS fg_made, SUM(pat_made) AS pat_made
         FROM rosters r
         JOIN stats s ON s.roster_id = r.id
-        WHERE YEAR = $selectedSeason and roster_spot != 'BN' and roster_spot != 'IR'
+        WHERE YEAR = $selectedSeason and roster_spot != 'BN' and roster_spot != 'IR' $weekFilter
         GROUP BY manager");
 
     return $result;
@@ -1828,7 +1831,7 @@ function getCurrentSeasonWeekStatsAgainst()
 /**
  * Undocumented function
  */
-function getCurrentSeasonTopPerformers()
+function getCurrentSeasonTopPerformers($throughWeek = null)
 {
     global $selectedSeason;
     $response = [
@@ -1842,7 +1845,9 @@ function getCurrentSeasonTopPerformers()
         ]
     ];
 
-    $result = query("SELECT * FROM rosters WHERE YEAR = $selectedSeason ORDER BY points DESC LIMIT 1");
+    $weekFilter = $throughWeek !== null ? "AND week <= $throughWeek" : "";
+
+    $result = query("SELECT * FROM rosters WHERE YEAR = $selectedSeason $weekFilter ORDER BY points DESC LIMIT 1");
     while ($row = fetch_array($result)) {
         $response['topPerformer'] = [
             'manager' => $row['manager'],
@@ -1862,7 +1867,7 @@ function getCurrentSeasonTopPerformers()
     $result = query("SELECT manager, (SUM(pass_tds)+SUM(rush_tds)+SUM(rec_tds)) AS total_tds
         FROM rosters
         JOIN stats ON stats.roster_id = rosters.id
-        WHERE YEAR = $selectedSeason
+        WHERE YEAR = $selectedSeason $weekFilter
         GROUP BY manager
         ORDER BY total_tds DESC LIMIT 1");
     while ($row = fetch_array($result)) {
@@ -1875,7 +1880,7 @@ function getCurrentSeasonTopPerformers()
     $result = query("SELECT manager, (SUM(pass_yds)+SUM(rush_yds)+SUM(rec_yds)) AS total_yds
         FROM rosters
         JOIN stats ON stats.roster_id = rosters.id
-        WHERE YEAR = $selectedSeason
+        WHERE YEAR = $selectedSeason $weekFilter
         GROUP BY manager
         ORDER BY total_yds DESC LIMIT 1");
     while ($row = fetch_array($result)) {
@@ -1887,7 +1892,7 @@ function getCurrentSeasonTopPerformers()
 
     $result = query("SELECT manager, SUM(points) AS bench_pts
         FROM rosters
-        WHERE YEAR = $selectedSeason AND (roster_spot = 'BN' or roster_spot = 'IR')
+        WHERE YEAR = $selectedSeason AND (roster_spot = 'BN' or roster_spot = 'IR') $weekFilter
         GROUP BY manager
         ORDER BY bench_pts DESC LIMIT 1");
     while ($row = fetch_array($result)) {
@@ -2372,7 +2377,7 @@ function getPlayersRetained()
 /**
  * Calculate record if we had played against everyone every week
  */
-function getRecordAgainstEveryone()
+function getRecordAgainstEveryone($throughWeek = null)
 {
     global $selectedSeason;
     $index = -1;
@@ -2390,9 +2395,10 @@ function getRecordAgainstEveryone()
         'Gavin' => ['losses' => 0, 'wins' => 0]
     ];
     $scores = [];
+    $weekFilter = $throughWeek !== null ? "AND week_number <= $throughWeek" : "";
     $result = query("SELECT week_number, name, manager1_score FROM regular_season_matchups rsm
         JOIN managers ON managers.id = rsm.manager1_id
-        where year = $selectedSeason
+        where year = $selectedSeason $weekFilter
         ORDER BY year, week_number, manager1_score ASC");
     while ($row = fetch_array($result)) {
         $scores[$selectedSeason][$row['week_number']][$row['name']] = $row['manager1_score'];

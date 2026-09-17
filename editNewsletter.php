@@ -76,18 +76,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     $existingQuery = query("SELECT id FROM newsletters WHERE year = $editYear AND week = $editWeek");
     $existingRow = fetch_array($existingQuery);
     if ($existingRow) {
-        // Update existing record
-        $updateQuery = "UPDATE newsletters SET recap = '" . SQLite3::escapeString($recap) . "', preview = '" . SQLite3::escapeString($preview) . "', headline = '" . SQLite3::escapeString($headline) . "', notes = '" . SQLite3::escapeString($notes) . "', recap_notes = '" . SQLite3::escapeString($recap_notes) . "', created_at = datetime('now')";
+        // Update existing record. Only overwrite a text field when the submission
+        // actually contains content for it - a blank/stale submit (e.g. CKEditor
+        // not done loading before Save was clicked) must never erase saved content.
+        $textFields = [
+            'recap' => $recap,
+            'preview' => $preview,
+            'headline' => $headline,
+            'notes' => $notes,
+            'recap_notes' => $recap_notes,
+        ];
+        $setClauses = [];
+        foreach ($textFields as $column => $value) {
+            if (trim(strip_tags($value)) !== '') {
+                $setClauses[] = "$column = '" . SQLite3::escapeString($value) . "'";
+            }
+        }
         if ($metadataImagePath) {
-            $updateQuery .= ", metadata_image = '" . SQLite3::escapeString($metadataImagePath) . "'";
+            $setClauses[] = "metadata_image = '" . SQLite3::escapeString($metadataImagePath) . "'";
         }
         if (!empty($_POST['remove_hero_image'])) {
-            $updateQuery .= ", hero_image = NULL";
+            $setClauses[] = "hero_image = NULL";
         } elseif ($heroImagePath) {
-            $updateQuery .= ", hero_image = '" . SQLite3::escapeString($heroImagePath) . "'";
+            $setClauses[] = "hero_image = '" . SQLite3::escapeString($heroImagePath) . "'";
         }
-        $updateQuery .= " WHERE year = $editYear AND week = $editWeek";
-        query($updateQuery);
+        if ($setClauses) {
+            $setClauses[] = "created_at = datetime('now')";
+            $updateQuery = "UPDATE newsletters SET " . implode(', ', $setClauses) . " WHERE year = $editYear AND week = $editWeek";
+            query($updateQuery);
+        }
     } else {
         // Insert new record
         $insertQuery = "INSERT INTO newsletters (year, week, recap, preview, headline, notes, recap_notes, created_at";

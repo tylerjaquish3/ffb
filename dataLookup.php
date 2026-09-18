@@ -454,6 +454,7 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'best-teams-players') {
         FROM rosters r
         LEFT JOIN canonical c ON c.name = r.player
         WHERE r.player != '' AND r.player != '(Empty)'
+          AND r.year IN (SELECT DISTINCT year FROM finishes)
         GROUP BY COALESCE(c.canonical, r.player)"
     );
 

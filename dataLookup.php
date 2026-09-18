@@ -401,6 +401,89 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'free-agents') {
     die;
 }
 
+if (isset($_GET['dataType']) && $_GET['dataType'] == 'best-teams-players') {
+    $result = query(
+        "WITH canonical AS (
+            SELECT player AS name, player AS canonical FROM player_aliases
+            UNION SELECT alias_1, player FROM player_aliases WHERE alias_1 IS NOT NULL
+            UNION SELECT alias_2, player FROM player_aliases WHERE alias_2 IS NOT NULL
+            UNION SELECT alias_3, player FROM player_aliases WHERE alias_3 IS NOT NULL
+        ),
+        best_finish_per_year AS (
+            SELECT r.year, r.player, MAX(r.position) AS position, MIN(f.finish) AS finish
+            FROM rosters r
+            JOIN managers m ON m.name = r.manager
+            JOIN finishes f ON f.manager_id = m.id AND f.year = r.year
+            WHERE f.finish IN (1, 2)
+              AND r.roster_spot NOT IN ('BN', 'IR')
+              AND r.position NOT IN ('D', 'DL', 'DB', 'LB', 'S', 'CB')
+              AND r.player != '' AND r.player != '(Empty)'
+            GROUP BY r.year, r.player
+        )
+        SELECT COALESCE(c.canonical, bf.player) AS player, bf.position, bf.finish, COUNT(*) AS cnt
+        FROM best_finish_per_year bf
+        LEFT JOIN canonical c ON c.name = bf.player
+        GROUP BY COALESCE(c.canonical, bf.player), bf.position, bf.finish"
+    );
+
+    $players = [];
+    while ($row = fetch_array($result)) {
+        $name = $row['player'];
+        if (!isset($players[$name])) {
+            $players[$name] = ['player' => $name, 'first' => 0, 'second' => 0, 'positions' => []];
+        }
+        if ((int)$row['finish'] === 1) {
+            $players[$name]['first'] += (int)$row['cnt'];
+        } else {
+            $players[$name]['second'] += (int)$row['cnt'];
+        }
+        if (!isset($players[$name]['positions'][$row['position']])) {
+            $players[$name]['positions'][$row['position']] = 0;
+        }
+        $players[$name]['positions'][$row['position']] += (int)$row['cnt'];
+    }
+
+    $careerResult = query(
+        "WITH canonical AS (
+            SELECT player AS name, player AS canonical FROM player_aliases
+            UNION SELECT alias_1, player FROM player_aliases WHERE alias_1 IS NOT NULL
+            UNION SELECT alias_2, player FROM player_aliases WHERE alias_2 IS NOT NULL
+            UNION SELECT alias_3, player FROM player_aliases WHERE alias_3 IS NOT NULL
+        )
+        SELECT COALESCE(c.canonical, r.player) AS player, COUNT(DISTINCT r.year) AS seasons
+        FROM rosters r
+        LEFT JOIN canonical c ON c.name = r.player
+        WHERE r.player != '' AND r.player != '(Empty)'
+        GROUP BY COALESCE(c.canonical, r.player)"
+    );
+
+    $careerSeasons = [];
+    while ($row = fetch_array($careerResult)) {
+        $careerSeasons[$row['player']] = (int)$row['seasons'];
+    }
+
+    $rows = [];
+    foreach ($players as $info) {
+        arsort($info['positions']);
+        $total = $info['first'] + $info['second'];
+        $seasons = isset($careerSeasons[$info['player']]) ? $careerSeasons[$info['player']] : 0;
+        $rows[] = [
+            'player'   => $info['player'],
+            'position' => array_key_first($info['positions']),
+            'seasons'  => $seasons,
+            'first'    => $info['first'],
+            'second'   => $info['second'],
+            'total'    => $total,
+            'pct'      => $seasons > 0 ? round(($total / $seasons) * 100, 1) : 0,
+        ];
+    }
+
+    $content = new \stdClass();
+    $content->data = $rows;
+    echo json_encode($content);
+    die;
+}
+
 if (isset($_GET['dataType']) && $_GET['dataType'] == 'optimal-lineups') {
 
     $selectedSeason = $_GET['season'];

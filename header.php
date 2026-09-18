@@ -17,8 +17,8 @@
     </script>
 
     <title><?php echo isset($pageName) ? $pageName. ' | Suntown FFB' : 'Suntown FFB'; ?></title>
-    <?php $version = "v5.8.7";
-    $vDate = "(09/17/26)"; ?>
+    <?php $version = "v5.8.8";
+    $vDate = "(09/18/26)"; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">
 

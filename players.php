@@ -39,6 +39,7 @@ sort($allTimeManagerNames);
                         <button class="tab-button" id="top-seasons-tab" onclick="showCard('top-seasons', true)">Top Seasons</button>
                         <button class="tab-button" id="top-weeks-tab" onclick="showCard('top-weeks', true)">Top Weeks</button>
                         <button class="tab-button" id="players-by-manager-tab" onclick="showCard('players-by-manager', true)">Players by Manager</button>
+                        <button class="tab-button" id="best-teams-tab" onclick="showCard('best-teams', true)">Top Team Players</button>
                         <button class="tab-button" id="top-performers-all-tab" onclick="showCard('top-performers-all', true)">Top Performers</button>
                         <button class="tab-button" id="free-agents-tab" onclick="showCard('free-agents', true)">Free Agents</button>
                         <button class="tab-button" id="nfl-teams-tab" onclick="showCard('nfl-teams', true)">NFL Teams</button>
@@ -274,6 +275,35 @@ sort($allTimeManagerNames);
                                         }
                                         ?>
                                         </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row card-section" id="best-teams" style="display: none;">
+                <div class="col-sm-12 table-padding">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Players on Best Teams</h4>
+                            <small class="text-white">Active-lineup appearances on 1st or 2nd place teams, all-time</small>
+                        </div>
+                        <div class="card-body" style="direction: ltr;">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-striped nowrap" id="datatable-best-teams">
+                                        <thead>
+                                            <th>Player</th>
+                                            <th>Position</th>
+                                            <th>Seasons in League</th>
+                                            <th>1st Place Seasons</th>
+                                            <th>2nd Place Seasons</th>
+                                            <th>Total</th>
+                                            <th>% of Career on Top Teams</th>
+                                        </thead>
+                                        <tbody></tbody>
                                     </table>
                                 </div>
                             </div>
@@ -788,6 +818,28 @@ sort($allTimeManagerNames);
                     return '<a href="/profile.php?id=' + data + '">' + data + '</a>';
                 }},
                 { data: 'points' }
+            ]
+        });
+
+        $('#datatable-best-teams').DataTable({
+            pageLength: 25,
+            order: [[6, "desc"]],
+            ajax: {
+                url: 'dataLookup.php',
+                data: { dataType: 'best-teams-players' }
+            },
+            columns: [
+                { data: 'player', render: function(data) {
+                    return '<a href="/players.php?player=' + data + '">' + data + '</a>';
+                }},
+                { data: 'position' },
+                { data: 'seasons' },
+                { data: 'first' },
+                { data: 'second' },
+                { data: 'total' },
+                { data: 'pct', render: function(data) {
+                    return data + '%';
+                }}
             ]
         });
 

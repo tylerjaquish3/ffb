@@ -114,7 +114,12 @@ while ($row = fetch_array($result)) {
         document.getElementById(cardId+'-tab').classList.add('active');
     }
     document.addEventListener('DOMContentLoaded', function() {
-        showCard('submit');
+        var hashTab = window.location.hash.substring(1);
+        if (hashTab && document.getElementById(hashTab)) {
+            showCard(hashTab);
+        } else {
+            showCard('submit');
+        }
         // Initialize DataTable for suggestions
         if (window.jQuery && $('#datatable-suggestions').length) {
             $('#datatable-suggestions').DataTable({

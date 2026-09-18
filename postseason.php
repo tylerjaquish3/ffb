@@ -424,8 +424,13 @@ include 'sidebar.php';
             plugins: [ChartDataLabels]
         });
 
-        // Initialize the page with Matchups & Stats tab active
-        showCard('overview');
+        // Initialize the page with the tab from the URL hash if valid, else Overview
+        var hashTab = window.location.hash.substring(1);
+        if (hashTab && document.getElementById(hashTab)) {
+            showCard(hashTab);
+        } else {
+            showCard('overview');
+        }
         
     });
 </script>

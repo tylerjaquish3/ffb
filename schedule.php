@@ -360,10 +360,15 @@ $managerColors = [
             window.location = baseUrl + 'schedule.php?id=' + $('#year-select').val();
         });
         
-        // Initialize the page with Matchups tab active
+        // Initialize the page with the tab from the URL hash if valid, else Matchups
         setTimeout(function() {
             if (typeof showCard === 'function') {
-                showCard('matchups');
+                var hashTab = window.location.hash.substring(1);
+                if (hashTab && document.getElementById(hashTab)) {
+                    showCard(hashTab);
+                } else {
+                    showCard('matchups');
+                }
             }
         }, 100);
         

@@ -642,8 +642,13 @@ include 'sidebar.php';
             $('#datatable-draft').DataTable().page.len(25).draw();
         }
 
-        // Initialize the page with Draft Results tab active
-        showCard('draft-results');
+        // Initialize the page with the tab from the URL hash if valid, else Draft Results
+        var hashTab = window.location.hash.substring(1);
+        if (hashTab && document.getElementById(hashTab)) {
+            showCard(hashTab);
+        } else {
+            showCard('draft-results');
+        }
 
     });
 </script>

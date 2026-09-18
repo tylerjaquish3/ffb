@@ -377,9 +377,14 @@ while ($row = fetch_array($result)) {
         scrollCollapse: true
     });
 
-    // Initialize the page with League Info tab active
+    // Initialize the page with the tab from the URL hash if valid, else League Info
     document.addEventListener('DOMContentLoaded', function() {
-        showCard('league-info');
+        var hashTab = window.location.hash.substring(1);
+        if (hashTab && document.getElementById(hashTab)) {
+            showCard(hashTab);
+        } else {
+            showCard('league-info');
+        }
     });
 
 </script>

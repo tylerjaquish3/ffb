@@ -886,8 +886,13 @@ function lookupGameTime(?int $id) {
             plugins: [ChartDataLabels]
         });
 
-        // Initialize the page with Recap tab active
-        showCard('recap');
+        // Initialize the page with the tab from the URL hash if valid, else Recap
+        var hashTab = window.location.hash.substring(1);
+        if (hashTab && document.getElementById(hashTab)) {
+            showCard(hashTab);
+        } else {
+            showCard('recap');
+        }
 
     });
 </script>

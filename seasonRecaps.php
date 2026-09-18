@@ -718,7 +718,12 @@ foreach ($seasonNumbers as $standings) {
         }
     }
     
-    // Initialize the page with the Overview tab showing
-    showCard('overview');
+    // Initialize the page with the tab from the URL hash if valid, else Overview
+    var hashTab = window.location.hash.substring(1);
+    if (hashTab && document.getElementById(hashTab)) {
+        showCard(hashTab);
+    } else {
+        showCard('overview');
+    }
         
 </script>

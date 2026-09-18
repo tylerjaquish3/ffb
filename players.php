@@ -548,8 +548,13 @@ sort($allTimeManagerNames);
     }
 
     $(document).ready(function() {
-        // Initialize with All Players tab active
-        showCard('all-players', true);
+        // Show the tab from the URL hash (e.g. players.php#best-teams) if valid, else default to All Players
+        var hashTab = window.location.hash.substring(1);
+        if (hashTab && document.getElementById(hashTab)) {
+            showCard(hashTab, true);
+        } else {
+            showCard('all-players', true);
+        }
 
 
         $('#datatable-players-by-manager').DataTable({

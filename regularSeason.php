@@ -1280,8 +1280,13 @@ include 'sidebar.php';
             "info": false,
         });
         
-        // Initialize the page with Matchups & Stats tab active
-        showCard('matchups-stats');
+        // Initialize the page with the tab from the URL hash if valid, else Matchups & Stats
+        var hashTab = window.location.hash.substring(1);
+        if (hashTab && document.getElementById(hashTab)) {
+            showCard(hashTab);
+        } else {
+            showCard('matchups-stats');
+        }
         
         // Points by Season Chart functionality
         window.pointsByWeekChart = null;

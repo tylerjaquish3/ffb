@@ -1569,9 +1569,14 @@ include 'sidebar.php';
         });
     });
 
-    // Initialize the page with Performance Stats tab active
+    // Initialize the page with the tab from the URL hash if valid, else Performance Stats
     document.addEventListener('DOMContentLoaded', function() {
-        showCard('performance-stats');
+        var hashTab = window.location.hash.substring(1);
+        if (hashTab && document.getElementById(hashTab)) {
+            showCard(hashTab);
+        } else {
+            showCard('performance-stats');
+        }
     });
 </script>
 

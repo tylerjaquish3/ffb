@@ -484,9 +484,15 @@
 <script>
 $(document).ready(function() {
 
-    // Auto-switch to Record Log tab when a filter is active in the URL
+    // Show the tab from the URL hash if valid, else auto-switch to Record Log when a filter is active
+    var hashTab = window.location.hash.substring(1);
+    if (hashTab && document.getElementById(hashTab)) {
+        showCard(hashTab);
+    }
     <?php if (!empty($selected_fun_fact_id) || !empty($selected_manager_id)): ?>
-    showCard('pane-record-log');
+    else {
+        showCard('pane-record-log');
+    }
     <?php endif; ?>
 
     // Adjust new-leaders DataTable when its tab becomes visible

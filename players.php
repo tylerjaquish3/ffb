@@ -293,6 +293,7 @@ sort($allTimeManagerNames);
                         <div class="card-body" style="direction: ltr;">
                             <div class="row">
                                 <div class="col-sm-12">
+                                    <div style="overflow-x: auto;">
                                     <table class="table table-striped nowrap" id="datatable-best-teams">
                                         <thead>
                                             <th>Player</th>
@@ -305,6 +306,7 @@ sort($allTimeManagerNames);
                                         </thead>
                                         <tbody></tbody>
                                     </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -522,6 +524,10 @@ sort($allTimeManagerNames);
     }
     .nfl-high {
         background: #eaffea !important;
+    }
+    #datatable-best-teams td:first-child,
+    #datatable-best-teams th:first-child {
+        white-space: nowrap !important;
     }
 </style>
 

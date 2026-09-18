@@ -468,6 +468,11 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'best-teams-players') {
         arsort($info['positions']);
         $total = $info['first'] + $info['second'];
         $seasons = isset($careerSeasons[$info['player']]) ? $careerSeasons[$info['player']] : 0;
+
+        if ($seasons <= 1) {
+            continue;
+        }
+
         $rows[] = [
             'player'   => $info['player'],
             'position' => array_key_first($info['positions']),

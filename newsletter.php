@@ -132,6 +132,17 @@ $vDate = "(05/19/26)";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($customMetaTitle); ?></title>
 
+    <?php if ($APP_ENV === 'production'): ?>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2B6X5W9X3W"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-2B6X5W9X3W');
+    </script>
+    <?php endif; ?>
+
     <meta property="og:title" content="<?php echo htmlspecialchars($customMetaTitle); ?>" />
     <meta property="og:description" content="<?php echo htmlspecialchars($customMetaDescription); ?>" />
     <meta property="og:url" content="http://suntownffb.us/newsletter.php" />

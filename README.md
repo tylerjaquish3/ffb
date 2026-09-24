@@ -137,10 +137,7 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 ## Charts Page Additions
 
 - **Point Distribution Violin/Box Plot** — show the spread of scores, not just averages. Who is consistently mediocre vs. who has wild swings?
-- **Head-to-Head Win% Heatmap** — 10×10 grid, each cell colored by how often manager A beats manager B all-time. Visually striking and immediately creates conversation.
-- **"Lucky vs. Good" Scatter Plot** — X-axis: points scored, Y-axis: actual wins. Managers above the line won more than their points deserved (lucky); below the line are unlucky. Per season or all-time.
 - **Week-by-Week Points Bump Chart** — animated bump chart showing each manager's rank by total points scored, week by week through a season.
-- **Optimal Lineup % Over Time** — line chart showing if managers got smarter about setting lineups over the years. Do some managers chronically leave points on the bench?
 - **Score Distribution Bell Curve Overlay** — all scores in league history as a histogram with a normal curve overlay. Mark where each manager's average falls.
 
 ## Animations / Dashboard Intro

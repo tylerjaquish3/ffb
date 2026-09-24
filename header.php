@@ -1,3 +1,4 @@
+<?php include_once 'connections.php'; ?>
 <!DOCTYPE html>
 <html lang="en" data-textdirection="rtl" class="loading">
 
@@ -7,6 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 
+    <?php if ($APP_ENV === 'production'): ?>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-2B6X5W9X3W"></script>
     <script>
@@ -15,9 +17,10 @@
         gtag('js', new Date());
         gtag('config', 'G-2B6X5W9X3W');
     </script>
+    <?php endif; ?>
 
     <title><?php echo isset($pageName) ? $pageName. ' | Suntown FFB' : 'Suntown FFB'; ?></title>
-    <?php $version = "v5.8.9";
+    <?php $version = "v5.8.10";
     $vDate = "(09/24/26)"; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">

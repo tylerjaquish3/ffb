@@ -222,7 +222,8 @@ function getPlayerPoints($draftPlayerName, $playerPts, $aliasLookup) {
                                     // Now get projection data for Tyler's players from draft database
                                     $playerProjections = [];
                                     if (!empty($tylerPlayers)) {
-                                        $playerNames = "'" . implode("','", array_map('addslashes', $tylerPlayers)) . "'";
+                                        $sqliteEscape = fn($name) => str_replace("'", "''", $name);
+                                        $playerNames = "'" . implode("','", array_map($sqliteEscape, $tylerPlayers)) . "'";
                                         $aliasNames = [];
                                         
                                         // Also check for aliases that might match Tyler's players
@@ -234,7 +235,7 @@ function getPlayerPoints($draftPlayerName, $playerPts, $aliasLookup) {
                                         
                                         $allNames = $playerNames;
                                         if (!empty($aliasNames)) {
-                                            $aliasNamesStr = "'" . implode("','", array_map('addslashes', $aliasNames)) . "'";
+                                            $aliasNamesStr = "'" . implode("','", array_map($sqliteEscape, $aliasNames)) . "'";
                                             $allNames = $playerNames . "," . $aliasNamesStr;
                                         }
 

@@ -1,6 +1,6 @@
 <?php
 
-include 'connections.php';
+include_once 'connections.php';
 include 'data/currentSeason.php';
 
 // phpinfo(); exit;

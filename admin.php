@@ -114,97 +114,154 @@ function showCard(cardId) {
 
 <?php include 'footer.php'; ?>
 
-<!-- CKEditor for Newsletter tab -->
-<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/47.3.0/ckeditor5.css" crossorigin>
-<script src="https://cdn.ckeditor.com/ckeditor5/47.3.0/ckeditor5.umd.js" crossorigin></script>
-<script src="https://cdn.ckbox.io/ckbox/2.9.2/ckbox.js" crossorigin></script>
-
 <script>
 var access_token = null;
 
 $( document ).ready( () => {
 
     var newsletterDirty = false;
+    var ckeditorAssetsPromise = null;
+    var recapEditorsLoaded = false;
+    var previewEditorsLoaded = false;
 
-    const {
-        ClassicEditor,Autoformat,AutoImage,Autosave,BlockQuote,Bold,Emoji,
-        Essentials,Heading,Indent,IndentBlock,Italic,Link,List,MediaEmbed,Mention,Paragraph,
-        Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline
-    } = CKEDITOR;
+    // CKEditor counts against a monthly usage limit, so its CSS/JS are only
+    // fetched - and editor instances only created - when the Recap or Preview
+    // sub-tab of the Newsletter tab is actually opened, not on every page load.
+    function loadCKEditorAssets() {
+        if (ckeditorAssetsPromise) return ckeditorAssetsPromise;
 
-    let plugins = [
-        Autoformat,AutoImage,Autosave,BlockQuote,Bold,Emoji,
-        Essentials,Heading,Indent,IndentBlock,Italic,Link,List,MediaEmbed,Mention,Paragraph,
-        Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline
-    ];
+        ckeditorAssetsPromise = new Promise(function(resolve, reject) {
+            var cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = 'https://cdn.ckeditor.com/ckeditor5/47.3.0/ckeditor5.css';
+            cssLink.crossOrigin = 'anonymous';
+            document.head.appendChild(cssLink);
 
-    let toolbar = ['undo','redo','|',
-        'heading','|',
-        'bold','italic','underline','|',
-        'emoji','link','mediaEmbed','insertTable','blockQuote','|',
-        'bulletedList','numberedList','todoList','outdent','indent'
-    ];
-
-    // Initialize CKEditor for newsletter tab textareas (only if they exist)
-    if ($('textarea#newsletter-recap').length) {
-        ClassicEditor.create( $( 'textarea#newsletter-recap' )[ 0 ], {
-            licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
-            plugins: plugins,
-            toolbar: toolbar
-        })
-        .then( editor => {
-            window.newsletterRecapEditor = editor;
-            editor.model.document.on('change:data', function() { newsletterDirty = true; });
-        })
-        .catch( error => {
-            console.error( 'Error initializing CKEditor 5 for recap:', error );
+            var editorScript = document.createElement('script');
+            editorScript.src = 'https://cdn.ckeditor.com/ckeditor5/47.3.0/ckeditor5.umd.js';
+            editorScript.crossOrigin = 'anonymous';
+            editorScript.onload = function() {
+                var ckboxScript = document.createElement('script');
+                ckboxScript.src = 'https://cdn.ckbox.io/ckbox/2.9.2/ckbox.js';
+                ckboxScript.crossOrigin = 'anonymous';
+                ckboxScript.onload = resolve;
+                ckboxScript.onerror = reject;
+                document.body.appendChild(ckboxScript);
+            };
+            editorScript.onerror = reject;
+            document.body.appendChild(editorScript);
         });
+
+        return ckeditorAssetsPromise;
     }
 
-    if ($('textarea#preview').length) {
-        ClassicEditor.create( $( 'textarea#preview' )[ 0 ], {
-            licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
-            plugins: plugins,
-            toolbar: toolbar
-        })
-        .then( editor => {
-            window.newsletterPreviewEditor = editor;
-            editor.model.document.on('change:data', function() { newsletterDirty = true; });
-        })
-        .catch( error => {
-            console.error( 'Error initializing CKEditor 5 for preview:', error );
-        });
+    function ckeditorPluginsAndToolbar() {
+        const {
+            Autoformat,AutoImage,Autosave,BlockQuote,Bold,Emoji,
+            Essentials,Heading,Indent,IndentBlock,Italic,Link,List,MediaEmbed,Mention,Paragraph,
+            Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline
+        } = CKEDITOR;
+
+        return {
+            plugins: [
+                Autoformat,AutoImage,Autosave,BlockQuote,Bold,Emoji,
+                Essentials,Heading,Indent,IndentBlock,Italic,Link,List,MediaEmbed,Mention,Paragraph,
+                Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline
+            ],
+            toolbar: ['undo','redo','|',
+                'heading','|',
+                'bold','italic','underline','|',
+                'emoji','link','mediaEmbed','insertTable','blockQuote','|',
+                'bulletedList','numberedList','todoList','outdent','indent'
+            ]
+        };
     }
 
-    if ($('textarea#newsletter-recap-notes').length) {
-        ClassicEditor.create( $( 'textarea#newsletter-recap-notes' )[ 0 ], {
-            licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
-            plugins: plugins,
-            toolbar: toolbar
-        })
-        .then( editor => {
-            window.newsletterRecapNotesEditor = editor;
-            editor.model.document.on('change:data', function() { newsletterDirty = true; });
-        })
-        .catch( error => {
-            console.error( 'Error initializing CKEditor 5 for recap-notes:', error );
-        });
-    }
+    // Recap sub-tab: recap notes + recap textareas
+    window.loadRecapEditors = function() {
+        if (recapEditorsLoaded) return;
+        recapEditorsLoaded = true;
 
-    if ($('textarea#newsletter-notes').length) {
-        ClassicEditor.create( $( 'textarea#newsletter-notes' )[ 0 ], {
-            licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
-            plugins: plugins,
-            toolbar: toolbar
-        })
-        .then( editor => {
-            window.newsletterNotesEditor = editor;
-            editor.model.document.on('change:data', function() { newsletterDirty = true; });
-        })
-        .catch( error => {
-            console.error( 'Error initializing CKEditor 5 for notes:', error );
+        loadCKEditorAssets().then(function() {
+            const { ClassicEditor } = CKEDITOR;
+            const { plugins, toolbar } = ckeditorPluginsAndToolbar();
+
+            if ($('textarea#newsletter-recap-notes').length) {
+                ClassicEditor.create( $( 'textarea#newsletter-recap-notes' )[ 0 ], {
+                    licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
+                    plugins: plugins,
+                    toolbar: toolbar
+                })
+                .then( editor => {
+                    window.newsletterRecapNotesEditor = editor;
+                    editor.model.document.on('change:data', function() { newsletterDirty = true; });
+                })
+                .catch( error => {
+                    console.error( 'Error initializing CKEditor 5 for recap-notes:', error );
+                });
+            }
+
+            if ($('textarea#newsletter-recap').length) {
+                ClassicEditor.create( $( 'textarea#newsletter-recap' )[ 0 ], {
+                    licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
+                    plugins: plugins,
+                    toolbar: toolbar
+                })
+                .then( editor => {
+                    window.newsletterRecapEditor = editor;
+                    editor.model.document.on('change:data', function() { newsletterDirty = true; });
+                })
+                .catch( error => {
+                    console.error( 'Error initializing CKEditor 5 for recap:', error );
+                });
+            }
+        }).catch(function(err) {
+            console.error('Failed to load CKEditor:', err);
         });
-    }
+    };
+
+    // Preview sub-tab: preview notes + preview textareas
+    window.loadPreviewEditors = function() {
+        if (previewEditorsLoaded) return;
+        previewEditorsLoaded = true;
+
+        loadCKEditorAssets().then(function() {
+            const { ClassicEditor } = CKEDITOR;
+            const { plugins, toolbar } = ckeditorPluginsAndToolbar();
+
+            if ($('textarea#newsletter-notes').length) {
+                ClassicEditor.create( $( 'textarea#newsletter-notes' )[ 0 ], {
+                    licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
+                    plugins: plugins,
+                    toolbar: toolbar
+                })
+                .then( editor => {
+                    window.newsletterNotesEditor = editor;
+                    editor.model.document.on('change:data', function() { newsletterDirty = true; });
+                })
+                .catch( error => {
+                    console.error( 'Error initializing CKEditor 5 for notes:', error );
+                });
+            }
+
+            if ($('textarea#preview').length) {
+                ClassicEditor.create( $( 'textarea#preview' )[ 0 ], {
+                    licenseKey: '<?php echo $CKEDITOR_LICENSE; ?>',
+                    plugins: plugins,
+                    toolbar: toolbar
+                })
+                .then( editor => {
+                    window.newsletterPreviewEditor = editor;
+                    editor.model.document.on('change:data', function() { newsletterDirty = true; });
+                })
+                .catch( error => {
+                    console.error( 'Error initializing CKEditor 5 for preview:', error );
+                });
+            }
+        }).catch(function(err) {
+            console.error('Failed to load CKEditor:', err);
+        });
+    };
 
     // Yahoo API functionality - Manager selection
     $('input[name="managers[]"][value="all"]').change(function() {

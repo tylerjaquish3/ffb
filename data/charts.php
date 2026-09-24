@@ -106,6 +106,175 @@ function getCareerPointsRaceData()
     ];
 }
 
+// Animated bar chart race for career win totals — stepping week by week
+// through each regular season and then through that year's playoff bracket
+// (Quarterfinal -> Semifinal -> Final), with wins accumulating across the
+// manager's whole career rather than resetting each season.
+//
+// Returns:
+//   [
+//     'managers' => [mid => ['name' => ..., 'color' => ...], ...],
+//     'frames'   => [
+//        ['year' => 2006, 'phase' => 'regular', 'week' => 1,
+//         'label' => '2006 — Week 1', 'values' => [mid => career_wins_so_far, ...]],
+//        ...
+//        ['year' => 2006, 'phase' => 'playoff', 'round' => 'Quarterfinal',
+//         'label' => '2006 — Quarterfinal', 'values' => [...]],
+//        ['year' => 2006, 'phase' => 'playoff', 'round' => 'Final',
+//         'label' => '2006 — Final', 'values' => [...], 'championMid' => 8],
+//        ...
+//     ],
+//     'segments' => [mid => [['type' => 'regular', 'through' => 11],
+//                             ['type' => 'playoff', 'through' => 12],
+//                             ['type' => 'regular', 'through' => 23], ...], ...],
+//   ]
+//
+// `segments` is each manager's career win total broken into alternating
+// regular-season/playoff stretches, in chronological order, as a list of
+// running-total breakpoints. The renderer walks a manager's segments up to
+// their current frame value and shades whichever stretches are playoff wins
+// darker — so postseason wins show up right where they happened along the
+// bar (once each season, right after that year's regular-season stretch)
+// instead of all being pooled at the end of the bar.
+//
+// A manager is added to `values` (starting at 0) the season they first play
+// (covers the 2006-2007 seasons, which had 8 managers rather than the
+// current 10) and stays on the board every frame after that. A season with
+// no playoff rows yet (the in-progress current season) simply ends after
+// its last played regular-season week — no playoff frames, no `championMid`.
+function getSeasonWinsRaceData()
+{
+    $palette = getChartsManagerPalette();
+
+    $managers = [];
+    $res = query("SELECT id, name FROM managers ORDER BY id");
+    while ($row = fetch_array($res)) {
+        $mid = (int) $row['id'];
+        $managers[$mid] = [
+            'name'  => $row['name'],
+            'color' => $palette[$mid] ?? '#9c68d9',
+        ];
+    }
+
+    // weeklyWins[year][week][mid] = 1 or 0
+    $weeklyWins  = [];
+    $weeksByYear = []; // year => ordered list of week numbers
+
+    $res = query("SELECT year, week_number, manager1_id,
+                         CASE WHEN manager1_score > manager2_score THEN 1 ELSE 0 END AS win
+                  FROM regular_season_matchups
+                  ORDER BY year ASC, week_number ASC");
+    while ($row = fetch_array($res)) {
+        $y   = (int) $row['year'];
+        $w   = (int) $row['week_number'];
+        $mid = (int) $row['manager1_id'];
+        if (!isset($weeklyWins[$y][$w])) {
+            $weeklyWins[$y][$w] = [];
+            if (!isset($weeksByYear[$y]) || !in_array($w, $weeksByYear[$y], true)) {
+                $weeksByYear[$y][] = $w;
+            }
+        }
+        $weeklyWins[$y][$w][$mid] = (int) $row['win'];
+    }
+
+    // playoffRounds[year][round] = [[winnerMid], ...] one entry per game
+    $roundOrder    = ['Quarterfinal', 'Semifinal', 'Final'];
+    $playoffRounds = [];
+
+    $res = query("SELECT year, round, manager1_id, manager2_id, manager1_score, manager2_score
+                  FROM playoff_matchups");
+    while ($row = fetch_array($res)) {
+        $y      = (int) $row['year'];
+        $round  = $row['round'];
+        $s1     = (float) $row['manager1_score'];
+        $s2     = (float) $row['manager2_score'];
+        $winner = $s1 > $s2 ? (int) $row['manager1_id'] : (int) $row['manager2_id'];
+        $playoffRounds[$y][$round][] = $winner;
+    }
+
+    $years = array_keys($weeksByYear);
+    sort($years);
+
+    $frames   = [];
+    $running  = []; // mid => career wins so far, carried across seasons
+    $segments = []; // mid => [['type' => 'regular'|'playoff', 'through' => N], ...]
+    foreach ($years as $year) {
+        $weeks = $weeksByYear[$year];
+        sort($weeks);
+
+        // Managers active this season, in a stable order. A manager new to
+        // the league this year joins the board at 0 without disturbing
+        // anyone else's running total.
+        $activeMidSet = [];
+        foreach ($weeklyWins[$year] as $weekWins) {
+            foreach ($weekWins as $mid => $win) {
+                $activeMidSet[$mid] = true;
+            }
+        }
+        foreach ($managers as $mid => $info) {
+            if (isset($activeMidSet[$mid]) && !isset($running[$mid])) {
+                $running[$mid] = 0;
+            }
+        }
+
+        foreach ($weeks as $week) {
+            foreach ($weeklyWins[$year][$week] as $mid => $win) {
+                $running[$mid] = ($running[$mid] ?? 0) + $win;
+            }
+            $frames[] = [
+                'year'   => $year,
+                'phase'  => 'regular',
+                'week'   => $week,
+                'label'  => $year . ' — Week ' . $week,
+                'values' => $running,
+            ];
+        }
+
+        // Close out this year's regular-season stretch for every manager
+        // currently on the board, whether or not their total moved.
+        foreach ($running as $mid => $val) {
+            $segments[$mid][] = ['type' => 'regular', 'through' => $val];
+        }
+
+        if (empty($playoffRounds[$year])) {
+            continue; // in-progress season, no playoff results yet
+        }
+
+        foreach ($roundOrder as $round) {
+            if (empty($playoffRounds[$year][$round])) {
+                continue;
+            }
+            foreach ($playoffRounds[$year][$round] as $winnerMid) {
+                $running[$winnerMid] = ($running[$winnerMid] ?? 0) + 1;
+            }
+            $frame = [
+                'year'   => $year,
+                'phase'  => 'playoff',
+                'round'  => $round,
+                'label'  => $year . ' — ' . $round,
+                'values' => $running,
+            ];
+            if ($round === 'Final') {
+                $frame['championMid'] = $playoffRounds[$year][$round][0];
+            }
+            $frames[] = $frame;
+        }
+
+        // Close out this year's playoff stretch for every manager on the
+        // board (a no-op, zero-length segment for anyone who didn't make
+        // the playoffs — their bar just stays the base color there).
+        foreach ($running as $mid => $val) {
+            $segments[$mid][] = ['type' => 'playoff', 'through' => $val];
+        }
+    }
+
+    return [
+        'managers' => $managers,
+        'segments' => $segments,
+        'frames'   => $frames,
+    ];
+}
+
 // Treemap of points by position per manager, one snapshot per
 // (year, week) in the regular season.
 //
@@ -262,5 +431,181 @@ function getLineupAccuracyData()
     return [
         'seasons' => $seasons,
         'series'  => $series,
+    ];
+}
+
+// Head-to-head win% heatmap — all-time record for every ordered manager
+// pair (A vs B), combining regular season + playoffs.
+//
+// Regular season matchups already store one row per manager per game (see
+// CLAUDE.md), so manager1_id = A AND manager2_id = B covers A's side of
+// every meeting without double-counting. Playoff matchups store one row
+// per game total, so both manager1/manager2 orderings must be checked.
+//
+// Returns:
+//   [
+//     'managers' => [['mid' => 1, 'name' => 'Tyler', 'color' => '#...'], ...],
+//     'matrix'   => [mid => [opponentMid => ['wins' => .., 'total' => .., 'winPct' => ..], ...], ...],
+//   ]
+//
+// `matrix[$a][$a]` is omitted (no self matchups). Pairs with zero career
+// meetings are also omitted (none exist among the 10 original managers).
+function getHeadToHeadHeatmapData()
+{
+    $palette = getChartsManagerPalette();
+
+    $managers = [];
+    $res = query("SELECT id, name FROM managers ORDER BY id");
+    while ($row = fetch_array($res)) {
+        $mid = (int) $row['id'];
+        $managers[] = [
+            'mid'   => $mid,
+            'name'  => $row['name'],
+            'color' => $palette[$mid] ?? '#9c68d9',
+        ];
+    }
+
+    $wins  = []; // wins[$a][$b] = number of times $a beat $b
+    $total = []; // total[$a][$b] = number of times $a and $b played
+
+    $res = query("SELECT manager1_id AS a, manager2_id AS b,
+                         SUM(CASE WHEN manager1_score > manager2_score THEN 1 ELSE 0 END) AS w,
+                         COUNT(*) AS t
+                  FROM regular_season_matchups
+                  GROUP BY manager1_id, manager2_id");
+    while ($row = fetch_array($res)) {
+        $a = (int) $row['a'];
+        $b = (int) $row['b'];
+        $wins[$a][$b]  = ($wins[$a][$b]  ?? 0) + (int) $row['w'];
+        $total[$a][$b] = ($total[$a][$b] ?? 0) + (int) $row['t'];
+    }
+
+    $res = query("SELECT manager1_id AS m1, manager2_id AS m2,
+                         manager1_score AS s1, manager2_score AS s2
+                  FROM playoff_matchups");
+    while ($row = fetch_array($res)) {
+        $m1 = (int) $row['m1'];
+        $m2 = (int) $row['m2'];
+        $s1 = (float) $row['s1'];
+        $s2 = (float) $row['s2'];
+
+        $total[$m1][$m2] = ($total[$m1][$m2] ?? 0) + 1;
+        $total[$m2][$m1] = ($total[$m2][$m1] ?? 0) + 1;
+        if ($s1 > $s2) {
+            $wins[$m1][$m2] = ($wins[$m1][$m2] ?? 0) + 1;
+        } elseif ($s2 > $s1) {
+            $wins[$m2][$m1] = ($wins[$m2][$m1] ?? 0) + 1;
+        }
+    }
+
+    $matrix = [];
+    foreach ($managers as $ma) {
+        $a = $ma['mid'];
+        foreach ($managers as $mb) {
+            $b = $mb['mid'];
+            if ($a === $b) continue;
+            $t = $total[$a][$b] ?? 0;
+            if ($t <= 0) continue;
+            $w = $wins[$a][$b] ?? 0;
+            $matrix[$a][$b] = [
+                'wins'   => $w,
+                'total'  => $t,
+                'winPct' => round($w * 100 / $t, 1),
+            ];
+        }
+    }
+
+    return [
+        'managers' => $managers,
+        'matrix'   => $matrix,
+    ];
+}
+
+// "Lucky vs. Good" scatter data — points scored vs. wins, regular season
+// only (playoff seeding would muddy what "wins" means here).
+//
+// Returns:
+//   [
+//     'managers' => [['mid' => 1, 'name' => 'Tyler', 'color' => '#...'], ...],
+//     'seasons'  => [['mid' => 1, 'name' => 'Tyler', 'color' => '#...',
+//                     'year' => 2006, 'points' => 2264.12, 'wins' => 3, 'games' => 13], ...],
+//     'career'   => [['mid' => 1, 'name' => 'Tyler', 'color' => '#...',
+//                     'points' => 51234.5, 'wins' => 142, 'games' => 300], ...],
+//   ]
+//
+// `seasons` has one row per manager per year; `career` sums those into one
+// row per manager. The renderer fits its own regression line client-side
+// for whichever set is on screen.
+function getLuckVsGoodData()
+{
+    $palette = getChartsManagerPalette();
+
+    $managers = [];
+    $res = query("SELECT id, name FROM managers ORDER BY id");
+    while ($row = fetch_array($res)) {
+        $mid = (int) $row['id'];
+        $managers[$mid] = [
+            'mid'   => $mid,
+            'name'  => $row['name'],
+            'color' => $palette[$mid] ?? '#9c68d9',
+        ];
+    }
+
+    $sql = "SELECT year, manager1_id AS mid,
+                   COUNT(*) AS games,
+                   SUM(manager1_score) AS pts,
+                   SUM(CASE WHEN manager1_score > manager2_score THEN 1 ELSE 0 END) AS wins
+            FROM regular_season_matchups
+            GROUP BY year, manager1_id
+            ORDER BY year ASC, manager1_id ASC";
+
+    $seasons = [];
+    $careerTotals = []; // mid => ['points' => .., 'wins' => .., 'games' => ..]
+
+    $res = query($sql);
+    while ($row = fetch_array($res)) {
+        $mid    = (int) $row['mid'];
+        $year   = (int) $row['year'];
+        $points = round((float) $row['pts'], 2);
+        $wins   = (int) $row['wins'];
+        $games  = (int) $row['games'];
+
+        if (!isset($managers[$mid])) continue;
+
+        $seasons[] = [
+            'mid'    => $mid,
+            'name'   => $managers[$mid]['name'],
+            'color'  => $managers[$mid]['color'],
+            'year'   => $year,
+            'points' => $points,
+            'wins'   => $wins,
+            'games'  => $games,
+        ];
+
+        if (!isset($careerTotals[$mid])) {
+            $careerTotals[$mid] = ['points' => 0, 'wins' => 0, 'games' => 0];
+        }
+        $careerTotals[$mid]['points'] += $points;
+        $careerTotals[$mid]['wins']   += $wins;
+        $careerTotals[$mid]['games']  += $games;
+    }
+
+    $career = [];
+    foreach ($managers as $mid => $info) {
+        if (!isset($careerTotals[$mid])) continue;
+        $career[] = [
+            'mid'    => $mid,
+            'name'   => $info['name'],
+            'color'  => $info['color'],
+            'points' => round($careerTotals[$mid]['points'], 2),
+            'wins'   => $careerTotals[$mid]['wins'],
+            'games'  => $careerTotals[$mid]['games'],
+        ];
+    }
+
+    return [
+        'managers' => array_values($managers),
+        'seasons'  => $seasons,
+        'career'   => $career,
     ];
 }

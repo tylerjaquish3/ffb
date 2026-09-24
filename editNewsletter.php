@@ -492,6 +492,12 @@ function updateURL() {
             navItems.forEach(function(navItem) {
                 navItem.classList.toggle('active', navItem === item);
             });
+
+            if (target === 'newsletter-section-recap' && typeof window.loadRecapEditors === 'function') {
+                window.loadRecapEditors();
+            } else if (target === 'newsletter-section-preview' && typeof window.loadPreviewEditors === 'function') {
+                window.loadPreviewEditors();
+            }
         });
     });
 })();

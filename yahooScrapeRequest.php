@@ -186,19 +186,16 @@ function handle_scraped_matchups(array $matchups, int $year): int
  * same lookup_week() the API path uses, now shared via
  * yahooSharedFunctions.php rather than reimplemented here.
  *
- * IMPORTANT CAVEAT: unlike handle_scraped_team_names()/
- * handle_scraped_matchups(), the extractor this reads from
- * (extractTrades() in scrape.js) has never been exercised against a real
- * trade row — investigated 2026-09-15: the current 2026 league has had
- * zero trades all season (confirmed both by the live Yahoo page and by
- * this exact `trades` table already having zero 2026 rows), and this
- * scraping account isn't in any other reachable league/season with a
- * trade to check against either. Its non-empty-row parsing is therefore a
- * best-effort structural inference, not a verified pattern (see
- * scrape.js's extractTrades() for the full reasoning). The caller below
- * surfaces an extra caution banner whenever this actually writes 1+ rows,
- * so a real trade is never silently trusted the first time this runs
- * against one.
+ * UPDATE 2026-09-24: the first real trade of the season exposed the
+ * original extractTrades() (written against zero real examples — see its
+ * 2026-09-15 caveat, since superseded) as wrong: it checked a `title`
+ * attribute that doesn't exist on the trade icon, so every trade row was
+ * silently skipped as "non-trade" and this handler never received any
+ * rows to write. Re-verified against a real captured 3-for-3 trade
+ * (scraper/inspection-output/trades-1790273142158/) — see scrape.js's
+ * extractTrades() for the full corrected parsing logic and reasoning. The
+ * caller below still surfaces an extra caution banner the first time this
+ * writes 1+ rows in a given admin run, as a manual sanity check.
  */
 function handle_scraped_trades(array $trades, int $year): int
 {

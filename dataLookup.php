@@ -793,9 +793,9 @@ if (isset($_GET['dataType']) && $_GET['dataType'] == 'get-season-ranks') {
 
         $content[] = [
             'Week'          => $week,
-            'Rank'          => $rank,
+            'Weekly Rank'   => ordinalSuffix($rank),
             'Opponent'      => $opponents[$week],
-            'Opponent Rank' => $oppRanks[$week],
+            'Opponent Rank' => ordinalSuffix($oppRanks[$week]),
             'Result'        => $rank < $oppRanks[$week] ? 'Win' : 'Loss',
             // 'R'             => '<a href="/rosters.php?year='.$year.'&week='.$week.'&manager='.$manager.'"><i class="icon-clipboard"></i></a>'
         ];

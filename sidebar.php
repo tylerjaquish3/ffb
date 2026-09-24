@@ -33,10 +33,22 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <li><a href="/profile.php?id=Tyler" data-i18n="nav.page_layouts.1_column" class="menu-item">Tyler</a></li>
                 </ul>
             </li>
-            <li class="nav-item<?php if ($currentPage == 'seasonRecaps.php') echo ' active'; ?>">
-                <a href="/seasonRecaps.php">
-                    <i class="icon-map"></i>
-                    <span data-i18n="nav.dash.main" class="menu-title">Season Recaps</span>
+            <li class="nav-item<?php if ($currentPage == 'draft.php') echo ' active'; ?>">
+                <a href="/draft.php">
+                    <i class="icon-table"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">Draft</span>
+                </a>
+            </li>
+            <li class="nav-item<?php if ($currentPage == 'schedule.php') echo ' active'; ?>">
+                <a href="/schedule.php">
+                    <i class="icon-calendar"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">Schedule</span>
+                </a>
+            </li>
+            <li class="nav-item<?php if ($currentPage == 'currentSeason.php') echo ' active'; ?>">
+                <a href="/currentSeason.php">
+                    <i class="icon-clock"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">Current Season</span>
                 </a>
             </li>
             <li class="nav-item<?php if ($currentPage == 'regularSeason.php') echo ' active'; ?>">
@@ -51,10 +63,22 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <span data-i18n="nav.dash.main" class="menu-title">Postseason</span>
                 </a>
             </li>
-            <li class="nav-item<?php if ($currentPage == 'charts.php') echo ' active'; ?>">
-                <a href="/charts.php">
-                    <i class="icon-line-chart"></i>
-                    <span data-i18n="nav.dash.main" class="menu-title">Charts</span>
+            <li class="nav-item<?php if ($currentPage == 'seasonRecaps.php') echo ' active'; ?>">
+                <a href="/seasonRecaps.php">
+                    <i class="icon-map"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">Season Recaps</span>
+                </a>
+            </li>
+            <li class="nav-item<?php if ($currentPage == 'rosters.php') echo ' active'; ?>">
+                <a href="/rosters.php">
+                    <i class="icon-clipboard"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">Rosters</span>
+                </a>
+            </li>
+            <li class="nav-item<?php if ($currentPage == 'players.php') echo ' active'; ?>">
+                <a href="/players.php">
+                    <i class="icon-user"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">Players</span>
                 </a>
             </li>
             <li class="nav-item<?php if ($currentPage == 'awards.php') echo ' active'; ?>">
@@ -75,40 +99,22 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <span data-i18n="nav.dash.main" class="menu-title">Milestones</span>
                 </a>
             </li>
+            <li class="nav-item<?php if ($currentPage == 'charts.php') echo ' active'; ?>">
+                <a href="/charts.php">
+                    <i class="icon-line-chart"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">Charts</span>
+                </a>
+            </li>
             <li class="nav-item<?php if ($currentPage == 'whatIf.php') echo ' active'; ?>">
                 <a href="/whatIf.php">
                     <i class="icon-question"></i>
                     <span data-i18n="nav.dash.main" class="menu-title">What If</span>
                 </a>
             </li>
-            <li class="nav-item<?php if ($currentPage == 'draft.php') echo ' active'; ?>">
-                <a href="/draft.php">
-                    <i class="icon-table"></i>
-                    <span data-i18n="nav.dash.main" class="menu-title">Draft</span>
-                </a>
-            </li>
-            <li class="nav-item<?php if ($currentPage == 'rosters.php') echo ' active'; ?>">
-                <a href="/rosters.php">
-                    <i class="icon-clipboard"></i>
-                    <span data-i18n="nav.dash.main" class="menu-title">Rosters</span>
-                </a>
-            </li>
-            <li class="nav-item<?php if ($currentPage == 'players.php') echo ' active'; ?>">
-                <a href="/players.php">
-                    <i class="icon-user"></i>
-                    <span data-i18n="nav.dash.main" class="menu-title">Players</span>
-                </a>
-            </li>
-            <li class="nav-item<?php if ($currentPage == 'schedule.php') echo ' active'; ?>">
-                <a href="/schedule.php">
-                    <i class="icon-calendar"></i>
-                    <span data-i18n="nav.dash.main" class="menu-title">Schedule</span>
-                </a>
-            </li>
-            <li class="nav-item<?php if ($currentPage == 'currentSeason.php') echo ' active'; ?>">
-                <a href="/currentSeason.php">
-                    <i class="icon-clock"></i>
-                    <span data-i18n="nav.dash.main" class="menu-title">Current Season</span>
+            <li class="nav-item<?php if ($currentPage == 'luck.php') echo ' active'; ?>">
+                <a href="/luck.php">
+                    <i class="icon-dice"></i>
+                    <span data-i18n="nav.dash.main" class="menu-title">Luck</span>
                 </a>
             </li>
             <li class="nav-item<?php if ($currentPage == 'newsletter.php') echo ' active'; ?>">

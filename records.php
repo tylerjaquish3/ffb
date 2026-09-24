@@ -92,13 +92,6 @@
     }
     usort($nl_streaks, fn($a, $b) => $a['streak'] - $b['streak']);
 
-    $type_badge_classes = [
-        'regular' => 'badge-primary',
-        'post'    => 'badge-warning',
-        'current' => 'badge-success',
-        'draft'   => 'badge-info',
-        'roster'  => 'badge-secondary',
-    ];
 ?>
 <div class="app-content content">
     <div class="content-wrapper">
@@ -142,11 +135,7 @@
                                                 <?php foreach ($nl_streaks as $nl): ?>
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($nl['fact']); ?></td>
-                                                    <td>
-                                                        <span class="badge <?php echo $type_badge_classes[$nl['type']] ?? 'badge-secondary'; ?>">
-                                                            <?php echo ucfirst($nl['type']); ?>
-                                                        </span>
-                                                    </td>
+                                                    <td><?php echo ucfirst($nl['type']); ?></td>
                                                     <td><?php echo htmlspecialchars($nl['manager_name']); ?></td>
                                                     <td data-order="<?php echo $nl['streak']; ?>"><?php echo $nl['streak']; ?></td>
                                                     <td><?php echo $nl['since_year'] . ' Wk ' . $nl['since_week']; ?></td>

@@ -56,7 +56,7 @@
             'chartId' => 'milestone-' . $specId,
             'title'   => $spec['title'],
             'unit'    => $spec['unit'],
-            'tiers'   => $spec['tiers'],
+            'average' => $bundle['average'],
             'rows'    => $bundle['top5'],
         ];
     }
@@ -133,6 +133,7 @@
     .alert-badge.recent       { background: #2eb82e; }
     .alert-badge.first        { background: #f59e0b; }
     .alert-badge.first-recent { background: #9c68d9; }
+    .alert-badge.standing     { background: #94a3b8; }
     .alert-body { flex: 1 1 auto; min-width: 0; }
     .alert-text {
         font-size: 1rem;
@@ -167,6 +168,35 @@
         border-radius: 6px;
         color: rgba(0,0,0,0.7);
         font-style: italic;
+    }
+    .alert-filter-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0 0 1rem;
+    }
+    .alert-filter-btn {
+        background: #fff;
+        color: rgba(0,0,0,0.65);
+        border: 1px solid rgba(0,0,0,0.15);
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        transition: all 0.15s ease;
+    }
+    .alert-filter-btn:hover {
+        border-color: rgba(46,184,46,0.5);
+        color: #000;
+    }
+    .alert-filter-btn.active {
+        background: linear-gradient(135deg, #1d8c1d, #2eb82e);
+        color: #fff;
+        border-color: transparent;
     }
     .manager-legend {
         display: flex;
@@ -323,19 +353,29 @@
                                         <?php if (empty($alerts)): ?>
                                             <div class="alert-empty">No milestone crossings to report yet.</div>
                                         <?php else: ?>
-                                            <div class="alert-list">
+                                            <div class="alert-filter-group">
+                                                <button class="alert-filter-btn active" data-alert-filter="all">All</button>
+                                                <button class="alert-filter-btn" data-alert-filter="regular-season">Regular Season</button>
+                                                <button class="alert-filter-btn" data-alert-filter="postseason">Postseason</button>
+                                            </div>
+                                            <div class="alert-list" id="alert-list">
                                                 <?php foreach ($alerts as $a):
                                                     $color  = $managerColors[$a['manager_id']] ?? '#9c68d9';
-                                                    $label  = $a['type'] === 'recent' ? 'Recent'
-                                                            : ($a['type'] === 'first-recent' ? 'First · Recent' : 'First');
+                                                    $labels = [
+                                                        'recent'       => 'Recent',
+                                                        'first'        => 'First',
+                                                        'first-recent' => 'First · Recent',
+                                                        'standing'     => 'Milestone',
+                                                    ];
+                                                    $label  = $labels[$a['type']] ?? $a['type'];
                                                 ?>
-                                                <div class="alert-item" style="border-left-color: <?php echo $color; ?>;">
+                                                <div class="alert-item" data-tab="<?php echo htmlspecialchars($a['tab']); ?>" style="border-left-color: <?php echo $color; ?>;">
                                                     <span class="alert-badge <?php echo $a['type']; ?>"><?php echo $label; ?></span>
                                                     <div class="alert-body">
                                                         <div class="alert-text"><?php echo htmlspecialchars($a['text']); ?></div>
                                                         <div class="alert-when"><?php echo htmlspecialchars($a['when']); ?></div>
                                                     </div>
-                                                    <?php if (!empty($a['place'])): ?>
+                                                    <?php if (!empty($a['place']) && $a['type'] !== 'first' && $a['type'] !== 'first-recent'): ?>
                                                     <span class="alert-place<?php echo $a['place'] === 1 ? ' place-first' : ''; ?>">
                                                         <?php echo _milestoneOrdinal($a['place']); ?>
                                                     </span>
@@ -343,6 +383,7 @@
                                                 </div>
                                                 <?php endforeach; ?>
                                             </div>
+                                            <div class="alert-empty" id="alert-filter-empty" style="display: none;">No milestone crossings for this filter yet.</div>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -370,13 +411,11 @@
                                     </div>
                                     <div class="card-body" style="direction: ltr;">
                                         <div class="tier-legend">
-                                            <?php foreach ($c['tiers'] as $idx => $tv): ?>
-                                                <span class="tier-chip">
-                                                    <span class="tier-dot"></span>
-                                                    <span class="tier-label">Tier <?php echo $idx + 1; ?></span>
-                                                    <span class="tier-value"><?php echo number_format($tv); ?></span>
-                                                </span>
-                                            <?php endforeach; ?>
+                                            <span class="tier-chip">
+                                                <span class="tier-dot"></span>
+                                                <span class="tier-label">League Avg</span>
+                                                <span class="tier-value"><?php echo $c['unit'] === 'wins' ? round($c['average']) : number_format($c['average'], $c['average'] < 1000 ? 1 : 0); ?></span>
+                                            </span>
                                         </div>
                                         <div class="milestone-chart-wrapper">
                                             <canvas id="<?php echo $c['chartId']; ?>"></canvas>
@@ -556,37 +595,27 @@
         return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
     }
 
-    function tierIndex(value, tiers) {
-        let idx = 0;
-        for (let i = 0; i < tiers.length; i++) {
-            if (value >= tiers[i]) idx = i + 1;
-        }
-        return idx;
-    }
-
-    const tierLinesPlugin = {
-        id: 'tierLines',
+    const averageLinePlugin = {
+        id: 'averageLine',
         afterDatasetsDraw(chart, args, opts) {
-            const tiers = opts && opts.tiers;
-            if (!tiers || !tiers.length) return;
+            const avg = opts && opts.average;
+            if (avg === null || avg === undefined) return;
             const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+            const xPos = x.getPixelForValue(avg);
+            if (xPos < x.left || xPos > x.right) return;
             ctx.save();
             ctx.setLineDash([5, 5]);
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'rgba(0,0,0,0.45)';
             ctx.fillStyle = '#000';
             ctx.font = '600 11px Barlow, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
-            tiers.forEach((t, i) => {
-                const xPos = x.getPixelForValue(t);
-                if (xPos < x.left || xPos > x.right) return;
-                ctx.beginPath();
-                ctx.moveTo(xPos, top);
-                ctx.lineTo(xPos, bottom);
-                ctx.stroke();
-                ctx.fillText('T' + (i + 1), xPos, top + 2);
-            });
+            ctx.beginPath();
+            ctx.moveTo(xPos, top);
+            ctx.lineTo(xPos, bottom);
+            ctx.stroke();
+            ctx.fillText('AVG', xPos, top + 2);
             ctx.restore();
         }
     };
@@ -600,10 +629,6 @@
         const data   = sorted.map(r => r.points);
         const mids   = sorted.map(r => r.manager_id);
         const colors = sorted.map(r => managerColors[r.manager_id] || '#9c68d9');
-
-        const topTier = chartCfg.tiers[chartCfg.tiers.length - 1];
-        const leader  = Math.max.apply(null, data);
-        const xMax    = Math.max(leader, topTier) * 1.08;
 
         const unitLabel = chartCfg.unit === 'wins' ? 'Career Wins' : 'Career Points';
         const isWins    = chartCfg.unit === 'wins';
@@ -640,7 +665,7 @@
                 scales: {
                     x: {
                         beginAtZero: true,
-                        max: xMax,
+                        grace: '10%',
                         ticks: { color: '#000', callback: v => v.toLocaleString() },
                         grid:  { color: 'rgba(0,0,0,0.08)' }
                     },
@@ -655,26 +680,18 @@
                         callbacks: {
                             label: function (cx) {
                                 const v = cx.parsed.x;
-                                const tIdx = tierIndex(v, chartCfg.tiers);
-                                const tierStr = tIdx === 0 ? 'Below Tier 1' : ('Tier ' + tIdx);
-                                const lines = [
+                                const avgStr = chartCfg.average.toLocaleString(undefined, { maximumFractionDigits: isWins ? 0 : 2 });
+                                return [
                                     unitLabel + ': ' + (isWins ? v.toLocaleString() : v.toLocaleString(undefined, { maximumFractionDigits: 2 })),
-                                    'Current: ' + tierStr
+                                    'League Avg: ' + avgStr
                                 ];
-                                if (tIdx < chartCfg.tiers.length) {
-                                    const next = chartCfg.tiers[tIdx];
-                                    lines.push('To Tier ' + (tIdx + 1) + ': ' + Math.ceil(next - v).toLocaleString());
-                                } else {
-                                    lines.push('All tiers unlocked');
-                                }
-                                return lines;
                             }
                         }
                     },
-                    tierLines: { tiers: chartCfg.tiers }
+                    averageLine: { average: chartCfg.average }
                 }
             },
-            plugins: [ChartDataLabels, tierLinesPlugin]
+            plugins: [ChartDataLabels, averageLinePlugin]
         });
 
         chartInstances.push({ chart, mids, baseColors: colors });
@@ -683,6 +700,28 @@
 
     Object.keys(tabsData).forEach(tabId => {
         chartsByTab[tabId] = tabsData[tabId].charts.map(buildChart).filter(Boolean);
+    });
+
+    // ── Alert filter (all / regular season / postseason) ──────────────────
+    const alertFilterBtns = document.querySelectorAll('.alert-filter-btn');
+    const alertItems      = document.querySelectorAll('#alert-list .alert-item');
+    const alertFilterEmpty = document.getElementById('alert-filter-empty');
+
+    function applyAlertFilter(filter) {
+        let visibleCount = 0;
+        alertItems.forEach(item => {
+            const show = filter === 'all' || item.dataset.tab === filter;
+            item.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+        });
+        if (alertFilterEmpty) alertFilterEmpty.style.display = visibleCount === 0 ? '' : 'none';
+    }
+
+    alertFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            alertFilterBtns.forEach(b => b.classList.toggle('active', b === btn));
+            applyAlertFilter(btn.dataset.alertFilter);
+        });
     });
 
     // ── Manager highlight on legend click ─────────────────────────────────

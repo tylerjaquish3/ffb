@@ -141,7 +141,7 @@ include 'sidebar.php';
                         <div class="row">
                             <div class="col-sm-12">
                                 <div class="table-responsive">
-                                    <table class="table table-striped nowrap" id="datatable-recordByWeek" style="width: 100%;">
+                                    <table class="table table-striped nowrap" id="datatable-recordByWeek">
                                         <thead>
                                             <tr>
                                                 <th>Manager</th>
@@ -665,6 +665,40 @@ include 'sidebar.php';
         color: #888;
         margin: 8px 0 5px;
         font-style: italic;
+    }
+
+    #datatable-recordByWeek {
+        table-layout: fixed;
+        width: 100%;
+    }
+    #datatable-recordByWeek th,
+    #datatable-recordByWeek td {
+        width: auto !important;
+        text-align: center;
+    }
+    #datatable-recordByWeek td.record-high {
+        background-color: rgb(172, 240, 172) !important;
+    }
+    #datatable-recordByWeek td.record-low {
+        background-color: rgb(255, 179, 179) !important;
+    }
+
+    /* table-layout:fixed ignores min-width, so on small screens switch to
+       auto layout with nowrap cells: columns take their natural content
+       width instead of being squeezed, and the table overflows into the
+       existing .table-responsive horizontal scroll instead of overlapping. */
+    @media (max-width: 768px) {
+        #datatable-recordByWeek {
+            table-layout: auto;
+            width: auto;
+        }
+        #datatable-recordByWeek th,
+        #datatable-recordByWeek td {
+            width: auto !important;
+            white-space: nowrap;
+            padding-left: 12px;
+            padding-right: 12px;
+        }
     }
     .lookup-select {
         width: 100%;
@@ -1273,13 +1307,6 @@ include 'sidebar.php';
             return div; 
         }
 
-        // Initialize DataTable for Record By Week
-        $('#datatable-recordByWeek').DataTable({
-            "searching": false,
-            "paging": false,
-            "info": false,
-        });
-        
         // Initialize the page with the tab from the URL hash if valid, else Matchups & Stats
         var hashTab = window.location.hash.substring(1);
         if (hashTab && document.getElementById(hashTab)) {
@@ -1826,19 +1853,42 @@ include 'sidebar.php';
                 const recordByWeekTbody = document.querySelector('#datatable-recordByWeek tbody');
                 const recordByWeekThead = document.querySelector('#datatable-recordByWeek thead tr');
                 if (recordByWeekTbody && recordByWeekThead) {
+                    const sortedWeeks = data.recordsByWeek.weeks.slice().sort((a, b) => a - b);
+
                     // Week headers
                     recordByWeekThead.innerHTML = '<th>Manager</th>';
-                    data.recordsByWeek.weeks.sort((a, b) => a - b).forEach(week => {
+                    sortedWeeks.forEach(week => {
                         recordByWeekThead.innerHTML += `<th>Week ${week}</th>`;
                     });
+
+                    // Determine the best (most wins) and worst (fewest wins) record for each week
+                    const winsByWeek = {};
+                    sortedWeeks.forEach(week => {
+                        let max = -Infinity, min = Infinity;
+                        data.recordsByWeek.managers.forEach(manager => {
+                            const record = data.recordsByWeek.records[manager]?.[week] ?? '0-0';
+                            const wins = parseInt(record.split('-')[0], 10);
+                            if (wins > max) max = wins;
+                            if (wins < min) min = wins;
+                        });
+                        winsByWeek[week] = { max, min };
+                    });
+
                     // Table body
                     recordByWeekTbody.innerHTML = '';
                     data.recordsByWeek.managers.forEach(manager => {
                         const tr = document.createElement('tr');
                         tr.innerHTML = `<td>${manager}</td>`;
-                        data.recordsByWeek.weeks.sort((a, b) => a - b).forEach(week => {
+                        sortedWeeks.forEach(week => {
                             const record = data.recordsByWeek.records[manager]?.[week] ?? '0-0';
-                            tr.innerHTML += `<td>${record}</td>`;
+                            const wins = parseInt(record.split('-')[0], 10);
+                            const { max, min } = winsByWeek[week];
+                            let cellClass = '';
+                            if (max !== min) {
+                                if (wins === max) cellClass = 'record-high';
+                                else if (wins === min) cellClass = 'record-low';
+                            }
+                            tr.innerHTML += `<td class="${cellClass}">${record}</td>`;
                         });
                         recordByWeekTbody.appendChild(tr);
                     });

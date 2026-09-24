@@ -463,7 +463,7 @@ if ($contentRow) {
 <div id="save-success-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
     <div style="background:#fff;border-radius:6px;padding:2rem 2.5rem;max-width:380px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
         <div style="font-size:2.5rem;margin-bottom:0.5rem;">&#10003;</div>
-        <h3 style="margin:0 0 0.5rem;font-size:1.2rem;">Saved successfully!</h3>
+        <h3 style="margin:0 0 0.5rem;font-size:1.2rem;">Saved successfully</h3>
         <p style="color:#666;font-size:0.9rem;margin-bottom:1.5rem;">Newsletter Week <?php echo $editWeek; ?> &middot; <?php echo $editYear; ?></p>
         <div style="display:flex;gap:0.75rem;justify-content:center;">
             <a href="newsletter.php?year=<?php echo $editYear; ?>&week=<?php echo $editWeek; ?>" class="btn btn-primary">Preview</a>

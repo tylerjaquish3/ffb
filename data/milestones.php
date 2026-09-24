@@ -56,7 +56,7 @@ function _milestoneSpecs()
     $specs[] = [
         'id' => 'reg-points', 'tab' => 'regular-season',
         'title' => 'Career Points', 'category' => 'regular season points',
-        'tiers' => [30000, 40000, 50000], 'unit' => 'points',
+        'step' => 1000, 'unit' => 'points',
         'totals_sql' => "SELECT m.id AS mid, m.name AS mgr_name,
                             ROUND(COALESCE(SUM(rsm.manager1_score), 0), 2) AS value
                          FROM managers m
@@ -71,7 +71,7 @@ function _milestoneSpecs()
     $specs[] = [
         'id' => 'reg-wins', 'tab' => 'regular-season',
         'title' => 'Career Wins', 'category' => 'regular season wins',
-        'tiers' => [100, 125, 150], 'unit' => 'wins',
+        'step' => 25, 'unit' => 'wins',
         'totals_sql' => "SELECT m.id AS mid, m.name AS mgr_name,
                             COALESCE(COUNT(rsm.id), 0) AS value
                          FROM managers m
@@ -85,21 +85,14 @@ function _milestoneSpecs()
                          WHERE winning_manager_id IN (:ids) AND manager1_id = winning_manager_id
                          ORDER BY year ASC, week_number ASC, id ASC",
     ];
-    foreach ([
-        ['QB',  [5000, 6000, 7000]],
-        ['RB',  [5000, 6000, 7000]],
-        ['WR',  [7000, 8000, 9000]],
-        ['TE',  [1500, 2000, 2500]],
-        ['K',   [1500, 2000, 2200]],
-        ['DEF', [3000, 3500, 4000]],
-    ] as [$spot, $tiers]) {
+    foreach (['QB', 'RB', 'WR', 'TE', 'K', 'DEF'] as $spot) {
         $sql = _milestonePositionPointsRegSql($spot);
         $specs[] = [
             'id'    => 'reg-' . strtolower($spot),
             'tab'   => 'regular-season',
             'title' => "Career $spot Points",
             'category' => "regular season $spot points",
-            'tiers' => $tiers, 'unit' => 'points',
+            'step' => 1000, 'unit' => 'points',
             'totals_sql' => $sql['totals'],
             'events_sql' => $sql['events'],
         ];
@@ -109,7 +102,7 @@ function _milestoneSpecs()
     $specs[] = [
         'id' => 'post-points', 'tab' => 'postseason',
         'title' => 'Career Points', 'category' => 'postseason points',
-        'tiers' => [2000, 4000, 6000], 'unit' => 'points',
+        'step' => 100, 'unit' => 'points',
         'totals_sql' => "SELECT m.id AS mid, m.name AS mgr_name,
                             ROUND(COALESCE(SUM(CASE WHEN pm.manager1_id = m.id THEN pm.manager1_score
                                                     WHEN pm.manager2_id = m.id THEN pm.manager2_score END), 0), 2) AS value
@@ -130,7 +123,7 @@ function _milestoneSpecs()
     $specs[] = [
         'id' => 'post-wins', 'tab' => 'postseason',
         'title' => 'Career Wins', 'category' => 'postseason wins',
-        'tiers' => [10, 15, 20], 'unit' => 'wins',
+        'step' => 5, 'unit' => 'wins',
         'totals_sql' => "SELECT m.id AS mid, m.name AS mgr_name, COALESCE(COUNT(pm.id), 0) AS value
                          FROM managers m
                          LEFT JOIN playoff_matchups pm ON
@@ -149,21 +142,14 @@ function _milestoneSpecs()
                             FROM playoff_matchups WHERE manager2_score > manager1_score AND manager2_id IN (:ids)
                          ) ORDER BY yr ASC, wk ASC, id ASC",
     ];
-    foreach ([
-        ['QB',  [300, 500, 750]],
-        ['RB',  [300, 500, 750]],
-        ['WR',  [400, 700, 1000]],
-        ['TE',  [100, 200, 300]],
-        ['K',   [100, 150, 200]],
-        ['DEF', [200, 350, 500]],
-    ] as [$spot, $tiers]) {
+    foreach (['QB', 'RB', 'WR', 'TE', 'K', 'DEF'] as $spot) {
         $sql = _milestonePositionPointsPostSql($spot);
         $specs[] = [
             'id'    => 'post-' . strtolower($spot),
             'tab'   => 'postseason',
             'title' => "Career $spot Points",
             'category' => "postseason $spot points",
-            'tiers' => $tiers, 'unit' => 'points',
+            'step' => 100, 'unit' => 'points',
             'totals_sql' => $sql['totals'],
             'events_sql' => $sql['events'],
         ];
@@ -203,17 +189,18 @@ function _milestoneFetchCrossings($spec, $top5Rows)
         $prev = $totals[$mid];
         $curr = $prev + (float) $row['inc'];
         $totals[$mid] = $curr;
-        foreach ($spec['tiers'] as $tier) {
-            if ($prev < $tier && $curr >= $tier) {
-                $crossings[] = [
-                    'manager_id'   => $mid,
-                    'manager_name' => getManagerName($mid),
-                    'tier'         => $tier,
-                    'year'         => (int) $row['yr'],
-                    'when'         => $row['wk_label'],
-                    'sort_key'     => (int) $row['yr'] * 100 + (int) $row['wk'],
-                ];
-            }
+        $step = $spec['step'];
+        $prevStep = (int) floor($prev / $step);
+        $currStep = (int) floor($curr / $step);
+        for ($s = max($prevStep + 1, 1); $s <= $currStep; $s++) {
+            $crossings[] = [
+                'manager_id'   => $mid,
+                'manager_name' => getManagerName($mid),
+                'tier'         => $s * $step,
+                'year'         => (int) $row['yr'],
+                'when'         => $row['wk_label'],
+                'sort_key'     => (int) $row['yr'] * 100 + (int) $row['wk'],
+            ];
         }
     }
     return $crossings;
@@ -230,54 +217,64 @@ function _milestoneOrdinal($n)
     }
 }
 
-function _milestoneBuildAlerts($crossings, $categoryLabel, $latestSeason)
+function _milestoneBuildAlerts($crossings, $categoryLabel, $latestSeason, $tab)
 {
     if (empty($crossings)) return [];
 
-    $firstByTier = [];
+    // Who (chronologically) crossed each specific tier first, and everyone's
+    // rank at that tier — both scoped to the current top-5 population.
+    $byTier = [];
     foreach ($crossings as $c) {
-        if (!isset($firstByTier[$c['tier']])) $firstByTier[$c['tier']] = $c;
+        $byTier[$c['tier']][] = $c;
     }
-
-    // Compute each manager's rank (place) per tier, ordered by sort_key.
-    $placeByTier = [];
-    foreach ($crossings as $c) {
-        $placeByTier[$c['tier']][] = $c;
-    }
+    $firstByTier          = [];
     $rankByTierAndManager = [];
-    foreach ($placeByTier as $tier => $tierCrossings) {
+    foreach ($byTier as $tier => $tierCrossings) {
         usort($tierCrossings, fn($a, $b) => $a['sort_key'] <=> $b['sort_key']);
+        $firstByTier[$tier] = $tierCrossings[0];
         foreach ($tierCrossings as $i => $tc) {
             $rankByTierAndManager[$tier][$tc['manager_id']] = $i + 1;
         }
     }
 
-    $alerts = [];
+    // Each manager's own highest tier reached is their current milestone
+    // standing — lower tiers they crossed earlier are superseded by it.
+    $latestByManager = [];
     foreach ($crossings as $c) {
-        $first    = $firstByTier[$c['tier']];
+        $mid = $c['manager_id'];
+        if (!isset($latestByManager[$mid]) || $c['tier'] > $latestByManager[$mid]['tier']) {
+            $latestByManager[$mid] = $c;
+        }
+    }
+
+    $alerts = [];
+    foreach ($latestByManager as $c) {
+        $tier     = $c['tier'];
+        $first    = $firstByTier[$tier];
         $isFirst  = $first['manager_id'] === $c['manager_id'] && $first['sort_key'] === $c['sort_key'];
         $isRecent = $c['year'] === $latestSeason;
-        if (!$isFirst && !$isRecent) continue;
+        $place    = $rankByTierAndManager[$tier][$c['manager_id']] ?? null;
 
-        $tierStr = number_format($c['tier']);
+        $tierStr = number_format($tier);
         if ($isFirst) {
             $text = $c['manager_name'] . " was the first to reach $tierStr career $categoryLabel";
             $type = $isRecent ? 'first-recent' : 'first';
         } else {
-            $place = $rankByTierAndManager[$c['tier']][$c['manager_id']] ?? null;
-            $text  = $c['manager_name'] . " just went over $tierStr career $categoryLabel";
-            $type  = 'recent';
+            $verb = $isRecent ? 'just went over' : 'has reached';
+            $text = $c['manager_name'] . " $verb $tierStr career $categoryLabel";
+            $type = $isRecent ? 'recent' : 'standing';
         }
 
         $alerts[] = [
             'type'         => $type,
             'text'         => $text,
-            'place'        => $place ?? null,
+            'place'        => $place,
             'when'         => $c['year'] . ' ' . $c['when'],
             'manager_id'   => $c['manager_id'],
             'manager_name' => $c['manager_name'],
-            'tier'         => $c['tier'],
+            'tier'         => $tier,
             'category'     => $categoryLabel,
+            'tab'          => $tab,
             'sort_key'     => $c['sort_key'],
         ];
     }
@@ -396,9 +393,11 @@ function getMilestoneTotals()
     $out = [];
     foreach (_milestoneSpecs() as $spec) {
         $totals = _milestoneFetchTotals($spec);
+        $average = $totals ? array_sum(array_column($totals, 'points')) / count($totals) : 0;
         $out[$spec['id']] = [
-            'spec' => $spec,
-            'top5' => array_slice($totals, 0, 5),
+            'spec'    => $spec,
+            'top5'    => array_slice($totals, 0, 5),
+            'average' => $average,
         ];
     }
     return $out;
@@ -417,7 +416,7 @@ function getCareerPointsAlerts()
         $totals    = _milestoneFetchTotals($spec);
         $top5      = array_slice($totals, 0, 5);
         $crossings = _milestoneFetchCrossings($spec, $top5);
-        $allAlerts = array_merge($allAlerts, _milestoneBuildAlerts($crossings, $spec['category'], $latestSeason));
+        $allAlerts = array_merge($allAlerts, _milestoneBuildAlerts($crossings, $spec['category'], $latestSeason, $spec['tab']));
     }
 
     usort($allAlerts, fn($a, $b) => $b['sort_key'] <=> $a['sort_key']);

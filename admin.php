@@ -510,6 +510,9 @@ function makeRosterRequest(year, weeks, managers, mode, managerIndex, callback)
     }
 
     if (managerIndex >= managersToProcess.length) {
+        if (managersToProcess.length > 0) {
+            $('#output').append('<div class="alert alert-success">All rosters updated.</div>');
+        }
         if (callback) callback();
         return;
     }

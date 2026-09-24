@@ -68,11 +68,6 @@ php artisan gameTimes : parse storage/app/private/games/YYYY.csv and update game
     - league on pace to break record
 - make newsletter show random additional data so its not the same every week
 
-- add preview notes for each week of the new season
-- have a page for luck
-    - wins with bottom points
-    - wins under 5 pt margin
-    - late round picks that scored a lot
 
 Notes:
 Moved to 18 week schedule in 2021

@@ -275,93 +275,6 @@ function getSeasonWinsRaceData()
     ];
 }
 
-// Treemap of points by position per manager, one snapshot per
-// (year, week) in the regular season.
-//
-// Returns:
-//   [
-//     'positions'      => ['QB','RB','WR','TE','K','DEF'],
-//     'positionColors' => ['QB' => '#...', ...],
-//     'managers'       => ['Tyler','AJ',...],
-//     'frames'         => [
-//        ['year' => 2006, 'week' => 1, 'key' => '2006-1',
-//         'weekly' => [pos => [manager => points_that_week]]],
-//        ...
-//     ],
-//   ]
-//
-// Aggregates rosters.points by roster_spot. Treats the legacy roster_spot
-// 'D' as 'DEF' (used pre-2020). Flex slots (W/R, W/R/T, …) and IDP slots
-// (DB, DL, LB) are intentionally excluded so a manager's "RB points"
-// matches what the rest of the site reports.
-//
-// The page-side renderer walks frames in order, accumulating per-position
-// per-manager totals, so each playback step grows the treemap by exactly
-// that week's points.
-function getPositionTreemapData()
-{
-    $positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'];
-    $positionColors = [
-        'QB'  => '#ef4444',
-        'RB'  => '#22c55e',
-        'WR'  => '#3b82f6',
-        'TE'  => '#f59e0b',
-        'K'   => '#a855f7',
-        'DEF' => '#6b7280',
-    ];
-
-    $managers = [];
-    $res = query("SELECT name FROM managers ORDER BY id");
-    while ($row = fetch_array($res)) {
-        $managers[] = $row['name'];
-    }
-
-    $sql = "SELECT year, week,
-                   CASE WHEN roster_spot = 'D' THEN 'DEF' ELSE roster_spot END AS pos,
-                   manager,
-                   ROUND(SUM(points), 2) AS pts
-            FROM rosters
-            WHERE roster_spot IN ('QB','RB','WR','TE','K','DEF','D')
-            GROUP BY year, week, pos, manager
-            ORDER BY year ASC, week ASC";
-
-    $weeklyBuckets = []; // key => [pos => [mgr => pts]]
-    $order         = []; // ordered [[year, week, key], ...]
-
-    $res = query($sql);
-    while ($row = fetch_array($res)) {
-        $y   = (int) $row['year'];
-        $w   = (int) $row['week'];
-        $key = $y . '-' . $w;
-        $pos = $row['pos'];
-        $mgr = $row['manager'];
-        $pts = (float) $row['pts'];
-
-        if (!isset($weeklyBuckets[$key])) {
-            $weeklyBuckets[$key] = [];
-            $order[] = [$y, $w, $key];
-        }
-        $weeklyBuckets[$key][$pos][$mgr] = $pts;
-    }
-
-    $frames = [];
-    foreach ($order as [$year, $week, $key]) {
-        $frames[] = [
-            'year'   => $year,
-            'week'   => $week,
-            'key'    => $key,
-            'weekly' => $weeklyBuckets[$key],
-        ];
-    }
-
-    return [
-        'positions'      => $positions,
-        'positionColors' => $positionColors,
-        'managers'       => $managers,
-        'frames'         => $frames,
-    ];
-}
-
 // Multi-line lineup accuracy chart — accuracy % per manager per season.
 //
 // Uses pre-computed manager1_optimal from regular_season_matchups.
@@ -609,3 +522,4 @@ function getLuckVsGoodData()
         'career'   => $career,
     ];
 }
+

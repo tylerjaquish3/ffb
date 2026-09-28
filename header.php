@@ -20,8 +20,8 @@
     <?php endif; ?>
 
     <title><?php echo isset($pageName) ? $pageName. ' | Suntown FFB' : 'Suntown FFB'; ?></title>
-    <?php $version = "v5.8.10";
-    $vDate = "(09/24/26)"; ?>
+    <?php $version = "v5.8.11";
+    $vDate = "(09/28/26)"; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">
 

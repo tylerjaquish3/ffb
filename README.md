@@ -63,7 +63,6 @@ php artisan gameTimes : parse storage/app/private/games/YYYY.csv and update game
 - move functions to lookup after page load to make more efficient
     - current season
     - profile
-- analyze text messages by manager in group text
 - milestones about to happen
     - league on pace to break record
 - make newsletter show random additional data so its not the same every week
@@ -136,7 +135,6 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 
 ## Charts Page Additions
 
-- **Point Distribution Violin/Box Plot** — show the spread of scores, not just averages. Who is consistently mediocre vs. who has wild swings?
 - **Week-by-Week Points Bump Chart** — animated bump chart showing each manager's rank by total points scored, week by week through a season.
 - **Score Distribution Bell Curve Overlay** — all scores in league history as a histogram with a normal curve overlay. Mark where each manager's average falls.
 

@@ -122,8 +122,7 @@ if ($previewRow && !empty($previewRow['preview'])) {
     $previewContent = $previewRow['preview'];
 }
 
-$version = "v5.7.1";
-$vDate = "(05/19/26)";
+include_once 'version.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

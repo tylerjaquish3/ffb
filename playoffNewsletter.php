@@ -98,8 +98,7 @@ if ($playoffRound === 'Quarterfinal') {
     $recapLabel = ($playoffRound === 'Semifinal' ? 'Quarterfinal' : 'Semifinal') . " Recap";
 }
 
-$version = "v5.7.1";
-$vDate = "(05/19/26)";
+include_once 'version.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

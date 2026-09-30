@@ -9,16 +9,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$notes = trim($_POST['notes'] ?? '');
-$week  = isset($_POST['week']) ? (int)$_POST['week'] : null;
+$notes        = trim($_POST['notes'] ?? '');
+$instructions = trim($_POST['instructions'] ?? '');
+$week         = isset($_POST['week']) ? (int)$_POST['week'] : null;
 
 if (empty($notes)) {
     echo json_encode(['error' => 'No notes provided.']);
     exit;
 }
 
-$notesPlain = strip_tags($notes);
-$weekLabel  = $week ? "Week $week" : "this week";
+$notesPlain        = strip_tags($notes);
+$instructionsPlain = strip_tags($instructions);
+$weekLabel         = $week ? "Week $week" : "this week";
 
 $prompt = "You are a veteran sports newspaper columnist covering the Suntown Fantasy Football League, "
     . "a 10-manager league between longtime friends. Write the $weekLabel recap. "
@@ -26,8 +28,13 @@ $prompt = "You are a veteran sports newspaper columnist covering the Suntown Fan
     . "Use clever turns of phrase and pointed jabs/roasts at managers based on how they performed. "
     . "No emojis, no exclamation-point-heavy hype, and nothing that reads like a high schooler's writing. "
     . "Keep it tight: for each note/bullet point below, write at most a couple of sentences — do not "
-    . "expand any single point into a full paragraph. "
-    . "Base it on the following data: " . $notesPlain;
+    . "expand any single point into a full paragraph. ";
+
+if (!empty($instructionsPlain)) {
+    $prompt .= "Follow these additional instructions from the editor: " . $instructionsPlain . " ";
+}
+
+$prompt .= "Base it on the following data: " . $notesPlain;
 
 $result = callGeminiApi($prompt, $GEMINI_API_KEY);
 
@@ -67,7 +74,6 @@ function callGeminiApi($prompt, $apiKey) {
 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
 
     if (!$response || $httpCode !== 200) {
         $err    = json_decode($response, true);

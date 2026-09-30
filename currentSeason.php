@@ -778,13 +778,14 @@ include 'sidebar.php';
         function highlightColumns(tableId, skipCols, invertCols) {
             invertCols = invertCols || [];
             $(tableId).on('draw.dt', function() {
-                var $rows = $(this).find('tbody tr');
-                if ($rows.length === 0) return;
-                var numCols = $rows.first().find('td').length;
+                var api = $(tableId).DataTable();
+                var numCols = api.columns().count();
                 for (var col = skipCols; col < numCols; col++) {
+                    var nodes = api.column(col, {page: 'all', search: 'applied'}).nodes();
+                    if (nodes.length === 0) continue;
                     var vals = [];
-                    $rows.each(function() {
-                        var v = parseFloat($(this).find('td').eq(col).text().trim());
+                    nodes.each(function(node) {
+                        var v = parseFloat($(node).text().trim());
                         if (!isNaN(v)) vals.push(v);
                     });
                     if (vals.length === 0) continue;
@@ -792,12 +793,11 @@ include 'sidebar.php';
                     var min = Math.min.apply(null, vals);
                     if (max === min) continue;
                     var invert = invertCols.indexOf(col) !== -1;
-                    $rows.each(function() {
-                        var $cell = $(this).find('td').eq(col);
-                        var v = parseFloat($cell.text().trim());
-                        if (v === max) $cell[0].style.setProperty('background-color', invert ? 'rgb(255, 179, 179)' : 'rgb(172, 240, 172)', 'important');
-                        else if (v === min) $cell[0].style.setProperty('background-color', invert ? 'rgb(172, 240, 172)' : 'rgb(255, 179, 179)', 'important');
-                        else $cell[0].style.removeProperty('background-color');
+                    nodes.each(function(node) {
+                        var v = parseFloat($(node).text().trim());
+                        if (v === max) node.style.setProperty('background-color', invert ? 'rgb(255, 179, 179)' : 'rgb(172, 240, 172)', 'important');
+                        else if (v === min) node.style.setProperty('background-color', invert ? 'rgb(172, 240, 172)' : 'rgb(255, 179, 179)', 'important');
+                        else node.style.removeProperty('background-color');
                     });
                 }
             });
@@ -815,34 +815,10 @@ include 'sidebar.php';
             },
             order: [
                 [currentPointsColCount+1, "desc"]
-            ],
-            initComplete: function() {
-                var api = this.api();
-                
-                api.columns(':not(:first)').every(function() {
-                    var col = this.index();
-                    var array = [];
-                    api.cells(null, col).every(function() {
-                        var cell = this.node();
-                        var record_id = $(cell).attr("data-order");
-                        array.push(record_id)
-                    })
-
-                    last = array.length-1;
-                    array.sort(function(a, b){return b-a});
-
-                    api.cells(null, col).every( function() {
-                        var cell = this.node();
-                        var record_id = $( cell ).attr( "data-order" );
-                        if (record_id === array[0]) {
-                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                        } else if (record_id === array[last]) {
-                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                        }
-                    });
-                });
-            }
+            ]
         });
+        highlightColumns('#datatable-currentPoints', 1);
+        $('#datatable-currentPoints').DataTable().draw(false);
 
         $('#datatable-currentStats').DataTable({
             searching: false,

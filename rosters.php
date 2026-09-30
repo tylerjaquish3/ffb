@@ -506,115 +506,196 @@ function lookupGameTime(?int $id) {
                             <?php else: ?>
                                 <div class="row">
                                     <div class="col-sm-12">
+                                        <?php
+                                        // Fantasy points per unit, by raw-stat category. Total rows are excluded
+                                        // because yards/TDs are worth different amounts depending on stat type.
+                                        $pointRates = [
+                                            'pass_yds' => 0.25,
+                                            'pass_tds' => 4,
+                                            'ints' => -2,
+                                            'rush_yds' => 0.1,
+                                            'rush_tds' => 6,
+                                            'receptions' => 0.5,
+                                            'rec_yds' => 0.1,
+                                            'rec_tds' => 6,
+                                            'fumbles' => -3,
+                                        ];
+                                        $statPoints = function ($stats, $key) use ($pointRates) {
+                                            return ($stats[$key] ?? 0) * $pointRates[$key];
+                                        };
+                                        ?>
                                         <table class="table table-responsive table-striped nowrap">
                                             <thead>
                                                 <th>Statistic</th>
-                                                <th class="text-center"><?php echo $managerName; ?></th>
-                                                <th class="text-center"><?php echo $versus; ?></th>
-                                                <th class="text-center">Difference</th>
+                                                <th class="text-right"><?php echo $managerName; ?></th>
+                                                <th class="text-right"><?php echo $managerName; ?> Points</th>
+                                                <th class="text-right"><?php echo $versus; ?></th>
+                                                <th class="text-right"><?php echo $versus; ?> Points</th>
+                                                <th class="text-right">Difference</th>
+                                                <th class="text-right">Points Diff</th>
                                             </thead>
                                             <tbody>
                                                 <tr>
                                                     <td><strong>Total Yards</strong></td>
-                                                    <td class="text-center"><?php echo number_format(($managerStats['pass_yds'] ?? 0) + ($managerStats['rush_yds'] ?? 0) + ($managerStats['rec_yds'] ?? 0)); ?></td>
-                                                    <td class="text-center"><?php echo number_format(($versusStats['pass_yds'] ?? 0) + ($versusStats['rush_yds'] ?? 0) + ($versusStats['rec_yds'] ?? 0)); ?></td>
-                                                    <td class="text-center"><?php 
+                                                    <td class="text-right"><?php echo number_format(($managerStats['pass_yds'] ?? 0) + ($managerStats['rush_yds'] ?? 0) + ($managerStats['rec_yds'] ?? 0)); ?></td>
+                                                    <td class="text-right">&mdash;</td>
+                                                    <td class="text-right"><?php echo number_format(($versusStats['pass_yds'] ?? 0) + ($versusStats['rush_yds'] ?? 0) + ($versusStats['rec_yds'] ?? 0)); ?></td>
+                                                    <td class="text-right">&mdash;</td>
+                                                    <td class="text-right"><?php
                                                         $managerTotal = ($managerStats['pass_yds'] ?? 0) + ($managerStats['rush_yds'] ?? 0) + ($managerStats['rec_yds'] ?? 0);
                                                         $versusTotal = ($versusStats['pass_yds'] ?? 0) + ($versusStats['rush_yds'] ?? 0) + ($versusStats['rec_yds'] ?? 0);
                                                         $diff = $managerTotal - $versusTotal;
                                                         echo ($diff > 0 ? '+' : '') . number_format($diff);
                                                     ?></td>
+                                                    <td class="text-right">&mdash;</td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Total TDs</strong></td>
-                                                    <td class="text-center"><?php echo ($managerStats['pass_tds'] ?? 0) + ($managerStats['rush_tds'] ?? 0) + ($managerStats['rec_tds'] ?? 0); ?></td>
-                                                    <td class="text-center"><?php echo ($versusStats['pass_tds'] ?? 0) + ($versusStats['rush_tds'] ?? 0) + ($versusStats['rec_tds'] ?? 0); ?></td>
-                                                    <td class="text-center"><?php 
+                                                    <td class="text-right"><?php echo ($managerStats['pass_tds'] ?? 0) + ($managerStats['rush_tds'] ?? 0) + ($managerStats['rec_tds'] ?? 0); ?></td>
+                                                    <td class="text-right">&mdash;</td>
+                                                    <td class="text-right"><?php echo ($versusStats['pass_tds'] ?? 0) + ($versusStats['rush_tds'] ?? 0) + ($versusStats['rec_tds'] ?? 0); ?></td>
+                                                    <td class="text-right">&mdash;</td>
+                                                    <td class="text-right"><?php
                                                         $managerTds = ($managerStats['pass_tds'] ?? 0) + ($managerStats['rush_tds'] ?? 0) + ($managerStats['rec_tds'] ?? 0);
                                                         $versusTds = ($versusStats['pass_tds'] ?? 0) + ($versusStats['rush_tds'] ?? 0) + ($versusStats['rec_tds'] ?? 0);
                                                         $diff = $managerTds - $versusTds;
                                                         echo ($diff > 0 ? '+' : '') . $diff;
                                                     ?></td>
+                                                    <td class="text-right">&mdash;</td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Pass Yards</strong></td>
-                                                    <td class="text-center"><?php echo number_format($managerStats['pass_yds'] ?? 0); ?></td>
-                                                    <td class="text-center"><?php echo number_format($versusStats['pass_yds'] ?? 0); ?></td>
-                                                    <td class="text-center"><?php 
+                                                    <td class="text-right"><?php echo number_format($managerStats['pass_yds'] ?? 0); ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($managerStats, 'pass_yds'), 1); ?></td>
+                                                    <td class="text-right"><?php echo number_format($versusStats['pass_yds'] ?? 0); ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($versusStats, 'pass_yds'), 1); ?></td>
+                                                    <td class="text-right"><?php
                                                         $diff = ($managerStats['pass_yds'] ?? 0) - ($versusStats['pass_yds'] ?? 0);
                                                         echo ($diff > 0 ? '+' : '') . number_format($diff);
+                                                    ?></td>
+                                                    <td class="text-right"><?php
+                                                        $pointsDiff = $statPoints($managerStats, 'pass_yds') - $statPoints($versusStats, 'pass_yds');
+                                                        echo ($pointsDiff > 0 ? '+' : '') . number_format($pointsDiff, 1);
                                                     ?></td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Pass TDs</strong></td>
-                                                    <td class="text-center"><?php echo $managerStats['pass_tds'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php echo $versusStats['pass_tds'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php 
+                                                    <td class="text-right"><?php echo $managerStats['pass_tds'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($managerStats, 'pass_tds'), 1); ?></td>
+                                                    <td class="text-right"><?php echo $versusStats['pass_tds'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($versusStats, 'pass_tds'), 1); ?></td>
+                                                    <td class="text-right"><?php
                                                         $diff = ($managerStats['pass_tds'] ?? 0) - ($versusStats['pass_tds'] ?? 0);
                                                         echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                    <td class="text-right"><?php
+                                                        $pointsDiff = $statPoints($managerStats, 'pass_tds') - $statPoints($versusStats, 'pass_tds');
+                                                        echo ($pointsDiff > 0 ? '+' : '') . number_format($pointsDiff, 1);
                                                     ?></td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Interceptions</strong></td>
-                                                    <td class="text-center"><?php echo $managerStats['ints'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php echo $versusStats['ints'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php 
+                                                    <td class="text-right"><?php echo $managerStats['ints'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($managerStats, 'ints'), 1); ?></td>
+                                                    <td class="text-right"><?php echo $versusStats['ints'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($versusStats, 'ints'), 1); ?></td>
+                                                    <td class="text-right"><?php
                                                         $diff = ($managerStats['ints'] ?? 0) - ($versusStats['ints'] ?? 0);
                                                         echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                    <td class="text-right"><?php
+                                                        $pointsDiff = $statPoints($managerStats, 'ints') - $statPoints($versusStats, 'ints');
+                                                        echo ($pointsDiff > 0 ? '+' : '') . number_format($pointsDiff, 1);
                                                     ?></td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Rush Yards</strong></td>
-                                                    <td class="text-center"><?php echo number_format($managerStats['rush_yds'] ?? 0); ?></td>
-                                                    <td class="text-center"><?php echo number_format($versusStats['rush_yds'] ?? 0); ?></td>
-                                                    <td class="text-center"><?php 
+                                                    <td class="text-right"><?php echo number_format($managerStats['rush_yds'] ?? 0); ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($managerStats, 'rush_yds'), 1); ?></td>
+                                                    <td class="text-right"><?php echo number_format($versusStats['rush_yds'] ?? 0); ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($versusStats, 'rush_yds'), 1); ?></td>
+                                                    <td class="text-right"><?php
                                                         $diff = ($managerStats['rush_yds'] ?? 0) - ($versusStats['rush_yds'] ?? 0);
                                                         echo ($diff > 0 ? '+' : '') . number_format($diff);
+                                                    ?></td>
+                                                    <td class="text-right"><?php
+                                                        $pointsDiff = $statPoints($managerStats, 'rush_yds') - $statPoints($versusStats, 'rush_yds');
+                                                        echo ($pointsDiff > 0 ? '+' : '') . number_format($pointsDiff, 1);
                                                     ?></td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Rush TDs</strong></td>
-                                                    <td class="text-center"><?php echo $managerStats['rush_tds'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php echo $versusStats['rush_tds'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php 
+                                                    <td class="text-right"><?php echo $managerStats['rush_tds'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($managerStats, 'rush_tds'), 1); ?></td>
+                                                    <td class="text-right"><?php echo $versusStats['rush_tds'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($versusStats, 'rush_tds'), 1); ?></td>
+                                                    <td class="text-right"><?php
                                                         $diff = ($managerStats['rush_tds'] ?? 0) - ($versusStats['rush_tds'] ?? 0);
                                                         echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                    <td class="text-right"><?php
+                                                        $pointsDiff = $statPoints($managerStats, 'rush_tds') - $statPoints($versusStats, 'rush_tds');
+                                                        echo ($pointsDiff > 0 ? '+' : '') . number_format($pointsDiff, 1);
                                                     ?></td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Receptions</strong></td>
-                                                    <td class="text-center"><?php echo $managerStats['receptions'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php echo $versusStats['receptions'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php 
+                                                    <td class="text-right"><?php echo $managerStats['receptions'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($managerStats, 'receptions'), 1); ?></td>
+                                                    <td class="text-right"><?php echo $versusStats['receptions'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($versusStats, 'receptions'), 1); ?></td>
+                                                    <td class="text-right"><?php
                                                         $diff = ($managerStats['receptions'] ?? 0) - ($versusStats['receptions'] ?? 0);
                                                         echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                    <td class="text-right"><?php
+                                                        $pointsDiff = $statPoints($managerStats, 'receptions') - $statPoints($versusStats, 'receptions');
+                                                        echo ($pointsDiff > 0 ? '+' : '') . number_format($pointsDiff, 1);
                                                     ?></td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Receiving Yards</strong></td>
-                                                    <td class="text-center"><?php echo number_format($managerStats['rec_yds'] ?? 0); ?></td>
-                                                    <td class="text-center"><?php echo number_format($versusStats['rec_yds'] ?? 0); ?></td>
-                                                    <td class="text-center"><?php 
+                                                    <td class="text-right"><?php echo number_format($managerStats['rec_yds'] ?? 0); ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($managerStats, 'rec_yds'), 1); ?></td>
+                                                    <td class="text-right"><?php echo number_format($versusStats['rec_yds'] ?? 0); ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($versusStats, 'rec_yds'), 1); ?></td>
+                                                    <td class="text-right"><?php
                                                         $diff = ($managerStats['rec_yds'] ?? 0) - ($versusStats['rec_yds'] ?? 0);
                                                         echo ($diff > 0 ? '+' : '') . number_format($diff);
+                                                    ?></td>
+                                                    <td class="text-right"><?php
+                                                        $pointsDiff = $statPoints($managerStats, 'rec_yds') - $statPoints($versusStats, 'rec_yds');
+                                                        echo ($pointsDiff > 0 ? '+' : '') . number_format($pointsDiff, 1);
                                                     ?></td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Receiving TDs</strong></td>
-                                                    <td class="text-center"><?php echo $managerStats['rec_tds'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php echo $versusStats['rec_tds'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php 
+                                                    <td class="text-right"><?php echo $managerStats['rec_tds'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($managerStats, 'rec_tds'), 1); ?></td>
+                                                    <td class="text-right"><?php echo $versusStats['rec_tds'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($versusStats, 'rec_tds'), 1); ?></td>
+                                                    <td class="text-right"><?php
                                                         $diff = ($managerStats['rec_tds'] ?? 0) - ($versusStats['rec_tds'] ?? 0);
                                                         echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                    <td class="text-right"><?php
+                                                        $pointsDiff = $statPoints($managerStats, 'rec_tds') - $statPoints($versusStats, 'rec_tds');
+                                                        echo ($pointsDiff > 0 ? '+' : '') . number_format($pointsDiff, 1);
                                                     ?></td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Fumbles</strong></td>
-                                                    <td class="text-center"><?php echo $managerStats['fumbles'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php echo $versusStats['fumbles'] ?? 0; ?></td>
-                                                    <td class="text-center"><?php 
+                                                    <td class="text-right"><?php echo $managerStats['fumbles'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($managerStats, 'fumbles'), 1); ?></td>
+                                                    <td class="text-right"><?php echo $versusStats['fumbles'] ?? 0; ?></td>
+                                                    <td class="text-right"><?php echo number_format($statPoints($versusStats, 'fumbles'), 1); ?></td>
+                                                    <td class="text-right"><?php
                                                         $diff = ($managerStats['fumbles'] ?? 0) - ($versusStats['fumbles'] ?? 0);
                                                         echo ($diff > 0 ? '+' : '') . $diff;
+                                                    ?></td>
+                                                    <td class="text-right"><?php
+                                                        $pointsDiff = $statPoints($managerStats, 'fumbles') - $statPoints($versusStats, 'fumbles');
+                                                        echo ($pointsDiff > 0 ? '+' : '') . number_format($pointsDiff, 1);
                                                     ?></td>
                                                 </tr>
                                             </tbody>

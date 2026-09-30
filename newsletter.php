@@ -59,11 +59,12 @@ $customMetaTitle = "Week $selectedWeek Newsletter | $selectedSeason Suntown FFB"
 $customMetaDescription = "The best league in all the land";
 $customMetaImage = "http://suntownffb.us/images/football.ico"; // default
 
-$metaQuery = query("SELECT recap, metadata_image, headline, hero_image, created_at FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
+$metaQuery = query("SELECT recap, metadata_image, headline, hero_image, created_at, published FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
 $metaRow = fetch_array($metaQuery);
 $newsletterDate = null;
 $newsletterHeadline = null;
 $heroImage = null;
+$published = !empty($metaRow['published']);
 if ($metaRow) {
     if (!empty($metaRow['recap'])) {
         $cleanRecap = strip_tags($metaRow['recap']);
@@ -91,15 +92,11 @@ $rosterQuery = query("SELECT * FROM rosters WHERE year = $selectedSeason AND wee
 $rosterData = fetch_array($rosterQuery);
 $rosterAvailable = !empty($rosterData);
 
-// Check for newsletter content
+// Check for newsletter content - a week's newsletter only renders once it has
+// been explicitly published in the admin, regardless of whether a draft row exists
 $newsletterQuery = query("SELECT * FROM newsletters WHERE year = $selectedSeason AND week = $selectedWeek");
 $contentData = fetch_array($newsletterQuery);
-$contentAvailable = !empty($contentData);
-
-// If it's week 1, always show content
-if ($selectedWeek == 1) {
-    $contentAvailable = true;
-}
+$contentAvailable = !empty($contentData) && $published;
 
 // Get schedule info specifically for this newsletter's selected week
 $scheduleInfo = getScheduleInfo($selectedSeason, $selectedWeek);
@@ -282,12 +279,12 @@ include_once 'version.php';
      ============================================================ -->
 <div class="newspaper-page">
 
-    <?php if ($heroImage): ?>
+    <?php if ($contentAvailable && $heroImage): ?>
         <div class="hero-image-wrapper">
             <img src="<?php echo htmlspecialchars($heroImage); ?>" alt="">
         </div>
     <?php endif; ?>
-    <?php if ($newsletterHeadline): ?>
+    <?php if ($contentAvailable && $newsletterHeadline): ?>
         <h1 class="newsletter-headline"><?php echo htmlspecialchars($newsletterHeadline); ?></h1>
     <?php endif; ?>
 
@@ -373,7 +370,7 @@ include_once 'version.php';
         <?php endif; ?>
     <?php endif; ?>
 
-    <?php if ($selectedWeek > 1 && $rosterAvailable): ?>
+    <?php if ($contentAvailable && $selectedWeek > 1 && $rosterAvailable): ?>
 
         <!-- TOP PERFORMERS + RECORD AGAINST EVERYONE -->
         <div class="section-label"><span>League Standings &amp; Performers</span></div>

@@ -9,6 +9,8 @@ $preview = '';
 $headline = '';
 $notes = '';
 $recap_notes = '';
+$recap_ai_instructions = '';
+$preview_ai_instructions = '';
 $heroImagePath = '';
 $editYear = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
 $editWeek = isset($_GET['week']) ? (int)$_GET['week'] : 1;
@@ -22,6 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     $headline = isset($_POST['headline']) ? $_POST['headline'] : '';
     $notes = isset($_POST['notes']) ? $_POST['notes'] : '';
     $recap_notes = isset($_POST['recap_notes']) ? $_POST['recap_notes'] : '';
+    $recap_ai_instructions = isset($_POST['recap_ai_instructions']) ? $_POST['recap_ai_instructions'] : '';
+    $preview_ai_instructions = isset($_POST['preview_ai_instructions']) ? $_POST['preview_ai_instructions'] : '';
     $metadataImagePath = '';
     $heroImagePath = '';
 
@@ -85,6 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
             'headline' => $headline,
             'notes' => $notes,
             'recap_notes' => $recap_notes,
+            'recap_ai_instructions' => $recap_ai_instructions,
+            'preview_ai_instructions' => $preview_ai_instructions,
         ];
         $setClauses = [];
         foreach ($textFields as $column => $value) {
@@ -107,8 +113,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
         }
     } else {
         // Insert new record
-        $insertQuery = "INSERT INTO newsletters (year, week, recap, preview, headline, notes, recap_notes, created_at";
-        $insertValues = "$editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "', '" . SQLite3::escapeString($headline) . "', '" . SQLite3::escapeString($notes) . "', '" . SQLite3::escapeString($recap_notes) . "', datetime('now')";
+        $insertQuery = "INSERT INTO newsletters (year, week, recap, preview, headline, notes, recap_notes, recap_ai_instructions, preview_ai_instructions, created_at";
+        $insertValues = "$editYear, $editWeek, '" . SQLite3::escapeString($recap) . "', '" . SQLite3::escapeString($preview) . "', '" . SQLite3::escapeString($headline) . "', '" . SQLite3::escapeString($notes) . "', '" . SQLite3::escapeString($recap_notes) . "', '" . SQLite3::escapeString($recap_ai_instructions) . "', '" . SQLite3::escapeString($preview_ai_instructions) . "', datetime('now')";
         if ($metadataImagePath) {
             $insertQuery .= ", metadata_image";
             $insertValues .= ", '" . SQLite3::escapeString($metadataImagePath) . "'";
@@ -124,16 +130,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     $saved = true;
 }
 
+// Publish/unpublish is a separate, lightweight action - it only ever flips the
+// published flag and never touches the text/image fields above, so it can't
+// clobber in-progress edits and doesn't require re-submitting the full form.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['publish_action'])) {
+    $editYear = isset($_POST['year']) ? (int)$_POST['year'] : $editYear;
+    $editWeek = isset($_POST['week']) ? (int)$_POST['week'] : $editWeek;
+    $newPublished = ($_POST['publish_action'] === 'publish') ? 1 : 0;
+    $setClauses = "published = $newPublished";
+    if ($newPublished) {
+        // Stamp created_at at publish time so the masthead date reflects when
+        // the edition actually went live, not whenever it was last saved as a draft.
+        $setClauses .= ", created_at = datetime('now')";
+    }
+    query("UPDATE newsletters SET $setClauses WHERE year = $editYear AND week = $editWeek");
+}
+
 // Fetch existing content if any
-$contentQuery = query("SELECT recap, preview, headline, notes, recap_notes, hero_image FROM newsletters WHERE year = $editYear AND week = $editWeek");
+$contentQuery = query("SELECT recap, preview, headline, notes, recap_notes, recap_ai_instructions, preview_ai_instructions, hero_image, published FROM newsletters WHERE year = $editYear AND week = $editWeek");
 $contentRow = fetch_array($contentQuery);
 $existingHeroImage = null;
+$newsletterExists = !empty($contentRow);
+$isPublished = $newsletterExists && !empty($contentRow['published']);
 if ($contentRow) {
     $recap = $contentRow['recap'] ?? '';
     $preview = $contentRow['preview'] ?? '';
     $headline = $contentRow['headline'] ?? '';
     $notes = $contentRow['notes'] ?? '';
     $recap_notes = $contentRow['recap_notes'] ?? '';
+    $recap_ai_instructions = $contentRow['recap_ai_instructions'] ?? '';
+    $preview_ai_instructions = $contentRow['preview_ai_instructions'] ?? '';
     $existingHeroImage = !empty($contentRow['hero_image']) ? $contentRow['hero_image'] : null;
 }
 
@@ -149,8 +175,30 @@ if ($contentRow) {
             <div class="row" style="direction: ltr;">
                 <div class="col-sm-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h4>Edit Newsletter Content</h4>
+                        <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                            <h4 style="margin: 0;">Edit Newsletter Content</h4>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span class="badge" style="padding: 5px 10px; font-size: 0.8rem; color: #fff; background: <?php echo $isPublished ? '#28a745' : '#888'; ?>;">
+                                    <?php echo $isPublished ? 'Published' : 'Draft'; ?>
+                                </span>
+                                <?php if ($newsletterExists): ?>
+                                    <?php
+                                    $publishConfirmMsg = $isPublished
+                                        ? 'Unpublish this newsletter? It will go back to showing only the matchups.'
+                                        : 'Publish this newsletter now? It will immediately become visible to everyone.';
+                                    ?>
+                                    <form method="POST" action="admin.php?tab=newsletter&year=<?php echo $editYear; ?>&week=<?php echo $editWeek; ?>" style="margin: 0;" onsubmit="return confirm(<?php echo htmlspecialchars(json_encode($publishConfirmMsg)); ?>);">
+                                        <input type="hidden" name="year" value="<?php echo $editYear; ?>">
+                                        <input type="hidden" name="week" value="<?php echo $editWeek; ?>">
+                                        <input type="hidden" name="publish_action" value="<?php echo $isPublished ? 'unpublish' : 'publish'; ?>">
+                                        <button type="submit" class="btn btn-sm <?php echo $isPublished ? 'btn-outline-danger' : 'btn-success'; ?>">
+                                            <?php echo $isPublished ? 'Unpublish' : 'Publish'; ?>
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <span style="font-size: 0.8rem; color: #888;">Save changes below to create this edition before publishing.</span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         <div class="card-body" style="background: #fff;">
                             <form method="GET" id="yearWeekForm">
@@ -375,6 +423,14 @@ if ($contentRow) {
                                 <textarea id="newsletter-recap-notes" name="recap_notes" class="form-control" rows="10" style="direction: ltr;" placeholder="Internal notes for the recap..."><?php echo htmlspecialchars($recap_notes); ?></textarea>
                             </div>
                         </div>
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-header" style="direction: ltr;">
+                                <h4>AI Prompt Instructions <small style="font-weight:normal;font-size:0.8rem;opacity:0.75;">(theme, roasts, etc.)</small></h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr;">
+                                <textarea id="newsletter-recap-ai-instructions" name="recap_ai_instructions" class="form-control" rows="4" style="direction: ltr;" placeholder="e.g. Give it a horror-movie theme, or really roast Gavin this week..."><?php echo htmlspecialchars($recap_ai_instructions); ?></textarea>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-sm-12 col-md-6">
                         <div class="card" style="height: 100%;">
@@ -410,6 +466,14 @@ if ($contentRow) {
                             </div>
                             <div class="card-body" style="background: #fff; direction: ltr;">
                                 <textarea id="newsletter-notes" name="notes" class="form-control" rows="10" style="direction: ltr;" placeholder="Internal notes for the preview..."><?php echo htmlspecialchars($notes); ?></textarea>
+                            </div>
+                        </div>
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-header" style="direction: ltr;">
+                                <h4>AI Prompt Instructions <small style="font-weight:normal;font-size:0.8rem;opacity:0.75;">(theme, roasts, etc.)</small></h4>
+                            </div>
+                            <div class="card-body" style="background: #fff; direction: ltr;">
+                                <textarea id="newsletter-preview-ai-instructions" name="preview_ai_instructions" class="form-control" rows="4" style="direction: ltr;" placeholder="e.g. Give it a horror-movie theme, or really roast Gavin this week..."><?php echo htmlspecialchars($preview_ai_instructions); ?></textarea>
                             </div>
                         </div>
                     </div>

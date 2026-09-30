@@ -116,7 +116,7 @@ prompt for image:
 make a newspaper headline image with no text and wider than it is tall to fit atop a newsletter.
 it should use the attached image(s) to make ...
 
-- The Race to the Bottom Remains Wide Open
+The Race to the Bottom Remains Wide Open
 
 - Halloween, Thanksgiving, Christmas
 - 80s, superheroes

@@ -777,10 +777,13 @@ include 'sidebar.php';
         
         function highlightColumns(tableId, skipCols, invertCols) {
             invertCols = invertCols || [];
+            var skipSet = Array.isArray(skipCols) ? skipCols : null;
+            var skipStart = Array.isArray(skipCols) ? 0 : skipCols;
             $(tableId).on('draw.dt', function() {
                 var api = $(tableId).DataTable();
                 var numCols = api.columns().count();
-                for (var col = skipCols; col < numCols; col++) {
+                for (var col = 0; col < numCols; col++) {
+                    if (skipSet ? skipSet.indexOf(col) !== -1 : col < skipStart) continue;
                     var nodes = api.column(col, {page: 'all', search: 'applied'}).nodes();
                     if (nodes.length === 0) continue;
                     var vals = [];
@@ -991,27 +994,9 @@ include 'sidebar.php';
             ],
             order: [
                 [4, "desc"]
-            ],
-            initComplete: function() {
-                var api = this.api();
-                api.columns(':not(:first)').every(function() {
-                    var col = this.index();
-                    var data = this.data().unique().map(function(value) {
-                        return parseInt(value);
-                    }).toArray().sort(function(a, b){return b-a});
-
-                    last = data.length-1;
-                    api.cells(null, col).every(function() {
-                        var cell = parseInt(this.data());
-                        if (cell === data[0]) {
-                            $(this.node()).css('background-color', 'rgb(172, 240, 172)')
-                        } else if (cell === data[last]) {
-                            $(this.node()).css('background-color', 'rgba(255, 85, 85, 0.32)')
-                        }
-                    });
-                });
-            }
+            ]
         });
+        highlightColumns('#datatable-optimal', [0, 1, 2, 3, 6], [5, 8, 9]);
 
         $('#datatable-lineupAccuracy').DataTable({
             searching: false,

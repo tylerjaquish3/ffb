@@ -246,6 +246,7 @@ include_once 'version.php';
             ?>
         </select>
     </div>
+    <a class="past-editions-link" href="pastEditions.php">Past Editions</a>
 </div>
 
 <!-- PAGE BODY -->

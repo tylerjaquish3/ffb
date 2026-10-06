@@ -141,7 +141,7 @@ include_once 'version.php';
 
     <meta property="og:title" content="<?php echo htmlspecialchars($customMetaTitle); ?>" />
     <meta property="og:description" content="<?php echo htmlspecialchars($customMetaDescription); ?>" />
-    <meta property="og:url" content="http://suntownffb.us/newsletter.php" />
+    <meta property="og:url" content="https://suntownffb.us/newsletter.php" />
     <meta property="og:image" content="<?php echo htmlspecialchars($customMetaImage); ?>" />
 
     <link rel="icon" type="image/png" href="/images/football.ico">
@@ -272,6 +272,7 @@ include_once 'version.php';
             ?>
         </select>
     </div>
+    <a class="past-editions-link" href="pastEditions.php">Past Editions</a>
 </div>
 
 <!-- ============================================================
@@ -382,7 +383,7 @@ include_once 'version.php';
                     <li>
                         <div class="perf-icon"><i class="icon-coin-dollar"></i></div>
                         <div>
-                            <div class="perf-label">Top Week Performance</div>
+                            <div class="perf-label">Season Best Week</div>
                             <div class="perf-manager"><?php echo $topPerformers['topPerformer']['manager'].' &mdash; Wk '.$topPerformers['topPerformer']['week']; ?></div>
                             <div class="perf-detail"><?php echo $topPerformers['topPerformer']['player'].' &mdash; '.$topPerformers['topPerformer']['points'].' pts'; ?></div>
                         </div>

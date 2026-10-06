@@ -180,13 +180,76 @@ function getDefaultEffectiveWeek(SQLite3 $conn, $year) {
     return min($maxWeek + 1, DRAFT_ORDER_GAME_WEEKS);
 }
 
+// Current picks (not past/switched-away players) with no rosters row — even via
+// player_aliases — for the most recent scored week in $year, and no manual
+// override already entered for that week. These are gaps a manager's pick
+// silently scores as 0 for unless the admin fills them in via Manual Point
+// Overrides. Returns [] if no week has been scored yet.
+function getPlayersNeedingOverride(SQLite3 $conn, $year, array $currentPicks) {
+    $stmt = $conn->prepare("SELECT MAX(week) AS max_week FROM rosters WHERE year = :year");
+    $stmt->bindValue(':year', $year, SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $week = $row['max_week'] !== null ? (int)$row['max_week'] : null;
+    if ($week === null) {
+        return [];
+    }
+
+    $rosterStmt = $conn->prepare("
+        SELECT 1 FROM rosters r
+        WHERE r.year = :year AND r.week = :week
+          AND (
+            r.player = :player
+            OR EXISTS (
+                SELECT 1 FROM player_aliases pa
+                WHERE (pa.player = :player OR pa.alias_1 = :player OR pa.alias_2 = :player OR pa.alias_3 = :player)
+                  AND (r.player = pa.player OR r.player = pa.alias_1 OR r.player = pa.alias_2 OR r.player = pa.alias_3)
+            )
+          )
+    ");
+    $manualStmt = $conn->prepare("SELECT 1 FROM draft_order_manual_points WHERE year = :year AND player = :player AND week = :week");
+
+    $needsOverride = [];
+    foreach (array_unique(array_filter($currentPicks)) as $player) {
+        $rosterStmt->bindValue(':year', $year, SQLITE3_INTEGER);
+        $rosterStmt->bindValue(':week', $week, SQLITE3_INTEGER);
+        $rosterStmt->bindValue(':player', $player, SQLITE3_TEXT);
+        if ($rosterStmt->execute()->fetchArray(SQLITE3_ASSOC)) {
+            continue;
+        }
+
+        $manualStmt->bindValue(':year', $year, SQLITE3_INTEGER);
+        $manualStmt->bindValue(':player', $player, SQLITE3_TEXT);
+        $manualStmt->bindValue(':week', $week, SQLITE3_INTEGER);
+        if ($manualStmt->execute()->fetchArray(SQLITE3_ASSOC)) {
+            continue;
+        }
+
+        $needsOverride[] = ['player' => $player, 'week' => $week];
+    }
+    return $needsOverride;
+}
+
+// How many weeks of the season have been scored so far (MAX(week) with any rosters
+// data), used to compute each manager's on-pace "optimal" total alongside the
+// season-long target. 0 if the season hasn't started scoring yet.
+function getWeeksCompleted(SQLite3 $conn, $year) {
+    $stmt = $conn->prepare("SELECT MAX(week) AS max_week FROM rosters WHERE year = :year");
+    $stmt->bindValue(':year', $year, SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $row = $result->fetchArray(SQLITE3_ASSOC);
+    return $row['max_week'] !== null ? (int)$row['max_week'] : 0;
+}
+
 // One row per manager: name, current player (or null), position, season points
-// (summed across every assignment segment), diff from target, rank.
+// (summed across every assignment segment), diff from target, diff from the
+// on-pace "optimal" total for weeks completed so far, rank.
 // Managers with no pick sort last and carry no rank.
 function getSummaryRows(SQLite3 $conn, $year) {
     $managers = getManagers($conn);
     $pickHistory = getPickHistory($conn, $year);
     $pool = getPool($conn, $year);
+    $optimalPoints = (DRAFT_ORDER_GAME_TARGET / DRAFT_ORDER_GAME_WEEKS) * getWeeksCompleted($conn, $year);
     $poolByPlayer = [];
     foreach ($pool as $p) {
         $poolByPlayer[$p['player']] = $p;
@@ -204,6 +267,7 @@ function getSummaryRows(SQLite3 $conn, $year) {
             'overall_pick' => $currentPlayer && isset($poolByPlayer[$currentPlayer]) ? (int)$poolByPlayer[$currentPlayer]['overall_pick'] : null,
             'points' => null,
             'diff' => null,
+            'diff_from_optimal' => null,
             'history' => $assignments,
             // Voluntary switches only — a transition flagged 'forced' (the manager's
             // prior player was ineligible/injured at the time) doesn't count against
@@ -216,6 +280,7 @@ function getSummaryRows(SQLite3 $conn, $year) {
             $points = getManagerSeasonPoints($conn, $year, $assignments);
             $row['points'] = $points;
             $row['diff'] = abs($points - DRAFT_ORDER_GAME_TARGET);
+            $row['diff_from_optimal'] = abs($points - $optimalPoints);
         }
         $rows[] = $row;
     }

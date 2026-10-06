@@ -25,6 +25,9 @@ $managers = getManagers($conn);
 $summary = getSummaryRows($conn, $year);
 $defaultEffectiveWeek = getDefaultEffectiveWeek($conn, $year);
 $manualPoints = getManualPoints($conn, $year);
+$needsOverride = getPlayersNeedingOverride($conn, $year, $picks);
+$weeksCompleted = getWeeksCompleted($conn, $year);
+$optimalPoints = (DRAFT_ORDER_GAME_TARGET / DRAFT_ORDER_GAME_WEEKS) * $weeksCompleted;
 
 $pickedPlayers = array_flip(array_filter($picks));
 
@@ -73,6 +76,7 @@ $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title mb-0">Standings</h4>
+                            <span class="text-muted small">Optimal through Week <?php echo $weeksCompleted; ?>: <?php echo number_format($optimalPoints, 2); ?> points</span>
                         </div>
                         <div class="card-body p-0" style="direction: ltr;">
                             <table class="table table-sm mb-0">
@@ -84,6 +88,7 @@ $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
                                         <th>Pos</th>
                                         <th>Points</th>
                                         <th>Diff from <?php echo (int)DRAFT_ORDER_GAME_TARGET; ?></th>
+                                        <th>Diff from Optimal</th>
                                         <th>Moves</th>
                                     </tr>
                                 </thead>
@@ -108,9 +113,10 @@ $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
                                             <td><?php echo htmlspecialchars($row['position']); ?></td>
                                             <td><?php echo number_format($row['points'], 1); ?></td>
                                             <td><?php echo number_format($row['diff'], 1); ?></td>
+                                            <td><?php echo number_format($row['diff_from_optimal'], 1); ?></td>
                                             <td class="<?php echo $row['moves'] >= DRAFT_ORDER_GAME_MAX_MOVES ? 'text-danger' : ''; ?>"><?php echo $row['moves']; ?> / <?php echo DRAFT_ORDER_GAME_MAX_MOVES; ?></td>
                                         <?php else: ?>
-                                            <td colspan="5" class="text-muted font-italic">No pick yet</td>
+                                            <td colspan="6" class="text-muted font-italic">No pick yet</td>
                                         <?php endif; ?>
                                     </tr>
                                 <?php endforeach; ?>
@@ -252,6 +258,13 @@ $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
                                     </tbody>
                                 </table>
                                 </div>
+
+                                <?php if (!empty($needsOverride)): ?>
+                                    <div class="alert alert-warning" style="direction: ltr;">
+                                        <strong>Week <?php echo (int)$needsOverride[0]['week']; ?>:</strong> these current picks have no roster data for that week and need a manual override —
+                                        <?php echo htmlspecialchars(implode(', ', array_column($needsOverride, 'player'))); ?>.
+                                    </div>
+                                <?php endif; ?>
 
                                 <h5 class="mb-2 mt-3">Manual Point Overrides</h5>
                                 <p class="text-muted small">Points only come from the rosters table, which only has data for players who were actually on a fantasy roster that week. If a manager's pick gets dropped/waived, weeks they sat on waivers score as 0 unless you fill them in here. An override replaces whatever's in rosters for that player/week — it doesn't add to it.</p>

@@ -152,6 +152,20 @@ body {
 
 .edition-field { display: flex; align-items: center; }
 
+.edition-bar .past-editions-link {
+    margin-left: auto;
+    color: var(--paper);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.62rem;
+    opacity: 0.5;
+}
+.edition-bar .past-editions-link:hover,
+.edition-bar .past-editions-link:visited,
+.edition-bar .past-editions-link:active { color: var(--paper); opacity: 0.5; }
+.edition-bar .past-editions-link:hover { opacity: 0.85; }
+
 /* ============================================================
    PAGE CONTAINER
    ============================================================ */
@@ -490,6 +504,51 @@ body {
     color: var(--ink-faint);
     font-family: 'Playfair Display', serif;
     font-style: italic;
+}
+
+/* ============================================================
+   PAST EDITIONS LIST
+   ============================================================ */
+.edition-list {
+    list-style: none;
+    margin: 0 0 0.5rem;
+    padding: 0;
+    border-top: 1px solid var(--paper-dark);
+}
+.edition-list li { border-bottom: 1px solid var(--paper-dark); }
+.edition-list a,
+.edition-list a:visited,
+.edition-list a:hover,
+.edition-list a:active {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding: 0.65rem 0.2rem;
+    text-decoration: none;
+    color: var(--ink);
+}
+.edition-list a:hover { background: var(--paper-dark); }
+.edition-list .ed-week {
+    flex: 0 0 auto;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+}
+.edition-list .ed-headline {
+    flex: 1 1 auto;
+    font-family: 'Lora', serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+}
+.edition-list .ed-date {
+    flex: 0 0 auto;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.65rem;
+    color: var(--ink-faint);
+    white-space: nowrap;
 }
 
 /* ============================================================

@@ -23,8 +23,10 @@
     <?php include_once 'version.php'; ?>
 
     <link rel="icon" type="image/png" href="/images/football.ico">
+    <link rel="apple-touch-icon" href="/images/icon-180.png">
+    <link rel="manifest" href="/manifest.json">
 
-    <?php 
+    <?php
     // Use custom meta properties if they're set (e.g., from newsletter.php), otherwise use defaults
     $ogTitle = isset($customMetaTitle) ? $customMetaTitle : "Suntown Fantasy Football League";
     $ogDescription = isset($customMetaDescription) ? $customMetaDescription : "The best league in all the land";

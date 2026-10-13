@@ -58,7 +58,8 @@ function getMatchups($won)
             'score' => (float)$row['score'],
             'opponent' => $row['opponent'],
             'opponent_score' => (float)$row['opponent_score'],
-            'rank' => $won ? (int)$row['rank_bottom'] : (int)$row['rank_top'],
+            'rank' => (int)$row['rank_top'],
+            'filter_rank' => $won ? (int)$row['rank_bottom'] : (int)$row['rank_top'],
             'league_size' => (int)$row['league_size'],
             'margin' => round(abs($row['score'] - $row['opponent_score']), 2),
         ];
@@ -69,13 +70,14 @@ function getMatchups($won)
 
 /**
  * Rows where the manager was in the bottom/top 3 scorers of the week
- * (win side uses bottom-3, loss side uses top-3 — 'rank' is already the
- * relevant one per getMatchups()).
+ * (win side uses bottom-3, loss side uses top-3, per getMatchups()).
+ * 'rank' itself always stays the true weekly placement (from the top)
+ * for display, so filtering uses the separate 'filter_rank'.
  */
 function filterByRank($rows)
 {
     return array_values(array_filter($rows, function ($row) {
-        return $row['rank'] <= 3;
+        return $row['filter_rank'] <= 3;
     }));
 }
 

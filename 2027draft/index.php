@@ -79,17 +79,18 @@ $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
                             <span class="text-muted small">Optimal through Week <?php echo $weeksCompleted; ?>: <?php echo number_format($optimalPoints, 2); ?> points</span>
                         </div>
                         <div class="card-body p-0" style="direction: ltr;">
+                            <div class="table-responsive">
                             <table class="table table-sm mb-0">
                                 <thead>
                                     <tr>
                                         <th>Rank</th>
                                         <th>Manager</th>
-                                        <th>Player</th>
+                                        <th style="min-width: 220px;">Player</th>
                                         <th>Pos</th>
                                         <th>Points</th>
                                         <th>Diff from <?php echo (int)DRAFT_ORDER_GAME_TARGET; ?></th>
                                         <th>Diff from Optimal</th>
-                                        <th>Moves</th>
+                                        <th style="white-space: nowrap;">Moves</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -114,7 +115,7 @@ $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
                                             <td><?php echo number_format($row['points'], 1); ?></td>
                                             <td><?php echo number_format($row['diff'], 1); ?></td>
                                             <td><?php echo number_format($row['diff_from_optimal'], 1); ?></td>
-                                            <td class="<?php echo $row['moves'] >= DRAFT_ORDER_GAME_MAX_MOVES ? 'text-danger' : ''; ?>"><?php echo $row['moves']; ?> / <?php echo DRAFT_ORDER_GAME_MAX_MOVES; ?></td>
+                                            <td class="<?php echo $row['moves'] >= DRAFT_ORDER_GAME_MAX_MOVES ? 'text-danger' : ''; ?>" style="white-space: nowrap;"><?php echo $row['moves']; ?> / <?php echo DRAFT_ORDER_GAME_MAX_MOVES; ?></td>
                                         <?php else: ?>
                                             <td colspan="6" class="text-muted font-italic">No pick yet</td>
                                         <?php endif; ?>
@@ -122,6 +123,7 @@ $ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
                                 <?php endforeach; ?>
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
                 </div>

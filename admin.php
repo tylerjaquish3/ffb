@@ -498,22 +498,54 @@ $( document ).ready( () => {
 
 <script>
 function makeRequest(year, weeks, managers, mode) {
-    var pendingRequests = $('input[name="sections[]"]:checked').length;
-    var hasRosters = $('input[name="sections[]"][value="rosters"]:checked').length > 0;
+    var checkedSections = $('input[name="sections[]"]:checked').map(function () {
+        return $(this).val();
+    }).get();
     var endpoint = mode === 'scrape' ? 'yahooScrapeRequest.php' : 'yahooApiRequest.php';
 
-    if (pendingRequests === 0) {
+    if (checkedSections.length === 0) {
         $('#loading').hide();
         $('#output').html('<div class="alert alert-warning">Please select at least one section to update.</div>');
         return;
     }
 
+    if (checkedSections.includes('matchups') && checkedSections.includes('rosters')) {
+        // Rosters writes optimal points onto the matchup rows for the week, so the
+        // matchups scrape must finish (and those rows must exist) before rosters starts.
+        var remainingSections = checkedSections.filter(function (section) {
+            return section !== 'matchups';
+        });
+        var matchupRequestData = { year: year, section: 'matchups', weeks: weeks };
+        if (mode !== 'scrape') {
+            matchupRequestData.token = access_token;
+        }
+        $.ajax({
+            url: endpoint,
+            type: 'POST',
+            data: matchupRequestData,
+            success: function (response) {
+                $('#output').append(response);
+                runSections(remainingSections, year, weeks, managers, mode, endpoint);
+            },
+            error: function () {
+                $('#output').append('<div class="alert alert-danger">Error processing matchups. Please try again.</div>');
+                runSections(remainingSections, year, weeks, managers, mode, endpoint);
+            }
+        });
+    } else {
+        runSections(checkedSections, year, weeks, managers, mode, endpoint);
+    }
+}
+
+function runSections(sections, year, weeks, managers, mode, endpoint) {
+    var pendingRequests = sections.length;
+    var hasRosters = sections.includes('rosters');
+
     if (hasRosters) {
         pendingRequests--;
     }
 
-    $('input[name="sections[]"]:checked').each(function () {
-        let section = $(this).val();
+    sections.forEach(function (section) {
         if (section == 'rosters') {
             makeRosterRequest(year, weeks, managers, mode, 0, function() {
                 if (pendingRequests === 0) {

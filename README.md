@@ -113,7 +113,7 @@ $managersInOrder = ['Tyler', 'AJ', 'Gavin', 'Matt', 'Cameron', 'Andy', 'Everett'
 # Newsletter themes
 
 prompt for image:
-make a newspaper headline image with no text and wider than it is tall to fit atop a newsletter.
+make a newspaper headline image with no text and wider than it is tall (94:35 ratio) to fit atop a newsletter.
 it should use the attached image(s) to make ...
 
 The Race to the Bottom Remains Wide Open

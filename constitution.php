@@ -192,6 +192,25 @@ while ($row = fetch_array($result)) {
             <div class="row card-section" id="meeting-notes" style="display: none;">
                 <div class="col-sm-12">
 
+                    <!-- Meeting Agenda 2027 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Meeting Agenda | 2027</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-block" style="direction: ltr">
+                                <br />
+                                <strong>Vote on the following: </strong>
+                                <ul style="padding-left: 0; list-style-position: inside;">
+                                    <li>No items yet, feel free to make a suggestion</li>
+                                </ul>
+                                <br />
+                                <strong>Draft date: TBD | Location: Ben's</strong>
+                                <br /><br />
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Meeting Agenda 2026 -->
                     <div class="card">
                         <div class="card-header">
@@ -205,18 +224,6 @@ while ($row = fetch_array($result)) {
                                     <li>Add stat category for "Pick 6s Thrown" worth -4 points | <strong>Voted to keep as-is (vote was 7-2).</strong></li>
                                 </ol>
                                 <strong>Mystic Pickle determined 2026 draft order</strong><br />
-                                <ol>
-                                    <li>Andy</li>
-                                    <li>Cameron</li>
-                                    <li>Justin</li>
-                                    <li>Matt</li>
-                                    <li>Cole</li>
-                                    <li>Gavin</li>
-                                    <li>Everett</li>
-                                    <li>AJ</li>
-                                    <li>Tyler</li>
-                                    <li>Ben</li>
-                                </ol>
                                 <br />
                                 <strong>Draft date: 8.29.26 | Time: 6pm | Location: Cole's</strong>
                                 <br /><br />

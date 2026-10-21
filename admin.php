@@ -159,20 +159,72 @@ $( document ).ready( () => {
         const {
             Autoformat,AutoImage,Autosave,BlockQuote,Bold,Emoji,
             Essentials,Heading,Indent,IndentBlock,Italic,Link,List,MediaEmbed,Mention,Paragraph,
-            Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline
+            Strikethrough,Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline,
+            Plugin,Command,ButtonView
         } = CKEDITOR;
+
+        // First-line indent: toggles an inline text-indent on paragraphs. Stored
+        // as a style attribute so the public newsletter pages render it as-is.
+        class FirstLineIndentCommand extends Command {
+            refresh() {
+                const block = this.editor.model.document.selection.getSelectedBlocks().next().value;
+                this.isEnabled = !!block && block.is('element', 'paragraph');
+                this.value = this.isEnabled && !!block.getAttribute('firstLineIndent');
+            }
+            execute() {
+                const model = this.editor.model;
+                model.change(writer => {
+                    for (const block of model.document.selection.getSelectedBlocks()) {
+                        if (!block.is('element', 'paragraph')) continue;
+                        if (this.value) writer.removeAttribute('firstLineIndent', block);
+                        else writer.setAttribute('firstLineIndent', '2em', block);
+                    }
+                });
+            }
+        }
+
+        class FirstLineIndent extends Plugin {
+            init() {
+                const editor = this.editor;
+                editor.model.schema.extend('paragraph', { allowAttributes: 'firstLineIndent' });
+                editor.conversion.for('upcast').attributeToAttribute({
+                    view: { name: 'p', styles: { 'text-indent': /.+/ } },
+                    model: { key: 'firstLineIndent', value: viewElement => viewElement.getStyle('text-indent') }
+                });
+                editor.conversion.for('downcast').attributeToAttribute({
+                    model: { name: 'paragraph', key: 'firstLineIndent' },
+                    view: modelValue => ({ key: 'style', value: { 'text-indent': modelValue } })
+                });
+                editor.commands.add('firstLineIndent', new FirstLineIndentCommand(editor));
+                editor.ui.componentFactory.add('firstLineIndent', locale => {
+                    const button = new ButtonView(locale);
+                    const command = editor.commands.get('firstLineIndent');
+                    button.set({
+                        label: 'Indent first line',
+                        tooltip: true,
+                        withText: false,
+                        icon: '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M7 4h11v1.5H7zM2 8h16v1.5H2zM2 12h16v1.5H2zM2 16h10v1.5H2z"/></svg>'
+                    });
+                    button.bind('isEnabled').to(command, 'isEnabled');
+                    button.bind('isOn').to(command, 'value');
+                    button.on('execute', () => { editor.execute('firstLineIndent'); editor.editing.view.focus(); });
+                    return button;
+                });
+            }
+        }
 
         return {
             plugins: [
                 Autoformat,AutoImage,Autosave,BlockQuote,Bold,Emoji,
                 Essentials,Heading,Indent,IndentBlock,Italic,Link,List,MediaEmbed,Mention,Paragraph,
-                Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline
+                Strikethrough,Table,TableCaption,TableToolbar,TextTransformation,TodoList,Underline,
+                FirstLineIndent
             ],
             toolbar: ['undo','redo','|',
                 'heading','|',
-                'bold','italic','underline','|',
+                'bold','italic','underline','strikethrough','|',
                 'emoji','link','mediaEmbed','insertTable','blockQuote','|',
-                'bulletedList','numberedList','todoList','outdent','indent'
+                'bulletedList','numberedList','todoList','outdent','indent','firstLineIndent'
             ]
         };
     }

@@ -544,7 +544,7 @@ function getFoesArray()
             }
         }
 
-        $allOpponents = [];
+        $allOpponents = $allMatches = [];
         foreach ($allFoes as $versus) {
 
             $data = [];
@@ -569,6 +569,7 @@ function getFoesArray()
                 $postseasonTypes = ['Final', 'Semifinal', 'Quarterfinal'];
                 $data[] = [
                     'opponent' => getManagerName($versus),
+                    'year' => $row['year'],
                     'is_postseason' => in_array($row['week_number'], $postseasonTypes) ? true : false,
                     'week' => $row['week_number'],
                     'manager1_id' => $row['man1'],
@@ -592,9 +593,9 @@ function getFoesArray()
                 'closest_win' => 417417,'closest_loss' => -417417,
                 'total_points_missed' => 0
             ];
+            $totals['opponent'] = getManagerName($versus);
             foreach ($data as $match) {
-                
-                $totals['opponent'] = $match['opponent'];
+                $allMatches[] = $match;
                 if ($match['is_postseason']) {
                     $totals['postseason_matchups']++;
                     $totals['postseason_wins'] += $match['winning_manager_id'] == $managerId ? 1 : 0;
@@ -634,6 +635,7 @@ function getFoesArray()
 
         foreach ($categories as $category) {
             $results = sortAndAssign($allOpponents, $category, $results);
+            $results[$category]['ranking'] = buildFoeRanking($allOpponents, $allMatches, $category);
         }
 
     } else {
@@ -641,6 +643,53 @@ function getFoesArray()
     }
 
     return $results;
+}
+
+/**
+ * Ranked context for a High/Low Foes row: individual matchups for the margin
+ * categories, opponents for everything else.
+ */
+function buildFoeRanking(array $opponents, array $matches, string $category, int $limit = 5)
+{
+    $marginRules = [
+        'biggest_win' => ['sign' => 1, 'dir' => 'desc'],
+        'closest_win' => ['sign' => 1, 'dir' => 'asc'],
+        'biggest_loss' => ['sign' => -1, 'dir' => 'desc'],
+        'closest_loss' => ['sign' => -1, 'dir' => 'asc'],
+    ];
+
+    if (isset($marginRules[$category])) {
+        $rule = $marginRules[$category];
+        $matches = array_filter($matches, function ($m) use ($rule) {
+            return $m['margin'] * $rule['sign'] > 0;
+        });
+        usort($matches, function ($a, $b) use ($rule) {
+            $cmp = abs($a['margin']) <=> abs($b['margin']);
+            return $rule['dir'] == 'asc' ? $cmp : -$cmp;
+        });
+        $rows = [];
+        foreach (array_slice($matches, 0, $limit) as $m) {
+            $rows[] = [
+                'label' => $m['opponent'],
+                'detail' => $m['year'].' '.(is_numeric($m['week']) ? 'Wk '.$m['week'] : $m['week']),
+                'value' => round(abs($m['margin']), 2),
+            ];
+        }
+        return $rows;
+    }
+
+    $opponents = array_filter($opponents, function ($o) {
+        return $o['overall_matchups'] > 0;
+    });
+    $asc = $category == 'best_lineup_accuracy';
+    usort($opponents, function ($a, $b) use ($category, $asc) {
+        return $asc ? $a[$category] <=> $b[$category] : $b[$category] <=> $a[$category];
+    });
+    $rows = [];
+    foreach (array_slice($opponents, 0, $limit) as $o) {
+        $rows[] = ['label' => $o['opponent'], 'detail' => '', 'value' => $o[$category]];
+    }
+    return $rows;
 }
 
 function sortAndAssign(array $array, string $category, array $result)

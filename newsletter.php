@@ -163,14 +163,14 @@ include_once 'version.php';
 <div class="masthead-wrapper">
     <div class="masthead-top-bar">
         <a href="/">&larr; Back to Dashboard</a>
-        <span>
+        <a href="pastEditions.php" title="Past Editions">
             <?php
                 $dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
                 $monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
                 $displayDate = $newsletterDate ?? new DateTime('now', new DateTimeZone('America/Los_Angeles'));
                 echo $dayNames[(int)$displayDate->format('w')] . ', ' . $monthNames[(int)$displayDate->format('n')-1] . ' ' . $displayDate->format('j') . ', ' . $displayDate->format('Y');
             ?>
-        </span>
+        </a>
     </div>
 
     <div class="masthead-main">
@@ -272,7 +272,6 @@ include_once 'version.php';
             ?>
         </select>
     </div>
-    <a class="past-editions-link" href="pastEditions.php">Past Editions</a>
 </div>
 
 <!-- ============================================================

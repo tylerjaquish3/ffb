@@ -1028,93 +1028,51 @@ if (isset($_GET['id'])) {
                         <div class="card-body" style="direction: ltr;">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <table class="table table-responsive table-striped nowrap">
-                                        <tr>
-                                            <td>Reg. Season Matchups</td>
-                                            <td><?php echo $foes['reg_season_matchups']['manager']; ?></td>
-                                            <td><?php echo $foes['reg_season_matchups']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Reg. Season Wins</td>
-                                            <td><?php echo $foes['reg_season_wins']['manager']; ?></td>
-                                            <td><?php echo $foes['reg_season_wins']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Reg. Season Losses</td>
-                                            <td><?php echo $foes['reg_season_losses']['manager']; ?></td>
-                                            <td><?php echo $foes['reg_season_losses']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Postseason Matchups</td>
-                                            <td><?php echo $foes['postseason_matchups']['manager']; ?></td>
-                                            <td><?php echo $foes['postseason_matchups']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Postseason Wins</td>
-                                            <td><?php echo $foes['postseason_wins']['manager']; ?></td>
-                                            <td><?php echo $foes['postseason_wins']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Postseason Losses</td>
-                                            <td><?php echo $foes['postseason_losses']['manager']; ?></td>
-                                            <td><?php echo $foes['postseason_losses']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Overall Winning %</td>
-                                            <td><?php echo $foes['overall_win_pct']['manager']; ?></td>
-                                            <td><?php echo $foes['overall_win_pct']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Most Total Points For</td>
-                                            <td><?php echo $foes['total_pf']['manager']; ?></td>
-                                            <td><?php echo $foes['total_pf']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Most Total Points Against</td>
-                                            <td><?php echo $foes['total_pa']['manager']; ?></td>
-                                            <td><?php echo $foes['total_pa']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Highest Average Points For</td>
-                                            <td><?php echo $foes['average_pf']['manager']; ?></td>
-                                            <td><?php echo $foes['average_pf']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Highest Average Points Against</td>
-                                            <td><?php echo $foes['average_pa']['manager']; ?></td>
-                                            <td><?php echo $foes['average_pa']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Biggest Win</td>
-                                            <td><?php echo $foes['biggest_win']['manager']; ?></td>
-                                            <td><?php echo $foes['biggest_win']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Biggest Loss</td>
-                                            <td><?php echo $foes['biggest_loss']['manager']; ?></td>
-                                            <td><?php echo abs($foes['biggest_loss']['value']); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Closest Win</td>
-                                            <td><?php echo $foes['closest_win']['manager']; ?></td>
-                                            <td><?php echo $foes['closest_win']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Closest Loss</td>
-                                            <td><?php echo $foes['closest_loss']['manager']; ?></td>
-                                            <td><?php echo abs($foes['closest_loss']['value']); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Most Points Missed</td>
-                                            <td><?php echo $foes['worst_lineup_accuracy']['manager']; ?></td>
-                                            <td><?php echo $foes['worst_lineup_accuracy']['value']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Fewest Points Missed</td>
-                                            <td><?php echo $foes['best_lineup_accuracy']['manager']; ?></td>
-                                            <td><?php echo $foes['best_lineup_accuracy']['value']; ?></td>
-                                        </tr>
-
+                                    <?php
+                                    $foeRows = [
+                                        ['Reg. Season Matchups', 'reg_season_matchups', false],
+                                        ['Reg. Season Wins', 'reg_season_wins', false],
+                                        ['Reg. Season Losses', 'reg_season_losses', false],
+                                        ['Postseason Matchups', 'postseason_matchups', false],
+                                        ['Postseason Wins', 'postseason_wins', false],
+                                        ['Postseason Losses', 'postseason_losses', false],
+                                        ['Overall Winning %', 'overall_win_pct', false],
+                                        ['Most Total Points For', 'total_pf', false],
+                                        ['Most Total Points Against', 'total_pa', false],
+                                        ['Highest Average Points For', 'average_pf', false],
+                                        ['Highest Average Points Against', 'average_pa', false],
+                                        ['Biggest Win', 'biggest_win', false],
+                                        ['Biggest Loss', 'biggest_loss', true],
+                                        ['Closest Win', 'closest_win', false],
+                                        ['Closest Loss', 'closest_loss', true],
+                                        ['Most Points Missed', 'worst_lineup_accuracy', false],
+                                        ['Fewest Points Missed', 'best_lineup_accuracy', false],
+                                    ];
+                                    ?>
+                                    <table class="table table-responsive table-striped nowrap foes-table">
+                                        <?php foreach ($foeRows as $i => [$label, $key, $abs]) {
+                                            $foe = $foes[$key];
+                                            $ranking = $foe['ranking'] ?? [];
+                                            $value = $abs ? abs($foe['value']) : $foe['value'];
+                                            ?>
+                                            <tr class="foe-row" <?php echo $ranking ? 'data-target="foe-detail-'.$i.'" style="cursor: pointer;"' : ''; ?>>
+                                                <td><span class="foe-arrow"><?php echo $ranking ? '&#9656;' : ''; ?></span> <?php echo $label; ?></td>
+                                                <td><?php echo $foe['manager']; ?></td>
+                                                <td><?php echo $value; ?></td>
+                                            </tr>
+                                            <?php if ($ranking) { ?>
+                                                <tr class="foe-detail" id="foe-detail-<?php echo $i; ?>" style="display: none;">
+                                                    <td colspan="3" style="padding-left: 28px; font-size: 0.9em;">
+                                                        <?php foreach ($ranking as $n => $r) { ?>
+                                                            <div style="display: flex; justify-content: space-between; gap: 12px;">
+                                                                <span><?php echo ($n + 1).'. '.$r['label'].($r['detail'] ? ' <span class="text-muted">('.$r['detail'].')</span>' : ''); ?></span>
+                                                                <span><?php echo $r['value']; ?></span>
+                                                            </div>
+                                                        <?php } ?>
+                                                    </td>
+                                                </tr>
+                                            <?php }
+                                        } ?>
                                     </table>
                                 </div>
                             </div>
@@ -1224,6 +1182,12 @@ if (isset($_GET['id'])) {
 
 <script type="text/javascript">
     $(document).ready(function() {
+
+        $('.foes-table').on('click', '.foe-row[data-target]', function() {
+            $('#' + $(this).data('target')).toggle();
+            var arrow = $(this).find('.foe-arrow');
+            arrow.html(arrow.html() === '\u25B8' ? '\u25BE' : '\u25B8');
+        });
 
         // Initialize the page with the correct tab active - delay to ensure showCard function is loaded
         setTimeout(function() {

@@ -177,33 +177,12 @@ if ($contentRow) {
                     <div class="card">
                         <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
                             <h4 style="margin: 0;">Edit Newsletter Content</h4>
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <span class="badge" style="padding: 5px 10px; font-size: 0.8rem; color: #fff; background: <?php echo $isPublished ? '#28a745' : '#888'; ?>;">
-                                    <?php echo $isPublished ? 'Published' : 'Draft'; ?>
-                                </span>
-                                <?php if ($newsletterExists): ?>
-                                    <?php
-                                    $publishConfirmMsg = $isPublished
-                                        ? 'Unpublish this newsletter? It will go back to showing only the matchups.'
-                                        : 'Publish this newsletter now? It will immediately become visible to everyone.';
-                                    ?>
-                                    <form method="POST" action="admin.php?tab=newsletter&year=<?php echo $editYear; ?>&week=<?php echo $editWeek; ?>" style="margin: 0;" onsubmit="return confirm(<?php echo htmlspecialchars(json_encode($publishConfirmMsg)); ?>);">
-                                        <input type="hidden" name="year" value="<?php echo $editYear; ?>">
-                                        <input type="hidden" name="week" value="<?php echo $editWeek; ?>">
-                                        <input type="hidden" name="publish_action" value="<?php echo $isPublished ? 'unpublish' : 'publish'; ?>">
-                                        <button type="submit" class="btn btn-sm <?php echo $isPublished ? 'btn-outline-danger' : 'btn-success'; ?>">
-                                            <?php echo $isPublished ? 'Unpublish' : 'Publish'; ?>
-                                        </button>
-                                    </form>
-                                <?php else: ?>
-                                    <span style="font-size: 0.8rem; color: #888;">Save changes below to create this edition before publishing.</span>
-                                <?php endif; ?>
-                            </div>
                         </div>
                         <div class="card-body" style="background: #fff;">
-                            <form method="GET" id="yearWeekForm">
-                                <div class="row" style="direction: ltr;">
-                                    <div class="col-sm-12 col-md-3">
+                            <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 15px;">
+                            <form method="GET" id="yearWeekForm" style="margin: 0;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 15px; direction: ltr;">
+                                    <div style="min-width: 150px;">
                                         <label for="year-select">Season:</label>
                                         <select id="year-select" name="year" class="form-control" onchange="updateURL()">
                                             <?php
@@ -232,7 +211,7 @@ if ($contentRow) {
                                             ?>
                                         </select>
                                     </div>
-                                    <div class="col-sm-12 col-md-3">
+                                    <div style="min-width: 150px;">
                                         <label for="week-select">Week:</label>
                                         <select id="week-select" name="week" class="form-control" onchange="updateURL()">
                                             <?php
@@ -246,6 +225,30 @@ if ($contentRow) {
                                     </div>
                                 </div>
                             </form>
+                            <div style="display: flex; align-items: center; gap: 12px; min-height: 38px;">
+                                <span class="badge" style="padding: 5px 10px; font-size: 0.8rem; color: #fff; background: <?php echo $isPublished ? '#28a745' : '#888'; ?>;">
+                                    <?php echo $isPublished ? 'Published' : 'Draft'; ?>
+                                </span>
+                                <?php if ($newsletterExists): ?>
+                                    <?php
+                                    $publishConfirmMsg = $isPublished
+                                        ? 'Unpublish this newsletter? It will go back to showing only the matchups.'
+                                        : 'Publish this newsletter now? It will immediately become visible to everyone.';
+                                    ?>
+                                    <form method="POST" action="admin.php?tab=newsletter&year=<?php echo $editYear; ?>&week=<?php echo $editWeek; ?>" style="margin: 0;" onsubmit="return confirm(<?php echo htmlspecialchars(json_encode($publishConfirmMsg)); ?>);">
+                                        <input type="hidden" name="year" value="<?php echo $editYear; ?>">
+                                        <input type="hidden" name="week" value="<?php echo $editWeek; ?>">
+                                        <input type="hidden" name="publish_action" value="<?php echo $isPublished ? 'unpublish' : 'publish'; ?>">
+                                        <button type="submit" class="btn btn-sm <?php echo $isPublished ? 'btn-outline-danger' : 'btn-success'; ?>">
+                                            <?php echo $isPublished ? 'Unpublish' : 'Publish'; ?>
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <span style="font-size: 0.8rem; color: #888;">Save changes below to create this edition before publishing.</span>
+                                <?php endif; ?>
+                                <a href="newsletter.php?year=<?php echo $editYear; ?>&week=<?php echo $editWeek; ?>" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">Preview newsletter</a>
+                            </div>
+                            </div>
                         </div>
                     </div>
                 </div>

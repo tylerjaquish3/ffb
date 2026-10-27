@@ -53,7 +53,7 @@ $gameTimePoints = [];
 $sql = "SELECT sum(points) as points, year, week, manager, game_slot FROM rosters WHERE game_time is not null AND roster_spot NOT IN ('IR','BN') GROUP BY year, week, manager, game_slot";
 $result = query($sql);
 while ($row = fetch_array($result)) {
-    $row['game_slot_label'] = isset($labels[$row['game_slot']]) ? $labels[$row['game_slot']] : null;
+    $row['game_slot_label'] = $labels[$row['game_slot'] ?? ''] ?? null;
     $gameTimePoints[] = $row;
 }
 $response['gameTimePoints'] = $gameTimePoints;
@@ -63,7 +63,7 @@ $totalGameTimePoints = [];
 $sql = "SELECT sum(points) as points, count(*) as count, manager, game_slot FROM rosters WHERE points > 0 AND roster_spot NOT IN ('IR','BN') GROUP BY manager, game_slot";
 $result = query($sql);
 while ($row = fetch_array($result)) {
-    $row['game_slot_label'] = isset($labels[$row['game_slot']]) ? $labels[$row['game_slot']] : null;
+    $row['game_slot_label'] = $labels[$row['game_slot'] ?? ''] ?? null;
     $row['points_per_count'] = $row['count'] > 0 ? round($row['points'] / $row['count'], 2) : 0;
     $totalGameTimePoints[] = $row;
 }
@@ -93,7 +93,7 @@ WHERE year = $currentYear
 ORDER BY rank ASC, game_slot ASC";
 $result = query($sql);
 while ($row = fetch_array($result)) {
-    $row['game_slot_label'] = isset($labels[$row['game_slot']]) ? $labels[$row['game_slot']] : null;
+    $row['game_slot_label'] = $labels[$row['game_slot'] ?? ''] ?? null;
     $currentYearGameTimeRankings[] = $row;
 }
 $response['currentYearGameTimeRankings'] = $currentYearGameTimeRankings;

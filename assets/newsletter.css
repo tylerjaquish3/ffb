@@ -202,7 +202,11 @@ body {
 /* ============================================================
    SCHEDULE / BOX SCORE
    ============================================================ */
-.schedule-section { margin-bottom: 1.5rem; }
+.schedule-section {
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
 
 .box-score-table {
     width: 100%;
@@ -595,7 +599,7 @@ table.dataTable.stripe tbody tr.odd { background: var(--paper-dark); }
     .masthead-top-bar { font-size: 0.6rem; }
     .edition-bar { gap: 0.8rem; padding: 0.4rem 0.8rem; }
     .newspaper-page { padding: 0 0.6rem; }
-    .box-score-table { font-size: 0.72rem; }
+    .box-score-table { font-size: 0.72rem; min-width: 520px; }
     .box-score-table thead th { font-size: 0.55rem; padding: 0.3rem 0.4rem; }
     .box-score-table tbody td { padding: 0.35rem 0.4rem; }
     .article-body.has-dropcap::first-letter { font-size: 3.5em; }

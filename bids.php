@@ -441,6 +441,11 @@ arsort($managerTotals);
 
 <?php include 'footer.php'; ?>
 
+<style>
+table.dataTable#bidsTable.nowrap th,
+table.dataTable#bidsTable.nowrap td { white-space: nowrap !important; }
+</style>
+
 <script>
 $(document).ready(function() {
 

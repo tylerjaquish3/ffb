@@ -265,7 +265,7 @@ arsort($managerTotals);
                                     <i class="icon-grid font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Total Bids</h5>
+                                    <h5>Total Claims</h5>
                                     <h5 class="text-bold-400"><?php echo $totalBids; ?></h5>
                                 </div>
                             </div>
@@ -292,11 +292,11 @@ arsort($managerTotals);
                         <div class="card-body">
                             <div class="media">
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-calculator font-large-2 white"></i>
+                                    <i class="icon-dollar font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Average Bid</h5>
-                                    <h5 class="text-bold-400">$<?php echo $totalBids > 0 ? number_format($totalSpent / $totalBids, 2) : '0'; ?></h5>
+                                    <h5>Total Overspent</h5>
+                                    <h5 class="text-bold-400">$<?php echo number_format(array_sum($managerOverspend)); ?></h5>
                                 </div>
                             </div>
                         </div>
@@ -307,11 +307,11 @@ arsort($managerTotals);
                         <div class="card-body">
                             <div class="media">
                                 <div class="p-2 text-xs-center bg-green-ffb media-left media-middle">
-                                    <i class="icon-users font-large-2 white"></i>
+                                    <i class="icon-calculator font-large-2 white"></i>
                                 </div>
                                 <div class="p-2 bg-green-ffb media-body">
-                                    <h5>Active Managers</h5>
-                                    <h5 class="text-bold-400"><?php echo count($managerTotals); ?></h5>
+                                    <h5>Average Bid</h5>
+                                    <h5 class="text-bold-400">$<?php echo $totalBids > 0 ? number_format($totalSpent / $totalBids, 2) : '0'; ?></h5>
                                 </div>
                             </div>
                         </div>

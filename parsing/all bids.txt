@@ -1,295 +1,505 @@
-Parker Washington Jax - WR 
-$2 Waiver
-Tyler
-Nov 5, 1:39 am
--------------------------------------
-Alec Pierce Ind - WR 
-$5 Waiver
-Matt
-Nov 5, 1:39 am
--------------------------------------
-Jameson Williams Det - WR 
-$8 Waiver
-Matt
-Nov 5, 1:39 am
--------------------------------------
-Marcus Mariota Was - QB 
-$25 Waiver
-Ben
-Nov 5, 1:39 am
--------------------------------------
-Kyle Pitts Sr. Atl - TE 
-$2 Waiver
-Cole
-Oct 30, 12:48 am
--------------------------------------
-Bam Knight Ari - RB 
-$5 Waiver
-Tyler
-Oct 29, 1:36 am
--------------------------------------
-Chimere Dike Ten - WR 
-$6 Waiver
-Tyler
-Oct 29, 1:36 am
--------------------------------------
-Los Angeles LAC - DEF 
-$7 Waiver
-Cole
-Oct 29, 1:36 am
--------------------------------------
-Los Angeles LAR - DEF 
-$8 Waiver
-Matt
-Oct 29, 1:36 am
--------------------------------------
-Tyrone Tracy Jr. NYG - RB 
-$25 Waiver
-Matt
-Oct 29, 1:36 am
--------------------------------------
-Christian Watson GB - WR 
-$31 Waiver
-Everett
-Oct 29, 1:36 am
--------------------------------------
-Oronde Gadsden LAC - TE 
-$6 Waiver
-Tyler
-Oct 22, 1:28 am
--------------------------------------
-Tampa Bay TB - DEF 
-$6 Waiver
-Cameron
-Oct 22, 1:28 am
--------------------------------------
-Atlanta Atl - DEF 
-$8 Waiver
-Cole
-Oct 22, 1:28 am
--------------------------------------
-Travis Hunter Jax - WR
-$8 Waiver
-Tyler
-Oct 22, 1:28 am
--------------------------------------
-Cade Otton TB - TE 
-$11 Waiver
-Everett
-Oct 22, 1:28 am
--------------------------------------
-Nick Folk NYJ - K 
-$16 Waiver
-Andy
-Oct 22, 1:28 am
--------------------------------------
-Mac Jones SF - QB 
-$5 Waiver
-Cole
-Oct 18, 12:37 am
--------------------------------------
-Minnesota Min - DEF 
-$9 Waiver
-Cole
-Oct 15, 1:27 am
--------------------------------------
-Kansas City KC - DEF 
-$11 Waiver
-Matt
-Oct 15, 1:27 am
--------------------------------------
-Dallas Goedert Phi - TE 
-$13 Waiver
-Andy
-Oct 15, 1:27 am
--------------------------------------
-Kimani Vidal LAC - RB 
-$14 Waiver
-Tyler
-Oct 15, 1:27 am
--------------------------------------
-Joe Flacco Cin - QB 
-$17 Waiver
-Gavin
-Oct 12, 12:27 am
--------------------------------------
-Michael Carter Ari - RB
-$32 Waiver
+Chris Boswell Pit - K 
+$0 Waiver
 Justin
-Oct 9, 12:25 am
+Nov 11, 4:01 am
 -------------------------------------
-Kendrick Bourne SF - WR 
-$7 Waiver
-Tyler
-Oct 8, 3:02 am
--------------------------------------
-Hassan Haskins LAC - RB
-$8 Waiver
-Tyler
-Oct 8, 3:02 am
--------------------------------------
-Las Vegas LV - DEF 
-$15 Waiver
-Justin
-Oct 8, 3:02 am
--------------------------------------
-Kansas City KC - DEF 
+Brenton Strange Jax - TE 
 $1 Waiver
-Cole
-Oct 1, 3:22 am
+Matt
+Nov 11, 4:01 am
 -------------------------------------
-Stefon Diggs NE - WR 
+Spencer Shrader Ind - K 
 $5 Waiver
-Cole
-Oct 1, 3:22 am
+Tyler
+Nov 11, 4:01 am
 -------------------------------------
-Travis Hunter Jax - WR
-$5 Waiver
-Cole
-Oct 1, 3:22 am
--------------------------------------
-Darius Slayton NYG - WR 
-$6 Waiver
-Cameron
-Oct 1, 3:22 am
--------------------------------------
-Darren Waller Mia - TE
-$6 Waiver
-Gavin
-Oct 1, 3:22 am
--------------------------------------
-Arizona Ari - DEF 
-$11 Waiver
-Everett
-Oct 1, 3:22 am
--------------------------------------
-KaVontae Turpin Dal - WR 
-$24 Waiver
-Andy
-Oct 1, 3:22 am
--------------------------------------
-Minnesota Min - DEF 
+Ravens Bal - DEF 
 $8 Waiver
 Tyler
-Sep 24, 3:01 am
+Nov 11, 4:01 am
 -------------------------------------
-Tre Tucker LV - WR 
-$10 Waiver
-Matt
-Sep 24, 3:01 am
--------------------------------------
-Dalton Kincaid Buf - TE 
+Jacoby Brissett Bal - QB 
 $11 Waiver
-Andy
-Sep 24, 3:01 am
--------------------------------------
-Los Angeles LAC - DEF 
-$12 Waiver
-Matt
-Sep 24, 3:01 am
--------------------------------------
-Tyler Allgeier Atl - RB 
-$1 Waiver
 Justin
-Sep 17, 3:03 am
+Nov 11, 4:01 am
 -------------------------------------
-Mac Jones SF - QB 
-$4 Waiver
-Gavin
-Sep 17, 3:03 am
--------------------------------------
-Atlanta Atl - DEF 
-$5 Waiver
-Gavin
-Sep 17, 3:03 am
--------------------------------------
-Troy Franklin Den - WR 
-$8 Waiver
-Tyler
-Sep 17, 3:03 am
--------------------------------------
-Cam Skattebo NYG - RB
-$8 Waiver
+Corey Kiner NE - RB 
+$18 Waiver
 Matt
-Sep 17, 3:03 am
+Nov 11, 4:01 am
 -------------------------------------
-Zach Ertz Was - TE 
-$15 Waiver
-Andy
-Sep 17, 3:03 am
--------------------------------------
-Jake Ferguson Dal - TE 
-$16 Waiver
-AJ
-Sep 17, 3:03 am
--------------------------------------
-Rhamondre Stevenson NE - RB
+Rams LAR - DEF 
 $21 Waiver
-Andy
-Sep 17, 3:03 am
+Everett
+Nov 11, 4:01 am
 -------------------------------------
-Jake Browning Cin - QB 
-$32 Waiver
-Tyler
-Sep 17, 3:03 am
+Carson Beck Ari - QB 
+$26 Waiver
+Everett
+Nov 11, 4:01 am
 -------------------------------------
-Kansas City KC - DEF 
-$13 Waiver
-Cole
-Sep 14, 12:19 am
+Tank Dell Hou - WR 
+$31 Waiver
+AJ
+Nov 11, 4:01 am
 -------------------------------------
-Braelon Allen NYJ - RB
-$2 Waiver
-Cole
-Sep 10, 3:11 am
+DeMario Douglas NE - WR 
+$31 Waiver
+AJ
+Nov 11, 4:01 am
 -------------------------------------
-Kyle Pitts Sr. Atl - TE 
-$3 Waiver
-Cameron
-Sep 10, 3:11 am
--------------------------------------
-Juwan Johnson NO - TE 
+Steelers Pit - DEF 
 $6 Waiver
 Gavin
-Sep 10, 3:11 am
+Nov 9, 3:59 am
 -------------------------------------
-Cam Little Jax - K 
-$7 Waiver
-Gavin
-Sep 10, 3:11 am
+Omar Cooper Jr. NYJ - WR 
+$13 Waiver
+Tyler
+Nov 8, 3:26 am
 -------------------------------------
-Quentin Johnston LAC - WR 
-$7 Waiver
+Jadarian Price Sea - RB 
+$88 Waiver
+Ben
+Nov 7, 3:45 am
+-------------------------------------
+Emmett Johnson KC - RB 
+$0 Waiver
+Cole
+Nov 5, 3:56 am
+-------------------------------------
+Chad Ryland Ari - K 
+$0 Waiver
+Tyler
+Nov 4, 3:55 am
+-------------------------------------
+Tyjae Spears Ten - RB 
+$0 Waiver
+Cameron
+Nov 4, 3:55 am
+-------------------------------------
+Tyler Huntley Bal - QB 
+$1 Waiver
+Justin
+Nov 4, 3:55 am
+-------------------------------------
+Caleb Douglas Mia - WR 
+$3 Waiver
+Cole
+Nov 4, 3:55 am
+-------------------------------------
+Adonai Mitchell NYJ - WR 
+$3 Waiver
 Gavin
-Sep 10, 3:11 am
+Nov 4, 3:55 am
+-------------------------------------
+Antonio Williams Was - WR 
+$5 Waiver
+Justin
+Nov 4, 3:55 am
+-------------------------------------
+Giants NYG - DEF 
+$15 Waiver
+Matt
+Nov 4, 3:55 am
 -------------------------------------
 Harold Fannin Jr. Cle - TE 
-$10 Waiver
-Justin
-Sep 10, 3:11 am
+$27 Waiver
+Tyler
+Nov 4, 3:55 am
 -------------------------------------
-Green Bay GB - DEF 
-$12 Waiver
+Gardner Minshew II Ari - QB 
+$30 Waiver
+Gavin
+Nov 4, 3:55 am
+-------------------------------------
+Tyler Allgeier Ari - RB 
+$67 Waiver
 AJ
-Sep 10, 3:11 am
+Nov 4, 3:55 am
 -------------------------------------
-Dylan Sampson Cle - RB 
-$21 Waiver
+Rico Dowdle Pit - RB 
+$7 Waiver
+Cole
+Nov 1, 2:25 am
+-------------------------------------
+DeMario Douglas NE - WR 
+$8 Waiver
+Cole
+Nov 1, 2:25 am
+-------------------------------------
+Tanner McKee Phi - QB 
+$27 Waiver
+Everett
+Oct 30, 3:41 am
+-------------------------------------
+Brenton Strange Jax - TE 
+$0 Waiver
+Justin
+Oct 28, 3:48 am
+-------------------------------------
+Emmett Johnson KC - RB 
+$0 Waiver
+Cole
+Oct 28, 3:48 am
+-------------------------------------
+Tyler Bass Buf - K 
+$0 Waiver
+Everett
+Oct 28, 3:48 am
+-------------------------------------
+Bengals Cin - DEF 
+$7 Waiver
+Cole
+Oct 28, 3:48 am
+-------------------------------------
+Kyle Pitts Sr. Atl - TE 
+$15 Waiver
+Matt
+Oct 28, 3:48 am
+-------------------------------------
+Rams LAR - DEF 
+$2 Waiver
+Justin
+Oct 25, 3:14 am
+-------------------------------------
+Ladd McConkey LAC - WR 
+$13 Waiver
+Justin
+Oct 25, 3:14 am
+-------------------------------------
+Chris Boswell Pit - K 
+$0 Waiver
+Cole
+Oct 21, 3:43 am
+-------------------------------------
+Tre Tucker LV - WR 
+$0 Waiver
+Cole
+Oct 21, 3:43 am
+-------------------------------------
+Tanner McKee Phi - QB 
+$0 Waiver
+Cole
+Oct 21, 3:43 am
+-------------------------------------
+J.J. McCarthy NYG - QB 
+$3 Waiver
+Gavin
+Oct 21, 3:43 am
+-------------------------------------
+Jets NYJ - DEF 
+$6 Waiver
 Cameron
-Sep 10, 3:11 am
+Oct 21, 3:43 am
 -------------------------------------
-Hollywood Brown KC - WR 
-$31 Waiver
+Titans Ten - DEF 
+$6 Waiver
+Gavin
+Oct 21, 3:43 am
+-------------------------------------
+Browns Cle - DEF 
+$18 Waiver
+Matt
+Oct 21, 3:43 am
+-------------------------------------
+Omar Cooper Jr. NYJ - WR 
+$26 Waiver
+Gavin
+Oct 21, 3:43 am
+-------------------------------------
+Woody Marks Hou - RB 
+$5 Waiver
+Tyler
+Oct 18, 3:13 am
+-------------------------------------
+Tyler Huntley Bal - QB 
+$0 Waiver
+Justin
+Oct 17, 3:27 am
+-------------------------------------
+Tyler Bass Buf - K 
+$0 Waiver
+Justin
+Oct 14, 3:34 am
+-------------------------------------
+Giants NYG - DEF 
+$0 Waiver
 Cameron
-Sep 10, 3:11 am
+Oct 14, 3:34 am
 -------------------------------------
-Cedric Tillman Cle - WR
-$36 Waiver
-Andy
-Sep 10, 3:11 am
+Kendre Miller Dal - RB 
+$0 Waiver
+Tyler
+Oct 14, 3:34 am
 -------------------------------------
-Nick Chubb Hou - RB
+Mike Washington Jr. LV - RB 
+$0 Waiver
+Matt
+Oct 14, 3:34 am
+-------------------------------------
+Germie Bernard Pit - WR 
+$6 Waiver
+Gavin
+Oct 14, 3:34 am
+-------------------------------------
+Tre Tucker LV - WR 
+$8 Waiver
+Cole
+Oct 14, 3:34 am
+-------------------------------------
+Jalon Daniels TB - QB 
+$12 Waiver
+Cole
+Oct 14, 3:34 am
+-------------------------------------
+49ers SF - DEF 
+$13 Waiver
+Gavin
+Oct 14, 3:34 am
+-------------------------------------
+Steelers Pit - DEF 
+$17 Waiver
+Ben
+Oct 14, 3:34 am
+-------------------------------------
+Jakobi Meyers Jax - WR 
+$22 Waiver
+Ben
+Oct 14, 3:34 am
+-------------------------------------
+Pat Freiermuth Pit - TE 
+$32 Waiver
+Ben
+Oct 14, 3:34 am
+-------------------------------------
+J.K. Dobbins Den - RB 
+$0 Waiver
+Cole
+Oct 11, 3:10 am
+-------------------------------------
+Will Reichard Min - K 
+$8 Waiver
+AJ
+Oct 8, 3:32 am
+-------------------------------------
+Jadarian Price Sea - RB 
+$33 Waiver
+Cole
+Oct 8, 3:32 am
+-------------------------------------
+Keaton Mitchell LAC - RB 
 $3 Waiver
 Tyler
-Aug 28, 12:17 am
+Oct 7, 3:36 am
+-------------------------------------
+T.J. Hockenson Min - TE 
+$3 Waiver
+Gavin
+Oct 7, 3:36 am
+-------------------------------------
+Browns Cle - DEF 
+$6 Waiver
+Cameron
+Oct 7, 3:36 am
+-------------------------------------
+Carnell Tate Ten - WR 
+$25 Waiver
+Matt
+Oct 7, 3:36 am
+-------------------------------------
+Emanuel Wilson Sea - RB 
+$0 Waiver
+Cameron
+Oct 4, 3:10 am
+-------------------------------------
+Harrison Butker KC - K 
+$0 Waiver
+Cole
+Oct 4, 3:10 am
+-------------------------------------
+Packers GB - DEF 
+$2 Waiver
+Cole
+Oct 4, 3:10 am
+-------------------------------------
+Dontayvion Wicks Phi - WR 
+$18 Waiver
+Gavin
+Oct 4, 3:10 am
+-------------------------------------
+Michael Penix Jr. Atl - QB 
+$37 Waiver
+Cameron
+Oct 1, 3:31 am
+-------------------------------------
+Skyy Moore GB - WR 
+$0 Waiver
+Cameron
+Sep 30, 3:36 am
+-------------------------------------
+Bills Buf - DEF 
+$0 Waiver
+Cole
+Sep 30, 3:36 am
+-------------------------------------
+Jets NYJ - DEF 
+$2 Waiver
+Everett
+Sep 30, 3:36 am
+-------------------------------------
+J.K. Dobbins Den - RB 
+$2 Waiver
+Gavin
+Sep 30, 3:36 am
+-------------------------------------
+Spencer Shrader Ind - K 
+$4 Waiver
+Cameron
+Sep 30, 3:36 am
+-------------------------------------
+Kenyon Sadiq NYJ - TE 
+$7 Waiver
+Tyler
+Sep 30, 3:36 am
+-------------------------------------
+Keenan Allen SF - WR 
+$15 Waiver
+Gavin
+Sep 30, 3:36 am
+-------------------------------------
+Braelon Allen NYJ - RB 
+$22 Waiver
+Justin
+Sep 30, 3:36 am
+-------------------------------------
+Ollie Gordon II Mia - RB 
+$53 Waiver
+Cameron
+Sep 30, 3:36 am
+-------------------------------------
+Jacoby Brissett Bal - QB 
+$0 Waiver
+Cole
+Sep 27, 3:12 am
+-------------------------------------
+Ravens Bal - DEF 
+$5 Waiver
+Justin
+Sep 27, 3:12 am
+-------------------------------------
+Jason Myers Sea - K 
+$2 Waiver
+Cole
+Sep 26, 3:26 am
+-------------------------------------
+Aaron Jones Sr. Min - RB 
+$11 Waiver
+Cole
+Sep 24, 3:34 am
+-------------------------------------
+Michael Penix Jr. Atl - QB 
+$0 Waiver
+Cole
+Sep 23, 3:42 am
+-------------------------------------
+Eagles Phi - DEF 
+$6 Waiver
+Cole
+Sep 23, 3:42 am
+-------------------------------------
+Denzel Boston Cle - WR 
+$17 Waiver
+Andy
+Sep 23, 3:42 am
+-------------------------------------
+Evan McPherson Cin - K 
+$0 Waiver
+Andy
+Sep 20, 3:12 am
+-------------------------------------
+Rachaad White Was - RB 
+$0 Waiver
+Cole
+Sep 20, 3:12 am
+-------------------------------------
+Broncos Den - DEF 
+$9 Waiver
+Cole
+Sep 20, 3:12 am
+-------------------------------------
+Tyler Loop Bal - K 
+$0 Waiver
+Tyler
+Sep 16, 3:37 am
+-------------------------------------
+Eddy Pineiro SF - K 
+$2 Waiver
+Cole
+Sep 16, 3:37 am
+-------------------------------------
+Mark Andrews Bal - TE 
+$3 Waiver
+Gavin
+Sep 16, 3:37 am
+-------------------------------------
+Brian Robinson Jr. Atl - RB 
+$4 Waiver
+Gavin
+Sep 16, 3:37 am
+-------------------------------------
+Buccaneers TB - DEF 
+$6 Waiver
+Everett
+Sep 16, 3:37 am
+-------------------------------------
+49ers SF - DEF 
+$15 Waiver
+Tyler
+Sep 16, 3:37 am
+-------------------------------------
+Dalton Kincaid Buf - TE 
+$32 Waiver
+Justin
+Sep 16, 3:37 am
+-------------------------------------
+Devaughn Vele NO - WR 
+$41 Waiver
+Andy
+Sep 16, 3:37 am
+-------------------------------------
+Isaiah Likely NYG - TE 
+$42 Waiver
+Andy
+Sep 16, 3:37 am
+-------------------------------------
+Tyler Loop Bal - K 
+$0 Waiver
+Cole
+Sep 6, 3:11 am
+-------------------------------------
+Harrison Mevis LAR - K 
+$0 Waiver
+Matt
+Sep 2, 3:12 am
+-------------------------------------
+Tyjae Spears Ten - RB 
+$5 Waiver
+Gavin
+Sep 2, 3:12 am
+-------------------------------------
+Steelers Pit - DEF 
+$5 Waiver
+Gavin
+Sep 2, 3:12 am
+-------------------------------------
+Matthew Golden GB - WR 
+$8 Waiver
+Gavin
+Sep 2, 3:12 am
+-------------------------------------
+Tyler Allgeier Ari - RB 
+$20 Waiver
+Justin
+Sep 2, 3:12 am
 -------------------------------------

@@ -389,6 +389,76 @@ function handle_scraped_rosters(array $players, int $year): int
     return $written;
 }
 
+/**
+ * Write the scraped bid data to the two text files the bids page (bids.php)
+ * parses: parsing/all bids.txt and parsing/competitive bids.txt. Unlike the
+ * other sections this is NOT scoped to a week/manager and does not touch the
+ * database — each run fully overwrites both files with whatever Yahoo shows.
+ * Yahoo team ids are mapped to manager names (the files use manager names,
+ * not team names). Entry formats match what bids.php's parsers expect.
+ *
+ * Returns [allCount, competitiveCount]. A file is left untouched when its
+ * scraped list is empty, so a bad scrape can't wipe good data.
+ */
+function handle_scraped_bids(array $data, int $year): array
+{
+    $names = [];
+    $nameFor = function ($yahooId) use (&$names, $year) {
+        $yahooId = (int)$yahooId;
+        if (!isset($names[$yahooId])) {
+            $managerId = lookupManager($yahooId, $year);
+            $names[$yahooId] = null;
+            if ($managerId) {
+                $result = query("SELECT name FROM managers WHERE id = " . (int)$managerId);
+                while ($row = fetch_array($result)) {
+                    $names[$yahooId] = $row['name'];
+                    break;
+                }
+            }
+        }
+        return $names[$yahooId];
+    };
+
+    $allEntries = [];
+    foreach ($data['all'] ?? [] as $bid) {
+        $manager = $nameFor($bid['teamYahooId'] ?? 0);
+        if (!$manager) {
+            echo 'No manager found for Yahoo team ID ' . htmlspecialchars((string)($bid['teamYahooId'] ?? '?')) . ', skipping bid on ' . htmlspecialchars($bid['player'] ?? '?') . '.<br>';
+            continue;
+        }
+        $allEntries[] = $bid['player'] . " \n$" . (int)$bid['amount'] . " Waiver\n" . $manager . "\n" . $bid['date'] . "\n";
+    }
+
+    $compEntries = [];
+    foreach ($data['competitive'] ?? [] as $bid) {
+        $winner = $nameFor($bid['awardedYahooId'] ?? 0);
+        if (!$winner) {
+            echo 'No manager found for Yahoo team ID ' . htmlspecialchars((string)($bid['awardedYahooId'] ?? '?')) . ', skipping competitive bid on ' . htmlspecialchars($bid['player'] ?? '?') . '.<br>';
+            continue;
+        }
+        $entry = $bid['player'] . " \n$" . (int)$bid['winningAmount'] . " Winning Offer\n";
+        foreach ($bid['offers'] ?? [] as $offer) {
+            $offerManager = $nameFor($offer['teamYahooId'] ?? 0) ?: 'Unknown';
+            $entry .= $offerManager . ' $' . (int)$offer['amount'] . ' (' . $offer['reason'] . ")\n\n";
+        }
+        $entry .= "Awarded To:\t\n" . $winner . "\n" . $bid['date'] . "\n";
+        $compEntries[] = $entry;
+    }
+
+    $dir = __DIR__ . '/parsing';
+    if (!is_dir($dir)) {
+        mkdir($dir, 0775, true);
+    }
+    if ($allEntries) {
+        file_put_contents($dir . '/all bids.txt', implode("-------------------------------------\n", $allEntries) . "-------------------------------------\n", LOCK_EX);
+    }
+    if ($compEntries) {
+        file_put_contents($dir . '/competitive bids.txt', implode("----------------------------------------------\n", $compEntries) . "----------------------------------------------\n", LOCK_EX);
+    }
+
+    return [count($allEntries), count($compEntries)];
+}
+
 session_start();
 
 if (isset($APP_ENV) && $APP_ENV === 'production' && empty($_SESSION['admin_auth'])) {
@@ -464,6 +534,13 @@ if ($section === 'team_names') {
         echo '<div class="alert alert-warning">Scraped and saved ' . htmlspecialchars($section) . ' (' . $writtenCount . ' of ' . $itemCount . ' trade(s) written). <strong>Caution:</strong> this extractor has never been verified against a real trade — manually check these rows against the Yahoo transactions page before trusting them.</div>';
     } else {
         echo '<div class="alert alert-success">Scraped ' . htmlspecialchars($section) . ' (0 of ' . $itemCount . ' trade(s) written — no trades found).</div>';
+    }
+} elseif ($section === 'bids') {
+    [$allCount, $compCount] = handle_scraped_bids($data, $year);
+    if ($allCount === 0 || $compCount === 0) {
+        echo '<div class="alert alert-warning">Scraped bids: ' . $allCount . ' bid(s) and ' . $compCount . ' competitive bid(s) written. A file with 0 entries was left unchanged.</div>';
+    } else {
+        echo '<div class="alert alert-success">Scraped and saved bids (' . $allCount . ' bid(s) to "all bids.txt", ' . $compCount . ' competitive bid(s) to "competitive bids.txt").</div>';
     }
 } else {
     echo '<div class="alert alert-success">Scraped ' . htmlspecialchars($section) . ' successfully (' . $itemCount . ' item(s)). Writing this section to the database is added in a follow-up task.</div>';

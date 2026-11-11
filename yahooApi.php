@@ -140,6 +140,7 @@ $request_token_url = get_request_token_url($consumer_key);
                             <input type="checkbox" name="sections[]" value="matchups"> Matchups<br>
                             <input type="checkbox" name="sections[]" value="rosters"> Rosters<br>
                             <input type="checkbox" name="sections[]" value="trades"> Trades<br>
+                            <span class="scrape-mode-field"><input type="checkbox" name="sections[]" value="bids"> Bids (all weeks, overwrites bid files)<br></span>
                             <!-- <input type="checkbox" name="sections[]" value="fun_facts"> Fun Facts<br> -->
 
                             <h3>Weeks</h3>

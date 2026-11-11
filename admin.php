@@ -333,8 +333,10 @@ $( document ).ready( () => {
         var mode = $('input[name="fetch_mode"]:checked').val();
         if (mode === 'scrape') {
             $('.api-mode-field').hide();
+            $('.scrape-mode-field').show();
         } else {
             $('.api-mode-field').show();
+            $('.scrape-mode-field').hide().find('input').prop('checked', false);
         }
     }
     $('input[name="fetch_mode"]').change(applyFetchModeVisibility);

@@ -53,6 +53,32 @@ function parseBidData($filePath) {
     return $bids;
 }
 
+// Season whose rosters the bids are matched against (latest year with roster data).
+$bidsYear = (int)(fetch_array(query("SELECT MAX(year) AS y FROM rosters"))['y'] ?? date('Y'));
+
+// Build the rosters WHERE clause for a bid's player. Bid strings look like
+// "Name Team - POS". Defenses are stored in rosters by city ("Los Angeles
+// Rams") while Yahoo gives the nickname ("Rams"), so DEFs match on team +
+// position only; everyone else matches on name, team and position.
+function bidRosterWhere($bid, $year) {
+    $team = $position = '';
+    if (preg_match('/^(.*?) ([A-Za-z]{2,4}) - ([A-Za-z]{1,3})$/', trim($bid['player']), $m)) {
+        $player = trim($m[1]);
+        $team = strtoupper($m[2]);
+        $position = strtoupper($m[3]);
+    } else {
+        $player = trim($bid['player']);
+    }
+    $where = "year = " . (int)$year . " AND manager = '" . SQLite3::escapeString($bid['manager']) . "'";
+    if ($position === 'DEF' && $team) {
+        return $where . " AND team = '" . SQLite3::escapeString($team) . "' AND position = 'DEF'";
+    }
+    $where .= " AND player = '" . SQLite3::escapeString($player) . "'";
+    if ($team) $where .= " AND team = '" . SQLite3::escapeString($team) . "'";
+    if ($position) $where .= " AND position = '" . SQLite3::escapeString($position) . "'";
+    return $where;
+}
+
 // Parse competitive bids first
 $competitiveBids = parseCompetitiveBids(__DIR__ . '/parsing/competitive bids.txt');
 
@@ -210,26 +236,8 @@ foreach ($bidData as $bid) {
     }
     $managerOverspend[$bid['manager']] += $bid['overspend'];
 
-    // Parse $bid['player'] to extract player, team, position
-    $playerName = $bid['player'];
-    $team = $position = '';
-    if (preg_match('/^(.*?) ([A-Za-z]{2,4}) - ([A-Za-z]{1,3})$/', $playerName, $matches)) {
-        $player = trim($matches[1]);
-        $team = trim($matches[2]);
-        $position = trim($matches[3]);
-    } else {
-        $player = $playerName;
-    }
     // Query for lineup points (roster_spot != 'BN')
-    $lineupQuery = "SELECT SUM(points) as total_points FROM rosters WHERE year = 2025 AND manager = '" . SQLite3::escapeString($bid['manager']) . "' 
-        AND player = '" . SQLite3::escapeString($player) . "'";
-    if ($team) {
-        $lineupQuery .= " AND team = '" . strtoupper($team) . "'";
-    }
-    if ($position) {
-        $lineupQuery .= " AND position = '" . strtoupper($position) . "'";
-    }
-    $lineupQuery .= " AND roster_spot != 'BN'";
+    $lineupQuery = "SELECT SUM(points) as total_points FROM rosters WHERE " . bidRosterWhere($bid, $bidsYear) . " AND roster_spot != 'BN'";
     $lineupResult = query($lineupQuery);
     if ($lineupRow = fetch_array($lineupResult)) {
         if (!isset($managerLineupPoints[$bid['manager']])) {
@@ -313,14 +321,14 @@ arsort($managerTotals);
 
             <!-- Manager Spending Summary -->
             <div class="row">
-                <div class="col-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">Manager Spending Summary</h4>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-striped" id="managerSummaryTable">
+                            <div class="table-responsive" style="overflow-x: auto; direction: ltr;">
+                                <table class="table table-striped nowrap" id="managerSummaryTable">
                                     <thead>
                                         <tr>
                                             <th>Manager</th>
@@ -356,14 +364,14 @@ arsort($managerTotals);
 
             <!-- All Bids Table -->
             <div class="row">
-                <div class="col-12">
+                <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">All Bids</h4>
                         </div>
                         <div class="card-body" style="direction: ltr;">
-                            <div class="table-responsive">
-                                <table class="table table-striped" id="bidsTable">
+                            <div class="table-responsive" style="overflow-x: auto; direction: ltr;">
+                                <table class="table table-striped nowrap" id="bidsTable">
                                     <thead>
                                         <tr>
                                             <th>Manager</th>
@@ -378,7 +386,7 @@ arsort($managerTotals);
                                     </thead>
                                     <tbody>
                                         <?php
-                                        // Build player points lookup for 2025
+                                        // Build player points lookup for the bids season
                                         $debugged = false;
                                         foreach ($bidData as $bid):
                                             // Try to match player name (strip team/position if present)
@@ -388,30 +396,12 @@ arsort($managerTotals);
                                             $bidDateStr = $bid['date'];
                                             if (strpos($bidDateStr, ',') !== false) {
                                                 $parts = explode(',', $bidDateStr, 2);
-                                                $bidDateStr = $parts[0] . ', 2025,' . $parts[1];
+                                                $bidDateStr = $parts[0] . ', ' . $bidsYear . ',' . $parts[1];
                                             }
                                             $bidDateObj = DateTime::createFromFormat('M j, Y, g:i a', $bidDateStr);
                                             $bidTimestamp = $bidDateObj ? $bidDateObj->getTimestamp() : false;
                                             
-                                            // Parse $bid['player'] to extract player, team, position
-                                            $playerName = $bid['player'];
-                                            $team = $position = '';
-                                            // Improved regex: Name Team - Position (team: 2-4 letters, position: 1-3 letters, case-insensitive)
-                                            if (preg_match('/^(.*?) ([A-Za-z]{2,4}) - ([A-Za-z]{1,3})$/', $playerName, $matches)) {
-                                                $player = trim($matches[1]);
-                                                $team = trim($matches[2]);
-                                                $position = trim($matches[3]);
-                                            } else {
-                                                $player = $playerName;
-                                            }
-                                            $playerQuery = "SELECT SUM(points) as total_points FROM rosters WHERE year = 2025 AND manager = '" . SQLite3::escapeString($bid['manager']) . "' 
-                                                AND player = '" . SQLite3::escapeString($player) . "'";
-                                            if ($team) {
-                                                $playerQuery .= " AND team = '" . strtoupper($team) . "'";
-                                            }
-                                            if ($position) {
-                                                $playerQuery .= " AND position = '" . strtoupper($position) . "'";
-                                            }
+                                            $playerQuery = "SELECT SUM(points) as total_points FROM rosters WHERE " . bidRosterWhere($bid, $bidsYear);
                                             if ($bidTimestamp) {
                                                 $playerQuery .= " AND game_time >= '" . date('Y-m-d H:i:s', $bidTimestamp) . "'";
                                             }

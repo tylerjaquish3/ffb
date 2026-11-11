@@ -703,11 +703,130 @@ async function extractRosterForWeek(args, context, week) {
     }
 }
 
+// Bids: two Yahoo transactions tabs feed the bids page's two text files.
+//   - `?transactionsfilter=add` ("Added Players"): every waiver-claim add shows
+//     an `<h6>` like "$8  Waiver" — that is the "all bids" data (winning bids
+//     only, one row per claim).
+//   - `?transactionsfilter=faab` ("FAB Offers"): ONLY contested claims — the
+//     winning offer, each losing offer + reason, and who it was awarded to.
+// Both are paginated 25 per page via `&count=<offset>`; we follow the pager's
+// "Next 25" link until it's gone. Team names are NOT returned — only Yahoo
+// team ids — so the PHP side can map them to manager names.
+function bidsPageUrl(leagueId, filter, offset) {
+    const base = `https://football.fantasysports.yahoo.com/f1/${leagueId}/transactions?transactionsfilter=${filter}`;
+    return offset > 0 ? `${base}&count=${offset}` : base;
+}
+
+async function scrapeBidPages(context, leagueId, filter, evalRows) {
+    const page = await context.newPage();
+    const rows = [];
+    try {
+        for (let offset = 0; ; offset += 25) {
+            await page.goto(bidsPageUrl(leagueId, filter, offset), { waitUntil: 'domcontentloaded', timeout: 30000 });
+            if (page.url().includes('login.yahoo.com')) {
+                throw new Error('Redirected to Yahoo login while loading the transactions page — the saved session has expired. Re-run to trigger a fresh login.');
+            }
+            await page.waitForSelector('#transactions table.Tst-transaction-table', { timeout: 15000 });
+
+            const pageRows = await page.$$eval('#transactions table.Tst-transaction-table tbody > tr', evalRows);
+            rows.push(...pageRows.filter(Boolean));
+
+            const hasNext = await page.$eval(
+                '#transactions .pagingnavlist li.last',
+                (li) => !!li.querySelector('a')
+            ).catch(() => false);
+            if (!hasNext || pageRows.length === 0) {
+                break;
+            }
+            if (offset > 5000) {
+                throw new Error('Pagination did not terminate — aborting.');
+            }
+        }
+    } finally {
+        await page.close();
+    }
+    return rows;
+}
+
+async function extractBids(args, context) {
+    if (!args['league-id']) {
+        throw new Error('Missing required --league-id=<id> argument.');
+    }
+    const leagueId = args['league-id'];
+
+    const all = await scrapeBidPages(context, leagueId, 'add', (trs) => {
+        const teamId = (el) => {
+            const m = el && (el.getAttribute('href') || '').match(/\/(\d+)$/);
+            return m ? m[1] : null;
+        };
+        return trs.map((tr) => {
+            const h6 = tr.querySelector('td.No-pstart h6');
+            const m = h6 && h6.textContent.match(/^\s*\$(\d+)\s+Waiver/i);
+            if (!m) {
+                return null; // free-agent add, or the empty-state row
+            }
+            const link = Array.from(tr.querySelectorAll('td.No-pstart a')).find(
+                (a) => !a.classList.contains('playernote')
+            );
+            const pos = tr.querySelector('td.No-pstart .F-position');
+            const team = tr.querySelector('td.Ta-end a.Tst-team-name');
+            const ts = tr.querySelector('.F-timestamp');
+            if (!link || !pos || !team || !ts) {
+                return null;
+            }
+            return {
+                player: `${link.textContent.trim()} ${pos.textContent.trim()}`,
+                amount: Number(m[1]),
+                teamYahooId: teamId(team),
+                date: ts.textContent.trim(),
+            };
+        });
+    });
+
+    const competitive = await scrapeBidPages(context, leagueId, 'faab', (trs) => {
+        const teamId = (el) => {
+            const m = el && (el.getAttribute('href') || '').match(/\/(\d+)$/);
+            return m ? m[1] : null;
+        };
+        return trs.map((tr) => {
+            const h6 = tr.querySelector('td.No-pstart h6');
+            const m = h6 && h6.textContent.match(/^\s*\$(\d+)\s+Winning Offer/i);
+            if (!m) {
+                return null;
+            }
+            const link = Array.from(tr.querySelectorAll('td.No-pstart a')).find(
+                (a) => !a.classList.contains('playernote')
+            );
+            const pos = tr.querySelector('td.No-pstart .F-position');
+            const winner = tr.querySelector('td.Ta-end a[href*="/f1/"]');
+            const ts = tr.querySelector('.F-timestamp');
+            if (!link || !pos || !winner || !ts) {
+                return null;
+            }
+            const offers = Array.from(tr.querySelectorAll('td.No-pstart .Mtop-med p')).map((p) => {
+                const a = p.querySelector('a');
+                const om = p.textContent.match(/\$(\d+)\s*\(([^)]*)\)/);
+                return a && om ? { teamYahooId: teamId(a), amount: Number(om[1]), reason: om[2].trim() } : null;
+            }).filter(Boolean);
+            return {
+                player: `${link.textContent.trim()} ${pos.textContent.trim()}`,
+                winningAmount: Number(m[1]),
+                offers,
+                awardedYahooId: teamId(winner),
+                date: ts.textContent.trim(),
+            };
+        });
+    });
+
+    return { all, competitive };
+}
+
 const extractors = {
     team_names: extractTeamNames,
     matchups: extractMatchups,
     trades: extractTrades,
     rosters: extractRosters,
+    bids: extractBids,
 };
 
 async function main() {
